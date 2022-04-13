@@ -2,13 +2,23 @@ from typing import Dict, Any, Optional, Union, List
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
-from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
+from core.utils.pickle_copy import pickle_deepcopy
+from scenarios.user.user_model import User
 from smart_kit.names.message_names import GET_PROFILE_DATA
 
 
 class SmartGeoAction(StringAction):
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+        super().__init__(items, id)
+        self.command = GET_PROFILE_DATA
+        self.behavior = items.get("behavior", "smart_geo_behavior")
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = [Command(GET_PROFILE_DATA)]
+        scenario_id = user.last_scenarios.last_scenario_name
+        user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
+                           text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
+
+        commands = super().run(user, text_preprocessing_result, params)
         return commands
