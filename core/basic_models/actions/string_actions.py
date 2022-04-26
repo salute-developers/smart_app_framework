@@ -1,7 +1,8 @@
 # coding: utf-8
 import random
 from copy import copy
-from typing import Union, Dict, List, Any, Optional
+from typing import Union, Dict, List, Any, Optional, Tuple
+from itertools import chain
 
 from lazy import lazy
 
@@ -17,6 +18,10 @@ ANSWER_TO_USER = "ANSWER_TO_USER"
 
 
 class NodeAction(CommandAction):
+    """ NodeAction расширяет функционал CommandAction, добавляя рендеринг Jinja-шаблонов внутри полей "nodes" и
+    "support_templates".
+
+    """
     version: Optional[int]
     command: str
     nodes: Dict[str, List[List[str]]]
@@ -86,7 +91,11 @@ class NodeAction(CommandAction):
 
 
 class StringAction(NodeAction):
-    """
+    """ StringAction расширяет NodeAction, реализуя метод run.
+
+    Метод run возвращает команду, составленную из заданных в теле действия типа команды, типа запроса и передаваемых
+    данных, а также извлечённых из `text_preprocessing_result` параметров.
+
     Example:
     {
       "pay_phone_cmd": {
@@ -101,6 +110,7 @@ class StringAction(NodeAction):
       }
     }
     """
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(StringAction, self).__init__(items, id)
 
@@ -226,30 +236,36 @@ class SDKAnswer(NodeAction):
 
     # функция идет по RANDOM_PATH, числа в нем считает индексами массива,
     # INDEX_WILDCARD - произвольным индексом массива, прочее - ключами словаря
-    # в конце пути предполагается непустой массив, дойдя до которого из него выбирается случайный элемент
-    def random_by_path(self, input_dict, nested_key):
+    # в конце пути предполагается непустой массив
+    def get_by_path(self, input_dict: Union[list, dict], nested_key: List[str]) -> List[Tuple[Union[list, dict], str]]:
         internal_dict_value = input_dict
         for ik, k in enumerate(nested_key):
             last_dict = internal_dict_value
             if k == self.INDEX_WILDCARD:
-                for wildcard_item in last_dict:
-                    self.random_by_path(wildcard_item, nested_key[ik + 1:])
-                return
+                return list(chain.from_iterable(
+                    [self.get_by_path(wildcard_item, nested_key[ik + 1:]) for wildcard_item in last_dict]
+                ))
             if k.isdigit():
                 internal_dict_value = internal_dict_value[int(k)]
             else:
                 internal_dict_value = internal_dict_value.get(k, None)
             if internal_dict_value is None:
-                return
-        last_dict[k] = random.choice(last_dict[k])
+                return []
+        return [(last_dict, k)]
+
+    def do_random(self, input_dict: Union[list, dict]):
+        dicts = list(chain.from_iterable([self.get_by_path(input_dict, j) for j in self.RANDOM_PATH]))
+        max_length = max(map(lambda x: len(x[0][x[1]]), dicts))
+        random_index = random.randrange(max_length)
+        for (d, k) in dicts:
+            d[k] = d[k][random_index % len(d[k])]
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
-        for j in self.RANDOM_PATH:
-            self.random_by_path(rendered, j)
+        self.do_random(rendered)
         if rendered or not self.no_empty_nodes:
             result = [
                 Command(

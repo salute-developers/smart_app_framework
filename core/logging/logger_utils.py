@@ -12,7 +12,7 @@ import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier
 from core.utils.masking_message import masking
 from core.utils.stats_timer import StatsTimer
-from smart_kit.utils.pickle_copy import pickle_deepcopy
+from core.utils.pickle_copy import pickle_deepcopy
 
 MESSAGE_ID_STR = "message_id"
 UID_STR = "uid"
@@ -43,9 +43,9 @@ class LoggerMessageCreator:
             message_id = message.incremental_id
             uuid = user.id
             logging_uuid = message.logging_uuid
-        params[UID_STR] = uuid
-        params[MESSAGE_ID_STR] = message_id
-        params[LOGGING_UUID] = logging_uuid
+        params.setdefault(UID_STR, uuid)
+        params.setdefault(MESSAGE_ID_STR, message_id)
+        params.setdefault(LOGGING_UUID, logging_uuid)
         params[CLASS_NAME] = cls_name
         params[LOG_STORE_FOR] = log_store_for
 
@@ -58,7 +58,8 @@ class LoggerMessageCreator:
         params = params or {}
         if user:
             cls.update_user_params(user, params)
-        masking(pickle_deepcopy(params))
+        params = pickle_deepcopy(params)
+        masking(params)
         cls.update_other_params(user, params, cls_name, log_store_for)
         return params
 
@@ -73,6 +74,8 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         previous_frame = current_frame.f_back
         module_name = previous_frame.f_globals["__name__"]
         logger = logging.getLogger(module_name)
+        if not logger.isEnabledFor(level_name):
+            return
         instance = previous_frame.f_locals.get('self', None)
 
         from smart_kit.configs import get_app_config
@@ -101,7 +104,7 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         raise
     except:
         default_logger.log(logging.getLevelName("ERROR"), "Failed to write a log. Exception occurred",
-                           params, exc_info=True)
+                           params, exc_info=True, stack_info=True)
 
 
 def log_classifier_result(classification_res: List[Dict[str, Union[str, float, bool]]], user,
