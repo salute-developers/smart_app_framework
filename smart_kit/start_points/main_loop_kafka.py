@@ -55,11 +55,12 @@ class MainLoop(BaseMainLoop):
                 "%(class_name)s START CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
             )
-            for key, config in kafka_config.items():
+            kafka_config_copy = pickle_deepcopy(kafka_config)
+            for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
-                    consumers.update({key: KafkaConsumer(pickle_deepcopy(kafka_config[key]))})
+                    consumers.update({key: KafkaConsumer(config)})
                 if config.get("publisher"):
-                    publishers.update({key: KafkaPublisher(pickle_deepcopy(kafka_config[key]))})
+                    publishers.update({key: KafkaPublisher(config)})
             log(
                 "%(class_name)s FINISHED CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
