@@ -144,12 +144,13 @@ class TemplateRequirement(Requirement):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
+        print(params)
         render_result = self._template.render(params)
         if render_result == "True":
             return True
         if render_result == "False":
             return False
-        raise TypeError(f'Template result should be "True" or "False", got: ',
+        raise TypeError(f'Template result should be "True" or "False", got: '
                         f'{render_result} for template {self.items["template"]}')
 
 
