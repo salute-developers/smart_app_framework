@@ -15,6 +15,7 @@ from core.message.from_message import SmartAppFromMessage
 from core.model.heapq.heapq_storage import HeapqKV
 from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
+from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.stats_timer import StatsTimer
 from core.basic_models.actions.command import Command
 from smart_kit.compatibility.commands import combine_commands
@@ -56,9 +57,9 @@ class MainLoop(BaseMainLoop):
             )
             for key, config in kafka_config.items():
                 if config.get("consumer"):
-                    consumers.update({key: KafkaConsumer(kafka_config[key])})
+                    consumers.update({key: KafkaConsumer(pickle_deepcopy(kafka_config[key]))})
                 if config.get("publisher"):
-                    publishers.update({key: KafkaPublisher(kafka_config[key])})
+                    publishers.update({key: KafkaPublisher(pickle_deepcopy(kafka_config[key]))})
             log(
                 "%(class_name)s FINISHED CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
