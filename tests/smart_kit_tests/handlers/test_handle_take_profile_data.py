@@ -25,7 +25,10 @@ class HandleTakeProfileDataTest(unittest.TestCase):
         self.app_name = "TestAppName"
         self.test_payload_1 = {"server_action": {}}
         self.test_payload_2 = {"server_action": {"action_id": 1, "parameters": 1}}
-        self.test_user = MagicMock('user', message=MagicMock(message_name="some_name"), variables=MockVariables())
+        self.test_user = MagicMock('user', message=MagicMock(message_name="some_name"), variables=MockVariables(),
+                                   behaviors=MagicMock(success=lambda x: MagicMock(run=lambda x, y: "success"),
+                                                       fail=lambda x: MagicMock(run=lambda x, y: "fail"),
+                                                       timeout=lambda x: MagicMock(run=lambda x, y: "timeout")))
         self.test_user.descriptions = {"external_actions": {"smart_geo_fail": MagicMock(run=lambda x, y: "fail"),
                                                             "smart_geo_success": MagicMock(run=lambda x, y: "success")}}
 
