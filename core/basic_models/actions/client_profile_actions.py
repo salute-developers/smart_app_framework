@@ -66,8 +66,7 @@ class GiveMeMemoryAction(StringAction):
         }
 
         if self.behavior:
-            scenario_id = user.last_scenarios.last_scenario_name
-            user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
+            user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, None,
                                text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
 
         commands = super().run(user, text_preprocessing_result, params)
