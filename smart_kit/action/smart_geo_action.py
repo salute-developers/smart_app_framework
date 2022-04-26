@@ -9,6 +9,26 @@ from smart_kit.names.message_names import GET_PROFILE_DATA
 
 
 class SmartGeoAction(StringAction):
+    """Action для получения геоданных пользователя
+
+    Описание smart geo сервиса: https://developers.sber.ru/docs/ru/va/reference/smartservices/smartgeo/overview
+    Условия подключение smart geo: https://developers.sber.ru/docs/ru/va/reference/smartservices/smartgeo/conditions
+    Описание smart geo API: https://developers.sber.ru/docs/ru/va/reference/smartservices/smartgeo/api
+
+    ## Использование:
+    Внимание: action поддерживает только смартаппы, использующие `MAIN_LOOP = MainLoop` (задаётся в _app_config.py_),
+    где `from smart_kit.start_points.main_loop_kafka import MainLoop`.
+    ```
+    {
+      "type": "smart_geo"
+    }
+    ```
+    Можно указать опциональный параметр Behavior (по умолчанию используется `"smart_geo_behavior"`)
+    `"behavior": "behavior_name"`
+
+    После исполнения команды и успешного ответа от smart geo API геоданные пользователя сохранятся в переменную внутри
+    User `user.variables.smart_geo`
+    """
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.command = GET_PROFILE_DATA
