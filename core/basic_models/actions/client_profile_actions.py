@@ -58,7 +58,6 @@ class GiveMeMemoryAction(StringAction):
         self._nodes["memory"] = [
             {"memoryPartition": key, "tags": val} for key, val in self._nodes["memory"].items()
         ]
-        self.callback_id_header = items.get("callback_id_header")
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
