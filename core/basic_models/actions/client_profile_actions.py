@@ -74,9 +74,7 @@ class GiveMeMemoryAction(StringAction):
             action_params = params or {}
             command_params = self._get_command_params(user, action_params)
             save_action_params = self._render_behavior_params(action_params, command_params)
-            scenario_id = user.last_scenarios if hasattr(user, 'last_scenarios') else None
-            user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
-                               text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
+            self._save_behavior(user, self.request_data, text_preprocessing_result, save_action_params)
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands
@@ -89,6 +87,8 @@ class GiveMeMemoryAction(StringAction):
         behavior_params.update({"send_timestamp": time.time()})
         to_message_name = self.command
         behavior_params.update({"to_message_name": to_message_name})
+
+        return behavior_params
 
     def _render_data(self, render_items, action_params):
         render_data = {}
