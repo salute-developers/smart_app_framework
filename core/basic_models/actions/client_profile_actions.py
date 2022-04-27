@@ -7,9 +7,10 @@ from core.basic_models.actions.string_actions import StringAction
 from core.logging.logger_utils import log
 from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
-from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.user.user_model import User
-from core.configs.global_constants import KAFKA
+from scenarios.actions.action_params_names import (SAVED_MESSAGES, REQUEST_FIELD, TO_MESSAGE_PARAMS, TO_MESSAGE_NAME)
+from core.configs.global_constants import KAFKA, CALLBACK_ID_HEADER
+from smart_kit.names.action_params_names import SEND_TIMESTAMP
 
 GIVE_ME_MEMORY = "GIVE_ME_MEMORY"
 REMEMBER_THIS = "REMEMBER_THIS"
@@ -71,64 +72,52 @@ class GiveMeMemoryAction(StringAction):
         }
 
         if self.behavior:
-            action_params = params or {}
-            command_params = self._get_command_params(user, action_params)
-            save_action_params = self._render_behavior_params(action_params, command_params)
-            self._save_behavior(user, self.request_data, text_preprocessing_result, save_action_params)
+            action_params = copy(params or {})
+            command_params = dict()
+            collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
+            action_params.update(collected)
+
+            for key, value in self.nodes.items():
+                rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
+                if rendered != "" or not self.no_empty_nodes:
+                    command_params[key] = rendered
+
+            callback_id = user.message.generate_new_callback_id()
+            request_data = copy(self.request_data or {})
+            request_data.update(self._get_extra_request_data(user, params, callback_id))
+
+            scenario = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
+
+            save_params = self._get_save_params(user, action_params, command_params)
+            user.behaviors.add(
+                callback_id,
+                self.behavior,
+                scenario,
+                text_preprocessing_result.raw,
+                save_params,
+            )
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands
 
-    def _render_behavior_params(self, action_params, command_params):
-        behavior_params = self._render_data({}.items(), action_params)
-        behavior_params.update({"pass_through": action_params.get("pass_through", {})})
-        behavior_params.update({"debug_info": action_params.get("debug_info", {})})
-        behavior_params.update({"to_message_params": command_params})
-        behavior_params.update({"send_timestamp": time.time()})
-        to_message_name = self.command
-        behavior_params.update({"to_message_name": to_message_name})
+    def _get_save_params(self, user, action_params, command_action_params):
+        save_params = self._get_rendered_tree_recursive({}, action_params)
+        save_params.update({SAVED_MESSAGES: action_params.get(SAVED_MESSAGES, {})})
+        save_params.update({REQUEST_FIELD: action_params.get(REQUEST_FIELD, {})})
+        save_params.update({SEND_TIMESTAMP: time.time()})
 
-        return behavior_params
+        if user.settings["template_settings"].get("self_service_with_state_save_messages", True):
+            saved_messages = save_params[SAVED_MESSAGES]
+            if user.message.message_name not in saved_messages or self.rewrite_saved_messages:
+                saved_messages[user.message.type] = user.message.payload
 
-    def _render_data(self, render_items, action_params):
-        render_data = {}
-        for key, value in render_items:
-            rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
-            if rendered != "" or not self.no_empty_nodes:
-                render_data[key] = rendered
-        return render_data
+        save_params.update({TO_MESSAGE_PARAMS: command_action_params})
+        save_params.update({TO_MESSAGE_NAME: self.command})
+        return save_params
 
-    def _get_command_params(self, user: BaseUser, action_params):
-        command_params = {}
-        if user.settings["template_settings"].get("debug_info"):
-            saved_debug_info = action_params.get("debug_info", {})
-            message_debug_info = user.message.debug_info
-            if message_debug_info.get("debug_info_key"):
-                app_debug_info = saved_debug_info.setdefault(message_debug_info["debug_info_key"], [])
-                app_debug_info.append(message_debug_info)
-            command_params["debug_info"] = saved_debug_info
-        return command_params
-
-    def _save_behavior(self, user, request_data, text_preprocessing_result, action_params):
-        callback_id = user.message.generate_new_callback_id()
-        if self.callback_id_header:
-            request_data[self.callback_id_header] = callback_id
-        to_message_params_to_save = copy(action_params.get("to_message_params", {}))
-        saved_to_message_params_fields = {
-            "intent", "intent_meta",
-            "original_intent", "app_info", "projectName", "new_session",
-            "applicationId", "appversionId", "domain_search", "status_code",
-            "permitted_actions", "caller_app_info"
-        }
-        for key in tuple(to_message_params_to_save.keys()):
-            if key not in saved_to_message_params_fields:
-                to_message_params_to_save.pop(key, None)
-        action_params_to_save = copy(action_params)
-        action_params_to_save["to_message_params"] = to_message_params_to_save
-        log(f'GiveMeMemoryAction._save_behavior action_params_to_save: %(action_params_to_save)s', user=user, params={
-            'action_params_to_save': str(action_params_to_save)
-        }, level='DEBUG')
-        user.behaviors.add(callback_id, self.behavior, None, text_preprocessing_result.raw, action_params_to_save)
+    def _get_extra_request_data(self, user, params, callback_id):
+        extra_request_data = {CALLBACK_ID_HEADER: callback_id}
+        return extra_request_data
 
 
 class RememberThisAction(StringAction):
