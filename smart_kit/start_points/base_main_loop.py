@@ -13,6 +13,7 @@ from core.monitoring.twisted_server import TwistedServer
 from core.model.base_user import BaseUser
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.message.msg_validator import MessageValidator
+from smart_kit.start_points.postprocess import PostprocessMainLoop
 from smart_kit.utils.monitoring import smart_kit_metrics
 from smart_kit.models.smartapp_model import SmartAppModel
 
@@ -23,6 +24,7 @@ class BaseMainLoop:
             self, model: SmartAppModel,
             user_cls: Type[BaseUser],
             parametrizer_cls: Type[BasicParametrizer],
+            postprocessor_cls: Type[PostprocessMainLoop],
             settings,
             to_msg_validators: Iterable[MessageValidator] = (),
             from_msg_validators: Iterable[MessageValidator] = (),
@@ -40,6 +42,7 @@ class BaseMainLoop:
             self.model: SmartAppModel = model
             self.user_cls = user_cls
             self.parametrizer_cls = parametrizer_cls
+            self.postprocessor = postprocessor_cls()
             self.db_adapter = self.get_db()
             self.is_work = True
             self.to_msg_validators: Iterable[MessageValidator] = to_msg_validators
@@ -91,7 +94,6 @@ class BaseMainLoop:
     def _init_monitoring_config(self, template_settings):
         monitoring_config = template_settings["monitoring"]
         monitoring.apply_config(monitoring_config)
-        smart_kit_metrics.apply_config(monitoring_config)
         smart_kit_metrics.init_metrics(app_name=self.app_name)
 
     def load_user(self, db_uid, message):
