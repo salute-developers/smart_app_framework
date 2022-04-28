@@ -10,6 +10,7 @@ from core.names.field import APP_INFO
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PARAMS, LOCAL_VARS
+from scenarios.utils.make_json_serializable import make_serializable
 from smart_kit.utils.monitoring import smart_kit_metrics
 
 
@@ -277,7 +278,7 @@ class Behaviors:
 
     @property
     def raw(self):
-        return {key: callback._asdict() for key, callback in self._callbacks.items()}
+        return {key: make_serializable(callback._asdict()) for key, callback in self._callbacks.items()}
 
     def _get_to_message_name(self, callback_id):
         callback_action_params = self.get_callback_action_params(callback_id) or {}
