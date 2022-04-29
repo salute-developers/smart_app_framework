@@ -4,8 +4,6 @@ from typing import Dict, Any, Optional, Union, List
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
-from core.logging.logger_utils import log
-from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from scenarios.user.user_model import User
 from scenarios.actions.action_params_names import (SAVED_MESSAGES, REQUEST_FIELD, TO_MESSAGE_PARAMS, TO_MESSAGE_NAME)
