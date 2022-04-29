@@ -15,6 +15,7 @@ from core.message.from_message import SmartAppFromMessage
 from core.model.heapq.heapq_storage import HeapqKV
 from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
+from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.stats_timer import StatsTimer
 from core.basic_models.actions.command import Command
 from smart_kit.compatibility.commands import combine_commands
@@ -54,11 +55,12 @@ class MainLoop(BaseMainLoop):
                 "%(class_name)s START CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
             )
-            for key, config in kafka_config.items():
+            kafka_config_copy = pickle_deepcopy(kafka_config)
+            for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
-                    consumers.update({key: KafkaConsumer(kafka_config[key])})
+                    consumers.update({key: KafkaConsumer(config)})
                 if config.get("publisher"):
-                    publishers.update({key: KafkaPublisher(kafka_config[key])})
+                    publishers.update({key: KafkaPublisher(config)})
             log(
                 "%(class_name)s FINISHED CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
@@ -121,8 +123,8 @@ class MainLoop(BaseMainLoop):
             request.update_empty_items({"topic_key": topic_key, "kafka_key": kafka_key})
             to_message = get_to_message(command.name)
             answer = to_message(command=command, message=message, request=request,
-                                 masking_fields=self.masking_fields,
-                                 validators=self.to_msg_validators)
+                                masking_fields=self.masking_fields,
+                                validators=self.to_msg_validators)
             if answer.validate():
                 answers.append(answer)
             else:
@@ -215,6 +217,7 @@ class MainLoop(BaseMainLoop):
         user_save_no_collisions = False
         user = None
         db_uid = None
+        message = None
         while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
             save_tries += 1
             message_value = mq_message.value()
@@ -240,6 +243,7 @@ class MainLoop(BaseMainLoop):
                             "topic": mq_message.topic(),
                             "message_partition": mq_message.partition(),
                             "message_key": mq_message.key(),
+                            "message_id": message.incremental_id,
                             "kafka_key": kafka_key,
                             "incoming_data": str(message.masked_value),
                             "length": len(message.value),
@@ -251,10 +255,8 @@ class MainLoop(BaseMainLoop):
                 )
 
                 db_uid = message.db_uid
-
                 with StatsTimer() as load_timer:
                     user = self.load_user(db_uid, message)
-
                 smart_kit_metrics.sampling_load_time(self.app_name, load_timer.secs)
                 stats += "Loading time: {} msecs\n".format(load_timer.msecs)
                 with StatsTimer() as script_timer:
@@ -295,7 +297,7 @@ class MainLoop(BaseMainLoop):
                         with StatsTimer() as publish_timer:
                             self._send_request(user, answer, mq_message)
                         stats += "Publishing time: {} msecs".format(publish_timer.msecs)
-                        log(stats)
+                        log(stats, user=user)
             else:
                 try:
                     data = message.masked_value
@@ -317,7 +319,7 @@ class MainLoop(BaseMainLoop):
                         "uid": user.id,
                         "db_version": str(user.variables.get(user.USER_DB_VERSION))},
                 level="WARNING")
-
+            self.postprocessor.postprocess(user, message)
             smart_kit_metrics.counter_save_collision_tries_left(self.app_name)
         consumer.commit_offset(mq_message)
 
