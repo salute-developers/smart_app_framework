@@ -281,7 +281,7 @@ class Monitoring:
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
 
-class Proxy:
+class MonitoringProxy:
     def __init__(self, default_cls):
         self.instance = default_cls()
 
