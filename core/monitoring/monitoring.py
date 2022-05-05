@@ -302,4 +302,4 @@ class MonitoringProxy:
         return getattr(self.instance, item)
 
 
-monitoring = Proxy(Monitoring)
+monitoring = MonitoringProxy(Monitoring)
