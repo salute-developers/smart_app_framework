@@ -81,7 +81,7 @@ class SmartPayActionTest(unittest.TestCase):
                                     },
                                     {
                                         "key": "_itemAttributes_nomenclature",
-                                        "value": "Å\u001e13622200005881"
+                                        "value": "13622200005881"
                                     },
                                     {
                                         "key": "_itemAttributes_agent_info.type",

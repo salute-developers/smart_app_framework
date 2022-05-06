@@ -10,7 +10,6 @@ from smart_kit.configs import settings
 class SmartPayAction(HTTPRequestAction):
     url = None
     method = None
-    store = None
 
     def __init__(self, items, id=None):
         request_params = items.get("request_params")
@@ -30,13 +29,12 @@ class SmartPayAction(HTTPRequestAction):
 
 
 class SmartPayCreateAction(SmartPayAction):
-
     """
     Example::
         {
             "type": "smartpay_create",
             "behavior": "some_behavior", // обязательный параметр
-            "smartpay_params": { // обязательноый параметр
+            "smartpay_params": { // обязательноый параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#создание-счета)
                 "ptype": 1,
                 "invoice": {
                     "purchaser": {
@@ -148,23 +146,21 @@ class SmartPayCreateAction(SmartPayAction):
             }
         }
     """
-
     def __init__(self, items, id=None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + "/invoices"
         self.method = self.POST
-        self.store = "smartpay_create_answer"
+        self.store = items.get("store", "smartpay_create_answer")
         super().__init__(items, id)
 
 
 class SmartPayPerformAction(SmartPayAction):
-
     """
     Example::
         {
             "type": "smartpay_perform",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // обязательынй параметр
+            "smartpay_params": { // обязательный параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#проведение-платежа)
                 "user_id": {
                     "partner_client_id": "2223"
                 },
@@ -189,17 +185,16 @@ class SmartPayPerformAction(SmartPayAction):
             }
         }
     """
-
     def __init__(self, items, id=None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.POST
-        self.store = "smartpay_perform_answer"
+        self.store = items.get("store", "smartpay_perform_answer")
         super().__init__(items, id)
 
 
 class SmartPayGetStatusAction(SmartPayAction):
-
     """
+    см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#получение-статуса
     Example::
         {
             "type": "smartpay_get_status",
@@ -209,32 +204,28 @@ class SmartPayGetStatusAction(SmartPayAction):
             "wait": 50 // опциональный параметр
         }
     """
-
     def __init__(self, items, id=None):
         items["request_params"] = {}
         inv_status = items.get("inv_status")
         wait = items.get("wait")
         if inv_status:
-            del items["inv_status"]
             items["request_params"]["inv_status"] = inv_status
         if wait:
-            del items["wait"]
             items["request_params"]["wait"] = wait
 
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.GET
-        self.store = "smartpay_get_status_answer"
+        self.store = items.get("store", "smartpay_get_status_answer")
         super().__init__(items, id)
 
 
 class SmartPayConfirmAction(SmartPayAction):
-
     """
     Example::
         {
             "type": "smartpay_confirm",
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // опциональный параметр, задаётся для неполной суммы (см. доку SmartPay API)
+            "smartpay_params": { // опциональный параметр, задаётся для неполной суммы (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#подтверждение-оплаты)
                 "invoice": {
                     "order": {
                         "amount": 79801,
@@ -258,41 +249,38 @@ class SmartPayConfirmAction(SmartPayAction):
             }
         }
     """
-
     def __init__(self, items, id=None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.PUT
-        self.store = "smartpay_confirm_answer"
+        self.store = items.get("store", "smartpay_confirm_answer")
         super().__init__(items, id)
 
 
 class SmartPayDeleteAction(SmartPayAction):
-
     """
+    см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#отмена-счета
     Example::
         {
             "type": "smartpay_delete",
-            "behavior": "my_behavior", // обязательынй параметр
-            "invoice_id": "0" // обязательынй параметр
+            "behavior": "my_behavior", // обязательный параметр
+            "invoice_id": "0" // обязательный параметр
         }
     """
-
     def __init__(self, items, id=None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.DELETE
-        self.store = "smartpay_delete_answer"
+        self.store = items.get("store", "smartpay_delete_answer")
         super().__init__(items, id)
 
 
 class SmartPayRefundAction(SmartPayAction):
-
     """
     Example::
         {
             "type": "smartpay_refund",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // опциональный параметр, задаётся при частичном возврате (см. доку SmartPay API)
+            "smartpay_params": { // опциональный параметр, задаётся при частичном возврате (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#частичный-возврат-платежа)
                 "invoice": {
                     "order": {
                         "current_amount": 79900,
@@ -314,9 +302,8 @@ class SmartPayRefundAction(SmartPayAction):
             }
         }
     """
-
     def __init__(self, items, id=None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.PATCH
-        self.store = "smartpay_refund_answer"
+        self.store = items.get("store", "smartpay_refund_answer")
         super().__init__(items, id)
