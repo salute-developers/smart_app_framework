@@ -1,7 +1,8 @@
 from typing import Dict, Any, Optional, List, Union
 
+from core.basic_models.actions.basic_actions import CommandAction
 from core.basic_models.actions.command import Command
-from core.basic_models.actions.string_actions import StringAction
+from core.configs.global_constants import KAFKA
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from scenarios.user.user_model import User
 
@@ -10,7 +11,7 @@ CALL_RATING = "CALL_RATING"
 ASK_RATING = "ASK_RATING"
 
 
-class SmartRatingAction(StringAction):
+class SmartRatingAction(CommandAction):
     kafka_key = None
     DEFAULT_KAFKA_KEY = "main"
 
@@ -23,7 +24,8 @@ class SmartRatingAction(StringAction):
             "kafka_replyTopic": user.settings["template_settings"]["consumer_topic"]
         }
 
-        return super().run(user, text_preprocessing_result, params)
+        commands = [Command(self.command, {}, self.id, request_type=KAFKA, request_data=self.request_data)]
+        return commands
 
 
 class CallRatingAction(SmartRatingAction):
