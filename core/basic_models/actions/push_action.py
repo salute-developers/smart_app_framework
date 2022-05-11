@@ -20,7 +20,7 @@ class PushAction(StringAction):
           "push_advertising_offer": {
             "type": "push",
             "surface": "COMPANION", // не обязательное, по дефолту "COMPANION", без шаблонной генерации
-            "push_data": {
+            "content": {
                 "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",
                 "fullText": "В нашем магазине большой ассортимент{% if day_time = 'evening' %}. Успей заказать!{% endif %}",
                 "mobileAppParameters": {
@@ -52,7 +52,7 @@ class PushAction(StringAction):
         self.surface = items.get("surface", self.COMPANION)
         items["request_data"] = request_data
         items["command"] = PUSH_NOTIFY
-        items["nodes"] = items.get("push_data") or {}
+        items["nodes"] = items.get("content") or {}
         super().__init__(items, id)
 
     def _render_request_data(self, action_params):
@@ -74,5 +74,5 @@ class PushAction(StringAction):
         }
         requests_data = self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=requests_data)]
+                            request_data=requests_data, payload_container=False)]
         return commands
