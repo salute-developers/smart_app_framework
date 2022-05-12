@@ -337,7 +337,7 @@ class ActionTest(unittest.TestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
         command = action.run(user=user, text_preprocessing_result=None)[0]
-        self.assertEqual(command.payload, expected)
+        self.assertEqual(command.raw, expected)
         # проверяем наличие кастомных хэдеров для сервиса пушей
         self.assertTrue(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS in command.request_data)
         headers = command.request_data.get(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS)
