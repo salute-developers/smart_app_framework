@@ -7,6 +7,7 @@ from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate
 from core.utils.pickle_copy import pickle_deepcopy
+from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
@@ -51,14 +52,14 @@ class PushAction(StringAction):
         self.surface = items.get("surface", self.COMPANION)
         items["nodes"] = items.get("content") or {}
         super().__init__(items, id)
+        self.default_request_data_template = self._get_template_tree(self.DEFAULT_REQUEST_DATA)
+        self.request_data_template = self._get_template_tree(self.request_data) if self.request_data else None
 
     def _render_request_data(self, action_params):
-        # копируем прежде чем рендерить шаблон хэдеров, чтобы не затереть его
+        request_data = self._get_rendered_tree_recursive(self.default_request_data_template, action_params)
         if self.request_data:
-            request_data = pickle_deepcopy(self.DEFAULT_REQUEST_DATA)
-            request_data.update(self.request_data)
-        else:
-            request_data = self.DEFAULT_REQUEST_DATA
+            request_data_update = self._get_rendered_tree_recursive(self.request_data_template, action_params)
+            request_data = deep_update_dict(request_data, request_data_update)
         return request_data
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
