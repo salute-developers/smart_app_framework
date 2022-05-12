@@ -73,6 +73,6 @@ class PushAction(StringAction):
         }
         requests_data = self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=requests_data, payload_container=False)]
+                            request_data=requests_data, need_payload_wrap=False)]
         return commands
 
