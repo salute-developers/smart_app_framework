@@ -6,6 +6,7 @@ from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate
+from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
@@ -31,34 +32,33 @@ class PushAction(StringAction):
         }
     """
 
-    DEFAULT_REQUEST_DATA = {
-        "topic_key": "push",
-        "kafka_key": "main",
-        SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS: None
-    }
     DEFAULT_EXTRA_HEADERS = {
         "request-id": "{{ uuid4() }}",
         "sender-id": "{{ uuid4() }}",
         "simple": "true"
     }
+
+    DEFAULT_REQUEST_DATA = {
+        "topic_key": "push",
+        "kafka_key": "main",
+        SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS: DEFAULT_EXTRA_HEADERS
+    }
+
     COMPANION = "COMPANION"
     EX_HEADERS_NAME = SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        request_data = items.get("request_data") or self.DEFAULT_REQUEST_DATA
-        request_data[self.EX_HEADERS_NAME] = request_data.get(self.EX_HEADERS_NAME) or self.DEFAULT_EXTRA_HEADERS
         self.surface = items.get("surface", self.COMPANION)
-        items["request_data"] = request_data
         items["nodes"] = items.get("content") or {}
         super().__init__(items, id)
 
     def _render_request_data(self, action_params):
         # копируем прежде чем рендерить шаблон хэдеров, чтобы не затереть его
-        request_data = copy(self.request_data)
-        request_data[self.EX_HEADERS_NAME] = {
-            key: UnifiedTemplate(value).render(action_params)
-            for key, value in request_data.get(self.EX_HEADERS_NAME).items()
-        }
+        if self.request_data:
+            request_data = pickle_deepcopy(self.DEFAULT_REQUEST_DATA)
+            request_data.update(self.request_data)
+        else:
+            request_data = self.DEFAULT_REQUEST_DATA
         return request_data
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
