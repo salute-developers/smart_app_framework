@@ -9,8 +9,6 @@ from core.unified_template.unified_template import UnifiedTemplate
 from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
-PUSH_NOTIFY = "PUSH_NOTIFY"
-
 
 class PushAction(StringAction):
     """
@@ -51,7 +49,6 @@ class PushAction(StringAction):
         request_data[self.EX_HEADERS_NAME] = request_data.get(self.EX_HEADERS_NAME) or self.DEFAULT_EXTRA_HEADERS
         self.surface = items.get("surface", self.COMPANION)
         items["request_data"] = request_data
-        items["command"] = PUSH_NOTIFY
         items["nodes"] = items.get("content") or {}
         super().__init__(items, id)
 
@@ -68,11 +65,13 @@ class PushAction(StringAction):
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         command_params = {
+            "projectId": user.settings["template_settings"]["project_id"],
+            "clientId": user.message.sub,
             "surface": self.surface,
             "content": self._generate_command_context(user, text_preprocessing_result, params),
-            "project_id": user.settings["template_settings"]["project_id"]
         }
         requests_data = self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=requests_data, payload_container=False)]
         return commands
+
