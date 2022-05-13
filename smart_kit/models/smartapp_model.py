@@ -18,10 +18,9 @@ from smart_kit.resources import SmartAppResources
 from smart_kit.utils import get_callback_action_params, set_debug_info
 from smart_kit.utils.monitoring import smart_kit_metrics
 
-additional_handlers = {}
-
 
 class SmartAppModel:
+    additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):
         log(
@@ -56,7 +55,7 @@ class SmartAppModel:
 
     def init_additional_handlers(self):
         self._handlers.update({
-            message_name: handler(self.app_name) for message_name, handler in additional_handlers.items()
+            message_name: handler(self.app_name) for message_name, handler in self.additional_handlers.items()
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
