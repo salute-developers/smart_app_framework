@@ -55,8 +55,9 @@ class SmartAppModel:
         return self._handlers[message_type]
 
     def init_additional_handlers(self):
-        for message_name, handler in additional_handlers.items():
-            self._handlers[message_name] = handler(self.app_name)
+        self._handlers.update({
+            message_name: handler(self.app_name) for message_name, handler in additional_handlers.items()
+        })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
     def answer(self, message, user):
