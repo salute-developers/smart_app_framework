@@ -1,7 +1,6 @@
 # coding: utf-8
 import sys
 import traceback
-from lazy import lazy
 
 from core.descriptions.descriptions import Descriptions
 from core.logging.logger_utils import log
@@ -18,6 +17,8 @@ from smart_kit.handlers.handle_server_action import HandlerServerAction
 from smart_kit.resources import SmartAppResources
 from smart_kit.utils import get_callback_action_params, set_debug_info
 from smart_kit.utils.monitoring import smart_kit_metrics
+
+additional_handlers = {}
 
 
 class SmartAppModel:
@@ -44,6 +45,7 @@ class SmartAppModel:
             message_name: HandlerRespond(self.app_name, action_name=action_name)
             for message_name, action_name in self.resources.get("responses", {}).items()
         })
+        self.init_additional_handlers()
 
         log(
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
@@ -51,6 +53,10 @@ class SmartAppModel:
 
     def get_handler(self, message_type):
         return self._handlers[message_type]
+
+    def init_additional_handlers(self):
+        for message_name, handler in additional_handlers.items():
+            self._handlers[message_name] = handler(self.app_name)
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
     def answer(self, message, user):
