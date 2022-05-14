@@ -49,7 +49,7 @@ class TestFromMessage(TestCase):
         self.assertEqual(input_msg["messageName"], message.type)
         self.assertEqual(input_msg["uuid"]["userId"], message.uid)
         self.assertEqual(json_input_msg, message.value)
-        self.assertEqual("sub_userId_B2C", message.db_uid)
+        self.assertEqual("userId_B2C", message.db_uid)
         self.assertDictEqual(input_msg["uuid"], message.uuid)
         self.assertDictEqual(input_msg["payload"], message.payload)
         device = input_msg["payload"]["device"]

@@ -155,7 +155,7 @@ class SmartAppFromMessage:
     # database user_id
     @property
     def db_uid(self):
-        return "{}_{}_{}".format(self.sub, self.uid, self.channel)
+        return "{}_{}".format(self.uid, self.channel)
 
     @property
     def channel(self):
