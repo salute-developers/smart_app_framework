@@ -302,7 +302,12 @@ class ActionTest(unittest.TestCase):
         }
         settings = {"template_settings": {"project_id": "project_id"}}
         items = {
-            "push_data": {
+            "request_data": {
+                "kafka_extraHeaders": {
+                    "request-id": "{{ 1 }}"
+                }
+            },
+            "content": {
                 "notificationHeader": "{% if day_time == 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",
                 "fullText": "В нашем магазине большой ассортимент{% if day_time == 'evening' %}. Успей заказать!{% endif %}",
                 "mobileAppParameters": {
@@ -312,9 +317,12 @@ class ActionTest(unittest.TestCase):
                 }
             }
         }
+        user = PicklableMagicMock()
+
         expected = {
             "surface": "COMPANION",
-            "project_id": "project_id",
+            "projectId": "project_id",
+            "clientId": user.message.sub,
             "content": {
                 "notificationHeader": "Время завтракать!",
                 "fullText": "В нашем магазине большой ассортимент",
@@ -326,7 +334,6 @@ class ActionTest(unittest.TestCase):
             }
         }
         action = PushAction(items)
-        user = PicklableMagicMock()
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
         command = action.run(user=user, text_preprocessing_result=None)[0]
@@ -336,9 +343,8 @@ class ActionTest(unittest.TestCase):
         headers = command.request_data.get(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS)
         self.assertTrue('request-id' in headers)
         self.assertTrue('sender-id' in headers)
-        self.assertTrue(uuid.UUID(headers.get('request-id'), version=4))
-        self.assertTrue(uuid.UUID(headers.get('sender-id'), version=4))
-        self.assertEqual(command.name, "PUSH_NOTIFY")
+        self.assertEqual(headers.get('request-id'), "1")
+        self.assertTrue(uuid.UUID(headers.get('sender-id'), version=3))
 
 
 class NonRepeatingActionTest(unittest.TestCase):
