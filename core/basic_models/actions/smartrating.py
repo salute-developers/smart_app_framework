@@ -21,7 +21,8 @@ class SmartRatingAction(CommandAction):
         self.request_data = {
             "topic_key": "toDP",
             "kafka_key": self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY,
-            "kafka_replyTopic": user.settings["template_settings"]["consumer_topic"]
+            "kafka_replyTopic":
+                user.settings["kafka"]["template-engine"]["main"]["consumer"]["topics"]["smartrating"]
         }
 
         commands = [Command(self.command, {}, self.id, request_type=KAFKA, request_data=self.request_data)]

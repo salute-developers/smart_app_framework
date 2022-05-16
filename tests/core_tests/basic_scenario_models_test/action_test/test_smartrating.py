@@ -13,7 +13,22 @@ class CallRatingActionTest(unittest.TestCase):
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
+        user.settings = {
+            "template_settings": {
+                "project_id": "0"
+            },
+            "kafka": {
+                "template-engine": {
+                    "main": {
+                        "consumer": {
+                            "topics": {
+                                "smartrating": "app"
+                            }
+                        }
+                    }
+                }
+            }
+        }
         items = {}
         action = CallRatingAction(items)
         result = action.run(user, None)
@@ -29,7 +44,22 @@ class AskRatingActionTest(unittest.TestCase):
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
+        user.settings = {
+            "template_settings": {
+                "project_id": "0"
+            },
+            "kafka": {
+                "template-engine": {
+                    "main": {
+                        "consumer": {
+                            "topics": {
+                                "smartrating": "app"
+                            }
+                        }
+                    }
+                }
+            }
+        }
         items = {}
         action = AskRatingAction(items)
         result = action.run(user, None)
