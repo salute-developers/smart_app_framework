@@ -13,27 +13,18 @@ class TestAsIsTooMessage(unittest.TestCase):
         self.message_ = Mock()
         self.command_.loader = "json.dumps"
         self.request_.header = "json"
-        self.command_.payload = {
+        self.command_.payload = {}
+        self.command_.root_nodes = {}
+        self.command_.raw = {
             "content": {"test_param": ""},
             "surface": "some_surface",
             "project_id": "project_id",
         }
         self.message_.sub = 'sub'
 
-    def test_smart_app_push_message_as_dict(self):
+    def test_as_is_to_message_as_dict(self):
         obj = AsIsToMessage(self.command_, self.message_, self.request_)
         self.assertEqual(obj.as_dict, {
             "content": {"test_param": ""},
             "surface": "some_surface",
-            "clientId": "sub",
-            "projectId": "project_id"
-        })
-
-    def test_smart_app_push_message_value(self):
-        obj = AsIsToMessage(self.command_, self.message_, self.request_)
-        self.assertEqual(obj.value, json.dumps({
-            "projectId": "project_id",
-            "clientId": "sub",
-            "surface": "some_surface",
-            "content": {"test_param": ""},
-        }, ensure_ascii=False))
+            "project_id": "project_id"})
