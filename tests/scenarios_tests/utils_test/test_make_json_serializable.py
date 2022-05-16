@@ -4,12 +4,6 @@ from scenarios.utils.make_json_serializable import make_serializable
 
 
 class TestMakeJsonSerializable(TestCase):
-
-    def setUp(self):
-        self.forms_dict = {'pay_phone_scenario':
-                               {'fields': {'amount': {'value': 100.0}, 'approve': {'available': True, 'value': True}},
-                                'remove_time': 1506418333}, 'callcenter_scenario': {'remove_time': 2506421370}}
-
     def serialize_unserializable(self):
         def foo():
             return "bar"
