@@ -64,7 +64,7 @@ class GiveMeMemoryAction(StringAction):
             }
         })
         settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
-        self.request_data = self.request_data = {
+        self.request_data = {
             "topic_key": "client_info",
             "kafka_key": self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY,
             "kafka_replyTopic": config["kafka"]["template-engine"]["main"]["consumer"]["topics"]["client_profile"]
@@ -73,48 +73,18 @@ class GiveMeMemoryAction(StringAction):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         if self.behavior:
-            action_params = copy(params or {})
-            command_params = dict()
-            collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
-            action_params.update(collected)
-
-            for key, value in self.nodes.items():
-                rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
-                if rendered != "" or not self.no_empty_nodes:
-                    command_params[key] = rendered
-
             callback_id = user.message.generate_new_callback_id()
-            request_data = copy(self.request_data or {})
-            request_data.update(self._get_extra_request_data(user, params, callback_id))
-
-            scenario = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
-
-            save_params = self._get_save_params(user, action_params, command_params)
+            scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
             user.behaviors.add(
                 callback_id,
                 self.behavior,
-                scenario,
+                scenario_id,
                 text_preprocessing_result.raw,
-                save_params,
+                params
             )
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands
-
-    def _get_save_params(self, user, action_params, command_action_params):
-        save_params = self._get_rendered_tree_recursive({}, action_params)
-        save_params.update({SAVED_MESSAGES: action_params.get(SAVED_MESSAGES, {})})
-        save_params.update({REQUEST_FIELD: action_params.get(REQUEST_FIELD, {})})
-        save_params.update({SEND_TIMESTAMP: time.time()})
-
-        if user.settings["template_settings"].get("self_service_with_state_save_messages", True):
-            saved_messages = save_params[SAVED_MESSAGES]
-            if user.message.message_name not in saved_messages or self.rewrite_saved_messages:
-                saved_messages[user.message.type] = user.message.payload
-
-        save_params.update({TO_MESSAGE_PARAMS: command_action_params})
-        save_params.update({TO_MESSAGE_NAME: self.command})
-        return save_params
 
     def _get_extra_request_data(self, user, params, callback_id):
         extra_request_data = {CALLBACK_ID_HEADER: callback_id}
