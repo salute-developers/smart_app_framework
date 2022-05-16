@@ -3,10 +3,10 @@ import json
 import unittest
 from unittest.mock import Mock
 
-from smart_kit.message.smart_app_push_message import SmartAppPushToMessage
+from smart_kit.message.as_is_to_message import AsIsToMessage
 
 
-class TestSmartAppPushMessage(unittest.TestCase):
+class TestAsIsTooMessage(unittest.TestCase):
     def setUp(self):
         self.command_ = Mock()
         self.request_ = Mock()
@@ -21,7 +21,7 @@ class TestSmartAppPushMessage(unittest.TestCase):
         self.message_.sub = 'sub'
 
     def test_smart_app_push_message_as_dict(self):
-        obj = SmartAppPushToMessage(self.command_, self.message_, self.request_)
+        obj = AsIsToMessage(self.command_, self.message_, self.request_)
         self.assertEqual(obj.as_dict, {
             "content": {"test_param": ""},
             "surface": "some_surface",
@@ -30,7 +30,7 @@ class TestSmartAppPushMessage(unittest.TestCase):
         })
 
     def test_smart_app_push_message_value(self):
-        obj = SmartAppPushToMessage(self.command_, self.message_, self.request_)
+        obj = AsIsToMessage(self.command_, self.message_, self.request_)
         self.assertEqual(obj.value, json.dumps({
             "projectId": "project_id",
             "clientId": "sub",
