@@ -7,7 +7,7 @@ import scenarios.logging.logger_constants as log_const
 
 from smart_kit.handlers.handler_base import HandlerBase
 from smart_kit.names.action_params_names import TO_MESSAGE_NAME, SEND_TIMESTAMP
-from smart_kit.utils.monitoring import smart_kit_metrics
+from core.monitoring.monitoring import monitoring
 
 
 class HandlerRespond(HandlerBase):
@@ -42,7 +42,7 @@ class HandlerRespond(HandlerBase):
         else:
             log("HandlerRespond with action %(action_name)s started without callback", user, params)
 
-        smart_kit_metrics.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__, user)
+        monitoring.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__, user)
 
         text_preprocessing_result = TextPreprocessingResult(payload.get("message", {}))
 
