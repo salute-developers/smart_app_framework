@@ -29,8 +29,8 @@ class SmartPayAction(HTTPRequestAction):
 
 
 class SmartPayCreateAction(SmartPayAction):
-    """
-    Экшн для создания счёта
+    """Экшн для создания счёта
+
     Example::
         {
             "type": "smartpay_create",
@@ -155,8 +155,8 @@ class SmartPayCreateAction(SmartPayAction):
 
 
 class SmartPayPerformAction(SmartPayAction):
-    """
-    Экшн для проведения платежа
+    """Экшн для проведения платежа
+
     Example::
         {
             "type": "smartpay_perform",
@@ -195,8 +195,8 @@ class SmartPayPerformAction(SmartPayAction):
 
 
 class SmartPayGetStatusAction(SmartPayAction):
-    """
-    Экшн для получения статуса платежа
+    """Экшн для получения статуса платежа
+
     см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#получение-статуса
     Example::
         {
@@ -223,8 +223,8 @@ class SmartPayGetStatusAction(SmartPayAction):
 
 
 class SmartPayConfirmAction(SmartPayAction):
-    """
-    Экшн для подтверждения оплаты
+    """Экшн для подтверждения оплаты
+
     Example::
         {
             "type": "smartpay_confirm",
@@ -261,8 +261,8 @@ class SmartPayConfirmAction(SmartPayAction):
 
 
 class SmartPayDeleteAction(SmartPayAction):
-    """
-    Экшн для отмены счёта
+    """Экшн для отмены счёта
+
     см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#отмена-счета
     Example::
         {
@@ -279,8 +279,8 @@ class SmartPayDeleteAction(SmartPayAction):
 
 
 class SmartPayRefundAction(SmartPayAction):
-    """
-    Эккшн для возврата платежа
+    """Экшн для возврата платежа
+
     Example::
         {
             "type": "smartpay_refund",
