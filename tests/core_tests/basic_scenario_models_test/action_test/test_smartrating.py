@@ -1,5 +1,7 @@
 import unittest
+from unittest.mock import patch, MagicMock
 
+import smart_kit
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.smartrating import CallRatingAction, AskRatingAction
 from smart_kit.utils.picklable_mock import PicklableMagicMock
@@ -7,13 +9,14 @@ from tests.core_tests.basic_scenario_models_test.action_test.test_action import 
 
 
 class CallRatingActionTest(unittest.TestCase):
-    def test_run(self):
+    @patch("smart_kit.configs.settings.Settings")
+    def test_run(self, settings_mock: MagicMock):
         expected = [Command("CALL_RATING", {}, None, "kafka",
                             {"topic_key": "toDP", "kafka_key": "main", "kafka_replyTopic": "app"})]
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {
+        settings_mock.return_value = {
             "template_settings": {
                 "project_id": "0"
             },
@@ -38,13 +41,14 @@ class CallRatingActionTest(unittest.TestCase):
 
 
 class AskRatingActionTest(unittest.TestCase):
-    def test_run(self):
+    @patch("smart_kit.configs.settings.Settings")
+    def test_run(self, settings_mock: MagicMock):
         expected = [Command("ASK_RATING", {}, None, "kafka",
                             {"topic_key": "toDP", "kafka_key": "main", "kafka_replyTopic": "app"})]
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {
+        settings_mock.return_value = {
             "template_settings": {
                 "project_id": "0"
             },
