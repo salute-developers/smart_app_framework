@@ -2,7 +2,7 @@ import requests
 from timeout_decorator import timeout_decorator
 from core.request.base_request import BaseRequest
 from core.utils.exception_handlers import exc_handler
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 
 
 class RestNoMethodSpecifiedException(Exception):

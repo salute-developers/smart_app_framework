@@ -10,7 +10,7 @@ from confluent_kafka.cimpl import KafkaError, KafkaException, OFFSET_END, Messag
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 from core.mq.kafka.base_kafka_consumer import BaseKafkaConsumer
 
 

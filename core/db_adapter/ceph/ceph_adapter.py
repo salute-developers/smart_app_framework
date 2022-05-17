@@ -9,7 +9,7 @@ import core.logging.logger_constants as log_const
 from core.db_adapter.ceph.ceph_io import CephIO
 from core.db_adapter.db_adapter import DBAdapter
 from core.logging.logger_utils import log
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 
 ssl._create_default_https_context = ssl._create_unverified_context
 

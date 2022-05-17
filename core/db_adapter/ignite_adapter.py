@@ -11,7 +11,7 @@ import core.logging.logger_constants as log_const
 from core.db_adapter import error
 from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.logging.logger_utils import log
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 
 
 class IgniteAdapter(AsyncDBAdapter):

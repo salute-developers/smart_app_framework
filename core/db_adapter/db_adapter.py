@@ -109,15 +109,15 @@ class AsyncDBAdapter(DBAdapter):
     async def path_exists(self, path):
         return await self._async_run(self._path_exists, path)
 
-    @monitoring.monitoring.got_histogram("save_time")
+    @monitoring.got_histogram("save_time")
     async def save(self, id, data):
         return await self._async_run(self._save, id, data)
 
-    @monitoring.monitoring.got_histogram("save_time")
+    @monitoring.got_histogram("save_time")
     async def replace_if_equals(self, id, sample, data):
         return await self._async_run(self._replace_if_equals, id, sample, data)
 
-    @monitoring.monitoring.got_histogram("get_time")
+    @monitoring.got_histogram("get_time")
     async def get(self, id):
         return await self._async_run(self._get, id)
 

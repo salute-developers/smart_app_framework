@@ -3,7 +3,7 @@ from threading import Thread
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 from core.mq.kafka.kafka_publisher import KafkaPublisher
 
 
