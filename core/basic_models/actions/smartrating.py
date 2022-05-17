@@ -33,12 +33,28 @@ class SmartRatingAction(CommandAction):
 
 
 class CallRatingAction(SmartRatingAction):
+    """Отправляет 'CALL_RATING' в SmartRating API
+    https://confluence.sberbank.ru/display/SDAT/API+SmartRating
+    Example::
+        {
+            "type": "call_rating",
+            "kafka_key": "some_key" // опциональный параметр, по умолчанию "main"
+        }
+    """
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         items["command"] = CALL_RATING
         super().__init__(items, id)
 
 
 class AskRatingAction(SmartRatingAction):
+    """Отправляет 'ASK_RATING' в SmartRating API
+    https://confluence.sberbank.ru/display/SDAT/API+SmartRating
+    Example::
+        {
+            "type": "ask_rating",
+            "kafka_key": "some_key" // опциональный параметр, по умолчанию "main"
+        }
+    """
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         items["command"] = ASK_RATING
         super().__init__(items, id)
