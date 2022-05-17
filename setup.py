@@ -9,14 +9,12 @@ setup(
     name="smart_app_framework",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    author="SberDevices",
-    author_email="developer@sberdevices.ru",
+    author="Salute-Developers",
     description="SmartApp Framework — это фреймворк, "
                 "который позволяет создавать смартапы "
                 "с поддержкой виртуальных ассистентов Салют.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    license="sberpl-2",
     packages=find_packages(exclude=[]),
     include_package_data=True,
     install_requires=[
