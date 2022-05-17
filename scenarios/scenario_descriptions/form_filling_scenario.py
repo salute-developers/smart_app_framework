@@ -2,7 +2,7 @@
 from typing import Dict, Any
 
 from core.basic_models.scenarios.base_scenario import BaseScenario
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 from core.logging.logger_utils import log
 
 import scenarios.logging.logger_constants as log_const
@@ -174,8 +174,8 @@ class FormFillingScenario(BaseScenario):
             user.last_scenarios.delete(self.id)
         return action_messages
 
-    @monitoring.monitoring.got_histogram_decorate("scenario_time")
-    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
+    @monitoring.got_histogram("scenario_time")
+    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
         form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)

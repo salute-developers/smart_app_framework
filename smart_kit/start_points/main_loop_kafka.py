@@ -9,6 +9,7 @@ import random
 import signal
 import concurrent.futures
 import tracemalloc
+import asyncio
 from functools import lru_cache
 
 from confluent_kafka.cimpl import KafkaException
@@ -21,6 +22,7 @@ from core.message.from_message import SmartAppFromMessage
 from core.mq.kafka.async_kafka_publisher import AsyncKafkaPublisher
 from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.utils.memstats import get_top_malloc
+from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.stats_timer import StatsTimer
 from core.basic_models.actions.command import Command
 from core.utils.utils import current_time_ms
@@ -30,7 +32,7 @@ from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.names import message_names
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.start_points.base_main_loop import BaseMainLoop
-from smart_kit.utils.monitoring import smart_kit_metrics
+from core.monitoring.monitoring import monitoring
 
 
 def _enrich_config_from_secret(kafka_config, secret_config):
@@ -72,11 +74,12 @@ class MainLoop(BaseMainLoop):
                 "%(class_name)s START CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
             )
-            for key, config in kafka_config.items():
+            kafka_config_copy = pickle_deepcopy(kafka_config)
+            for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
-                    consumers.update({key: KafkaConsumer(kafka_config[key])})
+                    consumers.update({key: KafkaConsumer(config)})
                 if config.get("publisher"):
-                    publishers.update({key: AsyncKafkaPublisher(kafka_config[key])})
+                    publishers.update({key: AsyncKafkaPublisher(config)})
             log(
                 "%(class_name)s FINISHED CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
@@ -306,7 +309,7 @@ class MainLoop(BaseMainLoop):
             else:
                 answers.append(SmartAppToMessage(self.BAD_ANSWER_COMMAND, message=message, request=request))
 
-            smart_kit_metrics.counter_outgoing(self.app_name, command.name, answer, user)
+            monitoring.counter_outgoing(self.app_name, command.name, answer, user)
 
         return answers
 
@@ -352,7 +355,7 @@ class MainLoop(BaseMainLoop):
                 stats += f"Mid: {message.incremental_id}\n"
                 log_params[MESSAGE_ID_STR] = message.incremental_id
 
-                smart_kit_metrics.sampling_mq_waiting_time(self.app_name, waiting_message_time / 1000)
+                monitoring.sampling_mq_waiting_time(self.app_name, waiting_message_time / 1000)
 
                 if self._is_message_timeout_to_skip(message, waiting_message_time):
                     skip_timeout = True
@@ -364,7 +367,7 @@ class MainLoop(BaseMainLoop):
                 self.check_message_key(message, mq_message.key(), user)
                 stats += f"Loading user time from DB time: {load_timer.msecs} msecs\n"
                 log_params["user_loading"] = load_timer.msecs
-                smart_kit_metrics.sampling_load_time(self.app_name, load_timer.secs)
+                monitoring.sampling_load_time(self.app_name, load_timer.secs)
 
                 log(
                     "INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: %("
@@ -387,7 +390,7 @@ class MainLoop(BaseMainLoop):
                 db_uid = message.db_uid
                 with StatsTimer() as load_timer:
                     user = self.load_user(db_uid, message)
-                smart_kit_metrics.sampling_load_time(self.app_name, load_timer.secs)
+                monitoring.sampling_load_time(self.app_name, load_timer.secs)
                 stats += "Loading time: {} msecs\n".format(load_timer.msecs)
                 with StatsTimer() as script_timer:
                     commands = await self.model.answer(message, user)
@@ -397,14 +400,14 @@ class MainLoop(BaseMainLoop):
 
                 stats += f"Script time: {script_timer.msecs} msecs\n"
                 log_params["script_time"] = script_timer.msecs
-                smart_kit_metrics.sampling_script_time(self.app_name, script_timer.secs)
+                monitoring.sampling_script_time(self.app_name, script_timer.secs)
 
                 with StatsTimer() as save_timer:
                     user_save_ok = await self.save_user(db_uid, user, message)
 
                 stats += "Saving user to DB time: {} msecs\n".format(save_timer.msecs)
                 log_params["user_saving"] = save_timer.msecs
-                smart_kit_metrics.sampling_save_time(self.app_name, save_timer.secs)
+                monitoring.sampling_save_time(self.app_name, save_timer.secs)
                 if not user_save_ok:
                     log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
                         user=user,
@@ -426,7 +429,7 @@ class MainLoop(BaseMainLoop):
                     for answer in answers:
                         with StatsTimer() as publish_timer:
                             self._send_request(user, answer, mq_message)
-                            smart_kit_metrics.counter_outgoing(self.app_name, answer.command.name, answer, user)
+                            monitoring.counter_outgoing(self.app_name, answer.command.name, answer, user)
                         stats += f"Publishing to Kafka time: {publish_timer.msecs} msecs\n"
                         log_params["kafka_publishing"] = publish_timer.msecs
             else:
@@ -442,7 +445,7 @@ class MainLoop(BaseMainLoop):
                     params={log_const.KEY_NAME: "invalid_message",
                             "data": data,
                             MESSAGE_ID_STR: mid}, level="ERROR")
-                smart_kit_metrics.counter_invalid_message(self.app_name)
+                monitoring.counter_invalid_message(self.app_name)
                 break
         if stats:
             log(stats, user=user, params=log_params)
@@ -459,7 +462,7 @@ class MainLoop(BaseMainLoop):
                         "db_version": str(user.variables.get(user.USER_DB_VERSION))},
                 level="WARNING")
             await self.postprocessor.postprocess(user, message)
-            smart_kit_metrics.counter_save_collision_tries_left(self.app_name)
+            monitoring.counter_save_collision_tries_left(self.app_name)
 
         consumer.commit_offset(mq_message)
         if message_handled_ok:
@@ -489,7 +492,7 @@ class MainLoop(BaseMainLoop):
         elif waiting_message_time >= warning_delay:
             # Warn, but continue message processing
             log_level = "WARNING"
-            smart_kit_metrics.counter_mq_long_waiting(self.app_name)
+            monitoring.counter_mq_long_waiting(self.app_name)
 
         if log_level is not None:
             log(
@@ -647,7 +650,7 @@ class MainLoop(BaseMainLoop):
                             "db_version": str(user.variables.get(user.USER_DB_VERSION))},
                     level="WARNING")
 
-                smart_kit_metrics.counter_save_collision_tries_left(self.app_name)
+                monitoring.counter_save_collision_tries_left(self.app_name)
             if user_save_ok:
                 self.save_behavior_timeouts(user, mq_message, kafka_key)
                 for answer in answers:

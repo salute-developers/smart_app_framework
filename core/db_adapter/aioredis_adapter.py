@@ -5,13 +5,12 @@ import typing
 
 from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.db_adapter import error
-from core.monitoring import monitoring
+from core.monitoring.monitoring import monitoring
 
 from core.logging.logger_utils import log
 
 
 class AIORedisAdapter(AsyncDBAdapter):
-
     def __init__(self, config=None):
         super().__init__(config)
         self._redis: typing.Optional[aioredis.Redis] = None
@@ -21,15 +20,15 @@ class AIORedisAdapter(AsyncDBAdapter):
         except KeyError:
             pass
 
-    @monitoring.monitoring.got_histogram_decorate("save_time")
+    @monitoring.got_histogram("save_time")
     async def save(self, id, data):
         return await self._async_run(self._save, id, data)
 
-    @monitoring.monitoring.got_histogram_decorate("save_time")
+    @monitoring.got_histogram("save_time")
     async def replace_if_equals(self, id, sample, data):
         return await self._async_run(self._replace_if_equals, id, sample, data)
 
-    @monitoring.monitoring.got_histogram_decorate("get_time")
+    @monitoring.got_histogram("get_time")
     async def get(self, id):
         return await self._async_run(self._get, id)
 

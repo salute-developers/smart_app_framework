@@ -130,3 +130,16 @@ def current_time_ms():
 
 def time_check(begin_time, reject_timeout):
     return current_time_ms() - begin_time <= reject_timeout if begin_time is not None else True
+
+
+def deep_update_dict(original, update):
+    """
+    Recursively updates a original by update.
+    Subdict's won't be overwritten but also updated.
+    """
+    for key, value in original.items():
+        if key not in update:
+            update[key] = value
+        elif isinstance(value, dict):
+            deep_update_dict(value, update[key])
+    return update
