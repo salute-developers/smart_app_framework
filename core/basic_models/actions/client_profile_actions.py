@@ -1,15 +1,11 @@
-import time
-from copy import copy
 from typing import Dict, Any, Optional, Union, List
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
+from core.configs.global_constants import KAFKA
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from scenarios.user.user_model import User
-from scenarios.actions.action_params_names import (SAVED_MESSAGES, REQUEST_FIELD, TO_MESSAGE_PARAMS, TO_MESSAGE_NAME)
-from core.configs.global_constants import KAFKA, CALLBACK_ID_HEADER
 from smart_kit.configs import settings
-from smart_kit.names.action_params_names import SEND_TIMESTAMP
 
 GIVE_ME_MEMORY = "GIVE_ME_MEMORY"
 REMEMBER_THIS = "REMEMBER_THIS"
@@ -64,10 +60,12 @@ class GiveMeMemoryAction(StringAction):
             }
         })
         settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
+        self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self.request_data = {
             "topic_key": "client_info",
-            "kafka_key": self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY,
-            "kafka_replyTopic": config["kafka"]["template-engine"]["main"]["consumer"]["topics"]["client_profile"]
+            "kafka_key": self.kafka_key,
+            "kafka_replyTopic":
+                config["kafka"]["template-engine"][self.kafka_key]["consumer"]["topics"]["client_profile"]
         }
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -85,10 +83,6 @@ class GiveMeMemoryAction(StringAction):
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands
-
-    def _get_extra_request_data(self, user, params, callback_id):
-        extra_request_data = {CALLBACK_ID_HEADER: callback_id}
-        return extra_request_data
 
 
 class RememberThisAction(StringAction):
@@ -167,8 +161,10 @@ class RememberThisAction(StringAction):
             }
         })
         settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
+        self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self.request_data = {
             "topic_key": "client_info_remember",
-            "kafka_key": self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY,
-            "kafka_replyTopic": config["kafka"]["template-engine"]["main"]["consumer"]["topics"]["client_profile"]
+            "kafka_key": self.kafka_key,
+            "kafka_replyTopic":
+                config["kafka"]["template-engine"][self.kafka_key]["consumer"]["topics"]["client_profile"]
         }
