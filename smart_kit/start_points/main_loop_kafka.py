@@ -20,7 +20,6 @@ from core.utils.stats_timer import StatsTimer
 from core.basic_models.actions.command import Command
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
-from smart_kit.message.smart_app_push_message import SmartAppPushToMessage
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.names import message_names
 from smart_kit.request.kafka_request import SmartKitKafkaRequest

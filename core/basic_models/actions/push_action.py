@@ -5,11 +5,11 @@ from typing import Union, Dict, List, Any, Optional
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
-from core.unified_template.unified_template import UnifiedTemplate
-from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
+
+PUSH_NOTIFY = "PUSH_NOTIFY"
 
 
 class PushAction(StringAction):
@@ -51,6 +51,7 @@ class PushAction(StringAction):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         self.surface = items.get("surface", self.COMPANION)
         items["nodes"] = items.get("content") or {}
+        items["command"] = PUSH_NOTIFY
         super().__init__(items, id)
         self.default_request_data_template = self._get_template_tree(self.DEFAULT_REQUEST_DATA)
         self.request_data_template = self._get_template_tree(self.request_data) if self.request_data else None
@@ -73,6 +74,6 @@ class PushAction(StringAction):
         }
         requests_data = self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=requests_data, need_payload_wrap=False)]
+                            request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
         return commands
 
