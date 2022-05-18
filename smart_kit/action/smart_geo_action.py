@@ -20,11 +20,11 @@ class SmartGeoAction(StringAction):
     где `from smart_kit.start_points.main_loop_kafka import MainLoop`.
     ```
     {
-      "type": "smart_geo"
+      "type": "smart_geo",
+      "behavior": "smart_geo_behavior"
     }
     ```
-    Можно указать опциональный параметр Behavior (по умолчанию используется `"smart_geo_behavior"`)
-    `"behavior": "behavior_name"`
+    Опциональный параметр `"behavior"` определяет Behavior, используемый в запросе.
 
     После исполнения команды и успешного ответа от smart geo API геоданные пользователя сохранятся в переменную внутри
     User `user.variables.smart_geo`
