@@ -40,4 +40,5 @@ jobs:
     - name: Test run_app
       run: |
         python -m smart_kit create_app test_app
+        cd test_app
         timeout 120 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
