@@ -4,6 +4,7 @@ from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
 from core.configs.global_constants import KAFKA
 from core.text_preprocessing.base import BaseTextPreprocessingResult
+from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.user.user_model import User
 from smart_kit.configs import settings
 
@@ -73,13 +74,8 @@ class GiveMeMemoryAction(StringAction):
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
-            user.behaviors.add(
-                callback_id,
-                self.behavior,
-                scenario_id,
-                text_preprocessing_result.raw,
-                params
-            )
+            user.behaviors.add(callback_id, self.behavior, scenario_id,
+                               text_preprocessing_result.raw, pickle_deepcopy(params))
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands
