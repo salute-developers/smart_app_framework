@@ -61,7 +61,7 @@ class MainLoop(BaseMainLoop):
         self.kafka_executor_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         self._timers = dict()  # stores aio timers for callbacks
         self.template_settings = self.settings["template_settings"]
-        self.worker_tasks = []
+        self.coro_tasks = []
 
         try:
             kafka_config = _enrich_config_from_secret(
@@ -146,7 +146,7 @@ class MainLoop(BaseMainLoop):
         profile_memory_log_delta = profiling_settings.get("memory_log_delta", 30)
         profile_memory_depth = profiling_settings.get("memory_depth", 4)
 
-        async def worker(iteration, queue):
+        async def coro(iteration, queue):
             nonlocal total_messages
             message_value = None
             user = None
@@ -201,14 +201,14 @@ class MainLoop(BaseMainLoop):
                 except Exception:
                     self.concurrent_messages -= 1
                     log("%(class_name)s iterate error. Kafka key %(kafka_key)s",
-                        params={log_const.KEY_NAME: "worker_exception",
+                        params={log_const.KEY_NAME: "coro_exception",
                                 "kafka_key": kafka_key,
                                 log_const.REQUEST_VALUE: str(message_value)},
                         level="ERROR", exc_info=True)
                     try:
                         consumer.commit_offset(mq_message)
                     except Exception:
-                        log("Error handling worker fail exception.", level="ERROR", exc_info=True)
+                        log("Error handling coroutine fail exception.", level="ERROR", exc_info=True)
                         raise
                     queue.task_done()
                 else:
@@ -234,8 +234,8 @@ class MainLoop(BaseMainLoop):
         queues = [asyncio.Queue() for _ in range(max_concurrent_messages)]
 
         for i, queue in enumerate(queues):
-            task = asyncio.create_task(worker(f'worker-{i}', queue))
-            self.worker_tasks.append(task)
+            task = asyncio.create_task(coro(f'coro-{i}', queue))
+            self.coro_tasks.append(task)
 
         await self.poll_kafka(consumer, queues)  # blocks while self.is_works
 
@@ -251,11 +251,11 @@ class MainLoop(BaseMainLoop):
         while self._timers and (self.loop.time() - t) < delay:
             await asyncio.sleep(1)
 
-        for task in self.worker_tasks:
+        for task in self.coro_tasks:
             cancell_status = task.cancel()
             log(f"{task} cancell status: {cancell_status} ")
 
-        log(f"Stop consuming messages. All workers closed, erasing {len(self._timers)} timers.")
+        log(f"Stop consuming messages. All coroutines closed, erasing {len(self._timers)} timers.")
 
         if profile_memory:
             log(f"{get_top_malloc(trace_limit=16)}")
