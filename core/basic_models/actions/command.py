@@ -2,7 +2,8 @@
 
 
 class Command:
-    def __init__(self, name, params=None, action_id=None, request_type=None, request_data=None, loader=None):
+    def __init__(self, name=None, params=None, action_id=None, request_type=None, request_data=None, loader=None,
+                 need_payload_wrap=True, need_message_name=True):
         """
         Initialize Command instance with params
 
@@ -20,10 +21,12 @@ class Command:
         self.request_type = request_type
         self.request_data = request_data or {}
         self.loader = loader or "json.dumps"
+        self.need_payload_wrap = need_payload_wrap
+        self.need_message_name = need_message_name
 
     @property
     def raw(self):
-        message = {"messageName": self.name, "payload": self.payload}
-        if self.action_id is not None:
-            message["action_id"] = self.action_id
+        message = {"payload": self.payload} if self.need_payload_wrap else self.payload
+        if self.need_message_name:
+            message["messageName"] = self.name
         return message

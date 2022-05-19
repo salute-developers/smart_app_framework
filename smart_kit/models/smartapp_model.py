@@ -1,7 +1,6 @@
 # coding: utf-8
 import sys
 import traceback
-from lazy import lazy
 
 from core.descriptions.descriptions import Descriptions
 from core.logging.logger_utils import log
@@ -17,10 +16,14 @@ from smart_kit.handlers.handler_timeout import HandlerTimeout
 from smart_kit.handlers.handle_server_action import HandlerServerAction
 from smart_kit.resources import SmartAppResources
 from smart_kit.utils import get_callback_action_params, set_debug_info
-from smart_kit.utils.monitoring import smart_kit_metrics
+from core.monitoring.monitoring import monitoring
 
 
 class SmartAppModel:
+    # additional_handlers format:
+    # {"MESSAGE_NAME": {"handler": HandlerText, "params": {"dialogue_manager": custom_dialogue_manager}}}
+    # "params" is optional
+    additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):
         log(
@@ -44,6 +47,7 @@ class SmartAppModel:
             message_name: HandlerRespond(self.app_name, action_name=action_name)
             for message_name, action_name in self.resources.get("responses", {}).items()
         })
+        self.init_additional_handlers()
 
         log(
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
@@ -51,6 +55,12 @@ class SmartAppModel:
 
     def get_handler(self, message_type):
         return self._handlers[message_type]
+
+    def init_additional_handlers(self):
+        self._handlers.update({
+            message_name: handler_dict["handler"](self.app_name, **handler_dict.get("params", {}))
+            for message_name, handler_dict in self.additional_handlers.items()
+        })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
     def answer(self, message, user):
@@ -67,7 +77,7 @@ class SmartAppModel:
 
     def on_answer_error(self, message, user):
         user.do_not_save = True
-        smart_kit_metrics.counter_exception(self.app_name)
+        monitoring.counter_exception(self.app_name)
         params = {log_const.KEY_NAME: log_const.DIALOG_ERROR_VALUE,
                   "message_id": user.message.incremental_id,
                   "masked_message": user.message.masked_value}
