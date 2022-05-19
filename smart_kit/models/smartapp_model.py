@@ -20,6 +20,9 @@ from smart_kit.utils.monitoring import smart_kit_metrics
 
 
 class SmartAppModel:
+    # additional_handlers format:
+    # {"MESSAGE_NAME": {"handler": HandlerText, "params": {"dialogue_manager": custom_dialogue_manager}}}
+    # "params" is optional
     additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):
@@ -55,7 +58,8 @@ class SmartAppModel:
 
     def init_additional_handlers(self):
         self._handlers.update({
-            message_name: handler(self.app_name) for message_name, handler in self.additional_handlers.items()
+            message_name: handler_dict["handler"](self.app_name, **handler_dict.get("params", {}))
+            for message_name, handler_dict in self.additional_handlers.items()
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
