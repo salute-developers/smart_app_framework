@@ -2,8 +2,8 @@
 from typing import Union, Dict, Any, Optional
 
 from core.basic_models.actions.basic_actions import Action
-from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.model.base_user import BaseUser
+from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 
 class CounterIncrementAction(Action):

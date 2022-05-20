@@ -1,5 +1,4 @@
 # coding: utf-8
-from copy import copy
 from typing import Union, Dict, List, Any, Optional
 
 from core.basic_models.actions.command import Command
@@ -13,8 +12,7 @@ PUSH_NOTIFY = "PUSH_NOTIFY"
 
 
 class PushAction(StringAction):
-    """
-        Action для отправки пуш уведомлений в сервис пушей.
+    """ Action для отправки пуш уведомлений в сервис пушей.
         Example:
         {
           "push_advertising_offer": {
@@ -76,4 +74,3 @@ class PushAction(StringAction):
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
         return commands
-

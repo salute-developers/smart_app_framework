@@ -1,17 +1,14 @@
-from typing import Optional, Dict, Any, Union
-
-from core.text_preprocessing.base import BaseTextPreprocessingResult
-
-from core.unified_template.unified_template import UnifiedTemplate
-
-from core.model.base_user import BaseUser
-
-from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 import collections
 import json
+from typing import Optional, Dict, Any, Union
+
 from jinja2 import exceptions as jexcept
 
 from core.basic_models.actions.basic_actions import Action
+from core.basic_models.parametrizers.parametrizer import BasicParametrizer
+from core.model.base_user import BaseUser
+from core.text_preprocessing.base import BaseTextPreprocessingResult
+from core.unified_template.unified_template import UnifiedTemplate
 
 
 class SetVariableAction(Action):

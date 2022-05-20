@@ -1,8 +1,8 @@
 # coding: utf-8
 import random
 from copy import copy
-from typing import Union, Dict, List, Any, Optional, Tuple
 from itertools import chain
+from typing import Union, Dict, List, Any, Optional, Tuple
 
 from lazy import lazy
 
@@ -115,7 +115,7 @@ class StringAction(NodeAction):
         super(StringAction, self).__init__(items, id)
 
     def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
+                                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
         command_params = dict()
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -226,13 +226,15 @@ class SDKAnswer(NodeAction):
     карточки на андроиде требуют sdk_version не ниже "20.03.0.0"
     """
     INDEX_WILDCARD = "*index*"
-    RANDOM_PATH = [['items', INDEX_WILDCARD, 'bubble', 'text'], ['pronounceText'], ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
+    RANDOM_PATH = [['items', INDEX_WILDCARD, 'bubble', 'text'], ['pronounceText'],
+                   ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(SDKAnswer, self).__init__(items, id)
         self.command: str = ANSWER_TO_USER
         if self._nodes == {}:
-            self._nodes = {i: items.get(i) for i in items if i not in ['random_paths', 'same_ans', 'type', 'support_templates', 'no_empty_nodes']}
+            self._nodes = {i: items.get(i) for i in items if
+                           i not in ['random_paths', 'same_ans', 'type', 'support_templates', 'no_empty_nodes']}
 
     # функция идет по RANDOM_PATH, числа в нем считает индексами массива,
     # INDEX_WILDCARD - произвольным индексом массива, прочее - ключами словаря

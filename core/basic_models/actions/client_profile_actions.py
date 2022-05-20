@@ -2,17 +2,16 @@ from typing import Dict, Any, Optional, Union, List
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
+from core.configs.global_constants import KAFKA
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.user.user_model import User
-from core.configs.global_constants import KAFKA
 
 GIVE_ME_MEMORY = "GIVE_ME_MEMORY"
 REMEMBER_THIS = "REMEMBER_THIS"
 
 
 class GiveMeMemoryAction(StringAction):
-
     """
     Example::
         {
@@ -75,7 +74,6 @@ class GiveMeMemoryAction(StringAction):
 
 
 class RememberThisAction(StringAction):
-
     """
     Example::
       {
