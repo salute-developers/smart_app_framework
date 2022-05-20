@@ -2,7 +2,7 @@
 import json
 import unittest
 import uuid
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 
 from core.basic_models.actions.basic_actions import Action, DoingNothingAction, action_factory, RequirementAction, \
     actions, ChoiceAction, ElseAction, CompositeAction, NonRepeatingAction
@@ -827,7 +827,8 @@ class SDKRandomAnswer(unittest.TestCase):
 
 
 class GiveMeMemoryActionTest(unittest.TestCase):
-    def test_run(self):
+    @patch("smart_kit.configs.settings.Settings")
+    def test_run(self, settings_mock: MagicMock):
         expected = [
             Command("GIVE_ME_MEMORY",
                     {
@@ -860,8 +861,25 @@ class GiveMeMemoryActionTest(unittest.TestCase):
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
+        settings = {
+            "template_settings": {
+                "project_id": "0"
+            },
+            "kafka": {
+                "template-engine": {
+                    "main": {
+                        "consumer": {
+                            "topics": {
+                                "client_profile": "app"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        settings_mock.return_value = settings
         items = {
+            "behavior": "my_behavior",
             "nodes": {
                 "memory": {
                     "confidentialMemo": [
@@ -884,14 +902,16 @@ class GiveMeMemoryActionTest(unittest.TestCase):
                 }
             }
         }
+        text_preprocessing_result = PicklableMock()
         action = GiveMeMemoryAction(items)
-        result = action.run(user, None)
+        result = action.run(user, text_preprocessing_result)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)
 
 
 class RememberThisActionTest(unittest.TestCase):
-    def test_run(self):
+    @patch("smart_kit.configs.settings.Settings")
+    def test_run(self, settings_mock: MagicMock):
         expected = [
             Command("REMEMBER_THIS",
                     {
@@ -957,7 +977,23 @@ class RememberThisActionTest(unittest.TestCase):
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
+        settings = {
+            "template_settings": {
+                "project_id": "0"
+            },
+            "kafka": {
+                "template-engine": {
+                    "main": {
+                        "consumer": {
+                            "topics": {
+                                "client_profile": "app"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        settings_mock.return_value = settings
         items = {
             "nodes": {
               "clientIds": {

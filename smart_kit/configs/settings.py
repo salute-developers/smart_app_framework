@@ -13,7 +13,7 @@ class Settings(BaseConfig, metaclass=Singleton):
     OSAdapterKey = "os"
 
     def __init__(self, *args, **kwargs):
-        super(Settings, self).__init__()
+        super().__init__()
         self.configs_path = kwargs.get("config_path")
         self.references_path = kwargs.get("references_path")
         self.secret_path = kwargs.get("secret_path")
