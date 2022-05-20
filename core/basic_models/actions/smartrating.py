@@ -34,7 +34,8 @@ class SmartRatingAction(CommandAction):
 
 class CallRatingAction(SmartRatingAction):
     """Отправляет 'CALL_RATING' в SmartRating API
-    https://confluence.sberbank.ru/display/SDAT/API+SmartRating
+
+    https://developers.sber.ru/docs/ru/va/reference/smartservices/smartrating/api
     Example::
         {
             "type": "call_rating",
@@ -48,7 +49,8 @@ class CallRatingAction(SmartRatingAction):
 
 class AskRatingAction(SmartRatingAction):
     """Отправляет 'ASK_RATING' в SmartRating API
-    https://confluence.sberbank.ru/display/SDAT/API+SmartRating
+
+    https://developers.sber.ru/docs/ru/va/reference/smartservices/smartrating/api
     Example::
         {
             "type": "ask_rating",
