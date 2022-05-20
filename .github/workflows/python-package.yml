@@ -48,6 +48,7 @@ jobs:
         docker-compose -f .github/workflows/docker-compose.yml up -d
         python -m smart_kit create_app kafka_test_app
         mv .github/workflows/kafka_config.yml kafka_test_app/static/configs/kafka_config.yml
+        mv .github/workflows/logging_config.yml kafka_test_app/static/configs/logging_config.yml
         cd kafka_test_app
         echo 'from smart_kit.start_points.main_loop_kafka import MainLoop' >> app_config.py
         echo 'MAIN_LOOP = MainLoop' >> app_config.py
