@@ -1,0 +1,36 @@
+template-engine:
+  main:
+    consumer:
+      assign_offset_end: true
+      conf:
+        auto.commit.interval.ms: 1000
+        bootstrap.servers: "10.53.88.57:9093"
+        debug: all
+        default.topic.config:
+          auto.offset.reset: largest
+        enable.auto.commit: true
+        enable.auto.offset.store: false
+        group.id: dialog_policy1
+        session.timeout.ms: 6000
+        topic.metadata.refresh.interval.ms: 100000
+        security.protocol: "SSL"
+        ssl.ca.location: "/opt/app/secrets/ca_root"
+        ssl.certificate.location: "/opt/app/secrets/cert"
+        ssl.key.location: "/opt/app/secrets/key"
+      internal_log_path: /tmp
+      poll_timeout: 0.01
+      topics:
+        apps: toTestApp
+    publisher:
+      conf:
+        bootstrap.servers: "10.53.88.57:9093"
+        topic.metadata.refresh.interval.ms: 100000
+        security.protocol: "SSL"
+        ssl.ca.location: "/opt/app/secrets/ca_root"
+        ssl.certificate.location: "/opt/app/secrets/cert"
+        ssl.key.location: "/opt/app/secrets/key"
+      flush_timeout: 10000
+      partitions_count: 3
+      poll_timeout: 0.01
+      topic:
+        apps: fromTestApp

@@ -46,3 +46,7 @@ jobs:
     - name: Test run_app on KafkaMainLoop
       run: |
         docker-compose -f .github/workflows/docker-compose.yml up -d
+        python -m smart_kit create_app kafka_test_app
+        cd kafka_test_app
+        echo '\nfrom smart_kit.start_points.main_loop_kafka import MainLoop\nMAIN_LOOP = MainLoop' >> app_config.py
+        timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
