@@ -14,12 +14,9 @@ from core.basic_models.actions.counter_actions import CounterIncrementAction, Co
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.external_actions import ExternalActions
 from core.basic_models.actions.push_action import PushAction, PUSH_NOTIFY
-<<<<<<< HEAD
 from core.basic_models.actions.smartrating import AskRatingAction, CallRatingAction
-=======
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
->>>>>>> a40ac81e1599a1aae7a188e46eb772099b2108c9
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
