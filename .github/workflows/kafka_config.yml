@@ -4,7 +4,7 @@ template-engine:
       assign_offset_end: true
       conf:
         auto.commit.interval.ms: 1000
-        bootstrap.servers: "10.53.88.57:9093"
+        bootstrap.servers: "localhost:9092"
         debug: all
         default.topic.config:
           auto.offset.reset: largest
@@ -23,7 +23,7 @@ template-engine:
         apps: toTestApp
     publisher:
       conf:
-        bootstrap.servers: "10.53.88.57:9093"
+        bootstrap.servers: "localhost:9092"
         topic.metadata.refresh.interval.ms: 100000
         security.protocol: "SSL"
         ssl.ca.location: "/opt/app/secrets/ca_root"
