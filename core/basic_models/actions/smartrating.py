@@ -50,7 +50,7 @@ class CallRatingAction(SmartRatingAction):
 class AskRatingAction(SmartRatingAction):
     """Отправляет 'ASK_RATING' в SmartRating API
 
-    Документация для внутренних разработчиков: https://confluence.sberbank.ru/display/SDAT/API+SmartRating
+    Документация для внутренних разработчиков: https://confluence.sberbank.ru/display/SMDG/API+SmartRating
     Example::
         {
             "type": "ask_rating",
