@@ -13,10 +13,6 @@ template-engine:
         group.id: dialog_policy1
         session.timeout.ms: 6000
         topic.metadata.refresh.interval.ms: 100000
-        security.protocol: "SSL"
-        ssl.ca.location: "/opt/app/secrets/ca_root"
-        ssl.certificate.location: "/opt/app/secrets/cert"
-        ssl.key.location: "/opt/app/secrets/key"
       internal_log_path: /tmp
       poll_timeout: 0.01
       topics:
@@ -25,10 +21,6 @@ template-engine:
       conf:
         bootstrap.servers: "localhost:9092"
         topic.metadata.refresh.interval.ms: 100000
-        security.protocol: "SSL"
-        ssl.ca.location: "/opt/app/secrets/ca_root"
-        ssl.certificate.location: "/opt/app/secrets/cert"
-        ssl.key.location: "/opt/app/secrets/key"
       flush_timeout: 10000
       partitions_count: 3
       poll_timeout: 0.01
