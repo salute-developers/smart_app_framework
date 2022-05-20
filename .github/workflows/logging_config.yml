@@ -5,13 +5,13 @@ loggers:
       - console_app_handler
       - file_app_handler
     propagate: false
-    level: Warning
+    level: WARNING
 version: 1
 root:
   handlers:
     - console_handler
     - file_handler
-  level: Warning
+  level: WARNING
 handlers:
   file_app_handler:
     backupCount: 30
