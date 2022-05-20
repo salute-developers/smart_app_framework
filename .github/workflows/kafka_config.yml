@@ -5,6 +5,7 @@ template-engine:
       conf:
         auto.commit.interval.ms: 1000
         bootstrap.servers: "localhost:9092"
+        security.protocol: "SSL"
         debug: all
         default.topic.config:
           auto.offset.reset: largest
@@ -20,6 +21,7 @@ template-engine:
     publisher:
       conf:
         bootstrap.servers: "localhost:9092"
+        security.protocol: "SSL"
         topic.metadata.refresh.interval.ms: 100000
       flush_timeout: 10000
       partitions_count: 3
