@@ -33,7 +33,7 @@ class SmartRatingAction(CommandAction):
 
 
 class CallRatingAction(SmartRatingAction):
-    """Action запроса оценки смартапа у пользователя через SmartRating API
+    """Action запроса оценки смартапа у пользователя по его инициативе через SmartRating API
 
     https://developers.sber.ru/docs/ru/va/reference/smartservices/smartrating/api
     Example::
