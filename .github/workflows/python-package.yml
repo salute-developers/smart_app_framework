@@ -37,8 +37,12 @@ jobs:
     - name: Test with unittest
       run: |
         python -m unittest discover -s tests
-    - name: Test run_app
+    - name: Test run_app on HttpMainLoop
       run: |
-        python -m smart_kit create_app test_app
-        cd test_app
+        python -m smart_kit create_app http_test_app
+        cd http_test_app
         timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+        cd ..
+    - name: Test run_app on KafkaMainLoop
+      run: |
+        docker-compose up -d
