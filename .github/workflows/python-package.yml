@@ -52,4 +52,4 @@ jobs:
         cd kafka_test_app
         echo 'from smart_kit.start_points.main_loop_kafka import MainLoop' >> app_config.py
         echo 'MAIN_LOOP = MainLoop' >> app_config.py
-        python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+        timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
