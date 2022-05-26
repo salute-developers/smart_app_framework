@@ -47,8 +47,9 @@ class GiveMeMemoryAction(StringAction):
         config = settings.Settings()
         self.command = GIVE_ME_MEMORY
         self.request_type = KAFKA
-        self.kafka_key = items.get("kafka_key")
-        self.behavior = items.get("behavior")
+        self.behavior: Optional[str] = items.get("behavior")
+        settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
+        self.kafka_key: str = items.get("kafka_key") or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self._nodes.update({
             "root_nodes": {
                 "protocolVersion": items.get("protocolVersion") or 1
@@ -60,8 +61,6 @@ class GiveMeMemoryAction(StringAction):
                 "projectId": config["template_settings"]["project_id"]
             }
         })
-        settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
-        self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self.request_data = {
             "topic_key": "client_info",
             "kafka_key": self.kafka_key,
@@ -70,7 +69,7 @@ class GiveMeMemoryAction(StringAction):
         }
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> [List[Command]]:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
@@ -147,7 +146,8 @@ class RememberThisAction(StringAction):
         config = settings.Settings()
         self.command = REMEMBER_THIS
         self.request_type = KAFKA
-        self.kafka_key = items.get("kafka_key")
+        settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
+        self.kafka_key: str = items.get("kafka_key") or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self._nodes.update({
             "root_nodes": {
                 "protocolVersion": items.get("protocolVersion") or 3
@@ -156,8 +156,6 @@ class RememberThisAction(StringAction):
                 "projectId": config["template_settings"]["project_id"]
             }
         })
-        settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
-        self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self.request_data = {
             "topic_key": "client_info_remember",
             "kafka_key": self.kafka_key,

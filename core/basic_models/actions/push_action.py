@@ -30,7 +30,6 @@ class PushAction(StringAction):
           }
         }
     """
-
     DEFAULT_EXTRA_HEADERS = {
         "request-id": "{{ uuid4() }}",
         "sender-id": "{{ uuid4() }}",

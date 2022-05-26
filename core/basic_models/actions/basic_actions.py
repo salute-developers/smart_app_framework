@@ -3,7 +3,6 @@ import random
 from typing import Union, Dict, List, Any, Optional
 
 import core.logging.logger_constants as log_const
-from core.basic_models import requirement
 from core.basic_models.actions.command import Command
 from core.basic_models.requirement.basic_requirements import Requirement
 from core.configs.global_constants import KAFKA
