@@ -37,8 +37,20 @@ jobs:
     - name: Test with unittest
       run: |
         python -m unittest discover -v -s tests
-    - name: Test run_app
+    - name: Test run_app on HttpMainLoop
       run: |
-        python -m smart_kit create_app test_app
-        cd test_app
+        python -m smart_kit create_app http_test_app
+        cd http_test_app
+        timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+        cd ..
+    - name: Test run_app on KafkaMainLoop
+      run: |
+        docker-compose -f .github/docker-compose.yml up -d
+        python -m smart_kit create_app kafka_test_app
+        mv .github/kafka_config.yml kafka_test_app/static/configs/kafka_config.yml
+        mv .github/logging_config.yml kafka_test_app/static/configs/logging_config.yml
+        cd kafka_test_app
+        echo 'from smart_kit.start_points.main_loop_kafka import MainLoop' >> app_config.py
+        echo 'MAIN_LOOP = MainLoop' >> app_config.py
+        docker exec github_kafka_1 kafka-topics.sh --create --bootstrap-server localhost:9092  --partitions 3 --topic toTestApp
         timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
