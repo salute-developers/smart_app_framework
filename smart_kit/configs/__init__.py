@@ -47,6 +47,8 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
     from smart_kit.utils.cache import JSONCache
     from smart_kit.testing.suite import TestCase
+    from smart_kit.testing.ssml_test.suite import SsmlTestSuite
+    from smart_kit.testing.ssml_test.ssml_string_parser import ssml_string_parser
 
     set_default(app_config, "LOCAL_TESTING", CLInterface)
     set_default(app_config, "TEST_CASE", TestCase)
@@ -63,6 +65,12 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     set_default(app_config, "SETTINGS", Settings)
     set_default(app_config, "RESOURCES", SmartAppResources)
     set_default(app_config, "FROM_MSG", SmartAppFromMessage)
+    set_default(app_config, "SSML_TEST_SUITE", SsmlTestSuite)
+    set_default(app_config, "SSML_TEST_ADDRESS", "http://1.2.3.4:1234/todo")  # TODO replace url according to API
+    set_default(app_config, "RESOURCE_TO_SSML_STRING_PARSER", {"scenarios": ssml_string_parser,
+                                                               "forms": ssml_string_parser,
+                                                               "external_actions": ssml_string_parser,
+                                                               "behaviors": ssml_string_parser})
 
     set_default(app_config, "NORMALIZATION_CACHE_TTL", 0)
     set_default(app_config, "NORMALIZATION_CACHE", JSONCache)
