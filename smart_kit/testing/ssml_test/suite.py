@@ -28,10 +28,10 @@ class SsmlTestSuite:
         total_num = len(ssml_strings)
         for ssml_string, location in ssml_strings:
             print(f"[+] Testing SSML string {ssml_string} from {location}")
-            print(f"[+] OK")
             is_valid, message = self.check_ssml_string(ssml_string, self.ssml_test_url)
             if is_valid:
                 success_num += 1
+                print(f"[+] OK")
             else:
                 print(f"[!] SSML markup of the string is invalid. Message: {message}")
         print(f"[+] Total: {success_num}/{total_num}")
