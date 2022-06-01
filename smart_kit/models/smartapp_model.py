@@ -44,7 +44,7 @@ class SmartAppModel:
             LOCAL_TIMEOUT: HandlerTimeout(self.app_name),
             SERVER_ACTION: HandlerServerAction(self.app_name),
             CLOSE_APP: HandlerCloseApp(self.app_name),
-            TAKE_PROFILE_DATA: HandlerTakeProfileData(self.app_name)
+            TAKE_PROFILE_DATA: HandlerTakeProfileData(self.app_name),
         }
         self._handlers.update({
             message_name: HandlerRespond(self.app_name, action_name=action_name)
