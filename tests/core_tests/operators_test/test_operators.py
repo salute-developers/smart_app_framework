@@ -110,7 +110,3 @@ class MoreOperatorTest(unittest.TestCase):
     def test_exists_fail(self):
         operator = Exists({})
         self.assertFalse(operator.compare(None))
-
-
-if __name__ == '__main__':
-    unittest.main()
