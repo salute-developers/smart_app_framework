@@ -75,7 +75,7 @@ def dict_factory(type: Type[T], has_id=True) -> Callable[[Type[T]], Callable]:
 def ordered_dict_factory(type: Type[T], has_id=True) -> Callable[[Type[T]], Callable]:
     def _inner(func: Callable) -> Callable:
         @functools.wraps(func)
-        def _wrap(*args: Any, **kwargs: Any) -> OrderedDict[T]:
+        def _wrap(*args: Any, **kwargs: Any) -> OrderedDict[str, T]:
             cls: Type[T] = registered_factories[type]
             items_iterator = func(*args, **kwargs).items()
             result = OrderedDict({})
