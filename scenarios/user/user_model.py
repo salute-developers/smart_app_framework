@@ -1,7 +1,6 @@
 import json
 from lazy import lazy
 
-
 from core.logging.logger_utils import log
 from core.model.field import Field
 from core.model.base_user import BaseUser
@@ -18,8 +17,8 @@ from scenarios.user.reply_selector.reply_selector import ReplySelector
 from core.monitoring.monitoring import monitoring
 import scenarios.logging.logger_constants as log_const
 
-class User(BaseUser):
 
+class User(BaseUser):
     forms: Forms
     last_fields: LastFields
     last_scenarios: LastScenarios
@@ -55,14 +54,14 @@ class User(BaseUser):
     @property
     def fields(self):
         return super().fields + [Field("forms", Forms, self.descriptions["forms"]),
-                                           Field("last_fields", LastFields),
-                                           Field("last_scenarios", LastScenarios, self.descriptions["last_scenarios"]),
-                                           Field("scenario_models", ScenarioModels, self.descriptions["scenarios"]),
-                                           Field("preprocessing_messages_for_scenarios", PreprocessingScenariosMessages,
-                                                 self.descriptions["preprocessing_messages_for_scenarios"]),
-                                           Field("behaviors", Behaviors, self.descriptions["behaviors"]),
-                                           Field("history", History, self.descriptions["history"]),
-                                           Field("gender_selector", ReplySelector)]
+                                 Field("last_fields", LastFields),
+                                 Field("last_scenarios", LastScenarios, self.descriptions["last_scenarios"]),
+                                 Field("scenario_models", ScenarioModels, self.descriptions["scenarios"]),
+                                 Field("preprocessing_messages_for_scenarios", PreprocessingScenariosMessages,
+                                       self.descriptions["preprocessing_messages_for_scenarios"]),
+                                 Field("behaviors", Behaviors, self.descriptions["behaviors"]),
+                                 Field("history", History, self.descriptions["history"]),
+                                 Field("gender_selector", ReplySelector)]
 
     @lazy
     def parametrizer(self):
