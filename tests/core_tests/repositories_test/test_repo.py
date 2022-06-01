@@ -224,7 +224,3 @@ class TestClassifierRepository(unittest.TestCase):
 
     def tearDown(self):
         self.temp_directory.cleanup()
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -587,7 +587,3 @@ class RequirementTest(unittest.TestCase):
         mock_user = Mock()
         mock_user.settings = {"template_settings": {"test_false_toggle_name": False}}
         self.assertFalse(req.check(Mock(), mock_user))
-
-
-if __name__ == '__main__':
-    unittest.main()

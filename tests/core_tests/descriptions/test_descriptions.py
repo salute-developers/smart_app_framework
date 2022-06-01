@@ -47,7 +47,3 @@ class DescriptionsTest(unittest.TestCase):
     def test_get3(self):
         item2 = self.descriptions["repo_key3"]
         assert item2 == "raw_3"
-
-
-if __name__ == '__main__':
-    unittest.main()
