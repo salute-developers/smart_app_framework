@@ -38,7 +38,7 @@ class SmartGeoAction(StringAction):
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
-                           text_preprocessing_result.raw, action_params=params)
+                           text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
 
         commands = super().run(user, text_preprocessing_result, params)
         return commands

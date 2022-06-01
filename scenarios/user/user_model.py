@@ -37,9 +37,9 @@ class User(BaseUser):
             monitoring.counter_load_error(settings.app_name)
             log(f"%(class_name)s.__init__ User load ValueError %(uid)s with user data {db_data}",
                 params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                 "uid": str(id)}, level="ERROR")
+                        "uid": str(id)}, level="ERROR")
             load_error = True
-        super(User, self).__init__(id, message, user_values, descriptions, load_error)
+        super().__init__(id, message, user_values, descriptions, load_error)
         self.__parametrizer_cls = parametrizer_cls
         self.do_not_save = False
         self.initial_db_data = db_data
@@ -49,12 +49,12 @@ class User(BaseUser):
         self.variables.set(self.USER_DB_VERSION, db_version + 1)
         log("%(class_name)s.__init__ USER %(uid)s LOAD db_version = %(db_version)s.", self,
             params={"db_version": str(db_version),
-             "uid": str(self.id), log_const.KEY_NAME:"user_load"})
+                    "uid": str(self.id), log_const.KEY_NAME: "user_load"})
         self.behaviors.initialize()
 
     @property
     def fields(self):
-        return super(User, self).fields + [Field("forms", Forms, self.descriptions["forms"]),
+        return super().fields + [Field("forms", Forms, self.descriptions["forms"]),
                                            Field("last_fields", LastFields),
                                            Field("last_scenarios", LastScenarios, self.descriptions["last_scenarios"]),
                                            Field("scenario_models", ScenarioModels, self.descriptions["scenarios"]),
@@ -69,10 +69,9 @@ class User(BaseUser):
         return self.__parametrizer_cls(self, {})
 
     def expire(self):
-        super(User, self).expire()
+        super().expire()
         self.behaviors.expire()
         self.forms.expire()
         self.last_fields.expire()
         self.last_scenarios.expire()
         self.history.expire()
-
