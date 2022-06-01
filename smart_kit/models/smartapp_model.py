@@ -1,7 +1,6 @@
 # coding: utf-8
 import sys
 import traceback
-from lazy import lazy
 
 from core.descriptions.descriptions import Descriptions
 from core.logging.logger_utils import log
@@ -23,6 +22,10 @@ from core.monitoring.monitoring import monitoring
 
 
 class SmartAppModel:
+    # additional_handlers format:
+    # {"MESSAGE_NAME": {"handler": HandlerText, "params": {"dialogue_manager": custom_dialogue_manager}}}
+    # "params" is optional
+    additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):
         log(
@@ -47,6 +50,7 @@ class SmartAppModel:
             message_name: HandlerRespond(self.app_name, action_name=action_name)
             for message_name, action_name in self.resources.get("responses", {}).items()
         })
+        self.init_additional_handlers()
 
         log(
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
@@ -54,6 +58,12 @@ class SmartAppModel:
 
     def get_handler(self, message_type):
         return self._handlers[message_type]
+
+    def init_additional_handlers(self):
+        self._handlers.update({
+            message_name: handler_dict["handler"](self.app_name, **handler_dict.get("params", {}))
+            for message_name, handler_dict in self.additional_handlers.items()
+        })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
     def answer(self, message, user):
