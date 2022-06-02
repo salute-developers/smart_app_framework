@@ -15,8 +15,8 @@ class HandlerTakeProfileData(HandlerBase):
         log(f"{self.__class__.__name__} started", user)
 
         text_preprocessing_result = TextPreprocessingResult(payload.get(MESSAGE, {}))
-        action = user.behaviors.fail(user.message.callback_id)
+        commands = user.behaviors.fail(user.message.callback_id)
         if payload.get(STATUS_CODE, {}).get(CODE) == self.SUCCESS_CODE:
-            action = user.behaviors.success(user.message.callback_id)
+            commands = user.behaviors.success(user.message.callback_id)
             user.variables.set("smart_geo", payload.get(PROFILE_DATA, {}).get(GEO))
-        return action.run(user, text_preprocessing_result)
+        return commands
