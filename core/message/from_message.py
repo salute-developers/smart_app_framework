@@ -15,6 +15,8 @@ from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.utils import current_time_ms
 from core.message.msg_validator import MessageValidator
 
+from smart_kit.configs import get_app_config
+
 
 class Headers:
     def __init__(self, data):
@@ -216,7 +218,6 @@ class SmartAppFromMessage:
             return self._callback_id
 
         try:
-            from smart_kit.configs import get_app_config
             from smart_kit.start_points.main_loop_http import HttpMainLoop
             if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
                 return str(self.incremental_id)
@@ -232,7 +233,6 @@ class SmartAppFromMessage:
 
     # noinspection PyMethodMayBeStatic
     def generate_new_callback_id(self):
-        from smart_kit.configs import get_app_config
         from smart_kit.start_points.main_loop_http import HttpMainLoop
         if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
             return str(self.incremental_id)
