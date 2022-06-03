@@ -1,7 +1,7 @@
 # coding: utf-8
 import functools
 from collections import OrderedDict
-from typing import TypeVar, Type, List, Callable, Tuple, Any, Dict, Optional
+from typing import TypeVar, Type, List, Callable, Any, Dict
 
 from core.model.registered import registered_factories, Registered
 

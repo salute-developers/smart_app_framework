@@ -1,4 +1,5 @@
 # coding: utf-8
+from typing import Dict, Any
 
 
 class Model:
@@ -23,7 +24,7 @@ class Model:
         return getattr(self, name)
 
     @property
-    def raw(self):
+    def raw(self) -> Dict[str, Any]:
         result = {}
         for field in self.fields:
             value = getattr(self, field.name)
