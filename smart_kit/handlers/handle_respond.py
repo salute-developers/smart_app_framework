@@ -44,7 +44,7 @@ class HandlerRespond(HandlerBase):
 
         monitoring.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__, user)
 
-        text_preprocessing_result = TextPreprocessingResult(payload.get("message", {}))
+        text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
 
         if payload.get("message"):
             params = {
