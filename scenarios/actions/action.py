@@ -180,7 +180,7 @@ class BaseSetVariableAction(Action):
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
-        params = user.parametrizer.collect(text_preprocessing_result)
+        params = user.parametrizer.collect_jinja(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
             # notion: {key: None} will return "None";
@@ -264,7 +264,7 @@ class FillFieldAction(Action):
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
-        params = user.parametrizer.collect(text_preprocessing_result)
+        params = user.parametrizer.collect_jinja(text_preprocessing_result)
         data = self._get_data(params)
         self._fill(user, data)
 
@@ -298,7 +298,9 @@ class RunScenarioAction(Action):
             params = user.parametrizer.collect(text_preprocessing_result)
         else:
             params.update(user.parametrizer.collect(text_preprocessing_result))
-        scenario_id = self.scenario.render(params)
+        jinja_params = pickle_deepcopy(params)
+        jinja_params.update(user.parametrizer.collect_jinja(text_preprocessing_result))
+        scenario_id = self.scenario.render(jinja_params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
             return scenario.run(text_preprocessing_result, user, params)
@@ -434,7 +436,7 @@ class AddHistoryEventAction(Action):
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         if scenario:
 
-            params = user.parametrizer.collect(text_preprocessing_result)
+            params = user.parametrizer.collect_jinja(text_preprocessing_result)
 
             if self.event_content:
                 for key, template in self.event_content.items():
@@ -517,13 +519,16 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         command_params = dict()
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         action_params.update(collected)
+        jinja_params = pickle_deepcopy(action_params)
+        jinja_params.update(user.parametrizer.collect_jinja(text_preprocessing_result,
+                                                            filter_params={"command": self.command}))
 
         scenario = None
         if self._check_scenario:
             scenario = user.last_scenarios.last_scenario_name
 
         for key, value in self.nodes.items():
-            rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
+            rendered = self._get_rendered_tree(value, jinja_params, self.no_empty_nodes)
             if rendered != "" or not self.no_empty_nodes:
                 command_params[key] = rendered
 

@@ -26,7 +26,7 @@ class TemplateInArrayRequirement(Requirement):
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         params = params or {}
-        collected = user.parametrizer.collect(text_preprocessing_result)
+        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
         params.update(collected)
         render_result = self._template.render(params)
         return render_result in self._items
@@ -41,7 +41,7 @@ class ArrayItemInTemplateRequirement(Requirement):
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         params = params or {}
-        collected = user.parametrizer.collect(text_preprocessing_result)
+        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
         params.update(collected)
         render_result = self._template.render(params)
         for item in self._items:
@@ -59,7 +59,7 @@ class RegexpInTemplateRequirement(Requirement):
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         params = params or {}
-        collected = user.parametrizer.collect(text_preprocessing_result)
+        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
         params.update(collected)
         render_result = self._template.render(params)
         return True if self._regexp.search(render_result) else False

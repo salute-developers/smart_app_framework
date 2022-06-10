@@ -115,7 +115,7 @@ class AvailableInfoFiller(FieldFillerDescription):
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
                 user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
         params = params or {}
-        collected = user.parametrizer.collect(text_preprocessing_result)
+        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
         params.update(collected)
         try:
             # if path is wrong, it may fail with UndefinedError

@@ -205,9 +205,6 @@ class SciKitClassifier(ExtendedClassifier):
 
     CLASSIFIER_TYPE = "scikit"
 
-    def __init__(self, settings: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(SciKitClassifier, self).__init__(settings, id)
-
     @staticmethod
     def prepared(text_preprocessing_result: BaseTextPreprocessingResult):
         return pickle.dumps(text_preprocessing_result.tokenized_elements_list)

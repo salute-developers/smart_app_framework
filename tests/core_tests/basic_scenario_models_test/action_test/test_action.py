@@ -39,6 +39,15 @@ class MockParametrizer:
             data.update({"filter": "filter_out"})
         return data
 
+    def collect_jinja(self, text_preprocessing_result=None, filter_params=None):
+        data = {
+            "payload": self.user.message.payload
+        }
+        data.update(self.data)
+        if self.filter:
+            data.update({"filter": "filter_out"})
+        return data
+
 
 class MockAction:
     def __init__(self, items=None):
@@ -73,6 +82,9 @@ class MockSimpleParametrizer:
         self.data = items.get("data")
 
     def collect(self, text_preprocessing_result, filter_params=None):
+        return self.data
+
+    def collect_jinja(self, text_preprocessing_result, filter_params=None):
         return self.data
 
 

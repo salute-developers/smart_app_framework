@@ -142,7 +142,7 @@ class TemplateRequirement(Requirement):
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         params = params or {}
-        collected = user.parametrizer.collect(text_preprocessing_result)
+        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
         params.update(collected)
         render_result = self._template.render(params)
         if render_result == "True":
