@@ -117,7 +117,7 @@ class MainLoop(BaseMainLoop):
         signal.signal(signal.SIGTERM, self.stop)
         log("%(class_name)s.run started", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
                                                   "class_name": self.__class__.__name__})
-        monitoring.pod_event(POD_UP)
+        monitoring.pod_event(self.app_name, POD_UP)
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.general_coro())
 
