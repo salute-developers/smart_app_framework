@@ -19,15 +19,15 @@ class HandlerRunApp(HandlerBase):
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    def run(self, payload, user):
-        super().run(payload, user)
+    async def run(self, payload, user):
+        await super().run(payload, user)
 
         params = {log_const.KEY_NAME: "handling_run_app"}
         log(f"{self.__class__.__name__}.run started", user, params)
 
-        answer = self._handle_base(user)
+        answer = await self._handle_base(user)
         return answer
 
-    def _handle_base(self, user):
-        answer, is_answer_found = self.dialogue_manager.run(TextPreprocessingResult({}), user)
+    async def _handle_base(self, user):
+        answer, is_answer_found = await self.dialogue_manager.run(TextPreprocessingResult({}), user)
         return answer or []
