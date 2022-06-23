@@ -856,18 +856,8 @@ class GiveMeMemoryActionTest(unittest.TestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         settings = {
             "template_settings": {
-                "project_id": "0"
-            },
-            "kafka": {
-                "template-engine": {
-                    "main": {
-                        "consumer": {
-                            "topics": {
-                                "client_profile": "app"
-                            }
-                        }
-                    }
-                }
+                "project_id": "0",
+                "consumer_topic": "app"
             }
         }
         settings_mock.return_value = settings
@@ -969,18 +959,8 @@ class RememberThisActionTest(unittest.TestCase):
         user = PicklableMagicMock()
         user.settings = {
             "template_settings": {
-                "project_id": "0"
-            },
-            "kafka": {
-                "template-engine": {
-                    "main": {
-                        "consumer": {
-                            "topics": {
-                                "client_profile": "app"
-                            }
-                        }
-                    }
-                }
+                "project_id": "0",
+                "consumer_topic": "app"
             }
         }
         params = {"params": "params"}
