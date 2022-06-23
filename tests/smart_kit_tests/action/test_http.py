@@ -17,7 +17,8 @@ class HttpRequestActionTest(unittest.TestCase):
             }
         )
 
-    def set_request_mock_attribute(self, request_mock, return_value=None):
+    @staticmethod
+    def set_request_mock_attribute(request_mock, return_value=None):
         return_value = return_value or {}
         request_mock.return_value = Mock(
             __enter__=Mock(return_value=Mock(

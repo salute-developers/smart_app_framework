@@ -45,7 +45,3 @@ class ComparatorsTest(unittest.TestCase):
     def test_equal_fail(self):
         comparator = EqualComparator({})
         assert not comparator.compare(1, 2)
-
-
-if __name__ == '__main__':
-    unittest.main()

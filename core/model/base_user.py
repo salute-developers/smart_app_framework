@@ -12,6 +12,7 @@ from core.model.model import Model
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.basic_models.counter.counters import Counters
 from core.basic_models.variables.variables import Variables
+from scenarios.logging.logger_constants import KEY_NAME
 
 
 class BaseUser(Model):
@@ -62,9 +63,11 @@ class BaseUser(Model):
     @property
     def raw_str(self):
         raw = json.dumps(self.raw)
-        log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s.", self,
+        log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s. "
+            "Saving User %(uid)s. Serialized utf8 json length is %(user_length)s symbols.", self,
             {"db_version": str(self.variables.get(self.USER_DB_VERSION)),
-             "uid": str(self.id), "user_length":len(raw)})
+             "uid": str(self.id), "user_length": len(raw),
+             KEY_NAME: "user_save"})
         return raw
 
     def expire(self):

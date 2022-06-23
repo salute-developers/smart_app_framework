@@ -208,9 +208,3 @@ class RequirementTest(unittest.TestCase):
             user.parametrizer = PicklableMock()
             user.parametrizer.collect = Mock(return_value=params)
             self.assertFalse(requirement.check(None, user))
-
-
-
-
-if __name__ == '__main__':
-    unittest.main()

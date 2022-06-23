@@ -14,6 +14,8 @@ from core.basic_models.actions.counter_actions import CounterIncrementAction, Co
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.external_actions import ExternalActions
 from core.basic_models.actions.push_action import PushAction, PUSH_NOTIFY
+from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
+    SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
@@ -91,7 +93,7 @@ from scenarios.user.preprocessing_messages.preprocessing_messages_description im
     PreprocessingMessagesDescription
 from smart_kit.action.http import HTTPRequestAction
 from smart_kit.message.get_to_message import to_messages
-from smart_kit.message.smart_app_push_message import SmartAppPushToMessage
+from smart_kit.message.as_is_to_message import AsIsToMessage
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 from core.db_adapter.aioredis_sentinel_adapter import AIORedisSentinelAdapter
@@ -314,6 +316,12 @@ class SmartAppResources(BaseConfig):
         actions["push"] = PushAction
         actions["give_me_memory"] = GiveMeMemoryAction
         actions["remember_this"] = RememberThisAction
+        actions["smartpay_create"] = SmartPayCreateAction
+        actions["smartpay_perform"] = SmartPayPerformAction
+        actions["smartpay_get_status"] = SmartPayGetStatusAction
+        actions["smartpay_confirm"] = SmartPayConfirmAction
+        actions["smartpay_delete"] = SmartPayDeleteAction
+        actions["smartpay_refund"] = SmartPayRefundAction
 
     def init_requirements(self):
         requirements[None] = Requirement
@@ -406,4 +414,4 @@ class SmartAppResources(BaseConfig):
         classifiers["skip"] = SkipClassifier
 
     def init_message_handlers(self):
-        to_messages[PUSH_NOTIFY] = SmartAppPushToMessage
+        to_messages[PUSH_NOTIFY] = AsIsToMessage
