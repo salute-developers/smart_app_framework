@@ -62,14 +62,15 @@ class GiveMeMemoryAction(StringAction):
         })
         settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
         self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
-
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self.request_data = {
             "topic_key": "client_info",
             "kafka_key": self.kafka_key,
-            "kafka_replyTopic": user.settings["template_settings"]["consumer_topic"]
+            "kafka_replyTopic":
+                config["template_settings"]["consumer_topic"]
         }
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
@@ -164,7 +165,8 @@ class RememberThisAction(StringAction):
         self.request_data = {
             "topic_key": "client_info_remember",
             "kafka_key": kafka_key,
-            "kafka_replyTopic": user.settings["template_settings"]["consumer_topic"]
+            "kafka_replyTopic":
+                user.settings["template_settings"]["consumer_topic"]
         }
 
         commands = super().run(user, text_preprocessing_result, params)
