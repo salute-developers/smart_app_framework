@@ -13,6 +13,11 @@ from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PA
 from core.monitoring.monitoring import monitoring
 
 
+Callback = namedtuple(
+            'Callback',
+            'behavior_id expire_time scenario_id text_preprocessing_result action_params hostname')
+
+
 class Behaviors:
     EXPIRATION_DELAY = 1
 
@@ -20,11 +25,8 @@ class Behaviors:
         self._items = items or {}
         self.descriptions = descriptions
         self._user = user
-        self.Callback = namedtuple(
-            'Callback',
-            'behavior_id expire_time scenario_id text_preprocessing_result action_params hostname')
-
-        self._callbacks = {}
+        self.Callback = Callback
+        self._callbacks: Dict[str, Callback] = {}
         self._behavior_timeouts = []
         self._returned_callbacks = []
 

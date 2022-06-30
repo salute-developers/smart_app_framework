@@ -22,7 +22,7 @@ class HandlerText(HandlerBase):
     def run(self, payload, user):
         super().run(payload, user)
 
-        text_preprocessing_result = TextPreprocessingResult(payload["message"])
+        text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
 
         params = {
             log_const.KEY_NAME: log_const.NORMALIZED_TEXT_VALUE,
