@@ -93,3 +93,15 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             "header_2": "32.03",
             "header_3": b"d32"
         }, method=HTTPRequestAction.DEFAULT_METHOD, timeout=ClientTimeout(self.TIMEOUT))
+
+    @patch('aiohttp.request')
+    async def test_beheivor_is_none(self, request_mock):
+        self.set_request_mock_attribute(request_mock)
+        items = {
+            "params": {
+            },
+            "store": "user_variable",
+        }
+        await HTTPRequestAction(items).run(self.user, None, {})
+        request_mock.assert_called_with(method=HTTPRequestAction.DEFAULT_METHOD,
+                                        timeout=ClientTimeout(HTTPRequestAction.DEFAULT_TIMEOUT))
