@@ -18,6 +18,8 @@ from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPer
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser
+from core.basic_models.actions.variable_actions import ClearVariablesAction, DeleteVariableAction, \
+    SetLocalVariableAction, SetVariableAction
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink, RawItem
 from core.basic_models.classifiers.basic_classifiers import classifiers, classifier_factory, Classifier, \
@@ -56,12 +58,10 @@ from core.request.base_request import requests_registered
 from core.request.rest_request import RestRequest
 from core.utils.loader import ordered_json
 from scenarios.actions.action import (
-    BreakScenarioAction, ChoiceScenarioAction, ClearCurrentScenarioAction,
-    ClearCurrentScenarioFormAction, ClearFormAction, ClearInnerFormAction, ClearScenarioByIdAction,
-    ClearVariablesAction, CompositeFillFieldAction, DeleteVariableAction, FillFieldAction,
-    RemoveCompositeFormFieldAction, RemoveFormFieldAction, SaveBehaviorAction, SetVariableAction,
-    ResetCurrentNodeAction, RunScenarioAction, RunLastScenarioAction, AddHistoryEventAction, SetLocalVariableAction,
-    ClearAllScenariosAction
+    BreakScenarioAction, ChoiceScenarioAction, ClearCurrentScenarioAction, ClearCurrentScenarioFormAction,
+    ClearFormAction, ClearInnerFormAction, ClearScenarioByIdAction, CompositeFillFieldAction, FillFieldAction,
+    RemoveCompositeFormFieldAction, RemoveFormFieldAction, SaveBehaviorAction, ResetCurrentNodeAction,
+    RunScenarioAction, RunLastScenarioAction, AddHistoryEventAction, ClearAllScenariosAction
 )
 from scenarios.actions.action import ProcessBehaviorAction, SelfServiceActionWithState, EmptyAction
 from scenarios.behaviors.behavior_descriptions import BehaviorDescriptions

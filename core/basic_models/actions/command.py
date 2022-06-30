@@ -1,4 +1,5 @@
 # coding: utf-8
+from typing import Dict, Any
 
 
 class Command:
@@ -15,18 +16,18 @@ class Command:
         :param loader: loader name for data before send. Possible loader values: json.dumps / protobuf
         """
 
-        self.name = name
-        self.payload = params or {}
-        self.action_id = action_id
-        self.request_type = request_type
-        self.request_data = request_data or {}
-        self.loader = loader or "json.dumps"
-        self.need_payload_wrap = need_payload_wrap
-        self.need_message_name = need_message_name
+        self.name: str = name
+        self.payload: Dict[str, Any] = params or {}
+        self.action_id: str = action_id
+        self.request_type: str = request_type
+        self.request_data: Dict[str, Any] = request_data or {}
+        self.loader: str = loader or "json.dumps"
+        self.need_payload_wrap: bool = need_payload_wrap
+        self.need_message_name: bool = need_message_name
 
     @property
     def raw(self):
-        message = {"payload": self.payload} if self.need_payload_wrap else self.payload
+        message: Dict[str, Any] = {"payload": self.payload} if self.need_payload_wrap else self.payload
         if self.need_message_name:
             message["messageName"] = self.name
         return message

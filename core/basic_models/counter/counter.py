@@ -1,4 +1,5 @@
 from time import time
+from typing import Dict
 
 
 class Counter:
@@ -10,7 +11,7 @@ class Counter:
         self.lifetime = items.get("lifetime")
         self.value = items.get("value")
 
-    def check_expire(self):
+    def check_expire(self) -> bool:
         return time() - self.create_time > self.lifetime if self.lifetime else False
 
     def inc(self, value=1, lifetime=None):
@@ -68,7 +69,7 @@ class Counter:
         return value
 
     @property
-    def raw(self):
+    def raw(self) -> Dict[str, int]:
         if self.value is not None:
             return {
                 "value": self.value,

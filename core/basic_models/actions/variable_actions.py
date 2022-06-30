@@ -1,36 +1,31 @@
-from typing import Optional, Dict, Any, Union
-
-from core.text_preprocessing.base import BaseTextPreprocessingResult
-
-from core.unified_template.unified_template import UnifiedTemplate
-
-from core.model.base_user import BaseUser
-
-from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 import collections
 import json
+from typing import Optional, Dict, Any, Union
+
 from jinja2 import exceptions as jexcept
 
 from core.basic_models.actions.basic_actions import Action
+from core.basic_models.parametrizers.parametrizer import BasicParametrizer
+from core.model.base_user import BaseUser
+from core.text_preprocessing.base import BaseTextPreprocessingResult
+from core.unified_template.unified_template import UnifiedTemplate
 
 
-class SetVariableAction(Action):
-    version: Optional[int]
-    parametrizer: BasicParametrizer
-    loader: Optional[str]
+class BaseSetVariableAction(Action):
     key: str
     loader: Optional[str]
     loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
-    ttl: int
     value: Union[str, Dict]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SetVariableAction, self).__init__(items, id)
+        super(BaseSetVariableAction, self).__init__(items, id)
         self.key: str = items["key"]
         self.loader = items.get('loader')
-        self.ttl: int = items.get("ttl")
         value: str = items["value"]
         self.template: UnifiedTemplate = UnifiedTemplate(value)
+
+    def _set(self, user, value):
+        raise NotImplemented
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
@@ -50,6 +45,23 @@ class SetVariableAction(Action):
             else:
                 value = None
 
+        self._set(user, value)
+
+
+class SetVariableAction(BaseSetVariableAction):
+    version: Optional[int]
+    parametrizer: BasicParametrizer
+    loader: Optional[str]
+    key: str
+    loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
+    ttl: int
+    value: Union[str, Dict]
+
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+        super(SetVariableAction, self).__init__(items, id)
+        self.ttl: int = items.get("ttl")
+
+    def _set(self, user, value):
         user.variables.set(self.key, value, self.ttl)
 
 
@@ -75,3 +87,8 @@ class ClearVariablesAction(Action):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
         user.variables.clear()
+
+
+class SetLocalVariableAction(BaseSetVariableAction):
+    def _set(self, user, value):
+        user.local_vars.set(self.key, value)

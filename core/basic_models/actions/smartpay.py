@@ -1,8 +1,3 @@
-from typing import Optional, Dict, Union, List
-
-from core.basic_models.actions.command import Command
-from core.model.base_user import BaseUser
-from core.text_preprocessing.base import BaseTextPreprocessingResult
 from smart_kit.action.http import HTTPRequestAction
 from smart_kit.configs import settings
 
