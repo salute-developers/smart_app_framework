@@ -45,7 +45,3 @@ class ModelTest(unittest.TestCase):
     def test_raw(self):
         raw = self.model.raw
         assert raw == dict(field1="field1_data")
-
-
-if __name__ == '__main__':
-    unittest.main()

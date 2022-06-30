@@ -61,6 +61,11 @@ class KafkaConsumer(BaseKafkaConsumer):
     def subscribe(self, topics=None):
         topics = list(set(topics or list(self._config["topics"].values())))
 
+        params = {
+            "topics": topics
+        }
+        log("Topics to subscribe: %(topics)s", params=params)
+
         self._consumer.subscribe(topics,
                                  on_assign=self.get_on_assign_callback() if self.assign_offset_end else
                                  KafkaConsumer.on_assign_log)
@@ -117,12 +122,11 @@ class KafkaConsumer(BaseKafkaConsumer):
                     "pid": os.getpid(),
                     "topic": msg.topic(),
                     "partition": msg.partition(),
-                    "offset": msg.offset(),
                     log_const.KEY_NAME: log_const.EXCEPTION_VALUE
                 }
                 log(
-                    "KafkaConsumer Error %(code)s at pid %(pid)s: topic=%(topic)s partition=[%(partition)s] "
-                    "reached end at offset %(offset)s\n", params=params, level="WARNING")
+                    "KafkaConsumer Error %(code)s at pid %(pid)s: topic=%(topic)s partition=[%(partition)s]\n",
+                    params=params, level="WARNING")
                 raise KafkaException(err)
 
         if msg.value():

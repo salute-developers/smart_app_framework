@@ -203,7 +203,3 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
         self.assertFalse(await requirement.check(None, user))
-
-
-if __name__ == '__main__':
-    unittest.main()

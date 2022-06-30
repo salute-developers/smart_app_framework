@@ -29,6 +29,9 @@ class HTTPRequestAction(NodeAction):
 
     POST = "POST"
     GET = "GET"
+    PUT = "PUT"
+    DELETE = "DELETE"
+    PATCH = "PATCH"
     DEFAULT_METHOD = POST
 
     TIMEOUT = "TIMEOUT"
