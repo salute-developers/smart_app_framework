@@ -85,7 +85,7 @@ class RememberThisAction(StringAction):
     """
     Example::
       {
-        "type": "remember",
+        "type": "remember_this",
         "nodes": {
           "clientIds": {
             "type": "unified_template",
