@@ -2,7 +2,6 @@
 from core.logging.logger_utils import log
 from core.model.registered import Registered
 from core.utils.masking_message import masking
-import copy
 
 import scenarios.logging.logger_constants as log_const
 
@@ -63,13 +62,13 @@ class BasicField:
 
     def _set_value(self, value):
         self._value = value
-        dict_value = {self.description.name: copy.deepcopy(value)}
-        masking(dict_value, self._masking_fields)
+        dict_value = {self.description.name: value}
+        masked_dict_value = masking(dict_value, self._masking_fields)
         message = "%(class_name)s: %(description_id)s filled by value: %(field_value)s"
         params = {log_const.KEY_NAME: log_const.FILLER_RESULT_VALUE,
                   "class_name": self.__class__.__name__,
                   "description_id": self.description.id,
-                  "field_value": str(dict_value[self.description.name])}
+                  "field_value": str(masked_dict_value[self.description.name])}
         log(message, None, params)
 
     def set_available(self):

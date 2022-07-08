@@ -12,7 +12,6 @@ import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier
 from core.utils.masking_message import masking
 from core.utils.stats_timer import StatsTimer
-from core.utils.pickle_copy import pickle_deepcopy
 
 MESSAGE_ID_STR = "message_id"
 UID_STR = "uid"
@@ -58,10 +57,9 @@ class LoggerMessageCreator:
         params = params or {}
         if user:
             cls.update_user_params(user, params)
-        params = pickle_deepcopy(params)
-        masking(params)
-        cls.update_other_params(user, params, cls_name, log_store_for)
-        return params
+        masked_params = masking(params)
+        cls.update_other_params(user, masked_params, cls_name, log_store_for)
+        return masked_params
 
 
 default_logger = logging.getLogger()
