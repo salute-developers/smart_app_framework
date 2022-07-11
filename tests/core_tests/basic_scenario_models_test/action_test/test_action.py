@@ -875,18 +875,8 @@ class GiveMeMemoryActionTest(unittest.TestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         settings = {
             "template_settings": {
-                "project_id": "0"
-            },
-            "kafka": {
-                "template-engine": {
-                    "main": {
-                        "consumer": {
-                            "topics": {
-                                "client_profile": "app"
-                            }
-                        }
-                    }
-                }
+                "project_id": "0",
+                "consumer_topic": "app"
             }
         }
         settings_mock.return_value = settings
@@ -922,8 +912,7 @@ class GiveMeMemoryActionTest(unittest.TestCase):
 
 
 class RememberThisActionTest(unittest.TestCase):
-    @patch("smart_kit.configs.settings.Settings")
-    def test_run(self, settings_mock: MagicMock):
+    def test_run(self):
         expected = [
             Command("REMEMBER_THIS",
                     {
@@ -987,25 +976,14 @@ class RememberThisActionTest(unittest.TestCase):
                     })
         ]
         user = PicklableMagicMock()
-        params = {"params": "params"}
-        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        settings = {
+        user.settings = {
             "template_settings": {
-                "project_id": "0"
-            },
-            "kafka": {
-                "template-engine": {
-                    "main": {
-                        "consumer": {
-                            "topics": {
-                                "client_profile": "app"
-                            }
-                        }
-                    }
-                }
+                "project_id": "0",
+                "consumer_topic": "app"
             }
         }
-        settings_mock.return_value = settings
+        params = {"params": "params"}
+        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         items = {
             "nodes": {
               "clientIds": {

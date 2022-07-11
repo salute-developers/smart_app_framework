@@ -66,7 +66,7 @@ class GiveMeMemoryAction(StringAction):
             "topic_key": "client_info",
             "kafka_key": self.kafka_key,
             "kafka_replyTopic":
-                config["kafka"]["template-engine"][self.kafka_key]["consumer"]["topics"]["client_profile"]
+                config["template_settings"]["consumer_topic"]
         }
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -144,23 +144,30 @@ class RememberThisAction(StringAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
-        config = settings.Settings()
         self.command = REMEMBER_THIS
         self.request_type = KAFKA
         self.kafka_key = items.get("kafka_key")
         self._nodes.update({
             "root_nodes": {
-                "protocolVersion": items.get("protocolVersion") or 3
-            },
-            "consumer": {
-                "projectId": config["template_settings"]["project_id"]
+                "protocolVersion": items.get("protocolVersion", 3)
             }
         })
-        settings_kafka_key = config["template_settings"].get("client_profile_kafka_key")
-        self.kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+        self._nodes.update({
+            "consumer": {
+                "projectId": user.settings["template_settings"]["project_id"]
+            }
+        })
+        settings_kafka_key = user.settings["template_settings"].get("client_profile_kafka_key")
+        kafka_key = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
         self.request_data = {
             "topic_key": "client_info_remember",
-            "kafka_key": self.kafka_key,
+            "kafka_key": kafka_key,
             "kafka_replyTopic":
-                config["kafka"]["template-engine"][self.kafka_key]["consumer"]["topics"]["client_profile"]
+                user.settings["template_settings"]["consumer_topic"]
         }
+
+        commands = super().run(user, text_preprocessing_result, params)
+        return commands
