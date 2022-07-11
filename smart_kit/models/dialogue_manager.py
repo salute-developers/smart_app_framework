@@ -28,6 +28,7 @@ class DialogueManager:
 
     def run(self, text_preprocessing_result, user):
         before_action = user.descriptions["external_actions"].get("before_action")
+        params = None
         if before_action:
             params = user.parametrizer.collect(text_preprocessing_result)
             before_action.run(user, text_preprocessing_result, params)
@@ -38,7 +39,7 @@ class DialogueManager:
             is_form_filling = isinstance(scenario, FormFillingScenario)
             if is_form_filling:
                 if not scenario.text_fits(text_preprocessing_result, user):
-                    params = user.parametrizer.collect(text_preprocessing_result)
+                    params = params or user.parametrizer.collect(text_preprocessing_result)
                     if scenario.check_ask_again_requests(text_preprocessing_result, user, params):
                         reply = scenario.ask_again(text_preprocessing_result, user, params)
                         return reply, True

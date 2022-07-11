@@ -24,6 +24,8 @@ from scenarios.actions.action import (
 from scenarios.actions.action import ClearFormAction, ClearInnerFormAction, BreakScenarioAction, \
     RemoveFormFieldAction, RemoveCompositeFormFieldAction
 from scenarios.scenario_models.history import Event
+from smart_kit.action.smart_geo_action import SmartGeoAction
+from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
 
@@ -44,6 +46,15 @@ class MockParametrizer:
         self.filter = items.get("filter") or False
 
     def collect(self, text_preprocessing_result=None, filter_params=None):
+        data = {
+            "person_info": self.user.person_info.raw,
+            "payload": self.user.message.payload}
+        data.update(self.data)
+        if self.filter:
+            data.update({"filter": "filter_out"})
+        return data
+
+    def collect_jinja(self, text_preprocessing_result=None, filter_params=None):
         data = {
             "person_info": self.user.person_info.raw,
             "payload": self.user.message.payload}
@@ -223,7 +234,8 @@ class SelfServiceActionWithStateTest(unittest.TestCase):
         self.assertEqual(result[0].name, "cmd_id")
         self.assertEqual(result[0].raw, {'messageName': 'cmd_id', 'payload': {}})
         behavior.add.assert_called_once_with(
-            self.user.message.generate_new_callback_id(), "test", scenarios_names[-1], text_preprocessing_result_raw, ANY
+            self.user.message.generate_new_callback_id(), "test", scenarios_names[-1], text_preprocessing_result_raw,
+            ANY
         )
 
 
@@ -630,6 +642,7 @@ class AddHistoryEventActionTest(unittest.TestCase):
         message = PicklableMock()
         message.name = "CLIENT_INFO_RESPONSE"
         parametrizer.collect = Mock(return_value={"message": message, "main_form": main_form})
+        parametrizer.collect_jinja = Mock(return_value={"message": message, "main_form": main_form})
 
         self.user = Mock(parametrizer=parametrizer)
         self.user.history = PicklableMock()
@@ -696,3 +709,34 @@ class AddHistoryEventActionTest(unittest.TestCase):
 
         self.user.history.add_event.assert_called_once()
         self.user.history.add_event.assert_called_once_with(expected)
+
+
+class SmartGeoActionTest(unittest.TestCase):
+
+    def setUp(self):
+        items = {"type": "smart_geo"}
+        self.smart_geo_action = SmartGeoAction(items)
+
+    def test_action_send_request(self):
+        incoming_message = Mock(incremental_id="1605196199186625000",
+                                session_id="0062530b-5521-42cc-90b0-a9d65dea4e98",
+                                uuid={"userChannel": "B2C", "userId": "ec8a9097-1508-4bec-8d97-67f2329c03e0",
+                                      "sub": "385342565001000018390f1f"},
+                                payload={})
+        user = Mock(parametrizer=Mock(collect_jinja=lambda text_preprocessing_result, filter_params: {}))
+        text_preprocessing_result = Mock()
+        command = self.smart_geo_action.run(user, text_preprocessing_result, {})[0]
+        answer = SmartAppToMessage(command, incoming_message, None)
+        expected = {
+            "messageId": "1605196199186625000",
+            "sessionId": "0062530b-5521-42cc-90b0-a9d65dea4e98",
+            "messageName": "GET_PROFILE_DATA",
+            "uuid": {
+                "userId": "ec8a9097-1508-4bec-8d97-67f2329c03e0",
+                "userChannel": "B2C",
+                "sub": "385342565001000018390f1f"
+            },
+            "payload": {
+            }
+        }
+        self.assertEqual(answer.as_dict, expected)

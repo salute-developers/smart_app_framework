@@ -9,7 +9,7 @@ class HttpRequestActionTest(unittest.TestCase):
 
     def setUp(self):
         self.user = Mock(
-            parametrizer=Mock(collect=lambda *args, **kwargs: {}),
+            parametrizer=Mock(collect=lambda *args, **kwargs: {}, collect_jinja=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
                     "my_behavior": Mock(timeout=Mock(return_value=self.TIMEOUT))

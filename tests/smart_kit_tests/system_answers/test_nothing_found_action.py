@@ -16,7 +16,7 @@ class SystemAnswersTest1(unittest.TestCase):
         self.test_text_preprocessing_result = Mock('text_preprocessing_result')
         self.test_user1 = Mock('user')
         self.test_user1.parametrizer = Mock('parametrizer')
-        self.test_user1.parametrizer.collect = lambda x, filter_params: {'input': x, 'result': x}
+        self.test_user1.parametrizer.collect_jinja = lambda x, filter_params: {'input': x, 'result': x}
 
     def test_system_answers_nothing_found_action_init(self):
         obj1 = nothing_found_action.NothingFoundAction()

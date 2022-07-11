@@ -10,7 +10,7 @@ from tests.smart_kit_tests.action.test_http import HttpRequestActionTest
 class SmartPayActionTest(unittest.TestCase):
     def setUp(self):
         self.user = PicklableMock(
-            parametrizer=PicklableMock(collect=lambda *args, **kwargs: {}),
+            parametrizer=PicklableMock(collect=lambda *args, **kwargs: {}, collect_jinja=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
                     "my_behavior": PicklableMock(timeout=PicklableMock(return_value=3))

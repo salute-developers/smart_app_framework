@@ -92,6 +92,7 @@ from scenarios.user.last_scenarios.last_scenarios_descriptions import LastScenar
 from scenarios.user.preprocessing_messages.preprocessing_messages_description import \
     PreprocessingMessagesDescription
 from smart_kit.action.http import HTTPRequestAction
+from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.get_to_message import to_messages
 from smart_kit.message.as_is_to_message import AsIsToMessage
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
@@ -316,6 +317,7 @@ class SmartAppResources(BaseConfig):
         actions["push"] = PushAction
         actions["give_me_memory"] = GiveMeMemoryAction
         actions["remember_this"] = RememberThisAction
+        actions["smart_geo"] = SmartGeoAction
         actions["smartpay_create"] = SmartPayCreateAction
         actions["smartpay_perform"] = SmartPayPerformAction
         actions["smartpay_get_status"] = SmartPayGetStatusAction

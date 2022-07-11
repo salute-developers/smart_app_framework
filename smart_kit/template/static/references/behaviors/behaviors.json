@@ -12,5 +12,50 @@
       "type": "external",
       "action": "timeout_reset_scenario"
     }
+  },
+  "smart_geo_behavior": {
+    "timeout": 4,
+    "success_action": {
+      "type": "string",
+      "command": "ANSWER_TO_USER",
+      "nodes": {
+        "pronounceText": "Геоданные пользователя",
+        "items": [
+          {
+            "bubble": {
+              "text": "Геоданные пользователя: {{ user.variables.smart_geo }}"
+            }
+          }
+        ]
+      }
+    },
+    "fail_action": {
+      "type": "string",
+      "command": "ANSWER_TO_USER",
+      "nodes": {
+        "pronounceText": "Ошибка при получении геоданных пользователя",
+        "items": [
+          {
+            "bubble": {
+              "text": "Ошибка при получении геоданных пользователя"
+            }
+          }
+        ]
+      }
+    },
+    "timeout_action": {
+      "type": "string",
+      "command": "ANSWER_TO_USER",
+      "nodes": {
+        "pronounceText": "Время ожидания получения геоданных пользователя превышено",
+        "items": [
+          {
+            "bubble": {
+              "text": "Время ожидания получения геоданных пользователя превышено"
+            }
+          }
+        ]
+      }
+    }
   }
 }
