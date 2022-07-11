@@ -11,7 +11,6 @@ from core.names import field
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.utils.masking_message import masking
-from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.utils import current_time_ms
 from core.message.msg_validator import MessageValidator
 
@@ -240,9 +239,8 @@ class SmartAppFromMessage:
 
     @property
     def masked_value(self):
-        data = pickle_deepcopy(self.as_dict)
-        masking(data, self.masking_fields)
-        return json.dumps(data, ensure_ascii=False)
+        masked_data = masking(self.as_dict, self.masking_fields)
+        return json.dumps(masked_data, ensure_ascii=False)
 
     @property
     def message_name(self):
