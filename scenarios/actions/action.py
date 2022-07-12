@@ -12,7 +12,7 @@ from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.basic_models.requirement.basic_requirements import Requirement
-from core.configs.global_constants import CALLBACK_ID_HEADER
+from core.configs.global_constants import CALLBACK_ID_HEADER, SAVED_BEHAVIOR_PARAMS_FIELDS
 from core.logging.logger_utils import log
 from core.model.factory import factory, list_factory
 from core.text_preprocessing.base import BaseTextPreprocessingResult
@@ -554,6 +554,9 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
 
     def _get_save_params(self, user, action_params, command_action_params):
         save_params = self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
+        for key in save_params.keys():
+            if key not in SAVED_BEHAVIOR_PARAMS_FIELDS:
+                save_params.pop(key, None)
         save_params.update({SAVED_MESSAGES: action_params.get(SAVED_MESSAGES, {})})
         save_params.update({REQUEST_FIELD: action_params.get(REQUEST_FIELD, {})})
         save_params.update({SEND_TIMESTAMP: time.time()})
