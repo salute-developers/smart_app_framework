@@ -18,13 +18,6 @@ class BasicParametrizer:
     def _get_user_data(self, text_preprocessing_result=None):
         return {"message": self._user.message}
 
-    def _get_jinja_data(self, text_preprocessing_result=None):
-        return self._get_user_data(text_preprocessing_result)
-
     def collect(self, text_preprocessing_result=None, filter_params=None):
         data = self._get_user_data(text_preprocessing_result)
-        return self.filter_out(data, filter_params)
-
-    def collect_jinja(self, text_preprocessing_result=None, filter_params=None):
-        data = self._get_jinja_data(text_preprocessing_result)
         return self.filter_out(data, filter_params)

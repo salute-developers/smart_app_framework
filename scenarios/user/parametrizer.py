@@ -16,12 +16,6 @@ class Parametrizer(BasicParametrizer):
             return forms[scenario.form_type]
         return None
 
-    def _get_jinja_data(self, text_preprocessing_result=None):  # TODO paste it where it is needed
-        data = self._get_user_data(text_preprocessing_result)
-        data.update({"gender_sensitive_text": self._user.gender_selector.get_text_by_key})
-        return data
-
-    # TODO check usages and replace by get_jinja_data if needed
     def _get_user_data(self, text_preprocessing_result=None):
         tpr_data = text_preprocessing_result.raw if text_preprocessing_result else {}
         forms = self._user.forms.collect_form_fields()
@@ -29,6 +23,7 @@ class Parametrizer(BasicParametrizer):
         data = {
             "counters": self._user.counters.raw,
             "forms": forms,
+            "gender_sensitive_text": self._user.gender_selector.get_text_by_key,
             "local_vars": self._user.local_vars.values,
             "main_form": main_form,
             "message": self._user.message,

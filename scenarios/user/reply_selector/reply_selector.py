@@ -41,7 +41,7 @@ class ReplySelector:
                 if reply_list:
                     break
             if reply_list:
-                params = self._user.parametrizer.collect_jinja()
+                params = self._user.parametrizer.collect()  # TODO give run-time action parameters to collect call
                 result_str = random.choice(reply_list)
                 result = UnifiedTemplate(result_str).render(params)
             else:

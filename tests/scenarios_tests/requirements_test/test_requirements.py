@@ -71,7 +71,7 @@ class RequirementTest(unittest.TestCase):
         }}
         user = PicklableMock()
         user.parametrizer = PicklableMock()
-        user.parametrizer.collect_jinja = Mock(return_value=params)
+        user.parametrizer.collect = Mock(return_value=params)
         self.assertTrue(requirement.check(None, user))
 
     def test_template_in_array_req_true2(self):
@@ -88,7 +88,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertTrue(requirement.check(None, user))
 
     def test_template_in_array_req_false(self):
@@ -105,7 +105,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertFalse(requirement.check(None, user))
 
 
@@ -128,7 +128,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertTrue(requirement.check(None, user))
 
 
@@ -147,7 +147,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertTrue(requirement.check(None, user))
 
 
@@ -170,7 +170,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertFalse(requirement.check(None, user))
 
 
@@ -188,7 +188,7 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertTrue(requirement.check(None, user))
 
 
@@ -206,5 +206,5 @@ class RequirementTest(unittest.TestCase):
             }}
             user = PicklableMock()
             user.parametrizer = PicklableMock()
-            user.parametrizer.collect_jinja = Mock(return_value=params)
+            user.parametrizer.collect = Mock(return_value=params)
             self.assertFalse(requirement.check(None, user))

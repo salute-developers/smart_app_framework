@@ -13,7 +13,6 @@ from core.model.base_user import BaseUser
 from core.model.factory import list_factory
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME
-from core.utils.pickle_copy import pickle_deepcopy
 
 ANSWER_TO_USER = "ANSWER_TO_USER"
 
@@ -118,12 +117,11 @@ class StringAction(NodeAction):
     def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
         command_params = dict()
-        collected = user.parametrizer.collect_jinja(text_preprocessing_result, filter_params={"command": self.command})
-        jinja_params = pickle_deepcopy(params)
-        jinja_params.update(collected)
+        collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
+        params.update(collected)
 
         for key, value in self.nodes.items():
-            rendered = self._get_rendered_tree(value, jinja_params, self.no_empty_nodes)
+            rendered = self._get_rendered_tree(value, params, self.no_empty_nodes)
             if rendered != "" or not self.no_empty_nodes:
                 command_params[key] = rendered
         return command_params
@@ -159,7 +157,7 @@ class AfinaAnswerAction(NodeAction):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        params = user.parametrizer.collect_jinja(text_preprocessing_result, filter_params={"command": self.command})
+        params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         answer_params = dict()
         result = []
 
@@ -265,7 +263,7 @@ class SDKAnswer(NodeAction):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         result = []
-        params = user.parametrizer.collect_jinja(text_preprocessing_result, filter_params={"command": self.command})
+        params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
         self.do_random(rendered)
         if rendered or not self.no_empty_nodes:
@@ -421,12 +419,10 @@ class SDKAnswerToUser(NodeAction):
 
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})
-        jinja_params = user.parametrizer.collect_jinja(text_preprocessing_result,
-                                                       filter_params={self.COMMAND: self.command})
-        rendered = self._get_rendered_tree(self.nodes[self.STATIC], jinja_params, self.no_empty_nodes)
+        rendered = self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
         if self._nodes[self.RANDOM_CHOICE]:
             random_node = random.choice(self.nodes[self.RANDOM_CHOICE])
-            rendered_random = self._get_rendered_tree(random_node, jinja_params, self.no_empty_nodes)
+            rendered_random = self._get_rendered_tree(random_node, params, self.no_empty_nodes)
             rendered.update(rendered_random)
         out = {}
         for item in self.items:
@@ -434,7 +430,7 @@ class SDKAnswerToUser(NodeAction):
                 out.setdefault(self.ITEMS, []).append(item.render(rendered))
 
         if self._suggests_template is not None:
-            out[self.SUGGESTIONS] = self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], jinja_params,
+            out[self.SUGGESTIONS] = self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], params,
                                                             self.no_empty_nodes)
         else:
             for suggest in self.suggests:

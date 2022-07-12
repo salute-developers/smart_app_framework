@@ -34,7 +34,7 @@ class SetVariableAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
-        params = user.parametrizer.collect_jinja(text_preprocessing_result)
+        params = user.parametrizer.collect(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
             # notion: {key: None} will return "None";

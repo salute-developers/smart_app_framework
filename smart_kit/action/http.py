@@ -79,7 +79,7 @@ class HTTPRequestAction(NodeAction):
 
     def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                             params: Optional[Dict[str, Union[str, float, int]]] = None):
-        collected = user.parametrizer.collect_jinja(text_preprocessing_result)
+        collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
         request_parameters = self._get_rendered_tree_recursive(self._get_template_tree(self.method_params), params)
         req_headers = request_parameters.get("headers")

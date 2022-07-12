@@ -54,15 +54,6 @@ class MockParametrizer:
             data.update({"filter": "filter_out"})
         return data
 
-    def collect_jinja(self, text_preprocessing_result=None, filter_params=None):
-        data = {
-            "person_info": self.user.person_info.raw,
-            "payload": self.user.message.payload}
-        data.update(self.data)
-        if self.filter:
-            data.update({"filter": "filter_out"})
-        return data
-
 
 class ClearFormIdActionTest(unittest.TestCase):
     def test_run(self):
@@ -642,7 +633,6 @@ class AddHistoryEventActionTest(unittest.TestCase):
         message = PicklableMock()
         message.name = "CLIENT_INFO_RESPONSE"
         parametrizer.collect = Mock(return_value={"message": message, "main_form": main_form})
-        parametrizer.collect_jinja = Mock(return_value={"message": message, "main_form": main_form})
 
         self.user = Mock(parametrizer=parametrizer)
         self.user.history = PicklableMock()
@@ -723,9 +713,10 @@ class SmartGeoActionTest(unittest.TestCase):
                                 uuid={"userChannel": "B2C", "userId": "ec8a9097-1508-4bec-8d97-67f2329c03e0",
                                       "sub": "385342565001000018390f1f"},
                                 payload={})
-        user = Mock(parametrizer=Mock(collect_jinja=lambda text_preprocessing_result, filter_params: {}))
+        user = Mock()
         text_preprocessing_result = Mock()
-        command = self.smart_geo_action.run(user, text_preprocessing_result, {})[0]
+        params = Mock()
+        command = self.smart_geo_action.run(user, text_preprocessing_result, params)[0]
         answer = SmartAppToMessage(command, incoming_message, None)
         expected = {
             "messageId": "1605196199186625000",

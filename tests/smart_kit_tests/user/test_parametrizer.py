@@ -69,7 +69,7 @@ class UserTest1(unittest.TestCase):
         self.assertTrue(obj1._get_main_form(self.test_forms) == 'any form 1')
         self.assertIsNone(obj2._get_main_form(self.test_forms))
 
-    def test_parametrizer_get_jinja_data(self):
+    def test_parametrizer_get_user_data(self):
         obj1 = parametrizer.Parametrizer(self.test_user4, self.test_items)
         answer1 = {'payload': 'any payload', 'uuid': '1234-5678-9102', 'forms': {
             'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
@@ -79,23 +79,6 @@ class UserTest1(unittest.TestCase):
             'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
                    'text_preprocessing_result': {1: 'any text'}, 'variables': [1, 2, 3], 'counters': 3,
                    'scenario_id': 22, 'gender_sensitive_text': '', 'local_vars': {}, 'settings': {}}
-        result1 = obj1._get_jinja_data()
-        result1.pop('message')
-        result2 = obj1._get_jinja_data(self.test_text_preprocessing_result)
-        result2.pop('message')
-        self.assertTrue(result1 == answer1)
-        self.assertTrue(result2 == answer2)
-
-    def test_parametrizer_get_user_data(self):
-        obj1 = parametrizer.Parametrizer(self.test_user4, self.test_items)
-        answer1 = {'payload': 'any payload', 'uuid': '1234-5678-9102', 'forms': {
-            'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
-                   'text_preprocessing_result': {}, 'variables': [1, 2, 3], 'counters': 3, 'scenario_id': 22,
-                   'local_vars': {}, 'settings': {}}
-        answer2 = {'payload': 'any payload', 'uuid': '1234-5678-9102', 'forms': {
-            'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
-                   'text_preprocessing_result': {1: 'any text'}, 'variables': [1, 2, 3], 'counters': 3,
-                   'scenario_id': 22, 'local_vars': {}, 'settings': {}}
         result1 = obj1._get_user_data()
         result1.pop('message')
         result2 = obj1._get_user_data(self.test_text_preprocessing_result)

@@ -14,8 +14,3 @@ class CustomParametrizer(Parametrizer):
         data = super(CustomParametrizer, self)._get_user_data(text_preprocessing_result)
         data.update({})
         return data
-
-    def _get_jinja_data(self, text_preprocessing_result=None):
-        data = super(CustomParametrizer, self)._get_jinja_data(text_preprocessing_result)
-        data.update({})
-        return data

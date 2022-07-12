@@ -22,17 +22,6 @@ class MockParametrizer:
             data.update({"filter": "filter_out"})
         return data
 
-    def collect_jinja(self, text_preprocessing_result=None, filter_params=None):
-        data = {
-            "person_info": self.user.person_info.raw,
-            "payload": self.user.message.payload,
-            "uuid": self.user.message.uuid
-
-        }
-        if self.filter:
-            data.update({"filter": "filter_out"})
-        return data
-
 
 class TestAvailableInfoFiller(TestCase):
     @classmethod
