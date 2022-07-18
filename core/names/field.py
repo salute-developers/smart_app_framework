@@ -23,7 +23,6 @@ SUB = "sub"
 SYSTEM_NAME = "systemName"
 USER_CHANNEL = "userChannel"
 USER_ID = "userId"
-MESSAGE = "message"
 
 DEBUG_INFO = "debug_info"
 DEBUG_INFO_APP_KEY = "debug_info_key"

@@ -34,11 +34,11 @@ class SmartGeoAction(StringAction):
         self.command = GET_PROFILE_DATA
         self.behavior = items.get("behavior", "smart_geo_behavior")
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
 
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = await super().run(user, text_preprocessing_result, params)
         return commands

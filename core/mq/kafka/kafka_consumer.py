@@ -59,7 +59,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         log("KafkaConsumer.subscribe<on_assign>: assign %(partitions)s %(log_level)s", params=params, level=log_level)
 
     def subscribe(self, topics=None):
-        topics = topics or list(self._config["topics"].values())
+        topics = list(set(topics or list(self._config["topics"].values())))
 
         params = {
             "topics": topics
@@ -67,7 +67,8 @@ class KafkaConsumer(BaseKafkaConsumer):
         log("Topics to subscribe: %(topics)s", params=params)
 
         self._consumer.subscribe(topics,
-                                 on_assign=self.get_on_assign_callback() if self.assign_offset_end else KafkaConsumer.on_assign_log)
+                                 on_assign=self.get_on_assign_callback() if self.assign_offset_end else
+                                 KafkaConsumer.on_assign_log)
 
     def get_on_assign_callback(self):
         if "cooperative" in self._config["conf"].get("partition.assignment.strategy", ""):
@@ -106,7 +107,7 @@ class KafkaConsumer(BaseKafkaConsumer):
             log_const.KEY_NAME: log_const.EXCEPTION_VALUE
         }
         log("KafkaConsumer: Error: %(error)s", params=params, level="WARNING")
-        monitoring.got_counter("kafka_consumer_exception")
+        monitoring.monitoring.got_counter("kafka_consumer_exception")
 
     # noinspection PyMethodMayBeStatic
     def _process_message(self, msg: KafkaMessage):
@@ -115,7 +116,7 @@ class KafkaConsumer(BaseKafkaConsumer):
             if err.code() == KafkaError._PARTITION_EOF:
                 return None
             else:
-                monitoring.got_counter("kafka_consumer_exception")
+                monitoring.monitoring.got_counter("kafka_consumer_exception")
                 params = {
                     "code": err.code(),
                     "pid": os.getpid(),

@@ -61,6 +61,10 @@ python3 -m pip install git+https://github.com/salute-developers/smart_app_framew
 
 При переходе на версию фреймворка >=1.0.7.rc4 со старым смартапом необходимо в директории смартапа из файла ```static/.text_normalizer_resources/static_workdata.json``` удалить строки 'Ё на Е'.
 
+При переходе на версию фреймворка >=1.0.8rc15 со старым смартапом необходимо проверить соблюдение асинхронных
+интерфейсов методами классов-наследников классов Action, Requirement, FieldFillerDescription, Scenario, HandlerBase, 
+SmartAppModel, BaseMainLoop.
+
 ## Установка фреймворка
 
 Для установки фреймворка выполните в терминале следующую команду:
