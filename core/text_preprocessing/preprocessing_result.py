@@ -1,6 +1,10 @@
+from typing import Dict
+
 import nltk
 
 from collections import defaultdict
+
+from core.names.field import MESSAGE, ANNOTATIONS
 from core.text_preprocessing.grammem.grammem_constants import TOKEN_VALUE, TOKEN_TYPE, IS_BEGINNING_OF_COMPOSITE, \
     COMPOSITE_TOKEN_VALUE, COMPOSITE_TOKEN_TYPE, VALUE, LIST_OF_TOKEN_TYPES_DATA
 from core.text_preprocessing.helpers import TokenizeHelper
@@ -16,13 +20,22 @@ class TextPreprocessingResult(BaseTextPreprocessingResult):
                  "_num_token_values", "_person_token_values", "_money_token_values", "_time_date_token_values",
                  "_period_token_values", "_org_token_values", "_time_date_interval_token_values",
                  "_relative_token_values", "_ccy_token_values", "_geo_token_values", "pipeline_results",
-                 "_tokenized_string_stop_words", "_words_tokenized_stop_words", "_words_tokenized_set_stop_words")
+                 "_tokenized_string_stop_words", "_words_tokenized_stop_words", "_words_tokenized_set_stop_words",
+                 "model_ner", "dict_ner")
 
-    def __init__(self, items):
+    @staticmethod
+    def from_payload(payload: Dict):
+        return TextPreprocessingResult(payload.get(MESSAGE, {}), payload.get(ANNOTATIONS, {}))
+
+    def __init__(self, *args: Dict):
+        items = {k: v for arg in args for k, v in arg.items()}
         super(TextPreprocessingResult, self).__init__(items)
         self.original_text = items.get("original_text", "")
         self.normalized_text = items.get("normalized_text", "")
         self.original_message_name = items.get("original_message_name", "")
+        # TODO: погрумить с IR как объединить ner-ы
+        self.model_ner = items.get("ner_prediction", [])
+        self.dict_ner = items.get("entities", [])
         self.__tokenized_elements_list = items.get("tokenized_elements_list", [])
         self.pipeline_results = items.get("pipeline_results", {})
         self._human_normalized_text = items.get("human_normalized_text")
@@ -241,4 +254,6 @@ class TextPreprocessingResult(BaseTextPreprocessingResult):
     def raw(self):
         return {"original_text": self.original_text,
                 "normalized_text": self.normalized_text,
-                "tokenized_elements_list": self.__tokenized_elements_list}
+                "tokenized_elements_list": self.__tokenized_elements_list,
+                "ner_prediction": self.model_ner,
+                "entities": self.dict_ner}

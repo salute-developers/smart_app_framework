@@ -52,6 +52,7 @@ setup(
         "tqdm",
         "Twisted",
         "freezegun==1.1.0",
+        "protobuf<4.21.0"  # https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

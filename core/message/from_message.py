@@ -1,6 +1,5 @@
 # coding=utf-8
 from typing import Iterable
-from lazy import lazy
 import json
 import uuid
 
@@ -11,9 +10,10 @@ from core.names import field
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.utils.masking_message import masking
-from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.utils import current_time_ms
 from core.message.msg_validator import MessageValidator
+
+from smart_kit.configs import get_app_config
 
 
 class Headers:
@@ -216,6 +216,9 @@ class SmartAppFromMessage:
             return self._callback_id
 
         try:
+            from smart_kit.start_points.main_loop_http import HttpMainLoop
+            if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
+                return str(self.incremental_id)
             return self.headers[self._callback_id_header_name]
         except KeyError:
             log(f"{self._callback_id_header_name} missed in headers for message_id %(message_id)s",
@@ -232,13 +235,15 @@ class SmartAppFromMessage:
 
     # noinspection PyMethodMayBeStatic
     def generate_new_callback_id(self):
+        from smart_kit.start_points.main_loop_http import HttpMainLoop
+        if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
+            return str(self.incremental_id)
         return str(uuid.uuid4())
 
     @property
     def masked_value(self):
-        data = pickle_deepcopy(self.as_dict)
-        masking(data, self.masking_fields)
-        return json.dumps(data, ensure_ascii=False)
+        masked_data = masking(self.as_dict, self.masking_fields)
+        return json.dumps(masked_data, ensure_ascii=False)
 
     @property
     def message_name(self):
@@ -256,6 +261,7 @@ class SmartAppFromMessage:
     @property
     def value(self):
         return self._value
+
 
 basic_error_message = SmartAppFromMessage(
     '''

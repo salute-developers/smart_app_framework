@@ -47,30 +47,30 @@ class HandlerTest4(unittest.IsolatedAsyncioTestCase):
 
         self.test_payload = {'message': {1: 1}}
 
-    def test_handler_respond_init(self):
+    async def test_handler_respond_init(self):
         obj1 = handle_respond.HandlerRespond(app_name=self.app_name)
         obj2 = handle_respond.HandlerRespond(self.app_name, "any action name")
         self.assertIsNotNone(obj1.KAFKA_KEY)
         self.assertIsNone(obj1._action_name)
         self.assertIsNotNone(obj2._action_name)
 
-    def test_handler_respond_get_action_name(self):
+    async def test_handler_respond_get_action_name(self):
         obj1 = handle_respond.HandlerRespond(app_name=self.app_name)
         obj2 = handle_respond.HandlerRespond(self.app_name, "any action name")
         self.assertIsNone(obj1.get_action_name(self.test_payload, self.test_user1))
         self.assertIsNotNone(obj2.get_action_name(self.test_payload, self.test_user1))
 
-    def test_handler_respond_get_action_params(self):
+    async def test_handler_respond_get_action_params(self):
         obj = handle_respond.HandlerRespond(app_name=self.app_name)
         self.assertTrue(obj.get_action_params(self.test_payload, self.test_user2) == self.callback11_action_params)
         self.assertTrue(obj.get_action_params("any data", self.test_user2) == self.callback11_action_params)
         self.assertTrue(obj.get_action_params(None, self.test_user2) == self.callback11_action_params)
 
     async def test_handler_respond_run(self):
-        self.assertIsNotNone(handle_respond.TextPreprocessingResult(self.test_payload.get("message", {})))
+        self.assertIsNotNone(handle_respond.TextPreprocessingResult.from_payload(self.test_payload))
         self.assertIsNotNone(handle_respond.log_const.KEY_NAME)
         self.assertIsNotNone(handle_respond.log_const.NORMALIZED_TEXT_VALUE)
-        self.assertIsNotNone(handle_respond.TextPreprocessingResult(self.test_payload.get("message", {})).raw)
+        self.assertIsNotNone(handle_respond.TextPreprocessingResult.from_payload(self.test_payload).raw)
         obj1 = handle_respond.HandlerRespond(app_name=self.app_name)
         obj2 = handle_respond.HandlerRespond(self.app_name, "any action name")
         with self.assertRaises(KeyError):

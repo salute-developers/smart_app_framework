@@ -46,7 +46,6 @@ class IgniteAdapter(AsyncDBAdapter):
             self._cache = await self._client.get_or_create_cache(self._cache_name)
             logger_args = {
                 log_const.KEY_NAME: log_const.IGNITE_VALUE,
-                "pyignite_args": str(self._init_params),
                 "pyignite_addresses": str(self._url)
             }
             log("IgniteAdapter to servers %(pyignite_addresses)s created", params=logger_args, level="WARNING")

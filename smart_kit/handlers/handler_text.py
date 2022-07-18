@@ -21,7 +21,8 @@ class HandlerText(HandlerBase):
 
     async def run(self, payload, user):
         await super().run(payload, user)
-        text_preprocessing_result = TextPreprocessingResult(payload.get("message", {}))
+
+        text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
 
         params = {
             log_const.KEY_NAME: log_const.NORMALIZED_TEXT_VALUE,

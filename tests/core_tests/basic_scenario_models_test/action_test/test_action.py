@@ -1,7 +1,8 @@
 # coding: utf-8
+import json
 import unittest
 import uuid
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 
 from core.basic_models.actions.basic_actions import Action, DoingNothingAction, action_factory, RequirementAction, \
     actions, ChoiceAction, ElseAction, CompositeAction, NonRepeatingAction
@@ -337,7 +338,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
         command = (await action.run(user=user, text_preprocessing_result=None))[0]
-        self.assertEqual(command.payload, expected)
+        self.assertEqual(command.raw, expected)
         # проверяем наличие кастомных хэдеров для сервиса пушей
         self.assertTrue(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS in command.request_data)
         headers = command.request_data.get(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS)
@@ -551,20 +552,20 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 }
             }
         }
-        exp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}"
-        exp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}"
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
         expect_arr = [exp1, exp2]
 
-        nexp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}"
-        nexp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}"
+        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
         not_expect_arr = [nexp1, nexp2]
 
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(str(result[0].raw) in expect_arr)
-            self.assertFalse(str(result[0].raw) in not_expect_arr)
+            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in expect_arr)
+            self.assertFalse(json.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
 
     async def test_typical_answer_without_items(self):
         user = PicklableMock()
@@ -577,14 +578,14 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 "pronounceText": ["pronounceText1", "pronounceText2"],
             }
         }
-        exp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1'}}"
-        exp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText2'}}"
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1'}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText2'}}, sort_keys=True)
         exp_list = [exp1, exp2]
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(str(result[0].raw) in exp_list)
+            self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in exp_list)
 
     async def test_typical_answer_without_nodes(self):
         user = PicklableMock()
@@ -613,19 +614,19 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     ]
                 }
         }
-        exp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}"
-        exp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}"
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
         expect_arr = [exp1, exp2]
 
-        nexp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}"
-        nexp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}"
+        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
         not_expect_arr = [nexp1, nexp2]
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(str(result[0].raw) in expect_arr)
-            self.assertFalse(str(result[0].raw) in not_expect_arr)
+            self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in expect_arr)
+            self.assertFalse(json.dumps((result[0].raw), sort_keys=True) in not_expect_arr)
 
 
 class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
@@ -710,13 +711,13 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                     }
                 ]
         }
-        exp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 't2', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p2'}}"
-        exp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 'Ivan Ivanov', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p1'}}"
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 't2', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p2'}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 'Ivan Ivanov', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p1'}}, sort_keys=True)
 
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(str(result[0].raw) in [exp1, exp2])
+            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_root(self):
 
@@ -759,13 +760,13 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                     },
                 ]
         }
-        exp1 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p1'}}"
-        exp2 = "{'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p2'}}"
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p1'}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p2'}}, sort_keys=True)
 
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(str(result[0].raw) in [exp1, exp2])
+            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_simple(self):
 
@@ -824,7 +825,8 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
 
 
 class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
-    async def test_run(self):
+    @patch("smart_kit.configs.settings.Settings")
+    async def test_run(self, settings_mock: MagicMock):
         expected = [
             Command("GIVE_ME_MEMORY",
                     {
@@ -857,8 +859,15 @@ class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
+        settings = {
+            "template_settings": {
+                "project_id": "0",
+                "consumer_topic": "app"
+            }
+        }
+        settings_mock.return_value = settings
         items = {
+            "behavior": "my_behavior",
             "nodes": {
                 "memory": {
                     "confidentialMemo": [
@@ -881,8 +890,9 @@ class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
                 }
             }
         }
+        text_preprocessing_result = PicklableMock()
         action = GiveMeMemoryAction(items)
-        result = await action.run(user, None)
+        result = await action.run(user, text_preprocessing_result)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)
 
@@ -952,9 +962,14 @@ class RememberThisActionTest(unittest.IsolatedAsyncioTestCase):
                     })
         ]
         user = PicklableMagicMock()
+        user.settings = {
+            "template_settings": {
+                "project_id": "0",
+                "consumer_topic": "app"
+            }
+        }
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
         items = {
             "nodes": {
               "clientIds": {

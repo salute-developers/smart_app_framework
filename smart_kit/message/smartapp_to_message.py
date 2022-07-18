@@ -3,7 +3,6 @@ import json
 from lazy import lazy
 from copy import copy
 
-from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.masking_message import masking
 from core.message.msg_validator import MessageValidator
 from smart_kit.utils import SmartAppToMessage_pb2
@@ -61,12 +60,11 @@ class SmartAppToMessage:
 
     @lazy
     def masked_value(self):
-        data = pickle_deepcopy(self.as_dict)
-        masking(data, self.masking_fields)
+        masked_data = masking(self.as_dict, self.masking_fields)
         if self.command.loader == "json.dumps":
-            return json.dumps(data, ensure_ascii=False)
+            return json.dumps(masked_data, ensure_ascii=False)
         elif self.command.loader == "protobuf":
-            protobuf_message = self.as_protobuf_message(data)
+            protobuf_message = self.as_protobuf_message(masked_data)
             return protobuf_message.SerializeToString()
 
     @lazy

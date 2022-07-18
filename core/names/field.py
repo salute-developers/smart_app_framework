@@ -1,4 +1,5 @@
 ANNOTATIONS = "annotations"
+MESSAGE = "message"
 APPLICATION_ID = "applicationId"
 APP_INFO = "app_info"
 APP_VERSION_ID = "appversionId"

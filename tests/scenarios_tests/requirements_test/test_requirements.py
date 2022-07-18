@@ -108,6 +108,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer.collect = Mock(return_value=params)
         self.assertFalse(await requirement.check(None, user))
 
+
     async def test_array_in_template_req_true(self):
         items = {
             "template": {
@@ -203,7 +204,3 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
         self.assertFalse(await requirement.check(None, user))
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -27,7 +27,7 @@ class BaseUser(Model):
         self.message = message
         self.descriptions = descriptions
         self.load_error = load_error
-        super(BaseUser, self).__init__(values=values, user=self)
+        super().__init__(values=values, user=self)
         self._initialize()
 
     def _initialize(self):
@@ -42,27 +42,16 @@ class BaseUser(Model):
     def fields(self):
         return [
             Field("counters", Counters),
-            Field(
-                "last_action_ids",
-                LimitedQueuedHashableObjectsItems,
-                self.descriptions["last_action_ids"]
-            ),
-            Field(
-                "last_messages_ids",
-                LimitedQueuedHashableObjects,
-                LimitedQueuedHashableObjectsDescription(None)
-            ),
+            Field("last_action_ids", LimitedQueuedHashableObjectsItems, self.descriptions["last_action_ids"]),
+            Field("last_messages_ids", LimitedQueuedHashableObjects, LimitedQueuedHashableObjectsDescription(None)),
             Field("local_vars", Variables, None, False),
             Field("variables", Variables),
         ]
 
     @property
-    def raw(self):
-        return super(BaseUser, self).raw
-
-    @property
     def raw_str(self):
-        raw = json.dumps(self.raw)
+        # Attention: non-serializable objects will become str with error message
+        raw = json.dumps(self.raw, default=lambda o: f"<non-serializable: {type(o).__qualname__}>")
         log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s. "
             "Saving User %(uid)s. Serialized utf8 json length is %(user_length)s symbols.", self,
             {"db_version": str(self.variables.get(self.USER_DB_VERSION)),
