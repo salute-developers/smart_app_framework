@@ -33,6 +33,7 @@ class HTTPRequestAction(NodeAction):
     DELETE = "DELETE"
     PATCH = "PATCH"
     DEFAULT_METHOD = POST
+    DEFAULT_TIMEOUT = 3
 
     TIMEOUT = "TIMEOUT"
     CONNECTION = "CONNECTION"
@@ -49,8 +50,11 @@ class HTTPRequestAction(NodeAction):
         self.behavior = items.get("behavior")
 
     def preprocess(self, user, text_processing, params):
-        behavior_description = user.descriptions["behaviors"][self.behavior]
-        self.method_params.setdefault("timeout", behavior_description.timeout(user))
+        behavior_description = user.descriptions["behaviors"].get(self.behavior)
+        self.method_params.setdefault(
+            "timeout",
+            behavior_description.timeout(user) if behavior_description else self.DEFAULT_TIMEOUT
+        )
         self.method_params["timeout"] = ClientTimeout(self.method_params["timeout"])
 
     @staticmethod
@@ -127,7 +131,7 @@ class HTTPRequestAction(NodeAction):
             return await action.run(user, text_preprocessing_result, None)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self.preprocess(user, text_preprocessing_result, params)
         params = params or {}
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)

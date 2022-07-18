@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from aiohttp import ClientTimeout
 
@@ -15,7 +15,7 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=PicklableMock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": AsyncPicklableMock(timeout=PicklableMock(return_value=3))
+                    "my_behavior": AsyncMock(timeout=PicklableMock(return_value=3))
                 }
             }
         )
