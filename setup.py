@@ -10,8 +10,10 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 
 def tf_version():
-    if sys.platform == "darwin":
+    if sys.platform == "darwin" and platform.machine() == "arm64":
         return "tensorflow-macos==2.9.1"
+    elif sys.platform == "darwin" and platform.machine() == "x86_64":
+        return "tensorflow==2.9.1"
     elif sys.platform == "linux" and platform.machine() == "x86_64":
         return "tensorflow==2.9.1"
     elif sys.platform == "linux" and platform.machine() == "aarch64":
