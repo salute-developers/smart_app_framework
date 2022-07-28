@@ -1,9 +1,23 @@
-from setuptools import find_packages, setup
-import versioneer
+import platform
+import sys
 
+from setuptools import find_packages, setup
+
+import versioneer
 
 with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
+
+
+def tf_version():
+    if sys.platform == "darwin":
+        return "tensorflow-macos==2.9.1"
+    elif sys.platform == "linux" and platform.machine() == "x86_64":
+        return "tensorflow==2.9.1"
+    elif sys.platform == "linux" and platform.machine() == "aarch64":
+        return "tensorflow-aarch64==2.9.1"
+    return "tensorflow==2.9.1"
+
 
 setup(
     name="smart_app_framework",
@@ -27,7 +41,7 @@ setup(
         "dill==0.3.3",
         "ics==0.6",
         "Jinja2==3.0.3",
-        "keras==2.6.0",
+        "keras==2.9.0",
         "lazy",
         "nltk==3.5",
         "numpy",
@@ -43,11 +57,11 @@ setup(
         "redis",
         "requests==2.22.0",
         "rusenttokenize==0.0.5",
-        "scikit-learn==0.24.1",
+        "scikit-learn==1.1.1",
         "setuptools",
         "tabulate",
         "tatsu==4.4.0",
-        "tensorflow==2.6.0",
+        tf_version(),
         "timeout-decorator==0.4.1",
         "tqdm",
         "Twisted",
