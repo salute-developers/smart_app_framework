@@ -241,7 +241,7 @@ class MainLoop(BaseMainLoop):
                     params={log_const.KEY_NAME: "incoming_message",
                             "topic": mq_message.topic(),
                             "message_partition": mq_message.partition(),
-                            "message_key": mq_message.key(),
+                            "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace'),
                             "message_id": message.incremental_id,
                             "kafka_key": kafka_key,
                             "incoming_data": str(message.masked_value),
@@ -304,7 +304,9 @@ class MainLoop(BaseMainLoop):
                     data = "<DATA FORMAT ERROR>"
                 log(f"Message validation failed, skip message handling.",
                     params={log_const.KEY_NAME: "invalid_message",
-                            "data": data}, level="ERROR")
+                            "data": data,
+                            "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
+                    level="ERROR")
                 monitoring.counter_invalid_message(self.app_name)
         if user and not user_save_no_collisions:
             log(
