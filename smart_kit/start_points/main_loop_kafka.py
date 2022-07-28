@@ -411,7 +411,9 @@ class MainLoop(BaseMainLoop):
                     "topic_key": request.topic_key,
                     "headers": str(request._get_new_headers(original_mq_message)),
                     "data": answer.masked_value,
-                    "length": len(answer.value)}, user=user)
+                    "length": len(answer.value),
+                    "message_key": (original_mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
+            user=user)
 
     @lru_cache()
     def _topic_names_2_key(self, kafka_key):
