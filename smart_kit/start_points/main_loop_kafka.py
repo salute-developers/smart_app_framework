@@ -119,7 +119,11 @@ class MainLoop(BaseMainLoop):
 
         for command in commands:
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
-            request.update_empty_items({"topic_key": topic_key, "kafka_key": kafka_key})
+            request_params_to_update = {"kafka_key": kafka_key, "topic_key": topic_key}
+            if "kafka_replyTopic" in message.headers:
+                request_params_to_update["kafka_replyTopic"] = message.headers["kafka_replyTopic"]
+            request.update_empty_items(request_params_to_update)
+
             to_message = get_to_message(command.name)
             answer = to_message(command=command, message=message, request=request,
                                 masking_fields=self.masking_fields,

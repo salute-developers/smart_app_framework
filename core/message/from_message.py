@@ -24,6 +24,9 @@ class Headers:
     def __getitem__(self, item):
         return self.raw[item].decode()
 
+    def __contains__(self, item):
+        return item in self.raw
+
     def get(self, key, default=None, encoding="utf-8"):
         res = self.raw.get(key)
         if res is None:

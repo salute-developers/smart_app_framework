@@ -1,3 +1,5 @@
+from typing import Dict
+
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.request.kafka_request import KafkaRequest
 
@@ -16,6 +18,13 @@ class SmartKitKafkaRequest(KafkaRequest):
     @property
     def _callback_id_header_name(self):
         return CALLBACK_ID_HEADER
+
+    def update_empty_items(self, items: Dict[str, str]) -> None:
+        self.kafka_key = self.kafka_key or items["kafka_key"]
+        if (self.topic_key is None) and ("kafka_replyTopic" in items):
+            self.reply_to_topic_name = items["kafka_replyTopic"]
+        else:
+            self.topic_key = self.topic_key or items["topic_key"]
 
     def _get_new_headers(self, source_mq_message):
         headers_dict = dict(super(SmartKitKafkaRequest, self)._get_new_headers(source_mq_message))
