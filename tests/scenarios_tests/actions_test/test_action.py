@@ -63,7 +63,7 @@ class ClearFormIdActionTest(unittest.TestCase):
         user.forms.remove_item.assert_called_once_with("form")
 
 
-class RemoveCompositeFormFieldActionTest(unittest.TestCase):
+class ClearInnerFormActionTest(unittest.TestCase):
     def test_run(self):
         action = ClearInnerFormAction({"form": "form", "inner_form": "inner_form"})
         user, form = PicklableMagicMock(), PicklableMagicMock()
