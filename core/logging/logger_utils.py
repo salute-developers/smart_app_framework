@@ -35,7 +35,7 @@ class LoggerMessageCreator:
                 params[name] = param
 
     @classmethod
-    def update_other_params(cls, user, params, cls_name='', log_store_for=0):
+    def update_other_params(cls, user, params, cls_name='', log_store_for=1):
         message_id, uuid, logging_uuid = None, None, None
         if user:
             message = user.message
@@ -53,7 +53,7 @@ class LoggerMessageCreator:
         return re.sub(r"(%[^\(])", r"%\1", string)
 
     @classmethod
-    def make_message(cls, user=None, params=None, cls_name='', log_store_for=0):
+    def make_message(cls, user=None, params=None, cls_name='', log_store_for=1):
         params = params or {}
         if user:
             cls.update_user_params(user, params)
@@ -65,7 +65,7 @@ class LoggerMessageCreator:
 default_logger = logging.getLogger()
 
 
-def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=0):
+def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=1):
     try:
         level_name = logging.getLevelName(level)
         current_frame = inspect.currentframe()
