@@ -32,7 +32,8 @@ class HandlerRespond(HandlerBase):
             log_const.KEY_NAME: "process_time",
             "callback_id": str(callback_id),
             "process_time": self.get_processing_time(user),
-            "action_name": action_name
+            "action_name": action_name,
+            "surface": user.message.device.surface
         }
 
         if user.behaviors.has_callback(callback_id):
