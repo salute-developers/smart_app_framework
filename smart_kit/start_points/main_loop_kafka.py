@@ -181,7 +181,7 @@ class MainLoop(BaseMainLoop):
                                     "message_key": mq_message.key(),
                                     "kafka_key": kafka_key,
                                     "uid": user.id,
-                                    "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                    "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                             level="WARNING")
 
                         continue
@@ -196,7 +196,7 @@ class MainLoop(BaseMainLoop):
                                 "message_partition": mq_message.partition(),
                                 "kafka_key": kafka_key,
                                 "uid": user.id,
-                                "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                         level="WARNING")
 
                     monitoring.counter_save_collision_tries_left(self.app_name)
@@ -286,7 +286,7 @@ class MainLoop(BaseMainLoop):
                                 "message_partition": mq_message.partition(),
                                 "kafka_key": kafka_key,
                                 "uid": user.id,
-                                "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                         level="WARNING")
                     continue
 
@@ -322,7 +322,7 @@ class MainLoop(BaseMainLoop):
                         "message_partition": mq_message.partition(),
                         "kafka_key": kafka_key,
                         "uid": user.id,
-                        "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                        "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                 level="WARNING")
             self.postprocessor.postprocess(user, message)
             monitoring.counter_save_collision_tries_left(self.app_name)
