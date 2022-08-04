@@ -1,18 +1,27 @@
-from typing import Optional
+from typing import Dict
 
 from core.request.base_request import BaseRequest
+from core.logging.logger_utils import log
+import core.logging.logger_constants as log_const
 
 
 class KafkaRequest(BaseRequest):
     TOPIC_KEY = "topic_key"
     KAFKA_KEY = "kafka_key"
+    TOPIC = "topic"
 
     def __init__(self, items, id=None):
         super(KafkaRequest, self).__init__(items)
         items = items or {}
         self.topic_key = items.get(self.TOPIC_KEY)
         self.kafka_key = items.get(self.KAFKA_KEY)
-        self.reply_to_topic_name: Optional[str] = None
+        # topic_key has priority over topic
+        self.topic = items.get(self.TOPIC)
+
+    def update_empty_items(self, items: Dict[str, str]):
+        self.topic_key = self.topic_key or items.get(self.TOPIC_KEY)
+        self.kafka_key = self.kafka_key or items.get(self.KAFKA_KEY)
+        self.topic = self.topic or items.get(self.TOPIC)
 
     @property
     def group_key(self):
@@ -26,20 +35,23 @@ class KafkaRequest(BaseRequest):
         publishers = params["publishers"]
         publisher = publishers[self.kafka_key]
         source_mq_message = params["mq_message"]
-        if self.reply_to_topic_name:
-            publisher.send_to_topic(
-                value=data,
-                key=source_mq_message.key(),
-                topic=self.reply_to_topic_name,
-                headers=self._get_new_headers(source_mq_message),
-            )
+        headers = self._get_new_headers(source_mq_message)
+
+        if self.topic_key is not None:
+            publisher.send(data, source_mq_message.key(), self.topic_key, headers=headers)
+        elif self.topic is not None:
+            publisher.send_to_topic(data, source_mq_message.key(), self.topic, headers=headers)
         else:
-            publisher.send(
-                value=data,
-                key=source_mq_message.key(),
-                topic_key=self.topic_key,
-                headers=self._get_new_headers(source_mq_message),
-            )
+            log_params = {
+                "data": str(data),
+                log_const.KEY_NAME: log_const.EXCEPTION_VALUE
+            }
+            log("KafkaTopicRequest: got no topic and no topic_key", params=log_params, level="ERROR")
 
     def __str__(self):
-        return f"KafkaRequest: topic_key={self.topic_key} kafka_key={self.kafka_key}"
+        if self.topic_key is not None:
+            return f"KafkaRequest: topic_key={self.topic_key} kafka_key={self.kafka_key}"
+        elif self.topic is not None:
+            return f"KafkaRequest: topic={self.topic} kafka_key={self.kafka_key}"
+        else:
+            return f"KafkaRequest: kafka_key={self.kafka_key}"
