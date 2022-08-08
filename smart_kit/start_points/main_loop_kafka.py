@@ -11,7 +11,7 @@ from lazy import lazy
 import scenarios.logging.logger_constants as log_const
 from core.configs.global_constants import KAFKA_REPLY_TOPIC
 from core.logging.logger_utils import log, UID_STR, MESSAGE_ID_STR
-from smart_kit.names.message_names import ANSWER_TO_USER
+from smart_kit.names.message_names import ANSWER_TO_USER, RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP
 
 from core.message.from_message import SmartAppFromMessage
 from core.model.heapq.heapq_storage import HeapqKV
@@ -266,7 +266,8 @@ class MainLoop(BaseMainLoop):
                 monitoring.sampling_load_time(self.app_name, load_timer.secs)
                 stats += "Loading time: {} msecs\n".format(load_timer.msecs)
 
-                if KAFKA_REPLY_TOPIC in message.headers:
+                if KAFKA_REPLY_TOPIC in message.headers and \
+                        message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
                     if user.private_vars.get(KAFKA_REPLY_TOPIC):
                         log("MainLoop.iterate: kafka_replyTopic collision",
                             params={log_const.KEY_NAME: "ignite_collision",
