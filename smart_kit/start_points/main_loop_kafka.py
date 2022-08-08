@@ -381,7 +381,7 @@ class MainLoop(BaseMainLoop):
             if isinstance(message_key, bytes):
                 message_key = message_key.decode()
         except UnicodeDecodeError:
-            log(f"Decode error of Kafka message key {message_key}",
+            log(f"MainLoop.get_str_message_key: Decode error of Kafka message key {message_key}",
                 params={log_const.KEY_NAME: "check_kafka_key_error",
                         MESSAGE_ID_STR: log_params["incremental_id"],
                         UID_STR: log_params["uid"]},
