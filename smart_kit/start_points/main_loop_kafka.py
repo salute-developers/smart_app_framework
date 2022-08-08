@@ -364,7 +364,7 @@ class MainLoop(BaseMainLoop):
                     level="ERROR", exc_info=True)
 
     def log_fail_check_kafka_message_key(self, message_key, valid_key, log_params):
-        log(f"Failed to check Kafka message key {message_key} != {valid_key}",
+        log(f"MainLoop.log_fail_check_kafka_message_key: Failed to check Kafka message key {message_key} != {valid_key}",
             params={
                 log_const.KEY_NAME: "check_kafka_key_validation",
                 MESSAGE_ID_STR: log_params["incremental_id"],
