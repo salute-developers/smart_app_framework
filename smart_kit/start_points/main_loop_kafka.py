@@ -412,7 +412,7 @@ class MainLoop(BaseMainLoop):
         request_params["message_key"] = message_key
         if message_key != valid_message_key:
             request_params["message_key"] = valid_message_key
-            log(f"Recovery of Kafka message key {message_key} -> {valid_message_key}",
+            log(f"MainLoop._send_request: Recovery of Kafka message key {message_key} -> {valid_message_key}",
                 params={log_const.KEY_NAME: "kafka_message_key_recovery",
                         MESSAGE_ID_STR: log_params["incremental_id"],
                         UID_STR: log_params["uid"]},
