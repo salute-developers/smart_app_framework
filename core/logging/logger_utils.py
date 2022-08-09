@@ -12,7 +12,6 @@ import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier
 from core.utils.masking_message import masking
 from core.utils.stats_timer import StatsTimer
-from core.utils.pickle_copy import pickle_deepcopy
 
 MESSAGE_ID_STR = "message_id"
 UID_STR = "uid"
@@ -36,7 +35,7 @@ class LoggerMessageCreator:
                 params[name] = param
 
     @classmethod
-    def update_other_params(cls, user, params, cls_name='', log_store_for=0):
+    def update_other_params(cls, user, params, cls_name='', log_store_for=1):
         message_id, uuid, logging_uuid = None, None, None
         if user:
             message = user.message
@@ -54,20 +53,19 @@ class LoggerMessageCreator:
         return re.sub(r"(%[^\(])", r"%\1", string)
 
     @classmethod
-    def make_message(cls, user=None, params=None, cls_name='', log_store_for=0):
+    def make_message(cls, user=None, params=None, cls_name='', log_store_for=1):
         params = params or {}
         if user:
             cls.update_user_params(user, params)
-        params = pickle_deepcopy(params)
-        masking(params)
-        cls.update_other_params(user, params, cls_name, log_store_for)
-        return params
+        masked_params = masking(params)
+        cls.update_other_params(user, masked_params, cls_name, log_store_for)
+        return masked_params
 
 
 default_logger = logging.getLogger()
 
 
-def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=0):
+def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=1):
     try:
         level_name = logging.getLevelName(level)
         current_frame = inspect.currentframe()

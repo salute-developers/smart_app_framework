@@ -39,7 +39,7 @@ def card_sub_func(x: Match[str]) -> str:
 
 
 def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]] = None,
-            depth_level: int = 2, mask_available_depth: int = -1):
+            depth_level: int = 2, mask_available_depth: int = -1) -> Union[Dict, List]:
     """
     :param data: коллекция для маскирования приватных данных
     :param masking_fields: поля для обязательной маскировки независимо от уровня
@@ -53,21 +53,23 @@ def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]]
     if masking_fields is None:
         masking_fields = DEFAULT_MASKING_FIELDS
 
-    _masking(data, masking_fields, depth_level, mask_available_depth, masking_on=False, card_masking_on=False)
+    return _masking(data, masking_fields, depth_level, mask_available_depth, masking_on=False, card_masking_on=False)
 
 
 def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
              depth_level: int = 2, mask_available_depth: int = -1, masking_on: bool = False,
-             card_masking_on: bool = False):
+             card_masking_on: bool = False) -> Union[Dict, List]:
 
     # тут в зависимости от листа или словаря создаем итератор
     if isinstance(data, dict):
         key_gen = data.items()
+        masked_data = dict()
     else:
         key_gen = enumerate(data)
+        masked_data = [None for _ in range(len(data))]
 
     for key, _ in key_gen:
-        value_is_collection = isinstance(data[key],(dict, list))
+        value_is_collection = isinstance(data[key], (dict, list))
         if isinstance(data[key], (set, tuple)):
             data[key] = list(data[key])
             value_is_collection = True
@@ -75,28 +77,40 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
             if value_is_collection:
                 # если глубина не превышена, идем внутрь с включенным флагом и уменьшаем глубину
                 if masking_on and depth_level > 0:
-                    _masking(data[key], masking_fields, depth_level - 1, mask_available_depth, masking_on=True)
+                    masked_data[key] = _masking(data[key], masking_fields, depth_level - 1,
+                                                mask_available_depth, masking_on=True)
                 elif key in masking_fields and masking_fields[key] > 0:
-                    _masking(data[key], masking_fields, masking_fields[key] - 1, mask_available_depth, masking_on=True)
+                    masked_data[key] = _masking(data[key], masking_fields, masking_fields[key] - 1,
+                                                mask_available_depth, masking_on=True)
                 else:
                     counter = structure_mask(data[key], depth=1, available_depth=mask_available_depth)
-                    data[key] = f'*items-{counter.items}*collections-{counter.collections}*maxdepth-{counter.max_depth}*'
+                    masked_data[key] = f'*items-{counter.items}*collections-{counter.collections}*maxdepth-{counter.max_depth}*'
             elif data[key] is not None:  # в случае простого элемента. маскируем как ***
-                data[key] = '***'
+                masked_data[key] = '***'
+            else:
+                masked_data[key] = data[key]
         elif key in CARD_MASKING_FIELDS or card_masking_on:  # проверка на реквизиты карты
             if value_is_collection:
-                _masking(data[key], masking_fields, depth_level, mask_available_depth, masking_on,card_masking_on=True)
+                masked_data[key] = _masking(data[key], masking_fields, depth_level,
+                                            mask_available_depth, masking_on, card_masking_on=True)
             elif isinstance(data[key], str):
-                data[key] = card_regular.sub(card_sub_func, data[key])
+                masked_data[key] = card_regular.sub(card_sub_func, data[key])
             elif isinstance(data[key], int):
                 str_value = str(data[key])
                 masked_value = card_regular.sub(card_sub_func, str_value)
                 if masked_value != str_value:
-                    data[key] = masked_value
+                    masked_data[key] = masked_value
+                else:
+                    masked_data[key] = data[key]
+            else:
+                masked_data[key] = data[key]
         elif value_is_collection:
             # если маскировка не нужна уходим глубже без включенного флага
-            _masking(data[key], masking_fields, depth_level, mask_available_depth,
-                     masking_on=False, card_masking_on=card_masking_on)
+            masked_data[key] = _masking(data[key], masking_fields, depth_level, mask_available_depth,
+                                        masking_on=False, card_masking_on=card_masking_on)
+        else:
+            masked_data[key] = data[key]
+    return masked_data
 
 
 def structure_mask(data: Union[Dict, List], depth: int, available_depth: int = -1,

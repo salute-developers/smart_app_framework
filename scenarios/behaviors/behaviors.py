@@ -13,6 +13,11 @@ from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PA
 from core.monitoring.monitoring import monitoring
 
 
+Callback = namedtuple(
+            'Callback',
+            'behavior_id expire_time scenario_id text_preprocessing_result action_params hostname')
+
+
 class Behaviors:
     EXPIRATION_DELAY = 1
 
@@ -20,11 +25,8 @@ class Behaviors:
         self._items = items or {}
         self.descriptions = descriptions
         self._user = user
-        self.Callback = namedtuple(
-            'Callback',
-            'behavior_id expire_time scenario_id text_preprocessing_result action_params hostname')
-
-        self._callbacks = {}
+        self.Callback = Callback
+        self._callbacks: Dict[str, Callback] = {}
         self._behavior_timeouts = []
         self._returned_callbacks = []
 
@@ -209,11 +211,11 @@ class Behaviors:
         return callback
 
     def has_callback(self, callback_id):
-        callback = self._callbacks.get(callback_id)
+        callback = self._get_callback(callback_id)
         return callback is not None
 
     def get_callback_action_params(self, callback_id):
-        callback = self._callbacks.get(callback_id)
+        callback = self._get_callback(callback_id)
         if callback:
             return callback.action_params
 
@@ -222,7 +224,7 @@ class Behaviors:
             self._user,
             params={log_const.KEY_NAME: log_const.BEHAVIOR_CHECK_MISSTATE_VALUE,
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
-        callback = self._callbacks.get(callback_id)
+        callback = self._get_callback(callback_id)
         if callback:
             callback_scenario_id = callback.scenario_id
             if callback_scenario_id is not None:
