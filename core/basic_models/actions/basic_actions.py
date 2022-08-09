@@ -141,7 +141,7 @@ class ChoiceAction(Action):
         return self._requirement_items
 
     @factory(Action)
-    def build_else_item(self) -> str:
+    def build_else_item(self) -> Optional[str]:
         return self._else_item
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
