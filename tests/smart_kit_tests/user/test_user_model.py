@@ -37,7 +37,7 @@ class UserTest2(unittest.TestCase):
     def test_smart_app_user_fields(self):
         obj1 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
                                        self.test_parametrizer_cls)
-        self.assertTrue(len(obj1.fields) == 13)
+        self.assertTrue(len(obj1.fields) == 14)
         self.assertTrue(isinstance(obj1.fields[0], Field))
 
     def test_smart_app_user_parametrizer(self):

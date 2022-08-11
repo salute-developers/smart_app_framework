@@ -20,6 +20,7 @@ class BaseUser(Model):
 
     counters: Counters
     variables: Variables
+    private_vars: Variables
     local_vars: Variables
 
     def __init__(self, id, message, values, descriptions, load_error=False):
@@ -46,6 +47,7 @@ class BaseUser(Model):
             Field("last_messages_ids", LimitedQueuedHashableObjects, LimitedQueuedHashableObjectsDescription(None)),
             Field("local_vars", Variables, None, False),
             Field("variables", Variables),
+            Field("private_vars", Variables),
         ]
 
     @property
@@ -54,7 +56,7 @@ class BaseUser(Model):
         raw = json.dumps(self.raw, default=lambda o: f"<non-serializable: {type(o).__qualname__}>")
         log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s. "
             "Saving User %(uid)s. Serialized utf8 json length is %(user_length)s symbols.", self,
-            {"db_version": str(self.variables.get(self.USER_DB_VERSION)),
+            {"db_version": str(self.private_vars.get(self.USER_DB_VERSION)),
              "uid": str(self.id), "user_length": len(raw),
              KEY_NAME: "user_save"})
         return raw
@@ -62,4 +64,5 @@ class BaseUser(Model):
     def expire(self):
         self.counters.expire()
         self.variables.expire()
+        self.private_vars.expire()
         self.local_vars.expire()
