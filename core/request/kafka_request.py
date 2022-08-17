@@ -27,8 +27,7 @@ class KafkaRequest(BaseRequest):
         publishers = params["publishers"]
         publisher = publishers[self.kafka_key]
         source_mq_message = params["mq_message"]
-        message_key = params["message_key"]
-        publisher.send(data, message_key, self.topic_key, headers=self._get_new_headers(source_mq_message))
+        publisher.send(data, source_mq_message.key(), self.topic_key, headers=self._get_new_headers(source_mq_message))
 
     def __str__(self):
         return f"KafkaRequest: topic_key={self.topic_key} kafka_key={self.kafka_key}"
