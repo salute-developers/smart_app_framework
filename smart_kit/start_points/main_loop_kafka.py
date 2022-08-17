@@ -235,18 +235,12 @@ class MainLoop(BaseMainLoop):
 
                 # check_message_key
                 log_params = {"incremental_id": message.incremental_id, "uid": message.uid, "user": user}
-                message_key = self.get_str_message_key(mq_message.key(), log_params)
-                valid_key = self.get_valid_message_key(message)
+                message_key = self._get_str_message_key(mq_message.key(), log_params)
+                valid_key = self._get_valid_message_key(message)
                 if message_key != valid_key:
-                    self.log_fail_check_kafka_message_key(message_key, valid_key, log_params)
+                    self._log_fail_check_kafka_message_key(message_key, valid_key, log_params)
                     self.publishers[kafka_key].send(message_value, valid_key, topic_key, mq_message.headers())
-                    log(f"Kafka message with invalid Kafka message key '{message_key}' "
-                        f"resent again with a valid key: '{valid_key}'",
-                        params={log_const.KEY_NAME: "kafka_message_key_recovery",
-                                MESSAGE_ID_STR: log_params["incremental_id"],
-                                UID_STR: log_params["uid"]},
-                        user=user,
-                        level="WARNING")
+                    self._log_resent_message_replaced_message_key(message_key, valid_key, log_params)
 
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
@@ -366,8 +360,8 @@ class MainLoop(BaseMainLoop):
                 log("Error handling worker fail exception.",
                     level="ERROR", exc_info=True)
 
-    def log_fail_check_kafka_message_key(self, message_key, valid_key, log_params):
-        log(f"MainLoop.log_fail_check_kafka_message_key: Failed to check Kafka message key {message_key} != {valid_key}",
+    def _log_fail_check_kafka_message_key(self, message_key, valid_key, log_params):
+        log(f"MainLoop._log_fail_check_kafka_message_key: Failed to check Kafka message key {message_key} != {valid_key}",
             params={
                 log_const.KEY_NAME: "check_kafka_key_validation",
                 MESSAGE_ID_STR: log_params["incremental_id"],
@@ -375,22 +369,31 @@ class MainLoop(BaseMainLoop):
             }, user=log_params["user"],
             level="WARNING")
 
-    def get_valid_message_key(self, from_message: SmartAppFromMessage):
+    def _get_valid_message_key(self, from_message: SmartAppFromMessage):
         return "_".join([i for i in [from_message.channel, from_message.sub, from_message.uid] if i])
 
-    def get_str_message_key(self, message_key: Union[str, bytes], log_params: Dict[str, Any]):
+    def _get_str_message_key(self, message_key: Union[str, bytes], log_params: Dict[str, Any]):
         message_key = message_key or b""
         try:
             if isinstance(message_key, bytes):
                 message_key = message_key.decode()
         except UnicodeDecodeError:
-            log(f"MainLoop.get_str_message_key: Decode error of Kafka message key {message_key}",
+            log(f"MainLoop._get_str_message_key: Decode error of Kafka message key {message_key}",
                 params={log_const.KEY_NAME: "check_kafka_key_error",
                         MESSAGE_ID_STR: log_params["incremental_id"],
                         UID_STR: log_params["uid"]},
                 user=log_params["user"], level="ERROR")
 
         return message_key
+
+    def _log_resent_message_replaced_message_key(self, message_key, valid_key, log_params):
+        log(f"Kafka message with invalid Kafka message key '{message_key}' "
+            f"resent again with a valid key: '{valid_key}'",
+            params={log_const.KEY_NAME: "kafka_message_key_recovery",
+                    MESSAGE_ID_STR: log_params["incremental_id"],
+                    UID_STR: log_params["uid"]},
+            user=log_params["user"],
+            level="WARNING")
 
     def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: Message):
         kafka_broker_settings = self.settings["template_settings"].get(
