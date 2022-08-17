@@ -239,7 +239,8 @@ class MainLoop(BaseMainLoop):
                 valid_key = self._get_valid_message_key(message)
                 if message_key != valid_key:
                     self._log_fail_check_kafka_message_key(message_key, valid_key, log_params)
-                    self.publishers[kafka_key].send(message_value, valid_key, topic_key, mq_message.headers())
+                    self.publishers[kafka_key].send_to_topic(message_value, valid_key, mq_message.topic(),
+                                                             mq_message.headers())
                     self._log_resent_message_replaced_message_key(message_key, valid_key, log_params)
 
                 else:
