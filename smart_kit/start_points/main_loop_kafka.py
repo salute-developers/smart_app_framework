@@ -3,13 +3,16 @@ import json
 import time
 from collections import namedtuple
 from functools import lru_cache
-from typing import Union, Dict, Any
+from typing import Union
+from typing import Optional
 
-from confluent_kafka.cimpl import KafkaException, Message
+from confluent_kafka.cimpl import KafkaException, Message as KafkaMessage
 from lazy import lazy
 
 import scenarios.logging.logger_constants as log_const
+from core.configs.global_constants import KAFKA_REPLY_TOPIC
 from core.logging.logger_utils import log, UID_STR, MESSAGE_ID_STR
+from smart_kit.names.message_names import ANSWER_TO_USER, RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP
 
 from core.message.from_message import SmartAppFromMessage
 from core.model.base_user import BaseUser
@@ -116,7 +119,12 @@ class MainLoop(BaseMainLoop):
 
         for command in commands:
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
-            request.update_empty_items({"topic_key": topic_key, "kafka_key": kafka_key})
+            request.update_empty_items({
+                "kafka_key": kafka_key,
+                "topic_key": topic_key,
+                "topic": user.private_vars.get(KAFKA_REPLY_TOPIC) if command.name == ANSWER_TO_USER else None
+            })
+
             to_message = get_to_message(command.name)
             answer = to_message(command=command, message=message, request=request,
                                 masking_fields=self.masking_fields,
@@ -176,7 +184,7 @@ class MainLoop(BaseMainLoop):
                                     "message_key": mq_message.key(),
                                     "kafka_key": kafka_key,
                                     "uid": user.id,
-                                    "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                    "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                             level="WARNING")
 
                         continue
@@ -191,7 +199,7 @@ class MainLoop(BaseMainLoop):
                                 "message_partition": mq_message.partition(),
                                 "kafka_key": kafka_key,
                                 "uid": user.id,
-                                "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                         level="WARNING")
 
                     monitoring.counter_save_collision_tries_left(self.app_name)
@@ -204,11 +212,11 @@ class MainLoop(BaseMainLoop):
                                                      log_const.REQUEST_VALUE: str(mq_message.value())},
                     level="ERROR", exc_info=True)
 
-    def _get_topic_key(self, mq_message: Message, kafka_key):
+    def _get_topic_key(self, mq_message: KafkaMessage, kafka_key):
         topic_names_2_key = self._topic_names_2_key(kafka_key)
         return self.default_topic_key(kafka_key) or topic_names_2_key[mq_message.topic()]
 
-    def process_message(self, mq_message: Message, consumer, kafka_key, stats):
+    def process_message(self, mq_message: KafkaMessage, consumer, kafka_key, stats):
         topic_key = self._get_topic_key(mq_message, kafka_key)
 
         save_tries = 0
@@ -278,6 +286,20 @@ class MainLoop(BaseMainLoop):
                         user = self.load_user(db_uid, message)
                     monitoring.sampling_load_time(self.app_name, load_timer.secs)
                     stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+                    if KAFKA_REPLY_TOPIC in message.headers and \
+                            message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
+                        if user.private_vars.get(KAFKA_REPLY_TOPIC):
+                            log("MainLoop.iterate: kafka_replyTopic collision",
+                                params={log_const.KEY_NAME: "ignite_collision",
+                                        "db_uid": db_uid,
+                                        "message_key": mq_message.key(),
+                                        "message_partition": mq_message.partition(),
+                                        "kafka_key": kafka_key,
+                                        "uid": user.id,
+                                        "saved_topic": user.private_vars.get(KAFKA_REPLY_TOPIC),
+                                        "current_topic": message.headers[KAFKA_REPLY_TOPIC]},
+                                user=user, level="WARNING")
+                        user.private_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
                     with StatsTimer() as script_timer:
                         commands = self.model.answer(message, user)
 
@@ -301,7 +323,7 @@ class MainLoop(BaseMainLoop):
                                     "message_partition": mq_message.partition(),
                                     "kafka_key": kafka_key,
                                     "uid": user.id,
-                                    "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                                    "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                             level="WARNING")
                         continue
 
@@ -336,7 +358,7 @@ class MainLoop(BaseMainLoop):
                         "message_partition": mq_message.partition(),
                         "kafka_key": kafka_key,
                         "uid": user.id,
-                        "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                        "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                 level="WARNING")
             self.postprocessor.postprocess(user, message)
             monitoring.counter_save_collision_tries_left(self.app_name)
@@ -344,7 +366,7 @@ class MainLoop(BaseMainLoop):
 
     def iterate(self, kafka_key):
         consumer = self.consumers[kafka_key]
-        mq_message = None
+        mq_message: Optional[KafkaMessage] = None
         message_value = None
         try:
             mq_message = None
@@ -391,7 +413,7 @@ class MainLoop(BaseMainLoop):
 
         return message_key
 
-    def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: Message):
+    def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
         kafka_broker_settings = self.settings["template_settings"].get(
             "route_kafka_broker"
         ) or []
@@ -435,7 +457,7 @@ class MainLoop(BaseMainLoop):
     def masking_fields(self):
         return self.settings["template_settings"].get("masking_fields")
 
-    def save_behavior_timeouts(self, user, mq_message: Message, kafka_key):
+    def save_behavior_timeouts(self, user, mq_message: KafkaMessage, kafka_key):
         for i, (expire_time_us, callback_id) in enumerate(user.behaviors.get_behavior_timeouts()):
             # two behaviors can be created in one query, so we need add some salt to make theirs key unique
             unique_key = expire_time_us + i * 1e-5
