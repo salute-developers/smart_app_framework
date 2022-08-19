@@ -255,7 +255,7 @@ class MainLoop(BaseMainLoop):
                             "class_name": self.__class__.__name__
                         }, user=user,
                         level="WARNING")
-                    self.publishers[kafka_key].send_to_topic(message_value, valid_key, mq_message.topic(),
+                    self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, mq_message.topic(),
                                                              mq_message.headers())
                     log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
                         f"resent again with a valid key: '{valid_key}'",
