@@ -246,7 +246,7 @@ class MainLoop(BaseMainLoop):
                                                         uid=message.uid, user=user)
                 valid_key = self._get_valid_message_key(message)
                 if message_key != valid_key:
-                    log(f"MainLoop._log_fail_check_kafka_message_key: Failed to check Kafka message key {message_key} "
+                    log(f"%(class_name)s.process_message: Failed to check Kafka message key {message_key} "
                         f"!= {valid_key}",
                         params={
                             log_const.KEY_NAME: "check_kafka_key_validation",
