@@ -251,7 +251,7 @@ class MainLoop(BaseMainLoop):
                         params={
                             log_const.KEY_NAME: "check_kafka_key_validation",
                             MESSAGE_ID_STR: message.incremental_id,
-                            UID_STR: message.uid
+                            UID_STR: message.uid,
                             "class_name": self.__class__.__name__
                         }, user=user,
                         level="WARNING")
