@@ -261,7 +261,8 @@ class MainLoop(BaseMainLoop):
                         f"resent again with a valid key: '{valid_key}'",
                         params={log_const.KEY_NAME: "kafka_message_key_recovery",
                                 MESSAGE_ID_STR: message.incremental_id,
-                                UID_STR: message.uid},
+                                UID_STR: message.uid,
+                                "class_name": self.__class__.__name__},
                         user=user,
                         level="WARNING")
 
