@@ -46,7 +46,7 @@ class KafkaRequest(BaseRequest):
             }
             log("KafkaRequest: got no topic and no topic_key", params=log_params, level="ERROR")
 
-    def run(self, data, params=None):
+    def run(self, data, params):
         publishers = params["publishers"]
         publisher = publishers[self.kafka_key]
         self.send(data=data, publisher=publisher, source_mq_message=params["mq_message"])

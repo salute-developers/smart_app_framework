@@ -2,6 +2,7 @@
 import logging
 import os
 import time
+from typing import Union
 
 from confluent_kafka import Producer
 
@@ -21,11 +22,13 @@ class KafkaPublisher(BaseKafkaPublisher):
         if internal_log_path:
             debug_logger = logging.getLogger("debug_publisher")
             timestamp = time.strftime("_%d%m%Y_")
-            debug_logger.addHandler(logging.FileHandler("{}/kafka_publisher_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())))
+            debug_logger.addHandler(logging.FileHandler(
+                "{}/kafka_publisher_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())
+            ))
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def send(self, value, key=None, topic_key=None, headers=None):
+    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers=None):
         try:
             topic = self._config["topic"]
             if topic_key is not None:
