@@ -257,7 +257,7 @@ class MainLoop(BaseMainLoop):
                         level="WARNING")
                     self.publishers[kafka_key].send_to_topic(message_value, valid_key, mq_message.topic(),
                                                              mq_message.headers())
-                    log(f"Kafka message with invalid Kafka message key '{message_key}' "
+                    log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
                         f"resent again with a valid key: '{valid_key}'",
                         params={log_const.KEY_NAME: "kafka_message_key_recovery",
                                 MESSAGE_ID_STR: message.incremental_id,
