@@ -252,6 +252,7 @@ class MainLoop(BaseMainLoop):
                             log_const.KEY_NAME: "check_kafka_key_validation",
                             MESSAGE_ID_STR: message.incremental_id,
                             UID_STR: message.uid
+                            "class_name": self.__class__.__name__
                         }, user=user,
                         level="WARNING")
                     self.publishers[kafka_key].send_to_topic(message_value, valid_key, mq_message.topic(),
