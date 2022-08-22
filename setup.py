@@ -11,14 +11,14 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 def tf_version():
     if sys.platform == "darwin" and platform.machine() == "arm64":
-        return "tensorflow-macos==2.9.1"
+        return "tensorflow-macos>=2.7.0"
     elif sys.platform == "darwin" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
+        return "tensorflow>=2.7.0"
     elif sys.platform == "linux" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
+        return "tensorflow>=2.7.0"
     elif sys.platform == "linux" and platform.machine() == "aarch64":
-        return "tensorflow-aarch64==2.9.1"
-    return "tensorflow==2.9.1"
+        return "tensorflow-aarch64>=2.7.0"
+    return "tensorflow>=2.7.0"
 
 
 setup(
@@ -43,7 +43,7 @@ setup(
         "dill==0.3.3",
         "ics==0.6",
         "Jinja2==3.0.3",
-        "keras==2.9.0",
+        "keras>=2.7.0",
         "lazy",
         "nltk==3.5",
         "numpy",
