@@ -11,14 +11,14 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 def tf_version():
     if sys.platform == "darwin" and platform.machine() == "arm64":
-        return "tensorflow-macos==2.9.1"
+        return "tensorflow-macos>=2.6.0"
     elif sys.platform == "darwin" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
+        return "tensorflow>=2.6.0"
     elif sys.platform == "linux" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
+        return "tensorflow>=2.6.0"
     elif sys.platform == "linux" and platform.machine() == "aarch64":
-        return "tensorflow-aarch64==2.9.1"
-    return "tensorflow==2.9.1"
+        return "tensorflow-aarch64>=2.6.0"
+    return "tensorflow>=2.6.0"
 
 
 setup(
@@ -43,7 +43,7 @@ setup(
         "dill==0.3.3",
         "ics==0.6",
         "Jinja2==3.0.3",
-        "keras==2.9.0",
+        "keras>=2.6.0",
         "lazy",
         "nltk==3.5",
         "numpy",
@@ -59,7 +59,7 @@ setup(
         "redis",
         "requests==2.22.0",
         "rusenttokenize==0.0.5",
-        "scikit-learn==1.1.1",
+        "scikit-learn>=0.24.1",
         "setuptools",
         "tabulate",
         "tatsu==4.4.0",
@@ -71,8 +71,7 @@ setup(
         "protobuf<4.21.0"  # https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
     ],
     classifiers=[
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9"
     ]
 )
