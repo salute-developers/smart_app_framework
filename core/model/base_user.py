@@ -4,6 +4,7 @@ from typing import List
 
 from lazy import lazy
 
+from core.descriptions.descriptions import Descriptions
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
     LimitedQueuedHashableObjectsDescription
 from core.model.queued_objects.limited_queued_hashable_objects import LimitedQueuedHashableObjects, \
@@ -23,6 +24,7 @@ class BaseUser(Model):
     counters: Counters
     variables: Variables
     local_vars: Variables
+    descriptions: Descriptions
 
     def __init__(self, id, message, values, descriptions, load_error=False):
         self.id = id
