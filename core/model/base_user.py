@@ -1,5 +1,7 @@
 # coding: utf-8
 import json
+from typing import List
+
 from lazy import lazy
 
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
@@ -40,7 +42,7 @@ class BaseUser(Model):
         return BasicParametrizer(self, {})
 
     @property
-    def fields(self):
+    def fields(self) -> List[Field]:
         return [
             Field("counters", Counters),
             Field("last_action_ids", LimitedQueuedHashableObjectsItems, self.descriptions["last_action_ids"]),

@@ -3,17 +3,15 @@ from typing import Dict, Any, Union, Optional
 from unittest.mock import Mock, ANY
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
+from core.basic_models.actions.variable_actions import SetVariableAction, DeleteVariableAction, ClearVariablesAction
 from core.model.registered import registered_factories
 from scenarios.actions.action import (
     ChoiceScenarioAction,
     ClearCurrentScenarioAction,
     ClearCurrentScenarioFormAction,
     ClearScenarioByIdAction,
-    ClearVariablesAction,
     CompositeFillFieldAction,
-    DeleteVariableAction,
     FillFieldAction,
-    SetVariableAction,
     SelfServiceActionWithState,
     SaveBehaviorAction,
     ResetCurrentNodeAction,

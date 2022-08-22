@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 
 from core.basic_models.requirement.basic_requirements import Requirement
 from core.model.factory import build_factory, factory
@@ -11,7 +11,7 @@ ANSWER_TO_USER = "ANSWER_TO_USER"
 
 
 class SdkAnswerItem:
-    version: Optional[int]
+    version: int
     id: Optional[str]
     requirement: Requirement
 
@@ -26,33 +26,37 @@ class SdkAnswerItem:
         return {}
 
     @factory(Requirement)
-    def build_requirement(self):
+    def build_requirement(self) -> str:
         return self._requirement
 
 
 class TextSdkItem(SdkAnswerItem):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(TextSdkItem, self).__init__(items, id)
-        self.text = items['text']
+        self.text = items["text"]
 
 
 class BubbleText(TextSdkItem):
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(BubbleText, self).__init__(items, id)
         self.markdown = items.get("markdown", True)
 
-    def render(self, nodes: Dict[str, Any]):
-        return {"bubble": {"text": nodes.get(self.text, self.text), "markdown": self.markdown}}
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+        return {
+            "bubble": {
+                "text": nodes.get(self.text, self.text),
+                "markdown": self.markdown
+            }
+        }
 
 
 class ItemCard(TextSdkItem):
-    def render(self, nodes: Dict[str, Any]):
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
         return {"card": nodes.get(self.text, self.text)}
 
 
 class PronounceText(TextSdkItem):
-    def render(self, nodes: Dict[str, Any]):
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
         return {"pronounceText": nodes.get(self.text, self.text)}
 
 
@@ -61,9 +65,14 @@ class SuggestText(TextSdkItem):
         super(SuggestText, self).__init__(items, id)
         self.title = items["title"]
 
-    def render(self, nodes: Dict[str, Any]):
-        return {"title": nodes.get(self.title, self.title),
-                "action": {"text": nodes.get(self.text, self.text), "type": "text"}}
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, Union[str, Dict[str, str]]]:
+        return {
+            "title": nodes.get(self.title, self.title),
+            "action": {
+                "text": nodes.get(self.text, self.text),
+                "type": "text"
+            }
+        }
 
 
 class SuggestDeepLink(SdkAnswerItem):
@@ -72,9 +81,14 @@ class SuggestDeepLink(SdkAnswerItem):
         self.title = items["title"]
         self.deep_link = items["deep_link"]
 
-    def render(self, nodes: Dict[str, Any]):
-        return {"title": nodes.get(self.title, self.title),
-                "action": {"deep_link": nodes.get(self.deep_link, self.deep_link), "type": "deep_link"}}
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, Union[str, Dict[str, str]]]:
+        return {
+            "title": nodes.get(self.title, self.title),
+            "action": {
+                "deep_link": nodes.get(self.deep_link, self.deep_link),
+                "type": "deep_link"
+            }
+        }
 
 
 class RawItem(SdkAnswerItem):
@@ -83,5 +97,5 @@ class RawItem(SdkAnswerItem):
         self.key = items["key"]
         self.value = items["value"]
 
-    def render(self, nodes: Dict[str, Any]):
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
         return {self.key: nodes.get(self.value, self.value)}
