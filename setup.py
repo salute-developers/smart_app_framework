@@ -1,24 +1,9 @@
-import platform
-import sys
-
 from setuptools import find_packages, setup
 
 import versioneer
 
 with open("README.md", "r", encoding="utf-8") as file:
     long_description = file.read()
-
-
-def tf_version():
-    if sys.platform == "darwin" and platform.machine() == "arm64":
-        return "tensorflow-macos==2.9.1"
-    elif sys.platform == "darwin" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
-    elif sys.platform == "linux" and platform.machine() == "x86_64":
-        return "tensorflow==2.9.1"
-    elif sys.platform == "linux" and platform.machine() == "aarch64":
-        return "tensorflow-aarch64==2.9.1"
-    return "tensorflow==2.9.1"
 
 
 setup(
@@ -63,7 +48,6 @@ setup(
         "setuptools",
         "tabulate",
         "tatsu==4.4.0",
-        tf_version(),
         "timeout-decorator==0.4.1",
         "tqdm",
         "Twisted",

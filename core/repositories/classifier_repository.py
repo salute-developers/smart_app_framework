@@ -2,7 +2,6 @@ import os
 from collections import OrderedDict
 from typing import Callable, Any, Dict
 
-import tensorflow as tf
 from keras.utils.generic_utils import CustomObjectScope
 
 import scenarios.logging.logger_constants as scenarios_log_const
@@ -14,6 +13,7 @@ from core.repositories.base_repository import BaseRepository
 from core.repositories.dill_repository import DillRepository
 from core.repositories.folder_repository import FolderRepository
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
+from smart_kit.configs import settings
 
 CLASSIFIER_TYPES_MAP = OrderedDict({"scikit": SciKitClassifier, "skip": SkipClassifier, "external": ExternalClassifier})
 
@@ -67,7 +67,7 @@ class ClassifierRepository(BaseRepository):
         self._folder_repository.load()
         classifiers_dict = self._folder_repository.data
 
-        gpu_available = tf.test.is_gpu_available()
+        gpu_available = settings.Settings()["template_settings"].get("is_gpu_available", False)
         repository = None
 
         for classifier_key in classifiers_dict:
