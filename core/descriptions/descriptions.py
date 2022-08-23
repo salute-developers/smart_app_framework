@@ -15,10 +15,10 @@ def default_description_factory(x):
 class Descriptions:
     def __init__(self, registered_repositories: Dict[str, BaseRepository]) -> None:
         self.registered_repositories: Dict[str, BaseRepository] = registered_repositories
-        self._descriptions: Dict[str, DescriptionsItems] = {}
+        self._descriptions: dict = {}
 
-    def __getitem__(self, key: str) -> DescriptionsItems:
-        description_item: DescriptionsItems = self._descriptions.get(key)
+    def __getitem__(self, key: str) -> object:
+        description_item = self._descriptions.get(key)
         if description_item is None:
             repository: BaseRepository = self.registered_repositories[key]
             factory: Callable = registered_description_factories.get(key, default_description_factory)
