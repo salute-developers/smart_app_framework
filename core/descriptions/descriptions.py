@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import Dict, Callable
+from typing import Dict, Callable, Any
 
 from core.descriptions.descriptions_items import DescriptionsItems
 from core.model.registered import Registered
@@ -17,7 +17,7 @@ class Descriptions:
         self.registered_repositories: Dict[str, BaseRepository] = registered_repositories
         self._descriptions: dict = {}
 
-    def __getitem__(self, key: str) -> object:
+    def __getitem__(self, key: str) -> Any:
         description_item = self._descriptions.get(key)
         if description_item is None:
             repository: BaseRepository = self.registered_repositories[key]
