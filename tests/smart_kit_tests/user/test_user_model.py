@@ -11,7 +11,7 @@ class UserTest2(unittest.TestCase):
     def setUp(self):
         self.test_scenario1 = Mock('scenario')
         self.test_scenario1.scenario_description = "This is test scenario 1 desc"
-        self.test_scenario1.form_type = "any type 1"
+        self.test_scenario1.form_type = "any _type 1"
         self.test_id = 11
         self.test_message = PicklableMock()
         self.test_message.incremental_id = 123

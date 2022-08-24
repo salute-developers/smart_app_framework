@@ -94,7 +94,7 @@ class Num2Text:
         num = round(num, self.fractionals_num)
         int_num = int(num)
         if int_num == num:
-            return self.int2text(num, sex)
+            return self.int2text(int_num, sex)
         frac = int(str(round(abs(num) - abs(int_num), self.fractionals_num))[2:])
         if frac == 0:
             return self.int2text(round(num), sex)

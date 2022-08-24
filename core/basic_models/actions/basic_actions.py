@@ -57,7 +57,7 @@ class CommandAction(Action):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(CommandAction, self).__init__(items, id)
         items = items or {}
-        self.command = items.get("command")
+        self.command: Optional[str] = items.get("command")
         self.request_type = items.get("request_type") or self.DEFAULT_REQUEST_TYPE
         self.request_data = items.get("request_data")
 

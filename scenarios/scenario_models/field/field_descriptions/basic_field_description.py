@@ -19,7 +19,7 @@ class BasicFieldDescription:
     def __init__(self, items, id):
         self.id = id
         self.name = id
-        self.type = items.get("type")
+        self.type = items.get("_type")
         self._required = items.get("required", False)
         self._filler = items.get("filler")
         self.default_value = items.get("default_value")

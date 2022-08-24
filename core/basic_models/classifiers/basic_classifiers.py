@@ -32,7 +32,7 @@ class Classifier(ABC):
         self.threshold = self.settings.get("threshold", 0)
         self.intents = self.settings.get("intents", [])
         self.class_other = cls_const.OTHER_KEY
-        self._check_classifier_type(settings["type"])
+        self._check_classifier_type(settings["_type"])
 
     def _answer_template(self, intent: str, score: float, is_other: bool) -> Dict[str, Union[str, float, bool]]:
         # Любой классификатор должен возвращать отсортированный список наиболее вероятных вариантов из заданного
@@ -42,7 +42,7 @@ class Classifier(ABC):
 
     def _check_classifier_type(self, classifier_type: str) -> None:
         if classifier_type != self.CLASSIFIER_TYPE:
-            raise Exception(f"Inappropriate classifier type: {classifier_type}, it should be {self.CLASSIFIER_TYPE}")
+            raise Exception(f"Inappropriate classifier _type: {classifier_type}, it should be {self.CLASSIFIER_TYPE}")
 
     @abstractmethod
     def find_best_answer(
@@ -93,7 +93,7 @@ class SkipClassifier(Classifier):
 
     @staticmethod
     def get_nothing() -> Dict[str, Any]:
-        return {"type": "skip", "intents": []}
+        return {"_type": "skip", "intents": []}
 
 
 class ExternalClassifier(Classifier):
@@ -215,7 +215,7 @@ class SciKitClassifier(ExtendedClassifier):
     def _prediction(
             self,
             text_preprocessing_result: BaseTextPreprocessingResult,
-            vector: Optional[np.ndarray] = np.array([])
+            vector: np.ndarray = np.array([])
     ) -> List[Any]:
         if vector.size != 0:
             prediction_result = self.classifier.predict_proba(

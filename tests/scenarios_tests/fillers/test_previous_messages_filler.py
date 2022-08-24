@@ -19,7 +19,7 @@ class PreviousMessagesFillerTest(unittest.TestCase):
         registered_factories[FieldFillerDescription] = field_filler_factory
         field_filler_description["mock_filler"] = MockFiller
         expected = "first"
-        items = {"filler": {"type": "mock_filler", "result": expected}}
+        items = {"filler": {"_type": "mock_filler", "result": expected}}
         user = PicklableMock()
         user.preprocessing_messages_for_scenarios = PicklableMock()
         user.preprocessing_messages_for_scenarios.processed_items = [{}, {}, {}]
@@ -31,7 +31,7 @@ class PreviousMessagesFillerTest(unittest.TestCase):
         registered_factories[FieldFillerDescription] = field_filler_factory
         field_filler_description["mock_filler"] = MockFiller
         expected = "first"
-        items = {"filler": {"type": "mock_filler", "result": expected}, "count": 2}
+        items = {"filler": {"_type": "mock_filler", "result": expected}, "count": 2}
         user = PicklableMock()
         user.preprocessing_messages_for_scenarios = PicklableMock()
         user.preprocessing_messages_for_scenarios.processed_items = [{}, {}, {}]

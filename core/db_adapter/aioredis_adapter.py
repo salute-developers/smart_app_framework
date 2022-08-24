@@ -18,7 +18,7 @@ class AIORedisAdapter(DBAdapter):
         self._redis: typing.Optional[aioredis.Redis] = None
 
         try:
-            del self.config["type"]
+            del self.config["_type"]
         except KeyError:
             pass
 

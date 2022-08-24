@@ -28,7 +28,7 @@ class SmartPayCreateAction(SmartPayAction):
 
     Example::
         {
-            "type": "smartpay_create",
+            "_type": "smartpay_create",
             "behavior": "some_behavior", // обязательный параметр
             "smartpay_params": { // обязательноый параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#создание-счета)
                 "ptype": 1,
@@ -86,7 +86,7 @@ class SmartPayCreateAction(SmartPayAction):
                                         "value": "Å\u001e13622200005881"
                                     },
                                     {
-                                        "key": "_itemAttributes_agent_info.type",
+                                        "key": "_itemAttributes_agent_info._type",
                                         "value": "7"
                                     }
 
@@ -154,7 +154,7 @@ class SmartPayPerformAction(SmartPayAction):
 
     Example::
         {
-            "type": "smartpay_perform",
+            "_type": "smartpay_perform",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
             "smartpay_params": { // обязательный параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#проведение-платежа)
@@ -195,7 +195,7 @@ class SmartPayGetStatusAction(SmartPayAction):
     см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#получение-статуса
     Example::
         {
-            "type": "smartpay_get_status",
+            "_type": "smartpay_get_status",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
             "inv_status": "executed", // опциональный параметр
@@ -222,7 +222,7 @@ class SmartPayConfirmAction(SmartPayAction):
 
     Example::
         {
-            "type": "smartpay_confirm",
+            "_type": "smartpay_confirm",
             "invoice_id": "0", // обязательный параметр
             "smartpay_params": { // опциональный параметр, задаётся для неполной суммы (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#подтверждение-оплаты)
                 "invoice": {
@@ -261,7 +261,7 @@ class SmartPayDeleteAction(SmartPayAction):
     см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#отмена-счета
     Example::
         {
-            "type": "smartpay_delete",
+            "_type": "smartpay_delete",
             "behavior": "my_behavior", // обязательный параметр
             "invoice_id": "0" // обязательный параметр
         }
@@ -278,7 +278,7 @@ class SmartPayRefundAction(SmartPayAction):
 
     Example::
         {
-            "type": "smartpay_refund",
+            "_type": "smartpay_refund",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
             "smartpay_params": { // опциональный параметр, задаётся при частичном возврате (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#частичный-возврат-платежа)

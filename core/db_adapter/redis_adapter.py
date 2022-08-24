@@ -10,7 +10,7 @@ class RedisAdapter(DBAdapter):
         self._redis: typing.Optional[redis.Redis] = None
 
         try:
-            del self.config["type"]
+            del self.config["_type"]
         except KeyError:
             pass
 

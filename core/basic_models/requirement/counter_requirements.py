@@ -19,7 +19,7 @@ class CounterValueRequirement(ComparisonRequirement):
         self.key = items["key"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: Optional[Dict[str, Any]] = None) -> bool:
         counter = user.counters[self.key]
         return self.operator.compare(counter)
 
@@ -35,6 +35,6 @@ class CounterUpdateTimeRequirement(ComparisonRequirement):
         self.fallback_value = items.get("fallback_value") or False
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: Optional[Dict[str, Any]] = None) -> bool:
         _time = user.counters[self.key].update_time
         return self.operator.compare(time() - _time) if _time else self.fallback_value

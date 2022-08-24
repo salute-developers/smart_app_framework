@@ -21,7 +21,7 @@ class UserTest1(unittest.TestCase):
         self.test_items = {"123-ASDF": {"command": [], "no_empty_nodes": True}}
         self.test_scenario1 = Mock('scenario')
         self.test_scenario1.scenario_description = "This is test scenario 1 desc"
-        self.test_scenario1.form_type = "any type 1"
+        self.test_scenario1.form_type = "any _type 1"
         self.test_user2 = Mock('User')
         self.test_user2.message = Mock('Message')
         self.test_user2.descriptions = {"scenarios": {22: self.test_scenario1}}
@@ -32,7 +32,7 @@ class UserTest1(unittest.TestCase):
         self.test_user3.descriptions = {"scenarios": {22: self.test_scenario1}}
         self.test_user3.last_scenarios = Mock('last scenario')
         self.test_user3.last_scenarios.last_scenario_name = 33
-        self.test_forms = {'any type 1': 'any form 1', 'any type 2': 'any form 2'}
+        self.test_forms = {'any _type 1': 'any form 1', 'any _type 2': 'any form 2'}
         self.test_user4 = Mock('User')
         self.test_user4.forms = Mock('Forms')
         self.test_user4.forms.collect_form_fields = lambda: self.test_forms
@@ -72,11 +72,11 @@ class UserTest1(unittest.TestCase):
     def test_parametrizer_get_user_data(self):
         obj1 = parametrizer.Parametrizer(self.test_user4, self.test_items)
         answer1 = {'payload': 'any payload', 'uuid': '1234-5678-9102', 'forms': {
-            'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
+            'any _type 1': 'any form 1', 'any _type 2': 'any form 2'}, 'main_form': 'any form 1',
                    'text_preprocessing_result': {}, 'variables': [1, 2, 3], 'counters': 3, 'scenario_id': 22,
                    'gender_sensitive_text': '', 'local_vars': {}, 'settings': {}}
         answer2 = {'payload': 'any payload', 'uuid': '1234-5678-9102', 'forms': {
-            'any type 1': 'any form 1', 'any type 2': 'any form 2'}, 'main_form': 'any form 1',
+            'any _type 1': 'any form 1', 'any _type 2': 'any form 2'}, 'main_form': 'any form 1',
                    'text_preprocessing_result': {1: 'any text'}, 'variables': [1, 2, 3], 'counters': 3,
                    'scenario_id': 22, 'gender_sensitive_text': '', 'local_vars': {}, 'settings': {}}
         result1 = obj1._get_user_data()

@@ -172,7 +172,7 @@ class RequirementTest(unittest.TestCase):
         counter = PicklableMock()
         counter.__gt__ = Mock(return_value=True)
         user.counters = {"test": counter}
-        requirement = CounterValueRequirement({"operator": {"type": "equal", "amount": 2}, "key": "test"})
+        requirement = CounterValueRequirement({"operator": {"_type": "equal", "amount": 2}, "key": "test"})
         self.assertTrue(requirement.check(None, user))
 
     def test_counter_time_requirement(self):
@@ -181,7 +181,7 @@ class RequirementTest(unittest.TestCase):
         counter = PicklableMock()
         counter.update_time = int(time()) - 10
         user.counters = {"test": counter}
-        requirement = CounterUpdateTimeRequirement({"operator": {"type": "more_or_equal", "amount": 5}, "key": "test"})
+        requirement = CounterUpdateTimeRequirement({"operator": {"_type": "more_or_equal", "amount": 5}, "key": "test"})
         self.assertTrue(requirement.check(None, user))
 
     def test_template_req_true(self):
@@ -249,7 +249,7 @@ class RequirementTest(unittest.TestCase):
         requirement = TimeRequirement(
             {
                 "operator": {
-                    "type": "more",
+                    "_type": "more",
                     "amount": "17:00:00",
                 }
             }
@@ -271,7 +271,7 @@ class RequirementTest(unittest.TestCase):
         requirement = TimeRequirement(
             {
                 "operator": {
-                    "type": "more",
+                    "_type": "more",
                     "amount": "18:00:00",
                 }
             }
@@ -363,7 +363,7 @@ class RequirementTest(unittest.TestCase):
         """Тест кейз проверяет что условие возвращает True, если результат классификации запроса относится к одной
         из указанных категорий, прошедших порог, но не равной классу other.
         """
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {"_type": "classifier", "classifier": {"_type": "external", "classifier": "hello_scenario_classifier"}}
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -373,7 +373,7 @@ class RequirementTest(unittest.TestCase):
     @patch.object(ExternalClassifier, "find_best_answer", return_value=[])
     def test_classifier_requirement_false(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если модель классификации не вернула ответ."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {"_type": "classifier", "classifier": {"_type": "external", "classifier": "hello_scenario_classifier"}}
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -383,7 +383,7 @@ class RequirementTest(unittest.TestCase):
     @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "other", "score": 1.0, "other": True}])
     def test_classifier_requirement_false_if_class_other(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если наиболее вероятный вариант есть класс other."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {"_type": "classifier", "classifier": {"_type": "external", "classifier": "hello_scenario_classifier"}}
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -478,14 +478,14 @@ class RequirementTest(unittest.TestCase):
 
     def test_phone_number_number_requirement_true(self):
         """Тест кейз проверяет что условие возвращает True, т.к кол-во номеров телефонов больше заданного."""
-        req = PhoneNumberNumberRequirement({"operator": {"type": "more", "amount": 1}})
+        req = PhoneNumberNumberRequirement({"operator": {"_type": "more", "amount": 1}})
         text_preprocessing_result = PicklableMock()
         text_preprocessing_result.get_token_values_by_type.return_value = ["89030478799", "89092534523"]
         self.assertTrue(req.check(text_preprocessing_result, PicklableMock()))
 
     def test_phone_number_number_requirement_false(self):
         """Тест кейз проверяет что условие возвращает False, т.к кол-во номеров телефонов НЕ больше заданного."""
-        req = PhoneNumberNumberRequirement({"operator": {"type": "more", "amount": 10}})
+        req = PhoneNumberNumberRequirement({"operator": {"_type": "more", "amount": 10}})
         text_preprocessing_result = PicklableMock()
         text_preprocessing_result.get_token_values_by_type.return_value = ["89030478799"]
         self.assertFalse(req.check(text_preprocessing_result, PicklableMock()))

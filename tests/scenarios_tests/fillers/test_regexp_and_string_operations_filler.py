@@ -49,21 +49,21 @@ class TestRegexpStringOperationsFiller(TestCase):
 
     def test_extract_upper(self):
         field_value = "1-rsar09a"
-        self.items["operations"] = [{"type":"upper"}]
+        self.items["operations"] = [{"_type":"upper"}]
 
         result = self._test_extract(field_value)
         self.assertEqual(field_value.upper(), result)
 
     def test_extract_rstrip(self):
         field_value = "1-RSAR09A !)"
-        self.items["operations"] = [{"type":"rstrip", "amount": "!) "}]
+        self.items["operations"] = [{"_type":"rstrip", "amount": "!) "}]
 
         result = self._test_extract(field_value)
         self.assertEqual(field_value.rstrip("!) "), result)
 
     def test_extract_upper_rstrip(self):
         field_value = "1-rsar09a !)"
-        self.items["operations"] = [ {"type":"upper"}, {"type":"rstrip", "amount": "!) "} ]
+        self.items["operations"] = [ {"_type":"upper"}, {"_type":"rstrip", "amount": "!) "} ]
 
         result = self._test_extract(field_value)
         self.assertEqual(field_value.upper().rstrip("!) "), result)

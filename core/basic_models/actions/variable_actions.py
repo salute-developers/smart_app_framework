@@ -59,7 +59,7 @@ class SetVariableAction(BaseSetVariableAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(SetVariableAction, self).__init__(items, id)
-        self.ttl: int = items.get("ttl")
+        self.ttl: Optional[int] = items.get("ttl")
 
     def _set(self, user, value):
         user.variables.set(self.key, value, self.ttl)
@@ -81,7 +81,7 @@ class DeleteVariableAction(Action):
 class ClearVariablesAction(Action):
     version: Optional[int]
 
-    def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
+    def __init__(self, items: Optional[Dict[str, Any]] = None, id: Optional[str] = None):
         super(ClearVariablesAction, self).__init__(items, id)
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,

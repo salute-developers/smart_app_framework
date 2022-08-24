@@ -8,7 +8,7 @@ from smart_kit.utils.picklable_mock import PicklableMock
 
 class TestScenarioDesc(dict):
     def form_type(self):
-        return 'type'
+        return '_type'
 
 
 class HandlerTest6(unittest.TestCase):

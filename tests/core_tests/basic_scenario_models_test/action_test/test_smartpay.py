@@ -84,7 +84,7 @@ class SmartPayActionTest(unittest.TestCase):
                                         "value": "13622200005881"
                                     },
                                     {
-                                        "key": "_itemAttributes_agent_info.type",
+                                        "key": "_itemAttributes_agent_info._type",
                                         "value": "7"
                                     }
 

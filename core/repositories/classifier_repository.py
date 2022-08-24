@@ -21,11 +21,11 @@ CLASSIFIER_TYPES_MAP = OrderedDict({"scikit": SciKitClassifier, "skip": SkipClas
 def classifiers_initial_launch(classifiers: Dict[str, Any]) -> None:
     # external классификаторы должны запускаться последними
     type_order = [_type for _type in CLASSIFIER_TYPES_MAP]
-    sorted_cls_by_type_order = OrderedDict(sorted(classifiers.items(), key=lambda i: type_order.index(i[1]["type"])))
+    sorted_cls_by_type_order = OrderedDict(sorted(classifiers.items(), key=lambda i: type_order.index(i[1]["_type"])))
 
     text_preprocessing_result = TextPreprocessingResult({})
     for cls_name, cls_settings in sorted_cls_by_type_order.items():
-        cls = CLASSIFIER_TYPES_MAP[cls_settings["type"]](cls_settings)
+        cls = CLASSIFIER_TYPES_MAP[cls_settings["_type"]](cls_settings)
         cls.initial_launch(text_preprocessing_result, sorted_cls_by_type_order)
         sorted_cls_by_type_order[cls_name] = cls
 
@@ -78,10 +78,10 @@ class ClassifierRepository(BaseRepository):
             if classifier_params.get("is_gpu") and gpu_available is False:
                 continue
 
-            classifier_type = classifier_params["type"]
+            classifier_type = classifier_params["_type"]
             if classifier_type not in self._supported_classifiers_types:
                 log(
-                    message=f"classifier_repository.load: Invalid classifier type for classifier "
+                    message=f"classifier_repository.load: Invalid classifier _type for classifier "
                             f"%({scenarios_log_const.CLASSIFIER_VALUE})s",
                     params={scenarios_log_const.KEY_NAME: scenarios_log_const.STARTUP_VALUE,
                             scenarios_log_const.CLASSIFIER_VALUE: classifier_key},

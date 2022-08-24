@@ -163,7 +163,7 @@ class TestClassifierRepository(unittest.TestCase):
         with patch(
                 "core.repositories.folder_repository.FolderRepository.data",
                 new_callable=PropertyMock,
-                return_value={"test_classifier": {"type": "scikit", "path": self.temp_model_file_name, "intents": []}}
+                return_value={"test_classifier": {"_type": "scikit", "path": self.temp_model_file_name, "intents": []}}
         ) as mock:
             with patch("core.repositories.folder_repository.FolderRepository.load") as load_mock:
                 with patch("core.repositories.classifier_repository.classifiers_initial_launch") as initial_launch_mock:
@@ -174,7 +174,7 @@ class TestClassifierRepository(unittest.TestCase):
                         "test_classifier": {
                             "classifier": {"tests": "success"},
                             "path": self.temp_model_file_name,
-                            "type": "scikit",
+                            "_type": "scikit",
                             "intents": []
                         }
                     }
@@ -183,7 +183,7 @@ class TestClassifierRepository(unittest.TestCase):
     def test_load_skip_classifier(self):
         """Тест кейз на проверку загрузки skip классификатора, для этого типа классификаторов сам
         файл модели не предусматривается."""
-        expected_return_obj = {"test_classifier": {"type": "skip", "intents": []}}
+        expected_return_obj = {"test_classifier": {"_type": "skip", "intents": []}}
 
         with patch("core.repositories.folder_repository.FolderRepository.data", new_callable=PropertyMock,
                    return_value=expected_return_obj) as mock_folder_data:
@@ -196,8 +196,8 @@ class TestClassifierRepository(unittest.TestCase):
     def test_load_external_classifier(self):
         """Тест кейз на проверку загрузки external классификатора."""
         expected_return_obj = {
-            "test_classifier": {"type": "external", "classifier": "another_test_classifier"},
-            "another_test_classifier": {"type": "scikit", "path": self.temp_model_file_name, "intents": []}
+            "test_classifier": {"_type": "external", "classifier": "another_test_classifier"},
+            "another_test_classifier": {"_type": "scikit", "path": self.temp_model_file_name, "intents": []}
         }
 
         with patch("core.repositories.folder_repository.FolderRepository.data", new_callable=PropertyMock,

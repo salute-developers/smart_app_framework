@@ -21,6 +21,6 @@ class ExternalRequirement(Requirement):
         self.requirement = items["requirement"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: Optional[Dict[str, Any]] = None) -> bool:
         requirement = user.descriptions["external_requirements"][self.requirement]
         return requirement.check(text_preprocessing_result, user, params)

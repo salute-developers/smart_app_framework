@@ -20,7 +20,7 @@ class AIORedisSentinelAdapter(DBAdapter):
         self.socket_timeout = None
 
         try:
-            del self.config["type"]
+            del self.config["_type"]
         except KeyError:
             pass
 

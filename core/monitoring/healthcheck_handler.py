@@ -8,7 +8,7 @@ from core.utils.memstats import get_meminfo, show_growth, show_most_common_types
 
 
 def add_headers(request, response_text):
-    request.responseHeaders.addRawHeader(b"content-type", CONTENT_TYPE_LATEST.encode())
+    request.responseHeaders.addRawHeader(b"content-_type", CONTENT_TYPE_LATEST.encode())
     request.responseHeaders.addRawHeader(b"content-length", str(len(response_text)).encode())
 
 

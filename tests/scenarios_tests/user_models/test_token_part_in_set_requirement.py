@@ -8,7 +8,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_false(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "locality_type",
               "values": ["DISTRICT", "REGION"]
             }
@@ -27,7 +27,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_true(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "locality_type",
               "values": ["DISTRICT", "CITY"]
             }
@@ -46,7 +46,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False_double_empty(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "locality_type",
               "values": []
             }
@@ -65,7 +65,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False_empty_val_none(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "locality_type",
               "values": []
             }
@@ -84,7 +84,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False_string(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "value",
               "values": 'cba'
             }
@@ -102,7 +102,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": "country_hidden",
               "values": [1, 2, 3]
             }
@@ -120,7 +120,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False_val_int(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": 'capital',
               "values": [-9.23083]
             }
@@ -138,7 +138,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_True_arr(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": 'timezone',
               "values": [[[None, 1.0]]]
             }
@@ -156,7 +156,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_token_part_in_set_requirement_equal_False_arr(self):
         requirement_items ={
-              "type": "token_part_in_set",
+              "_type": "token_part_in_set",
               "part": 'timezone',
               "values": [[[1.0, None]]]
             }

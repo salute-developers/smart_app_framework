@@ -22,7 +22,7 @@ LOG_STORE_FOR = "log_store_for"
 
 class LoggerMessageCreator:
     ART_NAMES = [
-        "channel", "type", "device_channel", "device_channel_version", "device_platform", "group",
+        "channel", "_type", "device_channel", "device_channel_version", "device_platform", "group",
         "device_platform_version", "device_platform_client_type", "csa_profile_id", "test_deploy"
     ]
 

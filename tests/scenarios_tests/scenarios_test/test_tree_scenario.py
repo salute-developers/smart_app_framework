@@ -45,7 +45,7 @@ class TestTreeScenario(TestCase):
         form_type = "form for doing smth"
         internal_form_key = "my form key"
 
-        node_mock = {"form_key": internal_form_key, "actions": [{"type": "test", "command": "jump", "nodes": {}}]}
+        node_mock = {"form_key": internal_form_key, "actions": [{"_type": "test", "command": "jump", "nodes": {}}]}
 
         items = {"channels": "web", "form": form_type, "start_node_key": "node_1",
                  "scenario_nodes": {"node_1": node_mock}}
@@ -102,10 +102,10 @@ class TestTreeScenario(TestCase):
         form_type = "form for doing smth"
         internal_form_key = "my form key"
 
-        node_mock = {"form_key": internal_form_key, "actions": [{"type": "test", "command": "jump", "nodes": {}}]}
+        node_mock = {"form_key": internal_form_key, "actions": [{"_type": "test", "command": "jump", "nodes": {}}]}
 
         items = {"channels": "web", "form": form_type, "start_node_key": "node_1",
-                 "scenario_nodes": {"node_1": node_mock}, "actions": [{"type": "success"}]}
+                 "scenario_nodes": {"node_1": node_mock}, "actions": [{"_type": "success"}]}
 
         field_descriptor = PicklableMock(name="field_descriptor_mock")
         field_descriptor.filler.extract = PicklableMock(name="my_field_value_1", return_value=61)

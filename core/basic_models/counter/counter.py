@@ -1,5 +1,5 @@
 from time import time
-from typing import Dict
+from typing import Dict, Optional
 
 
 class Counter:
@@ -69,7 +69,7 @@ class Counter:
         return value
 
     @property
-    def raw(self) -> Dict[str, int]:
+    def raw(self) -> Optional[Dict[str, Optional[int]]]:
         if self.value is not None:
             return {
                 "value": self.value,

@@ -20,7 +20,7 @@ class SmartGeoAction(StringAction):
     где `from smart_kit.start_points.main_loop_kafka import MainLoop`.
     ```
     {
-      "type": "smart_geo",
+      "_type": "smart_geo",
       "behavior": "smart_geo_behavior"
     }
     ```

@@ -13,7 +13,7 @@ class ScenarioHistoryTest(TestCase):
             'scenario_version': 'version',
             'node': 'node',
             'results': 'true',
-            'type': 'type',
+            '_type': '_type',
             'content': {'foo': 'bar'}
         }
         event = Event(**item)
@@ -22,7 +22,7 @@ class ScenarioHistoryTest(TestCase):
         self.assertEqual(event.scenario_version, item['scenario_version'])
         self.assertEqual(event.node, item['node'])
         self.assertEqual(event.results, item['results'])
-        self.assertEqual(event.type, item['type'])
+        self.assertEqual(event.type, item['_type'])
         self.assertDictEqual(event.content, item['content'])
 
     def test_event_to_dict(self):
@@ -31,7 +31,7 @@ class ScenarioHistoryTest(TestCase):
             'scenario_version': 'version',
             'node': 'node',
             'results': 'true',
-            'type': 'type',
+            '_type': '_type',
             'content': {'foo': 'bar'},
             'created_time': time()
         }
@@ -42,7 +42,7 @@ class ScenarioHistoryTest(TestCase):
     def test_history_add_event(self):
         descriptions = PicklableMock()
         item = {
-            'type': 'event_type',
+            '_type': 'event_type',
             'content': {'foo': 'bar'}
         }
         history = History({}, descriptions, None)
@@ -58,11 +58,11 @@ class ScenarioHistoryTest(TestCase):
         items = {
             'events': [
                 {
-                    'type': 'event_type_1',
+                    '_type': 'event_type_1',
                     'content': {'foo': 'bar'}
                 },
                 {
-                    'type': 'event_type_2',
+                    '_type': 'event_type_2',
                     'content': {'foo': 'bar'}
                 }
             ]
@@ -79,7 +79,7 @@ class ScenarioHistoryTest(TestCase):
         items = {
             'events': [
                 {
-                    'type': 'event_type_1',
+                    '_type': 'event_type_1',
                     'content': {'foo': 'bar'},
                     'created_time': now
                 }
@@ -88,7 +88,7 @@ class ScenarioHistoryTest(TestCase):
         expected = {
             'events': [
                 {
-                    'type': 'event_type_1',
+                    '_type': 'event_type_1',
                     'content': {'foo': 'bar'},
                     'node': None,
                     'results': None,
@@ -110,12 +110,12 @@ class ScenarioHistoryTest(TestCase):
         items = {
             'events': [
                 {
-                    'type': 'event_type_1',
+                    '_type': 'event_type_1',
                     'content': {'foo': 'bar'},
                     'created_time': now - 1
                 },
                 {
-                    'type': 'event_type_2',
+                    '_type': 'event_type_2',
                     'content': {'foo': 'bar'},
                     'created_time': now - 5
                 }
@@ -128,7 +128,7 @@ class ScenarioHistoryTest(TestCase):
 
         history_raw = history.raw
         events_raw = history_raw["events"]
-        event_keys = {event_raw.get("type") for event_raw in events_raw}
+        event_keys = {event_raw.get("_type") for event_raw in events_raw}
 
         self.assertSetEqual(event_keys, expected_keys)
 
@@ -166,7 +166,7 @@ class ScenarioHistoryTest(TestCase):
         items = {
             'events': [
                 {
-                    'type': 'field_event',
+                    '_type': 'field_event',
                     'scenario': 'name',
                     'node': 'node',
                     'results': 'filled',

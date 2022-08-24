@@ -177,7 +177,7 @@ class CLInterface(cmd.Cmd):
 
         for answer in answers:
             ans = answer.raw
-            print("{}\nrequest type: {}\n".format(self.format_answer_value(ans), answer.request_type))
+            print("{}\nrequest _type: {}\n".format(self.format_answer_value(ans), answer.request_type))
             if ans["messageName"] == "ANSWER_TO_USER":
                 params = ans["payload"]
                 intent = params.get("intent")

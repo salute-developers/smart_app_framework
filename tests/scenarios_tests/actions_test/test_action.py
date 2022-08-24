@@ -434,7 +434,7 @@ class ChoiceScenarioActionTest(unittest.TestCase):
                     "requirement": {"cond": True}
                 }
             ],
-            "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
+            "else_action": {"_type": "test", "result": "ELSE ACTION IS DONE"}
         }
         expected_scen_result = "test_N_done"
         real_scen_result = self.mock_and_perform_action(
@@ -471,7 +471,7 @@ class ChoiceScenarioActionTest(unittest.TestCase):
                     "requirement": {"cond": False}
                 }
             ],
-            "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
+            "else_action": {"_type": "test", "result": "ELSE ACTION IS DONE"}
         }
         expected_scen_result = "ELSE ACTION IS DONE"
         real_scen_result = self.mock_and_perform_action(test_items, expected_result=expected_scen_result)
@@ -643,12 +643,12 @@ class AddHistoryEventActionTest(unittest.TestCase):
         scenario.version = '1.0'
         self.user.descriptions = {'scenarios': {'test_scenario': scenario}}
         items = {
-            'event_type': 'type',
+            'event_type': '_type',
             'event_content': {'foo': 'bar'},
             'results': 'result'
         }
         expected = Event(
-            type='type',
+            type='_type',
             results='result',
             content={'foo': 'bar'},
             scenario='name',
@@ -664,7 +664,7 @@ class AddHistoryEventActionTest(unittest.TestCase):
     def test_action_with_empty_scenario(self):
         self.user.descriptions = {'scenarios': {}}
         items = {
-            'event_type': 'type',
+            'event_type': '_type',
             'event_content': {'foo': 'bar'},
             'results': 'result'
         }
@@ -680,12 +680,12 @@ class AddHistoryEventActionTest(unittest.TestCase):
         scenario.version = '1.0'
         self.user.descriptions = {'scenarios': {'test_scenario': scenario}}
         items = {
-            'event_type': 'type',
+            'event_type': '_type',
             'event_content': {'field_1': '{{ main_form.field_1 }}'},
             'results': '{{ message.name }}'
         }
         expected = Event(
-            type='type',
+            type='_type',
             results='CLIENT_INFO_RESPONSE',
             content={'field_1': 'value_1'},
             scenario='name',
@@ -702,7 +702,7 @@ class AddHistoryEventActionTest(unittest.TestCase):
 class SmartGeoActionTest(unittest.TestCase):
 
     def setUp(self):
-        items = {"type": "smart_geo"}
+        items = {"_type": "smart_geo"}
         self.smart_geo_action = SmartGeoAction(items)
 
     def test_action_send_request(self):

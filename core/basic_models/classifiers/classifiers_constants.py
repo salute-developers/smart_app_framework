@@ -15,4 +15,4 @@ INTENT_RECOGNIZER_ANSWER_KEY = "answer"
 INTENT_RECOGNIZER_OTHER_KEY = "other"
 
 # Параметры, наличие которых обязательно в конфиге любого классификатора
-REQUIRED_CONFIG_PARAMS = frozenset(["type"])
+REQUIRED_CONFIG_PARAMS = frozenset(["_type"])

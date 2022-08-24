@@ -10,7 +10,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_type_cast_int(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "int",
             "template": "{{ input ** 2 }}"
         })
@@ -18,7 +18,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_type_cast_json(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "json",
             "template": "{{ input }}"
         })
@@ -26,7 +26,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_support_templates(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "support_templates": {
                 "name": "{{ personInfo.name|capitalize }}",
                 "surname": "{{ personInfo.surname|capitalize }}"
@@ -41,7 +41,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_bool_cast_false(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "bool",
             "template": "False"
         })
@@ -49,7 +49,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_bool_cast_false_lowercase(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "bool",
             "template": "false"
         })
@@ -57,7 +57,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_bool_cast_true(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "bool",
             "template": "True"
         })
@@ -65,7 +65,7 @@ class TestUnifiedTemplate(TestCase):
 
     def test_bool_cast_true_lowercase(self):
         template = UnifiedTemplate({
-            "type": UNIFIED_TEMPLATE_TYPE_NAME,
+            "_type": UNIFIED_TEMPLATE_TYPE_NAME,
             "loader": "bool",
             "template": "true"
         })

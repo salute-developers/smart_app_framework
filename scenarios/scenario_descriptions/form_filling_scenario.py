@@ -99,7 +99,7 @@ class FormFillingScenario(BaseScenario):
         callback_id = user.message.callback_id
         action_params = user.behaviors.get_callback_action_params(callback_id) or {}
         request_field = action_params.get(REQUEST_FIELD)
-        if request_field and request_field["type"] == "integration":
+        if request_field and request_field["_type"] == "integration":
             field = form.fields[request_field["id"]]
             field_descr = form.description.fields[request_field["id"]]
             if field.available:
@@ -159,7 +159,7 @@ class FormFillingScenario(BaseScenario):
             }
             message = "Ask question on field: %(field)s"
             log(message, user, params)
-            action_params[REQUEST_FIELD] = {"type": field.description.type, "id": field.description.id}
+            action_params[REQUEST_FIELD] = {"_type": field.description.type, "id": field.description.id}
             action_messages = self.get_action_results(user, text_preprocessing_result, actions, action_params)
         else:
             actions = reply_actions

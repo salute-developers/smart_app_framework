@@ -33,7 +33,7 @@ class SdkAnswerItem:
 class TextSdkItem(SdkAnswerItem):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(TextSdkItem, self).__init__(items, id)
-        self.text = items["text"]
+        self.text: str = items["text"]
 
 
 class BubbleText(TextSdkItem):
@@ -41,7 +41,7 @@ class BubbleText(TextSdkItem):
         super(BubbleText, self).__init__(items, id)
         self.markdown = items.get("markdown", True)
 
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+    def render(self, nodes: Dict[str, Any]) -> Dict[str, Dict[str, Union[str, bool]]]:
         return {
             "bubble": {
                 "text": nodes.get(self.text, self.text),
@@ -70,7 +70,7 @@ class SuggestText(TextSdkItem):
             "title": nodes.get(self.title, self.title),
             "action": {
                 "text": nodes.get(self.text, self.text),
-                "type": "text"
+                "_type": "text"
             }
         }
 
@@ -86,7 +86,7 @@ class SuggestDeepLink(SdkAnswerItem):
             "title": nodes.get(self.title, self.title),
             "action": {
                 "deep_link": nodes.get(self.deep_link, self.deep_link),
-                "type": "deep_link"
+                "_type": "deep_link"
             }
         }
 

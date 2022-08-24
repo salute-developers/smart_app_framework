@@ -27,8 +27,8 @@ class TestCompositeFiller(TestCase):
         expected = "first"
         items = {
             "fillers": [
-                {"type": "mock_filler", "result": expected},
-                {"type": "mock_filler", "result": "second"}
+                {"_type": "mock_filler", "result": expected},
+                {"_type": "mock_filler", "result": "second"}
             ]
         }
         filler = CompositeFiller(items)
@@ -39,8 +39,8 @@ class TestCompositeFiller(TestCase):
         expected = "second"
         items = {
             "fillers": [
-                {"type": "mock_filler"},
-                {"type": "mock_filler", "result": expected}
+                {"_type": "mock_filler"},
+                {"_type": "mock_filler", "result": expected}
             ]
         }
         filler = CompositeFiller(items)
@@ -50,8 +50,8 @@ class TestCompositeFiller(TestCase):
     def test_not_fit(self):
         items = {
             "fillers": [
-                {"type": "mock_filler"},
-                {"type": "mock_filler"}
+                {"_type": "mock_filler"},
+                {"_type": "mock_filler"}
             ]
         }
         filler = CompositeFiller(items)

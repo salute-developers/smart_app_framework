@@ -16,7 +16,7 @@ class GiveMeMemoryAction(StringAction):
     """
     Example::
         {
-            "type": "give_me_memory",
+            "_type": "give_me_memory",
             "behavior": "client_info_request",
             "nodes": {
                 "memory": {
@@ -28,12 +28,12 @@ class GiveMeMemoryAction(StringAction):
                     ]
                 },
                 "profileEmployee": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ 0 }}",
                     "loader": "json"
                 },
                 "tokenType": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ 0 }}",
                     "loader": "json"
                 }
@@ -70,7 +70,7 @@ class GiveMeMemoryAction(StringAction):
         }
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> [List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
@@ -85,10 +85,10 @@ class RememberThisAction(StringAction):
     """
     Example::
       {
-        "type": "remember_this",
+        "_type": "remember_this",
         "nodes": {
           "clientIds": {
-            "type": "unified_template",
+            "_type": "unified_template",
             "template": "{{ 0 }}",
             "loader": "json"
           },
@@ -99,7 +99,7 @@ class RememberThisAction(StringAction):
                 {
                   "tag": "historyInfo",
                   "action": {
-                    "type": "upsert",
+                    "_type": "upsert",
                     "params": {
                       "operation": [
                         {

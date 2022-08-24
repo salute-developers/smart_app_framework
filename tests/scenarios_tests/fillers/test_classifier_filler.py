@@ -10,9 +10,9 @@ class TestClassifierFiller(TestCase):
 
     def setUp(self):
         test_items = {
-            "type": "classifier",
+            "_type": "classifier",
             "intents": ["да", "нет"],
-            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}
+            "classifier": {"_type": "external", "classifier": "hello_scenario_classifier"}
         }
         self.filler = ClassifierFiller(test_items)
 
@@ -43,9 +43,9 @@ class TestClassifierFillerMeta(TestCase):
 
     def setUp(self):
         test_items = {
-            "type": "classifier_meta",
+            "_type": "classifier_meta",
             "intents": ["да", "нет"],
-            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}
+            "classifier": {"_type": "external", "classifier": "hello_scenario_classifier"}
         }
         self.filler_meta = ClassifierFillerMeta(test_items)
 

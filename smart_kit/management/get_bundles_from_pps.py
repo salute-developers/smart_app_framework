@@ -57,7 +57,7 @@ class GetBundleCommand:
                 "payload": {
                     "items_to_pps": {
                         bundle_name: {
-                            "type": "text",
+                            "_type": "text",
                             "key": key,
                             "text": text,
                             "params": {}

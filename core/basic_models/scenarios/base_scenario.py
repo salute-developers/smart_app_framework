@@ -31,7 +31,7 @@ class BaseScenario:
     def __init__(self, items, id):
         self._actions = items.get("actions")
         self._available_requirement = items.get("availabe_requirement")
-        self._default_empty_answer = {"type": "external", "action": self.EMPTY_ANSWER_KEY}
+        self._default_empty_answer = {"_type": "external", "action": self.EMPTY_ANSWER_KEY}
         self._empty_answer = items.get("empty_answer", self._default_empty_answer)
         self.id = id
         self.root_id = items.get("root_id", self.id)
@@ -106,5 +106,5 @@ class BaseScenario:
     def history(self):
         return {"scenario_path": [{"scenario": self.id, "node": None}]}
 
-    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+    def run(self, text_preprocessing_result, user, params: Optional[Dict[str, Any]] = None) -> List[Command]:
         return self.get_action_results(user, text_preprocessing_result, self.actions, params)

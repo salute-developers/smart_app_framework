@@ -123,20 +123,20 @@ class ActionTest(unittest.TestCase):
         requirements["test"] = MockRequirement
         registered_factories[Action] = action_factory
         actions["test"] = MockAction
-        items = {"requirement": {"type": "test", "result": True}, "action": {"type": "test"}}
+        items = {"requirement": {"_type": "test", "result": True}, "action": {"_type": "test"}}
         action = RequirementAction(items)
         self.assertIsInstance(action.requirement, MockRequirement)
         self.assertIsInstance(action.internal_item, MockAction)
         self.assertEqual(action.run(None, None), ["test action run"])
-        items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
+        items = {"requirement": {"_type": "test", "result": False}, "action": {"_type": "test"}}
         action = RequirementAction(items)
         result = action.run(None, None)
         self.assertIsNone(result)
 
     def test_requirement_choice(self):
         items = {"requirement_actions": [
-            {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
-            {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": "action2"}}
+            {"requirement": {"_type": "test", "result": False}, "action": {"_type": "test", "result": "action1"}},
+            {"requirement": {"_type": "test", "result": True}, "action": {"_type": "test", "result": "action2"}}
         ]}
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
@@ -147,10 +147,10 @@ class ActionTest(unittest.TestCase):
     def test_requirement_choice_else(self):
         items = {
             "requirement_actions": [
-                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
-                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action2"}},
+                {"requirement": {"_type": "test", "result": False}, "action": {"_type": "test", "result": "action1"}},
+                {"requirement": {"_type": "test", "result": False}, "action": {"_type": "test", "result": "action2"}},
             ],
-            "else_action": {"type": "test", "result": "action3"}
+            "else_action": {"_type": "test", "result": "action3"}
         }
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
@@ -181,9 +181,9 @@ class ActionTest(unittest.TestCase):
         actions["test"] = MockAction
         user = PicklableMock()
         items = {
-            "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "requirement": {"_type": "test", "result": True},
+            "action": {"_type": "test", "result": "main_action"},
+            "else_action": {"_type": "test", "result": "else_action"}
         }
         action = ElseAction(items)
         self.assertEqual(action.run(user, None), "main_action")
@@ -195,9 +195,9 @@ class ActionTest(unittest.TestCase):
         actions["test"] = MockAction
         user = PicklableMock()
         items = {
-            "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "requirement": {"_type": "test", "result": False},
+            "action": {"_type": "test", "result": "main_action"},
+            "else_action": {"_type": "test", "result": "else_action"}
         }
         action = ElseAction(items)
         self.assertEqual(action.run(user, None), "else_action")
@@ -209,8 +209,8 @@ class ActionTest(unittest.TestCase):
         actions["test"] = MockAction
         user = PicklableMock()
         items = {
-            "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
+            "requirement": {"_type": "test", "result": True},
+            "action": {"_type": "test", "result": "main_action"},
         }
         action = ElseAction(items)
         self.assertEqual(action.run(user, None), "main_action")
@@ -222,8 +222,8 @@ class ActionTest(unittest.TestCase):
         actions["test"] = MockAction
         user = PicklableMock()
         items = {
-            "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
+            "requirement": {"_type": "test", "result": False},
+            "action": {"_type": "test", "result": "main_action"},
         }
         action = ElseAction(items)
         result = action.run(user, None)
@@ -235,8 +235,8 @@ class ActionTest(unittest.TestCase):
         user = PicklableMock()
         items = {
             "actions": [
-                {"type": "action_mock"},
-                {"type": "action_mock"}
+                {"_type": "action_mock"},
+                {"_type": "action_mock"}
             ]
         }
         action = CompositeAction(items)
@@ -279,7 +279,7 @@ class ActionTest(unittest.TestCase):
             "nodes": {
                 "answer": "{{ answer_text }}",
                 "buttons": {
-                    "type": UNIFIED_TEMPLATE_TYPE_NAME,
+                    "_type": UNIFIED_TEMPLATE_TYPE_NAME,
                     "template": "{{range(buttons_number)|list}}",
                     "loader": "json"
                 }
@@ -352,9 +352,9 @@ class NonRepeatingActionTest(unittest.TestCase):
     def setUp(self):
         self.expected = PicklableMock()
         self.expected1 = PicklableMock()
-        self.action = NonRepeatingAction({"actions": [{"type": "action_mock",
+        self.action = NonRepeatingAction({"actions": [{"_type": "action_mock",
                                                        "result": self.expected},
-                                                      {"type": "action_mock",
+                                                      {"_type": "action_mock",
                                                        "result": self.expected1}
                                                       ],
                                           "last_action_ids_storage": "last_action_ids_storage"})
@@ -516,7 +516,7 @@ class CardAnswerActionTest(unittest.TestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-            "type": "sdk_answer",
+            "_type": "sdk_answer",
             "nodes": {
                 "pronounceText": ["pronounceText1", "{{payload.personInfo.name}}"],
                 "items": [
@@ -527,7 +527,7 @@ class CardAnswerActionTest(unittest.TestCase):
                   },
                   {
                     "card": {
-                      "type": "simple_list",
+                      "_type": "simple_list",
                       "header": "1 доллар США ",
                       "items": [
                         {
@@ -548,18 +548,18 @@ class CardAnswerActionTest(unittest.TestCase):
                         "title": ["Отделения"],
                         "action": {
                           "text": "Где ближайщие отделения сбера?",
-                          "type": "text"
+                          "_type": "text"
                         }
                      }]
                 }
             }
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'_type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', '_type': 'text'}}]}}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'_type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', '_type': 'text'}}]}}}, sort_keys=True)
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
-        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'_type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', '_type': 'text'}}]}}}, sort_keys=True)
+        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'_type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', '_type': 'text'}}]}}}, sort_keys=True)
         not_expect_arr = [nexp1, nexp2]
 
         for i in range(10):
@@ -576,7 +576,7 @@ class CardAnswerActionTest(unittest.TestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-            "type": "sdk_answer",
+            "_type": "sdk_answer",
             "nodes": {
                 "pronounceText": ["pronounceText1", "pronounceText2"],
             }
@@ -596,7 +596,7 @@ class CardAnswerActionTest(unittest.TestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-                "type": "sdk_answer",
+                "_type": "sdk_answer",
                 "pronounceText": ["pronounceText1"],
                 "suggestions": {
                     "buttons": [
@@ -604,25 +604,25 @@ class CardAnswerActionTest(unittest.TestCase):
                             "title": ["{{payload.personInfo.name}}", "отделения2"],
                             "action": {
                                 "text": "отделения",
-                                "type": "text"
+                                "_type": "text"
                             }
                         },
                         {
                             "title": ["кредит1", "кредит2"],
                             "action": {
                                 "text": "кредит",
-                                "type": "text"
+                                "_type": "text"
                             }
                         }
                     ]
                 }
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', '_type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', '_type': 'text'}}]}}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', '_type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', '_type': 'text'}}]}}}, sort_keys=True)
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
-        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', '_type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', '_type': 'text'}}]}}}, sort_keys=True)
+        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', '_type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', '_type': 'text'}}]}}}, sort_keys=True)
         not_expect_arr = [nexp1, nexp2]
         for i in range(10):
             action = SDKAnswer(items)
@@ -651,7 +651,7 @@ class SDKRandomAnswer(unittest.TestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-            "type": "sdk_answer_to_user",
+            "_type": "sdk_answer_to_user",
             "static":
                 {
                     "static_text": "st1",
@@ -672,50 +672,50 @@ class SDKRandomAnswer(unittest.TestCase):
             "items":
                 [
                     {
-                        'type': "item_card",
+                        '_type': "item_card",
                         "text": "txt",
-                        "requirement": {"type": "test", "result": False}
+                        "requirement": {"_type": "test", "result": False}
                     },
                     {
-                        'type': "bubble_text",
+                        '_type': "bubble_text",
                         "text": "txt",
                         "markdown": False
                     },
                     {
-                        'type': "item_card",
+                        '_type': "item_card",
                         "text": "card1",
-                        "requirement": {"type": "test", "result": True}
+                        "requirement": {"_type": "test", "result": True}
                     }
                 ],
             "root":
                 [
                     {
-                        'type': "pronounce_text",
+                        '_type': "pronounce_text",
                         "text": "pron",
                     }
                 ],
             "suggestions":
                 [
                     {
-                        "type": "suggest_text",
+                        "_type": "suggest_text",
                         "title": "pron",
                         "text": "txt",
                     },
                     {
-                        "type": "suggest_text",
+                        "_type": "suggest_text",
                         "title": "pron",
                         "text": "txt",
-                        "requirement": {"type": "test", "result": True}
+                        "requirement": {"_type": "test", "result": True}
                     },
                     {
-                        "type": "suggest_deeplink",
+                        "_type": "suggest_deeplink",
                         "title": "pron",
                         "deep_link": "dl"
                     }
                 ]
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 't2', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p2'}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 'Ivan Ivanov', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p1'}}, sort_keys=True)
+        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 't2', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p2', 'action': {'text': 't2', '_type': 'text'}}, {'title': 'p2', 'action': {'text': 't2', '_type': 'text'}}, {'title': 'p2', 'action': {'deep_link': 'www.ww.w', '_type': 'deep_link'}}]}, 'pronounceText': 'p2'}}, sort_keys=True)
+        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 'Ivan Ivanov', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p1', 'action': {'text': 'Ivan Ivanov', '_type': 'text'}}, {'title': 'p1', 'action': {'text': 'Ivan Ivanov', '_type': 'text'}}, {'title': 'p1', 'action': {'deep_link': 'www.ww.w', '_type': 'deep_link'}}]}, 'pronounceText': 'p1'}}, sort_keys=True)
 
         action = SDKAnswerToUser(items)
         for i in range(3):
@@ -737,7 +737,7 @@ class SDKRandomAnswer(unittest.TestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-            "type": "sdk_answer_to_user",
+            "_type": "sdk_answer_to_user",
             "static":
                 {
                     "static_text": "st1",
@@ -758,7 +758,7 @@ class SDKRandomAnswer(unittest.TestCase):
             "root":
                 [
                     {
-                        'type': "pronounce_text",
+                        '_type': "pronounce_text",
                         "text": "pron",
                     },
                 ]
@@ -779,11 +779,11 @@ class SDKRandomAnswer(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         items = {
-            "type": "sdk_answer_to_user",
+            "_type": "sdk_answer_to_user",
             "items":
                 [
                     {
-                        'type': "bubble_text",
+                        '_type': "bubble_text",
                         "text": "42"
                     }
                 ]
@@ -800,12 +800,12 @@ class SDKRandomAnswer(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         items = {
-            "type": "sdk_answer_to_user",
+            "_type": "sdk_answer_to_user",
             "support_templates": {
-                "suggestions_from_template": '{ "buttons": [ { "title": "some title", "action": { "type": "text", "text": "some text" } } ]}'
+                "suggestions_from_template": '{ "buttons": [ { "title": "some title", "action": { "_type": "text", "text": "some text" } } ]}'
             },
             "suggestions_template": {
-                "type": "unified_template",
+                "_type": "unified_template",
                 "template": "{{ suggestions_from_template }}",
                 "loader": "json"
             }
@@ -819,7 +819,7 @@ class SDKRandomAnswer(unittest.TestCase):
                 'payload': {
                     'suggestions': {
                         'buttons': [
-                            {'title': 'some title', 'action': {'type': 'text', 'text': 'some text'}}
+                            {'title': 'some title', 'action': {'_type': 'text', 'text': 'some text'}}
                         ]
                     }
                 }
@@ -881,12 +881,12 @@ class GiveMeMemoryActionTest(unittest.TestCase):
                     ]
                 },
                 "profileEmployee": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ 0 }}",
                     "loader": "json"
                 },
                 "tokenType": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ 0 }}",
                     "loader": "json"
                 }
@@ -918,7 +918,7 @@ class RememberThisActionTest(unittest.TestCase):
                                     {
                                         'tag': 'historyInfo',
                                         'action': {
-                                            'type': 'upsert',
+                                            '_type': 'upsert',
                                             'params': {
                                                 'operation': [
                                                     {
@@ -975,7 +975,7 @@ class RememberThisActionTest(unittest.TestCase):
         items = {
             "nodes": {
               "clientIds": {
-                "type": "unified_template",
+                "_type": "unified_template",
                 "template": "{{ 0 }}",
                 "loader": "json"
               },
@@ -986,7 +986,7 @@ class RememberThisActionTest(unittest.TestCase):
                     {
                       "tag": "historyInfo",
                       "action": {
-                        "type": "upsert",
+                        "_type": "upsert",
                         "params": {
                           "operation": [
                             {

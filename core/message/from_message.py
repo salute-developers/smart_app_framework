@@ -124,7 +124,7 @@ class SmartAppFromMessage:
             if required_field and required_field_type:
                 log(
                     "Message validation error: Expected '%(required_field)s'"
-                    " of type '%(required_field_type)s': %(value)s",
+                    " of _type '%(required_field_type)s': %(value)s",
                     params=params,
                     level="ERROR",
                 )

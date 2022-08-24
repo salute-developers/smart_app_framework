@@ -112,7 +112,7 @@ class RequirementTest(unittest.TestCase):
     def test_array_in_template_req_true(self):
             items = {
                 "template": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ payload.userInfo.departcode.split('/')|tojson }}",
                     "loader": "json"
                 },
@@ -154,7 +154,7 @@ class RequirementTest(unittest.TestCase):
     def test_array_in_template_req_false(self):
             items = {
                 "template": {
-                    "type": "unified_template",
+                    "_type": "unified_template",
                     "template": "{{ payload.userInfo.departcode.split('/')|tojson }}",
                     "loader": "json"
                 },

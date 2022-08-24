@@ -16,7 +16,7 @@ class PushAction(StringAction):
         Example:
         {
           "push_advertising_offer": {
-            "type": "push",
+            "_type": "push",
             "surface": "COMPANION", // не обязательное, по дефолту "COMPANION", без шаблонной генерации
             "content": {
                 "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",

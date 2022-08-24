@@ -16,14 +16,14 @@ class TestRandomAction(TestCase):
         items = {
             "actions": [
                 {
-                    "type": "do_nothing",
+                    "_type": "do_nothing",
                     "command": "ANSWER_TO_USER",
                     "nodes": {
                         "answer": "Доброе утро!",
                     }
                 },
                 {
-                    "type": "do_nothing",
+                    "_type": "do_nothing",
                     "command": "ANSWER_TO_USER",
                     "nodes": {
                         "answer": "Добрый вечер!",
@@ -39,7 +39,7 @@ class TestRandomAction(TestCase):
         items = {
             "actions": [
                 {
-                    "type": "do_nothing",
+                    "_type": "do_nothing",
                     "command": "ANSWER_TO_USER",
                     "nodes": {
                         "answer": "Добрый вечер!",

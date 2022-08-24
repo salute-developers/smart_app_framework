@@ -28,7 +28,7 @@ class AnswerItemTest(unittest.TestCase):
         }
         test = SuggestDeepLink(items)
         res = test.render(nodes)
-        self.assertDictEqual(res, {'title': 42, 'action': {'deep_link': 24, 'type': 'deep_link'}})
+        self.assertDictEqual(res, {'title': 42, 'action': {'deep_link': 24, '_type': 'deep_link'}})
 
     def test_SuggestText(self):
         nodes = {
@@ -41,7 +41,7 @@ class AnswerItemTest(unittest.TestCase):
         }
         test = SuggestText(items)
         res = test.render(nodes)
-        self.assertDictEqual(res, {'title': 42, 'action': {'text': 'text', 'type': 'text'}})
+        self.assertDictEqual(res, {'title': 42, 'action': {'text': 'text', '_type': 'text'}})
 
     def test_SuggestText_no_nodes(self):
         items = {
@@ -50,7 +50,7 @@ class AnswerItemTest(unittest.TestCase):
         }
         test = SuggestText(items)
         res = test.render({})
-        self.assertDictEqual(res, {'title': "ans", 'action': {'text': 'text', 'type': 'text'}})
+        self.assertDictEqual(res, {'title': "ans", 'action': {'text': 'text', '_type': 'text'}})
 
     def test_PronounceText(self):
         nodes = {
@@ -100,7 +100,7 @@ class RawItemTest(unittest.TestCase):
 
     def test_finished(self):
         items = {
-            "type": "raw",
+            "_type": "raw",
             "key": "finished",
             "value": "True"
         }

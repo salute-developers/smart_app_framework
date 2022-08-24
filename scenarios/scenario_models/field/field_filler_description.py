@@ -238,7 +238,7 @@ class RegexpAndStringOperationsFieldFiller(RegexpFieldFiller):
         original_text = text_preprocessing_result.original_text
         if self.operations:
             for op in self.operations:
-                original_text = self._operation(original_text, op["type"], op.get("amount"))
+                original_text = self._operation(original_text, op["_type"], op.get("amount"))
         text_preprocessing_result_copy = pickle_deepcopy(text_preprocessing_result)
         text_preprocessing_result_copy.original_text = original_text
         return super(RegexpAndStringOperationsFieldFiller, self).extract(text_preprocessing_result_copy, user, params)
@@ -382,7 +382,7 @@ class DatePeriodFiller(FieldFillerDescription):
             "required": true,
             "available": true,
             "filler": {
-              "type": "date_period_filler",
+              "_type": "date_period_filler",
               "max_days_in_period": 365,
               "future_days_allowed": false
             }

@@ -37,15 +37,15 @@ class NodeAction(CommandAction):
         self.no_empty_nodes = items.get("no_empty_nodes", False)
 
     @lazy
-    def nodes(self) -> Dict[str, Union[str, T]]:
+    def nodes(self) -> Dict[str, str]:
         return {k: self._get_template_tree(t) for k, t in self._nodes.items()}
 
     @lazy
-    def support_templates(self) -> Dict[str, Union[str, T]]:
+    def support_templates(self) -> Dict[str, str]:
         return {k: self._get_template_tree(t) for k, t in self._support_templates.items()}
 
     def _get_template_tree(self, value: Union[str, T]) -> T:
-        is_dict_unified_template = isinstance(value, dict) and value.get("type") == UNIFIED_TEMPLATE_TYPE_NAME
+        is_dict_unified_template = isinstance(value, dict) and value.get("_type") == UNIFIED_TEMPLATE_TYPE_NAME
         if isinstance(value, str) or is_dict_unified_template:
             result = UnifiedTemplate(value)
         elif isinstance(value, dict):
@@ -60,14 +60,14 @@ class NodeAction(CommandAction):
             result = value
         return result
 
-    def _get_rendered_tree(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
+    def _get_rendered_tree(self, value, params: Dict, no_empty=False) -> Union[dict, list, str]:
         params = copy(params)
         for support_key, support_template in self.support_templates.items():
             params[support_key] = support_template.render(params)
         return self._get_rendered_tree_recursive(value, params, no_empty=no_empty)
 
-    def _get_rendered_tree_recursive(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
-        value_type: Type[T] = type(value)
+    def _get_rendered_tree_recursive(self, value, params: Dict, no_empty=False) -> Union[str, Dict, List]:
+        value_type = type(value)
         if value_type is dict:
             result = {}
             for inner_key, inner_value in value.items():
@@ -100,7 +100,7 @@ class StringAction(NodeAction):
     Example:
     {
       "pay_phone_cmd": {
-        "type": "string",
+        "_type": "string",
         "command": "recharge_mobile",
         "nodes": {
           "phone": "{% if approve and phone_number is defined and phone_number not in (None, 1) %}{{ phone_number }}{% endif %}",
@@ -116,6 +116,7 @@ class StringAction(NodeAction):
 
     def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
+        params = params or {}
         command_params = dict()
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -140,7 +141,7 @@ class AfinaAnswerAction(NodeAction):
     """
     Example:
     {
-      "type": "random_field_answer",
+      "_type": "random_field_answer",
       "nodes":
       {
           "pronounce_text": ["pronounceText1", "pronounceText2"]
@@ -178,7 +179,7 @@ class SDKAnswer(NodeAction):
     """
     Example:
     {
-      "type": "sdk_answer",
+      "_type": "sdk_answer",
       # можно без nodes
       "nodes":
       {
@@ -191,7 +192,7 @@ class SDKAnswer(NodeAction):
           },
           {
             "card": {
-              "type": "simple_list",
+              "_type": "simple_list",
               "header": "1 доллар США",
               "items": [
                 {
@@ -212,7 +213,7 @@ class SDKAnswer(NodeAction):
             "title": "Отделения",
             "action": {
               "text": ["Где ближайщие отделения сбера?"],
-              "type": "text"
+              "_type": "text"
             }
          }]
         }
@@ -233,12 +234,12 @@ class SDKAnswer(NodeAction):
         self.command: str = ANSWER_TO_USER
         if self._nodes == {}:
             self._nodes = {i: items.get(i) for i in items if
-                           i not in ['random_paths', 'same_ans', 'type', 'support_templates', 'no_empty_nodes']}
+                           i not in ['random_paths', 'same_ans', '_type', 'support_templates', 'no_empty_nodes']}
 
     # функция идет по RANDOM_PATH, числа в нем считает индексами массива,
     # INDEX_WILDCARD - произвольным индексом массива, прочее - ключами словаря
     # в конце пути предполагается непустой массив
-    def get_by_path(self, input_dict: Union[list, dict], nested_key: List[str]) -> List[Tuple[Union[list, dict], str]]:
+    def get_by_path(self, input_dict: dict, nested_key: List[str]) -> List[Tuple[Union[list, dict], str]]:
         internal_dict_value = input_dict
         for ik, k in enumerate(nested_key):
             last_dict = internal_dict_value
@@ -284,17 +285,17 @@ class SDKAnswerToUser(NodeAction):
     """
     Example:
     {
-        "type": "sdk_answer_to_user",
+        "_type": "sdk_answer_to_user",
         "root":
         [
           {
-            "type": "pronounce_text",
+            "_type": "pronounce_text",
             "text": "ans"
           }
         ],
         "static": {
           "ios_card": {
-            "type": "list_card",
+            "_type": "list_card",
             "cells": [
               {
                 "ios_params": "ios"
@@ -302,7 +303,7 @@ class SDKAnswerToUser(NodeAction):
             ]
           },
           "android_card": {
-            "type": "list_card",
+            "_type": "list_card",
             "cells": [
               {
                 "android_params": "android"
@@ -324,34 +325,34 @@ class SDKAnswerToUser(NodeAction):
         ],
         "items": [
           {
-            "type": "item_card",
+            "_type": "item_card",
             "value": "ios_card",
             "requirement": {
-              "type": "external",
+              "_type": "external",
               "requirement": "OCTOBER_iOS"
             }
           },
           {
-            "type": "item_card",
+            "_type": "item_card",
             "value": "android_card",
             "requirement": {
-              "type": "external",
+              "_type": "external",
               "requirement": "OCTOBER_android"
             }
           },
           {
-            "type": "bubble_text",
+            "_type": "bubble_text",
             "text": "ans"
           }
         ],
         "suggestions": [
           {
-            "type": "suggest_text",
+            "_type": "suggest_text",
             "text": "sg_text",
             "title": "tittle1"
           },
           {
-            "type": "suggest_deeplink",
+            "_type": "suggest_deeplink",
             "text": "sg_text",
             "deep_link": "tittle1"
           }
@@ -362,14 +363,14 @@ class SDKAnswerToUser(NodeAction):
     {
         "items":
             [{
-                "card": {"type": "list_card", "cells": [{"ios_params": "ios"}]}},
+                "card": {"_type": "list_card", "cells": [{"ios_params": "ios"}]}},
                 {"bubble": {"text": "random texti", "markdown": True}
             }],
         "suggestions":
             {"buttons":
                 [
-                    {"title": "static tittle1", "action": {"text": "static suggest text", "type": "text"}},
-                    {"title": "static tittle2", "action": {"deep_link": "www.www.www", "type": "deep_link"}}
+                    {"title": "static tittle1", "action": {"text": "static suggest text", "_type": "text"}},
+                    {"title": "static tittle2", "action": {"deep_link": "www.www.www", "_type": "deep_link"}}
                 ]
             },
         "pronounceText": "random texti"
@@ -423,7 +424,10 @@ class SDKAnswerToUser(NodeAction):
         if self._nodes[self.RANDOM_CHOICE]:
             random_node = random.choice(self.nodes[self.RANDOM_CHOICE])
             rendered_random = self._get_rendered_tree(random_node, params, self.no_empty_nodes)
-            rendered.update(rendered_random)
+            if isinstance(rendered, dict):
+                rendered.update(rendered_random)
+            else:
+                raise TypeError("Rendered tree is not dict")
         out = {}
         for item in self.items:
             if item.requirement.check(text_preprocessing_result, user, params):

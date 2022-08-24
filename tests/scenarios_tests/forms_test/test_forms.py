@@ -61,8 +61,8 @@ class FormsTest(TestCase):
         self.mock_0 = {}
         self.mock_1 = {'sbm_credit': {'fields': {'amount': {'value': 100.0},
                                                  'currency': {"required": True,
-                                                              "filler": {"type": "currency_first"},
-                                                              "questions": [{"type": "external",
+                                                              "filler": {"_type": "currency_first"},
+                                                              "questions": [{"_type": "external",
                                                                              "action": "sbm_currency_question"}]
                                                               }},
                                       'remove_time': 1506418333},
@@ -73,8 +73,8 @@ class FormsTest(TestCase):
         forms = Forms(self.mock_1, {"sbm_credit": PicklableMock(), "Turn_on_MB": PicklableMock()}, user)
         expected_dict = {'sbm_credit': {'fields': {'amount': {'value': 100.0},
                                                    'currency': {"required": True,
-                                                                "filler": {"type": "currency_first"},
-                                                                "questions": [{"type": "external",
+                                                                "filler": {"_type": "currency_first"},
+                                                                "questions": [{"_type": "external",
                                                                                "action": "sbm_currency_question"}]
                                                                 }},
                                         'remove_time': 1506418333},
@@ -94,8 +94,8 @@ class FormsTest(TestCase):
         ts = int(time.time()) + form.description.lifetime
         expected_dict = {'sbm_credit': {'fields': {'amount': {'value': 100.0},
                                                    'currency': {"required": True,
-                                                                "filler": {"type": "currency_first"},
-                                                                "questions": [{"type": "external",
+                                                                "filler": {"_type": "currency_first"},
+                                                                "questions": [{"_type": "external",
                                                                                "action": "sbm_currency_question"}]
                                                                 }},
                                         'remove_time': 1506418333},
@@ -162,9 +162,9 @@ class FormsTest(TestCase):
 
     def test_clear_form(self):
         expected_result = {'sbm_credit': {'fields': {'amount': {'value': 100.0},
-                                                     'currency': {'filler': {'type': 'currency_first'},
+                                                     'currency': {'filler': {'_type': 'currency_first'},
                                                                   'questions': [ {'action': 'sbm_currency_question',
-                                                                                  'type': 'external'} ],
+                                                                                  '_type': 'external'} ],
                                                                   'required': True}},
                                           'remove_time': 1506418333}}
         description_MB = MockDescription('Turn_on_MB', False)
