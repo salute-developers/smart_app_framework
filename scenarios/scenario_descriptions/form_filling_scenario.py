@@ -44,7 +44,7 @@ class FormFillingScenario(BaseScenario):
             Event(type=HistoryConstants.types.FIELD_EVENT,
                   scenario=self.root_id,
                   content={HistoryConstants.content_fields.FIELD: question_field.description.id},
-                  results=HistoryConstants.event_results.ASK_QUESTION))
+                  result=HistoryConstants.event_results.ASK_QUESTION))
 
         return question.run(user, text_preprocessing_result, params)
 
@@ -89,7 +89,7 @@ class FormFillingScenario(BaseScenario):
             event = Event(type=HistoryConstants.types.FIELD_EVENT,
                           scenario=self.root_id,
                           content={HistoryConstants.content_fields.FIELD: field_key},
-                          results=HistoryConstants.event_results.FILLED)
+                          result=HistoryConstants.event_results.FILLED)
             user.history.add_event(event)
         return result
 
@@ -197,7 +197,7 @@ class FormFillingScenario(BaseScenario):
                         Event(type=HistoryConstants.types.FIELD_EVENT,
                               scenario=self.root_id,
                               content={HistoryConstants.content_fields.FIELD: field.description.id},
-                              results=HistoryConstants.event_results.ASK_QUESTION))
+                              result=HistoryConstants.event_results.ASK_QUESTION))
                 reply = self.get_reply(user, text_preprocessing_result, self.actions, field, form)
                 reply_messages.extend(reply)
 

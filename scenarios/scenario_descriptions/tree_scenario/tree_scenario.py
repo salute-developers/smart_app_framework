@@ -113,7 +113,7 @@ class TreeScenario(FormFillingScenario):
                                       scenario=self.root_id,
                                       node=current_node.id,
                                       content={HistoryConstants.content_fields.FIELD: field_key},
-                                      results=HistoryConstants.event_results.FILLED)
+                                      result=HistoryConstants.event_results.FILLED)
                         user.history.add_event(event)
                         log_params = self._log_params()
                         log_params["message_id"] = user.message.incremental_id
@@ -149,7 +149,7 @@ class TreeScenario(FormFillingScenario):
                         type=HistoryConstants.types.END_SCENARIO,
                         scenario=self.root_id,
                         node=current_node.id,
-                        results=HistoryConstants.event_results.SUCCESS
+                        result=HistoryConstants.event_results.SUCCESS
                     )
                     user.history.add_event(event)
                     break
@@ -168,7 +168,7 @@ class TreeScenario(FormFillingScenario):
                           scenario=self.root_id,
                           node=current_node.id,
                           content={HistoryConstants.content_fields.FIELD: field.description.id},
-                          results=HistoryConstants.event_results.ASK_QUESTION)
+                          result=HistoryConstants.event_results.ASK_QUESTION)
             user.history.add_event(event)
         _command = self.get_reply(user, text_preprocessing_result, current_node.actions, field, main_form)
         reply_commands.extend(_command)

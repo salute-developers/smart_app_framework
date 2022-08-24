@@ -368,7 +368,7 @@ class AddHistoryEventAction(Action):
                 type=self.event_type,
                 scenario=scenario.id,
                 scenario_version=scenario.version,
-                results=self.results,
+                result=self.results,
                 content=self.event_content
             )
             user.history.add_event(event)
