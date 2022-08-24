@@ -3,7 +3,7 @@ from typing import Callable
 
 
 class DescriptionsItems:
-    def __init__(self, factory: Callable, items):
+    def __init__(self, factory: Callable, items, ordered=False):
         items = items or {}
         self._factory = factory
         self._raw_items = None
