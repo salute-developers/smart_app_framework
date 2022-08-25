@@ -265,7 +265,7 @@ class MainLoop(BaseMainLoop):
                                 "class_name": self.__class__.__name__},
                         user=user,
                         level="WARNING")
-
+                    break
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
                         "%(incoming_data)s",
