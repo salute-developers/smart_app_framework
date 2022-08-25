@@ -42,10 +42,18 @@ class UnifiedTemplate:
         params_dict = dict(*args, **kwargs)
         try:
             result = self.silent_render(params_dict)
+            log_params = dict()
+            log_params[log_const.KEY_NAME] = log_const.TEMPLATE_TRACE_VALUE
+            log_params["class_name"] = self.__class__.__name__
+            log_params["result"] = result
+            log_params["raw_items"] = str(self.input)
+            log_params["params"] = str(params_dict)
+            log(f"TRACING %(class_name)s. Result is %(result)s.", params=log_params, level="DEBUG")
+
         except Exception:
             log("Failed to render template: %(template)s with params %(params_dict_str)s",
                 params={log_const.KEY_NAME: log_const.HANDLED_EXCEPTION_VALUE,
-                          "template": str(self.input),
+                        "template": str(self.input),
                         "params_dict_str": str(params_dict)},
                 level="ERROR",
                 exc_info=True)

@@ -28,6 +28,7 @@ requirement_factory = build_factory(requirements)
 class Requirement:
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
+        self._descr = items.get("_description")
         self.items = items
         self.version = items.get("version", -1)
         self.id = id
@@ -38,16 +39,39 @@ class Requirement:
             "requirement": self.__class__.__name__
         }
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return True
 
-    def on_check_error(self, text_preprocessing_result, user):
-        log("exc_handler: Requirement failed to check. Return False. MESSAGE: %(masked_message)s.",
-            user, {log_const.KEY_NAME: log_const.HANDLED_EXCEPTION_VALUE,
-                   "masked_message": user.message.masked_value},
+    def _on_check_error_result(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser) -> bool:
+        # return True or False if it's acceptable in custom requirement
+        raise
+
+    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+              params: Dict[str, Any] = None) -> bool:
+        try:
+            result = self._check(text_preprocessing_result, user, params)
+        except:
+            return self.on_check_error(text_preprocessing_result, user)
+        log_params = self._log_params()
+        log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
+        log_params["result"] = result
+        log_params["raw_items"] = str(self.items)
+        log_params["params"] = str(params)
+        if self._descr:
+            log_params["descr"] = self._descr
+        log(f"TRACING %(requirement)s with id {self.id}: Result is %(result)s.", user, log_params, level="DEBUG")
+        return result
+
+    def on_check_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
+        result = self._on_check_error_result(text_preprocessing_result, user)
+        log_params = self._log_params()
+        log_params["masked_message"]: user.message.masked_value
+        log_params["result"]: result
+        log("exc_handler: Requirement FAILED to check. Return %(result)s. MESSAGE: %(masked_message)s.",
+            user, log_params,
             level="ERROR", exc_info=True)
-        return False
+        return result
 
 
 class CompositeRequirement(Requirement):
@@ -65,7 +89,7 @@ class CompositeRequirement(Requirement):
 
 class AndRequirement(CompositeRequirement):
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return all(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
                    for requirement in self.requirements)
@@ -73,7 +97,7 @@ class AndRequirement(CompositeRequirement):
 
 class OrRequirement(CompositeRequirement):
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return any(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
                    for requirement in self.requirements)
@@ -91,7 +115,7 @@ class NotRequirement(Requirement):
     def build_requirement(self):
         return self._requirement
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return not self.requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
 
@@ -116,7 +140,7 @@ class RandomRequirement(Requirement):
         super(RandomRequirement, self).__init__(items, id)
         self.percent = items["percent"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         result = random() * 100
         return result < self.percent
@@ -129,7 +153,7 @@ class TopicRequirement(Requirement):
         super(TopicRequirement, self).__init__(items, id)
         self.topics = items["topics"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return user.message.topic_key in self.topics
 
@@ -139,7 +163,7 @@ class TemplateRequirement(Requirement):
         super(TemplateRequirement, self).__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
@@ -160,7 +184,7 @@ class RollingRequirement(Requirement):
         super(RollingRequirement, self).__init__(items, id)
         self.percent = items["percent"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         id = user.id
         s = id.encode('utf-8')
@@ -173,7 +197,7 @@ class TimeRequirement(ComparisonRequirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
 
-    def check(
+    def _check(
             self,
             text_preprocessing_result: BaseTextPreprocessingResult,
             user: BaseUser,
@@ -199,7 +223,7 @@ class DateTimeRequirement(Requirement):
         super().__init__(items, id)
         self.match_cron = items['match_cron']
 
-    def check(
+    def _check(
             self,
             text_preprocessing_result: BaseTextPreprocessingResult,
             user: BaseUser,
@@ -226,7 +250,7 @@ class IntersectionRequirement(Requirement):
             id,
         )
 
-    def check(
+    def _check(
             self,
             text_preprocessing_result: TextPreprocessingResult,
             user: User,
@@ -252,7 +276,7 @@ class ClassifierRequirement(Requirement):
     def classifier(self) -> Classifier:
         return ExternalClassifier(self._classifier)
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         check_res = True
         classifier = self.classifier
@@ -279,7 +303,7 @@ class FormFieldValueRequirement(Requirement):
         self.field_name = items["field_name"]
         self.value = items["value"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         return user.forms[self.form_name].fields[self.field_name].value == self.value
 
@@ -300,7 +324,7 @@ class EnvironmentRequirement(Requirement):
         # Если среда исполнения задана, то проверям, что среда в списке возможных значений для сценария, иначе - False
         self.check_result = self.environment in self.values if self.environment else False
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         return self.check_result
 
@@ -314,7 +338,7 @@ class CharacterIdRequirement(Requirement):
         super(CharacterIdRequirement, self).__init__(items=items, id=id)
         self.values = items["values"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         return user.message.payload["character"]["id"] in self.values
 
@@ -328,6 +352,6 @@ class FeatureToggleRequirement(Requirement):
         super(FeatureToggleRequirement, self).__init__(items=items, id=id)
         self.toggle_name = items["toggle_name"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
               params: Dict[str, Any] = None) -> bool:
         return user.settings["template_settings"].get(self.toggle_name, False)
