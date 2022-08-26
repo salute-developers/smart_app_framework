@@ -649,7 +649,7 @@ class AddHistoryEventActionTest(unittest.TestCase):
         }
         expected = Event(
             type='type',
-            results='result',
+            result='result',
             content={'foo': 'bar'},
             scenario='name',
             scenario_version='1.0'
@@ -686,7 +686,7 @@ class AddHistoryEventActionTest(unittest.TestCase):
         }
         expected = Event(
             type='type',
-            results='CLIENT_INFO_RESPONSE',
+            result='CLIENT_INFO_RESPONSE',
             content={'field_1': 'value_1'},
             scenario='name',
             scenario_version='1.0'

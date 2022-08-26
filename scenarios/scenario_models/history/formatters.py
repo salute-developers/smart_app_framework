@@ -33,7 +33,7 @@ class HistoryEventFormatter(EventFormatter):
         return {
             "scenarioName": event.scenario,
             "scenarioVersion": event.scenario_version,
-            "results": event.results,
+            "result": event.result,
             "eventType": event.type,
             "eventContent": event.content
         }

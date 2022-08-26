@@ -12,7 +12,7 @@ class ScenarioHistoryTest(TestCase):
             'scenario': 'name',
             'scenario_version': 'version',
             'node': 'node',
-            'results': 'true',
+            'result': 'true',
             'type': 'type',
             'content': {'foo': 'bar'}
         }
@@ -21,7 +21,7 @@ class ScenarioHistoryTest(TestCase):
         self.assertEqual(event.scenario, item['scenario'])
         self.assertEqual(event.scenario_version, item['scenario_version'])
         self.assertEqual(event.node, item['node'])
-        self.assertEqual(event.results, item['results'])
+        self.assertEqual(event.result, item['result'])
         self.assertEqual(event.type, item['type'])
         self.assertDictEqual(event.content, item['content'])
 
@@ -30,7 +30,7 @@ class ScenarioHistoryTest(TestCase):
             'scenario': 'name',
             'scenario_version': 'version',
             'node': 'node',
-            'results': 'true',
+            'result': 'true',
             'type': 'type',
             'content': {'foo': 'bar'},
             'created_time': time()
@@ -91,7 +91,7 @@ class ScenarioHistoryTest(TestCase):
                     'type': 'event_type_1',
                     'content': {'foo': 'bar'},
                     'node': None,
-                    'results': None,
+                    'result': None,
                     'scenario': None,
                     'scenario_version': None,
                     'created_time': now
@@ -134,15 +134,15 @@ class ScenarioHistoryTest(TestCase):
 
     def test_history_event_formatter(self):
         events = [
-            Event(type='field_event', scenario='name', node='node', results='filled', content={'field': 'foo'}),
-            Event(type='field_event', scenario='name', node='node', results='filled', content={'field': 'bar'}),
+            Event(type='field_event', scenario='name', node='node', result='filled', content={'field': 'foo'}),
+            Event(type='field_event', scenario='name', node='node', result='filled', content={'field': 'bar'}),
         ]
         expected = [
             {
                 'no': 1,
                 'scenarioName': 'name',
                 'scenarioVersion': None,
-                'results': 'filled',
+                'result': 'filled',
                 'eventType': 'field_event',
                 'eventContent': {'field': 'foo'}
             },
@@ -150,7 +150,7 @@ class ScenarioHistoryTest(TestCase):
                 'no': 2,
                 'scenarioName': 'name',
                 'scenarioVersion': None,
-                'results': 'filled',
+                'result': 'filled',
                 'eventType': 'field_event',
                 'eventContent': {'field': 'bar'}
             }
@@ -169,7 +169,7 @@ class ScenarioHistoryTest(TestCase):
                     'type': 'field_event',
                     'scenario': 'name',
                     'node': 'node',
-                    'results': 'filled',
+                    'result': 'filled',
                     'content': {'field': 'field_name'}
                 }
             ]
@@ -179,7 +179,7 @@ class ScenarioHistoryTest(TestCase):
                 'no': 1,
                 'scenarioName': 'name',
                 'scenarioVersion': None,
-                'results': 'filled',
+                'result': 'filled',
                 'eventType': 'field_event',
                 'eventContent': {'field': 'field_name'}
             }
