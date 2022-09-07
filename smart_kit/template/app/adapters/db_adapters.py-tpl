@@ -3,7 +3,12 @@ from core.db_adapter import error
 
 
 class CustomDBAdapter(DBAdapter):
-    """Для создания класса-коннектора к БД, реализуйте методы или пометьте их raise error.NotSupportedOperation"""
+    """Класс-коннектор к базе данных
+
+    Может быть использован, например, для загрузки данных о User.
+
+    Ненужные методы можно оставить с телом raise error.NotSupportedOperation.
+    """
     def __init__(self, config):
         super().__init__(config)
 

@@ -1,8 +1,15 @@
-# coding: utf-8
+from typing import List
+
+from core.basic_models.actions.command import Command
 from smart_kit.handlers.handler_base import HandlerBase
 
 
 class CustomHandler(HandlerBase):
-    """Тут создаются Handlers, которые используются для запуска логики в зависимости от типа входяшего сообщения"""
-    def run(self, payload, user):
+    """Обработчик некоторого типа входящих сообщений
+
+    Для сопоставления типа сообщения обработчику, добавьте такую пару в CustomModel.additional_handlers. По умолчанию,
+    данный обработчик сопоставлен типу сообщения "CUSTOM_MESSAGE_NAME".
+    """
+    def run(self, payload, user) -> List[Command]:
+        super().run(payload, user)
         return []

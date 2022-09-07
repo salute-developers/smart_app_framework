@@ -9,6 +9,7 @@ from scenarios.scenario_descriptions.form_filling_scenario import FormFillingSce
 from smart_kit.system_answers.nothing_found_action import NothingFoundAction
 from core.monitoring.monitoring import monitoring
 
+
 class DialogueManager:
     NOTHING_FOUND_ACTION = "nothing_found_action"
 

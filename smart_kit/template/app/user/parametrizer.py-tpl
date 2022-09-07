@@ -2,7 +2,10 @@ from scenarios.user.parametrizer import Parametrizer
 
 
 class CustomParametrizer(Parametrizer):
-    """Тут можно добавить новые данные, которые будут доступны для использования в ASL при использовании jinja"""
+    """Параметризатор определяет данные, которые будут доступны в jinja-вставках в языке фреймворкаъ
+
+    Для использования данного параметризатора присвойте переменной PARAMETRIZER в app_config этот класс как значение.
+    """
     def __init__(self, user, items):
         super().__init__(user, items)
 
