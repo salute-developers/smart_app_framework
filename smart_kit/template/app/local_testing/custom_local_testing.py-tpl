@@ -2,11 +2,11 @@ from smart_kit.testing.local import CLInterface
 
 
 class CustomLocalTesting(CLInterface):
-    """
-      Тут модифицируется local_testing для эмулирования ответов от внешних систем
-      формат функции - on_<message_name>(self, message):
-      где <message_name> - это тип сообщения,написанный в нижнем регистре
-      например:
+    """Тут модифицируется local_testing для эмулирования ответов от внешних систем
+
+      Формат функции-эмулятора ответа: on_<message_name>(self, message),
+      где <message_name> - это тип сообщения, написанный в нижнем регистре
+      пример:
         def on_back_get_token_request(self, message):
           # BACK_GET_TOKEN_REQUEST - тип сообщения
           return json.dumps({
@@ -22,4 +22,5 @@ class CustomLocalTesting(CLInterface):
             }
            }
           )
-  """
+    """
+    pass

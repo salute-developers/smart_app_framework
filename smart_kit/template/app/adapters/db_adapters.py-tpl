@@ -3,14 +3,9 @@ from core.db_adapter import error
 
 
 class CustomDBAdapter(DBAdapter):
-
-    """
-        Для создания нового класса-коннектора к БД, реализуйте следующие методы или
-        пометьте их raise error.NotSupportedOperation
-    """
-
+    """Для создания класса-коннектора к БД, реализуйте методы или пометьте их raise error.NotSupportedOperation"""
     def __init__(self, config):
-        super(CustomDBAdapter, self).__init__(config)
+        super().__init__(config)
 
     def connect(self):
         pass

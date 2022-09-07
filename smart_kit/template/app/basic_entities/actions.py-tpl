@@ -8,13 +8,9 @@ from scenarios.user.user_model import User
 
 
 class CustomAction(Action):
-
-    """
-        Тут можно создать собственные Actions для использования их в сценариях
-    """
-
+    """Тут можно создать собственные Actions для использования их в сценариях"""
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(CustomAction, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.test_param = items.get("test_param")
 
