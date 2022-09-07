@@ -66,7 +66,7 @@ class Requirement:
     def on_check_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         result = self._on_check_error_result(text_preprocessing_result, user)
         log_params = self._log_params()
-        log_params["masked_message"]: user.message.masked_value
+        log_params["masked_message"]: str(user.message.masked_value)
         log_params["result"]: result
         log("exc_handler: Requirement FAILED to check. Return %(result)s. MESSAGE: %(masked_message)s.",
             user, log_params,
