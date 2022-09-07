@@ -1,5 +1,5 @@
 # coding=utf-8
-from typing import Iterable
+from typing import Iterable, Dict
 from lazy import lazy
 import json
 import uuid
@@ -50,11 +50,11 @@ class SmartAppFromMessage:
     payload: dict
     uuid: dict
 
-    def __init__(self, value: str, topic_key: str = None, creation_time=None, kafka_key: str = None, headers=None,
+    def __init__(self, value: Dict, topic_key: str = None, creation_time=None, kafka_key: str = None, headers=None,
                  masking_fields=None, headers_required=True, validators: Iterable[MessageValidator] = ()):
         self.logging_uuid = str(uuid.uuid4())
         self._value = value
-        self._as_dict = json.loads(self.value)
+        self._as_dict = self.value
         self.topic_key = topic_key
         self.kafka_key = kafka_key
         self.creation_time = creation_time or current_time_ms()
@@ -263,15 +263,13 @@ class SmartAppFromMessage:
         return self._value
 
 basic_error_message = SmartAppFromMessage(
-    '''
     {
         "messageName": "ERROR",
         "messageId": -1,
         "uuid": -1,
         "payload": {},
         "sessionId": -1
-    }
-    ''',
+    },
     headers={},
     headers_required=False,
 )

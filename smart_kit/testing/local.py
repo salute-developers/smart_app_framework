@@ -140,7 +140,7 @@ class CLInterface(cmd.Cmd):
         self.environment.intent = self.available_scenarios[0]
         print("Текущий сценарий: ", self.environment.intent)
 
-    def process_message(self, raw_message: str, headers: tuple = ()) -> typing.Tuple[typing.Any, list]:
+    def process_message(self, raw_message: typing.Dict, headers: tuple = ()) -> typing.Tuple[typing.Any, list]:
         from smart_kit.configs import get_app_config
         masking_fields = self.settings["template_settings"].get("masking_fields")
         message = SmartAppFromMessage(raw_message, headers=headers, masking_fields=masking_fields,
@@ -158,12 +158,12 @@ class CLInterface(cmd.Cmd):
         if self.lt_settings.DISPLAY_RAW:
             pprint.pprint(self.environment.as_dict)
 
-        user, answers = self.process_message(str(self.environment))
+        user, answers = self.process_message(self.environment.as_dict)
         self.user_data = user.raw_str
 
         answers = combine_commands(answers, user)
         for answer in answers:
-            respond = self.after_process_message(answer)
+            respond = json.loads(self.after_process_message(answer))
             if respond:
                 _, new_answers = self.process_message(
                     respond,

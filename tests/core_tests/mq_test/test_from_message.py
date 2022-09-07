@@ -37,18 +37,17 @@ class TestFromMessage(TestCase):
             },
             "messageName": "MESSAGE_TO_SKILL"
         }
-        json_input_msg = json.dumps(input_msg, ensure_ascii=False)
         topic = "test"
         headers = []
         current_time = current_time_ms()
-        message = SmartAppFromMessage(value=json_input_msg, topic_key=topic, headers=headers, creation_time=current_time)
+        message = SmartAppFromMessage(value=input_msg, topic_key=topic, headers=headers, creation_time=current_time)
 
         self.assertAlmostEqual(message.creation_time, current_time)
         self.assertEqual(2, message.incremental_id)
         self.assertEqual(input_msg["uuid"]["userChannel"], message.channel)
         self.assertEqual(input_msg["messageName"], message.type)
         self.assertEqual(input_msg["uuid"]["userId"], message.uid)
-        self.assertEqual(json_input_msg, message.value)
+        self.assertEqual(input_msg, message.value)
         self.assertEqual("userId_B2C", message.db_uid)
         self.assertDictEqual(input_msg["uuid"], message.uuid)
         self.assertDictEqual(input_msg["payload"], message.payload)
@@ -70,9 +69,8 @@ class TestFromMessage(TestCase):
             "payload": {"key": "some payload"},
             "messageName": "some_type"
         }
-        json_input_msg = json.dumps(input_msg, ensure_ascii=False)
         headers = [('test_header', 'result')]
-        message = SmartAppFromMessage(json_input_msg, headers=headers)
+        message = SmartAppFromMessage(input_msg, headers=headers)
         self.assertTrue(message.validate())
 
     def test_valid_false(self):
@@ -81,9 +79,8 @@ class TestFromMessage(TestCase):
             "payload": "some payload"
         }
         headers = [('test_header', 'result')]
-        json_input_msg = json.dumps(input_msg, ensure_ascii=False)
 
-        message = SmartAppFromMessage(json_input_msg, headers=headers)
+        message = SmartAppFromMessage(input_msg, headers=headers)
         self.assertFalse(message.validate())
 
     def test_validation(self):
@@ -99,12 +96,12 @@ class TestFromMessage(TestCase):
         headers = [('test_header', 'result')]
 
         message = SmartAppFromMessage(
-            json.dumps(input_msg, ensure_ascii=False),
+            input_msg,
             headers=headers, validators=(PieMessageValidator(),))
         self.assertTrue(message.validate())
 
         input_msg["payload"]["pi"] = 2.7182818284
         message = SmartAppFromMessage(
-            json.dumps(input_msg, ensure_ascii=False),
+            input_msg,
             headers=headers, validators=(PieMessageValidator(),))
         self.assertFalse(message.validate())

@@ -245,7 +245,7 @@ class TestCase:
             defaults["payload"].update({"message": message})
 
         defaults.update(data)
-        return self.__from_msg_cls(json.dumps(defaults), headers=headers)
+        return self.__from_msg_cls(defaults, headers=headers)
 
     def handle_predefined_fields_response(self, predefined_fields_resp, response):
         predefined_fields_resp_data = self.storaged_predefined_fields[predefined_fields_resp]
