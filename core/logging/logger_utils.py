@@ -95,8 +95,6 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
 
         # эскейпим сишное форматирование логгера,
         # см. tests.core_tests.test_utils.test_logger.TestLogger.test_escaping
-        for key in params:
-            params[key] = str(params[key])
         message = message_maker.escape(message)
 
         logger.log(level_name, message, params, exc_info=exc_info)
