@@ -88,7 +88,7 @@ class Behaviors:
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                     log_const.BEHAVIOR_ID_VALUE: behavior_id,
                     log_const.CHOSEN_SCENARIO_VALUE: scenario_id,
-                    "expiration_time": expiration_time})
+                    "expiration_time": int(expiration_time)})
 
         behavior_description = self.descriptions[behavior_id]
         expire_time_us = behavior_description.get_expire_time_from_now(self._user)
