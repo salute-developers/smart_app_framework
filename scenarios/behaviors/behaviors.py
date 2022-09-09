@@ -116,7 +116,6 @@ class Behaviors:
                       log_const.CHOSEN_SCENARIO_VALUE: callback.scenario_id,
                       "to_message_name": to_message_name,
                       "behavior_result": behavior_result}
-        log_params.update(app_info)
 
         log(
             f"{self.__class__.__name__}.{behavior_result}: found valid behavior %({log_const.BEHAVIOR_ID_VALUE})s with scenario_id %({log_const.CHOSEN_SCENARIO_VALUE})s for callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s with to_message_name %(to_message_name)s",
@@ -255,7 +254,7 @@ class Behaviors:
                           log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                           log_const.BEHAVIOR_DATA_VALUE: str(self._callbacks[callback_id]),
                           "to_message_name": to_message_name}
-            log_params.update(app_info)
+
             log(
                 f"behavior.expire: if you see this - something went wrong(should be timeout in normal case) callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s,  with to_message_name %(to_message_name)s",
                 params=log_params, level="WARNING", user=self._user)
