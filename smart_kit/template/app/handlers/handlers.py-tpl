@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Dict, Any
 
 from core.basic_models.actions.command import Command
 from smart_kit.handlers.handler_base import HandlerBase
+from scenarios.user.user_model import User
 
 
 class CustomHandler(HandlerBase):
@@ -10,6 +11,6 @@ class CustomHandler(HandlerBase):
     Для сопоставления типа сообщения обработчику, добавьте такую пару в CustomModel.additional_handlers. По умолчанию,
     данный обработчик сопоставлен типу сообщения "CUSTOM_MESSAGE_NAME".
     """
-    def run(self, payload, user) -> List[Command]:
-        super().run(payload, user)
-        return []
+    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = super().run(payload, user)
+        return commands
