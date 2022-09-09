@@ -163,10 +163,10 @@ class CLInterface(cmd.Cmd):
 
         answers = combine_commands(answers, user)
         for answer in answers:
-            respond = json.loads(self.after_process_message(answer))
+            respond = self.after_process_message(answer)
             if respond:
                 _, new_answers = self.process_message(
-                    respond,
+                    json.loads(respond),
                     (('app_callback_id', answer.request_data['app_callback_id'].encode()),),
                 )
                 answers.extend(new_answers or [])
