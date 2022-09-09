@@ -2,9 +2,9 @@ import cmd
 import json
 import os
 import pprint
-import typing
 
 from lazy import lazy
+from typing import Dict, Optional, Tuple, Any
 
 from core.descriptions.descriptions import Descriptions
 from core.message.from_message import SmartAppFromMessage
@@ -49,7 +49,7 @@ class CLInterface(cmd.Cmd):
         else:
             self.storaged_predefined_fields = {}
 
-    def after_process_message(self, message) -> typing.Optional[str]:
+    def after_process_message(self, message) -> Optional[str]:
         callback = getattr(self, f"on_{message.name.lower()}", lambda *args, **kwargs: None)
         return callback(message)
 
@@ -140,7 +140,7 @@ class CLInterface(cmd.Cmd):
         self.environment.intent = self.available_scenarios[0]
         print("Текущий сценарий: ", self.environment.intent)
 
-    def process_message(self, raw_message: typing.Dict, headers: tuple = ()) -> typing.Tuple[typing.Any, list]:
+    def process_message(self, raw_message: Dict, headers: tuple = ()) -> Tuple[Any, list]:
         from smart_kit.configs import get_app_config
         masking_fields = self.settings["template_settings"].get("masking_fields")
         message = SmartAppFromMessage(raw_message, headers=headers, masking_fields=masking_fields,
