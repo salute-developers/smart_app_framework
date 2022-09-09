@@ -26,7 +26,7 @@ class Action:
     version: Optional[int]
     id: Optional[str]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: Optional[Dict[str, Any]] = None, id: Optional[str] = None):
         items = items or {}
         self.id = id
         self.version = items.get("version", -1)

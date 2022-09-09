@@ -1,6 +1,10 @@
 # coding: utf-8
+from typing import List, Dict, Any
+
+from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
 import scenarios.logging.logger_constants as log_const
+from scenarios.user.user_model import User
 from smart_kit.handlers.handler_base import HandlerBase
 from smart_kit.message.app_info import AppInfo
 from core.names.field import APP_INFO
@@ -10,8 +14,8 @@ from core.monitoring.monitoring import monitoring
 
 class HandlerTimeout(HandlerBase):
 
-    def run(self, payload, user):
-        super().run(payload, user)
+    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = super().run(payload, user)
         callback_id = user.message.callback_id
         if user.behaviors.has_callback(callback_id):
             params = {log_const.KEY_NAME: "handling_timeout"}
@@ -25,8 +29,8 @@ class HandlerTimeout(HandlerBase):
                         break
 
                 monitoring.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__,
-                                                   user, app_info=app_info)
+                                            user, app_info=app_info)
 
             callback_id = user.message.callback_id
-            result = user.behaviors.timeout(callback_id)
-            return result
+            commands.extend(user.behaviors.timeout(callback_id))
+            return commands
