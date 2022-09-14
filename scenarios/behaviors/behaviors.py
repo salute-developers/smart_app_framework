@@ -2,9 +2,10 @@
 import socket
 from collections import namedtuple
 from time import time
-from typing import Dict
+from typing import Dict, List
 
 import scenarios.logging.logger_constants as log_const
+from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
 from core.names.field import APP_INFO
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
@@ -123,13 +124,13 @@ class Behaviors:
             user=self._user,
             params=log_params)
 
-    def success(self, callback_id: str):
+    def success(self, callback_id: str) -> List[Command]:
         log(f"behavior.success started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
             self._user,
             params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
-        result = None
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)
@@ -147,13 +148,13 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def fail(self, callback_id: str):
+    def fail(self, callback_id: str) -> List[Command]:
         log(f"behavior.fail started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
             self._user,
             params={log_const.KEY_NAME: log_const.BEHAVIOR_FAIL_VALUE,
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
-        result = None
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)
@@ -167,13 +168,13 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def timeout(self, callback_id: str):
+    def timeout(self, callback_id: str) -> List[Command]:
         log(f"behavior.timeout started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
             self._user,
             params={log_const.KEY_NAME: log_const.BEHAVIOR_TIMEOUT_VALUE,
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
-        result = None
+        result = []
         if callback:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
@@ -186,13 +187,13 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def misstate(self, callback_id: str):
+    def misstate(self, callback_id: str) -> List[Command]:
         log(f"behavior.misstate started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
             self._user,
             params={log_const.KEY_NAME: log_const.BEHAVIOR_MISSTATE_VALUE,
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
-        result = None
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)

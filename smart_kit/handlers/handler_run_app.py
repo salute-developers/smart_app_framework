@@ -12,7 +12,6 @@ from smart_kit.models.dialogue_manager import DialogueManager
 
 
 class HandlerRunApp(HandlerBase):
-
     def __init__(self, app_name: str, dialogue_manager: DialogueManager):
         super().__init__(app_name)
         log(

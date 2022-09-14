@@ -12,9 +12,8 @@ from smart_kit.models.dialogue_manager import DialogueManager
 
 
 class HandlerText(HandlerBase):
-
     def __init__(self, app_name: str, dialogue_manager: DialogueManager):
-        super(HandlerText, self).__init__(app_name)
+        super().__init__(app_name)
         log(
             f"{self.__class__.__name__}.__init__ started.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )

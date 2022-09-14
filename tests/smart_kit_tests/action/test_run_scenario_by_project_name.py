@@ -8,7 +8,7 @@ from scenarios.actions.action import RunScenarioByProjectNameAction
 
 class TestScenarioDesc(dict):
     def run(self, argv1, argv2, params):
-        return 'result to run scenario'
+        return ['result to run scenario']
 
 
 class RunScenarioByProjectNameActionTest1(unittest.TestCase):
@@ -35,10 +35,10 @@ class RunScenarioByProjectNameActionTest1(unittest.TestCase):
     def test_run_scenario_by_project_name_run(self):
         obj1 = RunScenarioByProjectNameAction(self.items)
         # без оглядки на аннотации из PEP 484
-        self.assertTrue(obj1.run(self.test_user1, self.test_text_preprocessing_result, {'any_attr': {'any_data'}}) ==
-                        'result to run scenario')
+        self.assertEqual(obj1.run(self.test_user1, self.test_text_preprocessing_result, {'any_attr': {'any_data'}}),
+                        ['result to run scenario'])
         obj2 = RunScenarioByProjectNameAction(self.items)
-        self.assertIsNone(obj2.run(self.test_user2, self.test_text_preprocessing_result))
+        self.assertEqual([], obj2.run(self.test_user2, self.test_text_preprocessing_result))
 
     def test_run_scenario_by_project_name_log_vars(self):
         obj = RunScenarioByProjectNameAction(self.items)

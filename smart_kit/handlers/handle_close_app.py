@@ -12,7 +12,7 @@ from smart_kit.handlers.handler_base import HandlerBase
 
 class HandlerCloseApp(HandlerBase):
     def __init__(self, app_name: str):
-        super(HandlerCloseApp, self).__init__(app_name)
+        super().__init__(app_name)
         self._clear_current_scenario = ClearCurrentScenarioAction()
 
     def run(self, payload: Dict[str, Any], user: User) -> List[Command]:

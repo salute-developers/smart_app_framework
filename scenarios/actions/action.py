@@ -1,10 +1,7 @@
-import collections
 import copy
-import json
 import time
 
 from lazy import lazy
-from jinja2 import exceptions as jexcept
 from typing import Optional, Dict, Any, Union, List
 
 from core.basic_models.actions.basic_actions import Action
@@ -22,7 +19,7 @@ from core.utils.pickle_copy import pickle_deepcopy
 
 import scenarios.logging.logger_constants as log_const
 from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PARAMS, SAVED_MESSAGES, \
-    REQUEST_FIELD, LOCAL_VARS
+    REQUEST_FIELD
 from scenarios.user.parametrizer import Parametrizer
 from scenarios.user.user_model import User
 from scenarios.scenario_models.history import Event
@@ -35,12 +32,14 @@ class ClearFormAction(Action):
     form: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(ClearFormAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.form = items["form"]
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         user.forms.remove_item(self.form)
+        return commands
 
 
 class ClearInnerFormAction(ClearFormAction):
@@ -50,14 +49,16 @@ class ClearInnerFormAction(ClearFormAction):
     inner_form: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(ClearInnerFormAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.inner_form = items["inner_form"]
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         form = user.forms[self.form]
         if form:
             form.forms.remove_item(self.inner_form)
+        return commands
 
 
 class RemoveFormFieldAction(Action):
@@ -67,14 +68,16 @@ class RemoveFormFieldAction(Action):
     field: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(RemoveFormFieldAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.form = items["form"]
         self.field = items["field"]
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         form = user.forms[self.form]
         form.fields.remove_item(self.field)
+        return commands
 
 
 class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
@@ -85,27 +88,31 @@ class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
     inner_form: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(RemoveCompositeFormFieldAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.inner_form = items["inner_form"]
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         form = user.forms[self.form]
         inner_form = form.forms[self.inner_form]
         inner_form.fields.remove_item(self.field)
+        return commands
 
 
 class BreakScenarioAction(Action):
     scenario_id: Optional[str]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(BreakScenarioAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.scenario_id = items.get("scenario_id")
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         scenario_id = self.scenario_id if self.scenario_id is not None else user.last_scenarios.last_scenario_name
         user.scenario_models[scenario_id].set_break()
+        return commands
 
 
 class SaveBehaviorAction(Action):
@@ -115,17 +122,19 @@ class SaveBehaviorAction(Action):
     check_scenario: bool
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SaveBehaviorAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.behavior = items["behavior"]
         self.check_scenario = items.get("check_scenario", True)
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         scenario_id = None
         if self.check_scenario:
             scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
+        return commands
 
 
 class BasicSelfServiceActionWithState(StringAction):
@@ -138,7 +147,7 @@ class BasicSelfServiceActionWithState(StringAction):
         self.behavior = items["behavior"]
         self._command_action: Dict[str, Any] = items["command_action"]
         self._check_scenario: bool = items.get("check_scenario", True)
-        super(BasicSelfServiceActionWithState, self).__init__(self._command_action, id)
+        super().__init__(self._command_action, id)
 
     @lazy
     def behavior_action(self) -> SaveBehaviorAction:
@@ -151,15 +160,17 @@ class BasicSelfServiceActionWithState(StringAction):
     def _check(self, user):
         return not user.behaviors.check_got_saved_id(self.behavior_action.behavior)
 
-    def _run(self, user, text_preprocessing_result, params=None):
+    def _run(self, user, text_preprocessing_result, params=None) -> List[Command]:
         self.behavior_action.run(user, text_preprocessing_result, params)
-        command_action_result = self.command_action.run(user, text_preprocessing_result, params) or []
+        command_action_result = self.command_action.run(user, text_preprocessing_result, params)
         return command_action_result
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         if self._check(user):
-            return self._run(user, text_preprocessing_result, params)
+            commands.extend(self._run(user, text_preprocessing_result, params))
+            return commands
 
 
 class FillFieldAction(Action):
@@ -170,7 +181,7 @@ class FillFieldAction(Action):
     data_path: Union[str, Dict[str, Any]]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(FillFieldAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.form = items["form"]
         self.field: str = items["field"]
         data_path = items["data_path"]
@@ -185,10 +196,12 @@ class FillFieldAction(Action):
         return self.template.render(params)
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         params = user.parametrizer.collect(text_preprocessing_result)
         data = self._get_data(params)
         self._fill(user, data)
+        return commands
 
 
 class CompositeFillFieldAction(FillFieldAction):
@@ -197,7 +210,7 @@ class CompositeFillFieldAction(FillFieldAction):
     internal_form: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(CompositeFillFieldAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.internal_form = items["internal_form"]
 
     def _fill(self, user, data):
@@ -211,11 +224,12 @@ class RunScenarioAction(Action):
     parametrizer: BasicParametrizer
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(RunScenarioAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.scenario: UnifiedTemplate = UnifiedTemplate(items["scenario"])
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         if params is None:
             params = user.parametrizer.collect(text_preprocessing_result)
         else:
@@ -223,16 +237,19 @@ class RunScenarioAction(Action):
         scenario_id = self.scenario.render(params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
-            return scenario.run(text_preprocessing_result, user, params)
+            commands.extend(scenario.run(text_preprocessing_result, user, params))
+        return commands
 
 
 class RunLastScenarioAction(Action):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         if scenario:
-            return scenario.run(text_preprocessing_result, user, params)
+            commands.extend(scenario.run(text_preprocessing_result, user, params))
+        return commands
 
 
 class ChoiceScenarioAction(Action):
@@ -241,7 +258,7 @@ class ChoiceScenarioAction(Action):
     FIELD_REQUIREMENT_KEY = "requirement"
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ChoiceScenarioAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._else_item = items.get(self.FIELD_ELSE_KEY)
         self._scenarios = items[self.FIELD_SCENARIOS_KEY]
         self._requirements = [scenario.pop(self.FIELD_REQUIREMENT_KEY) for scenario in self._scenarios]
@@ -262,67 +279,74 @@ class ChoiceScenarioAction(Action):
         return self._else_item
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
-        result = None
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         choice_is_made = False
 
         for scenario, requirement in zip(self._scenarios, self.requirement_items):
             check_res = requirement.check(text_preprocessing_result, user, params)
             if check_res:
-                result = RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params)
+                commands.extend(RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params))
                 choice_is_made = True
                 break
 
         if not choice_is_made and self._else_item:
-            result = self.else_item.run(user, text_preprocessing_result, params)
+            commands.extend(self.else_item.run(user, text_preprocessing_result, params))
 
-        return result
+        return commands
+
+
+def clear_scenario(user, scenario_id):
+    scenario = user.descriptions["scenarios"][scenario_id]
+    user.last_scenarios.delete(scenario_id)
+    user.forms.remove_item(scenario.form_type)
 
 
 class ClearCurrentScenarioAction(Action):
-
-    def _clear_scenario(self, user, scenario_id):
-        scenario = user.descriptions["scenarios"][scenario_id]
-        user.last_scenarios.delete(scenario_id)
-        user.forms.remove_item(scenario.form_type)
-
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
-            self._clear_scenario(user, last_scenario_id)
+            clear_scenario(user, last_scenario_id)
+        return commands
 
 
 class ClearAllScenariosAction(Action):
-
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         user.last_scenarios.clear_all()
+        return commands
 
 
-class ClearScenarioByIdAction(ClearCurrentScenarioAction):
+class ClearScenarioByIdAction(Action):  # wrong inheritance
     version: Optional[int]
     parametrizer: BasicParametrizer
     scenario_id: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(ClearScenarioByIdAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.scenario_id = items.get("scenario_id")
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         if self.scenario_id:
-            self._clear_scenario(user, self.scenario_id)
+            clear_scenario(user, self.scenario_id)
+        return commands
 
 
 class ClearCurrentScenarioFormAction(Action):
     def __init__(self, items, id=None):
         super().__init__(items, id)
 
-    def run(self, user, text_preprocessing_result, params=None):
+    def run(self, user, text_preprocessing_result, params=None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
             user.forms.clear_form(last_scenario_id)
+        return commands
 
 
 class ResetCurrentNodeAction(Action):
@@ -330,10 +354,12 @@ class ResetCurrentNodeAction(Action):
         super().__init__(items, id)
         self.node_id = items.get('node_id', None)
 
-    def run(self, user, text_preprocessing_result, params=None):
+    def run(self, user, text_preprocessing_result, params=None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
             user.scenario_models[last_scenario_id].current_node = self.node_id
+        return commands
 
 
 class AddHistoryEventAction(Action):
@@ -342,7 +368,7 @@ class AddHistoryEventAction(Action):
     event_content: Dict[str, UnifiedTemplate]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(AddHistoryEventAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.results = UnifiedTemplate(items.get("results"))
         self.event_type = UnifiedTemplate(items.get("event_type"))
         self.event_content = items.get("event_content")
@@ -351,7 +377,8 @@ class AddHistoryEventAction(Action):
                 self.event_content[k] = UnifiedTemplate(v)
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         if scenario:
@@ -372,34 +399,38 @@ class AddHistoryEventAction(Action):
                 content=self.event_content
             )
             user.history.add_event(event)
+        return commands
 
 
 class EmptyAction(Action):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         log("%(class_name)s.run: action do nothing.",
             params={log_const.KEY_NAME: "empty_action", "class_name": self.__class__.__name__}, user=user)
-        return None
+        return commands
 
 
 class RunScenarioByProjectNameAction(Action):
-
     def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         scenario_id = user.message.project_name
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
-            return scenario.run(text_preprocessing_result, user, params)
+            commands.extend(scenario.run(text_preprocessing_result, user, params))
         else:
             log("%(class_name)s warning: %(scenario_id)s isn't exist",
                 params={log_const.KEY_NAME: "warning_in_RunScenarioByProjectNameAction",
                         "class_name": self.__class__.__name__, "scenario_id": scenario_id},
                 user=user, level="WARNING")
+        return commands
 
 
 class ProcessBehaviorAction(Action):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         callback_id = user.message.callback_id
 
         log("%(class_name)s.run: got callback_id %(callback_id)s.",
@@ -412,12 +443,13 @@ class ProcessBehaviorAction(Action):
                 params={log_const.KEY_NAME: "process_behavior_action_warning",
                         "class_name": self.__class__.__name__,
                         "callback_id": callback_id}, level="WARNING", user=user)
-            return None
+            return commands
 
         if user.message.payload:
-            return user.behaviors.success(callback_id)
-
-        return user.behaviors.fail(callback_id)
+            commands.extend(user.behaviors.success(callback_id))
+        else:
+            commands.extend(user.behaviors.fail(callback_id))
+        return commands
 
 
 class SelfServiceActionWithState(BasicSelfServiceActionWithState):
@@ -432,7 +464,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         self.rewrite_saved_messages = items.get("rewrite_saved_messages", False)
         self._check_scenario: bool = items.get("check_scenario", True)
 
-    def _run(self, user, text_preprocessing_result, params=None):
+    def _run(self, user, text_preprocessing_result, params=None) -> List[Command]:
 
         action_params = copy.copy(params or {})
 

@@ -13,7 +13,6 @@ from core.monitoring.monitoring import monitoring
 
 
 class HandlerTimeout(HandlerBase):
-
     def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
         commands = super().run(payload, user)
         callback_id = user.message.callback_id

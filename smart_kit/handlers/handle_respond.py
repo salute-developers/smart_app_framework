@@ -17,7 +17,7 @@ class HandlerRespond(HandlerBase):
     handler_name = "HandlerRespond"
 
     def __init__(self, app_name: str, action_name: Optional[str] = None):
-        super(HandlerRespond, self).__init__(app_name)
+        super().__init__(app_name)
         self._action_name = action_name
 
     def get_action_name(self, payload: Dict[str, Any], user: User):
