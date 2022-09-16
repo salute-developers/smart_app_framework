@@ -56,7 +56,7 @@ setup(
         "python-dateutil==2.7.3",
         "python-json-logger==0.1.11",
         "PyYAML==5.3",
-        "redis==4.3.4",
+        "redis==4.1.4",
         "requests==2.22.0",
         "rusenttokenize==0.0.5",
         "scikit-learn>=0.24.1",
