@@ -1,6 +1,5 @@
 # coding=utf-8
 from typing import Iterable
-from lazy import lazy
 import json
 import uuid
 
