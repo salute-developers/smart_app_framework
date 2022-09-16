@@ -1,4 +1,4 @@
-from lazy import lazy
+from functools import cached_property
 
 
 class Device:
@@ -6,42 +6,42 @@ class Device:
     def __init__(self, value):
         self._value = value
 
-    @lazy
+    @cached_property
     def value(self):
         return self._value
 
-    @lazy
+    @cached_property
     def platform_type(self):
         return self._value.get("platformType") or ""
 
-    @lazy
+    @cached_property
     def platform_version(self):
         return self._value.get("platformVersion") or ""
 
-    @lazy
+    @cached_property
     def surface(self):
         return self._value.get("surface") or ""
 
-    @lazy
+    @cached_property
     def surface_version(self):
         return self._value.get("surfaceVersion") or ""
 
-    @lazy
+    @cached_property
     def features(self):
         return self._value.get("features") or {}
 
-    @lazy
+    @cached_property
     def capabilities(self):
         return self._value.get("capabilities") or {}
 
-    @lazy
+    @cached_property
     def additional_info(self):
         return self._value.get("additionalInfo") or {}
 
-    @lazy
+    @cached_property
     def tenant(self):
         return self._value.get("tenant") or ""
 
-    @lazy
+    @cached_property
     def device_id(self):
         return self._value.get("deviceId") or ""

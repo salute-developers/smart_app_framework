@@ -1,4 +1,4 @@
-from lazy import lazy
+from functools import cached_property
 
 from scenarios.user.user_model import User
 
@@ -20,7 +20,7 @@ class CustomeUser(User):
     def fields(self):
         return super(CustomeUser, self).fields + []
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return CustomParametrizer(self, {})
 

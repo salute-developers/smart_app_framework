@@ -3,8 +3,7 @@ import json
 import os
 import pprint
 import typing
-
-from lazy import lazy
+from functools import cached_property
 
 from core.descriptions.descriptions import Descriptions
 from core.message.from_message import SmartAppFromMessage
@@ -53,17 +52,17 @@ class CLInterface(cmd.Cmd):
         callback = getattr(self, f"on_{message.name.lower()}", lambda *args, **kwargs: None)
         return callback(message)
 
-    @lazy
+    @cached_property
     def app_model(self):
         return self.__model_cls(self.resources, self.__dialogue_manager_cls, custom_settings=self.settings)
 
-    @lazy
+    @cached_property
     def resources(self):
         source = self.settings.get_source()
 
         return self.__resources_cls(source, self.references_path, self.settings)
 
-    @lazy
+    @cached_property
     def available_scenarios(self):
         return list(Descriptions(self.resources.registered_repositories)["scenarios"].keys())
 

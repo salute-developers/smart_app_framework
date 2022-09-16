@@ -1,10 +1,6 @@
-import collections
 import copy
-import json
 import time
-
-from lazy import lazy
-from jinja2 import exceptions as jexcept
+from functools import cached_property
 from typing import Optional, Dict, Any, Union, List
 
 from core.basic_models.actions.basic_actions import Action
@@ -22,7 +18,7 @@ from core.utils.pickle_copy import pickle_deepcopy
 
 import scenarios.logging.logger_constants as log_const
 from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PARAMS, SAVED_MESSAGES, \
-    REQUEST_FIELD, LOCAL_VARS
+    REQUEST_FIELD
 from scenarios.user.parametrizer import Parametrizer
 from scenarios.user.user_model import User
 from scenarios.scenario_models.history import Event
@@ -140,11 +136,11 @@ class BasicSelfServiceActionWithState(StringAction):
         self._check_scenario: bool = items.get("check_scenario", True)
         super(BasicSelfServiceActionWithState, self).__init__(self._command_action, id)
 
-    @lazy
+    @cached_property
     def behavior_action(self) -> SaveBehaviorAction:
         return SaveBehaviorAction({"behavior": self.behavior, "check_scenario": self._check_scenario})
 
-    @lazy
+    @cached_property
     def command_action(self) -> StringAction:
         return StringAction(self._command_action)
 

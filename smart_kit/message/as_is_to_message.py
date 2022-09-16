@@ -1,4 +1,4 @@
-from lazy import lazy
+from functools import cached_property
 
 from core.message.from_message import SmartAppFromMessage
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -6,7 +6,7 @@ from smart_kit.message.smartapp_to_message import SmartAppToMessage
 
 class AsIsToMessage(SmartAppToMessage):
 
-    @lazy
+    @cached_property
     def as_dict(self):
         self.incoming_message: SmartAppFromMessage
         fields = self.command.raw

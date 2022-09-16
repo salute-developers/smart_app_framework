@@ -1,6 +1,5 @@
+from functools import cached_property
 from typing import TypeVar, Dict, Any
-
-from lazy import lazy
 
 from core.basic_models.parametrizers.filter import Filter
 
@@ -12,7 +11,7 @@ class BasicParametrizer:
         self._user = user
         self._filter = items.get("filter") or {}
 
-    @lazy
+    @cached_property
     def filter(self):
         return Filter(self._filter)
 
