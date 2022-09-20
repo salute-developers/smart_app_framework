@@ -44,10 +44,11 @@ class SmartAppFromMessage:
     SESSION_ID = "sessionId"
     CALLBACK_ID_HEADER_NAME = CALLBACK_ID_HEADER
 
-    incremental_id: str
+    # following fields are used for validation
+    incremental_id: int
     message_name: str
-    payload: Dict[str, Any]
-    uuid: Dict[str, str]
+    payload: dict
+    uuid: dict
 
     def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
                  kafka_key: Optional[str] = None, headers: Optional[Iterable[Tuple[Any, Any]]] = None,
@@ -88,6 +89,10 @@ class SmartAppFromMessage:
                 if r_field not in self.__annotations__:
                     continue
 
+                a = self.__annotations__[r_field]
+                print(a)
+                a = self.as_dict[r_field]
+                print(a)
                 if not isinstance(
                         self.as_dict[r_field],
                         self.__annotations__[r_field],

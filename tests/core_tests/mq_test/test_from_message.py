@@ -47,7 +47,7 @@ class TestFromMessage(TestCase):
         self.assertEqual(input_msg["uuid"]["userChannel"], message.channel)
         self.assertEqual(input_msg["messageName"], message.type)
         self.assertEqual(input_msg["uuid"]["userId"], message.uid)
-        self.assertEqual(input_msg, message.value)
+        self.assertEqual(json.dumps(input_msg, ensure_ascii=False), message.value)
         self.assertEqual("userId_B2C", message.db_uid)
         self.assertDictEqual(input_msg["uuid"], message.uuid)
         self.assertDictEqual(input_msg["payload"], message.payload)
@@ -64,8 +64,8 @@ class TestFromMessage(TestCase):
     def test_valid_true(self):
         input_msg = {
             "messageId": 2,
-            "sessionId": 234,
-            "uuid": {"userChannel": "web", "userId": 99, "chatId": 80},
+            "sessionId": "234",
+            "uuid": {"userChannel": "web", "userId": "99", "chatId": "80"},
             "payload": {"key": "some payload"},
             "messageName": "some_type"
         }
@@ -85,7 +85,7 @@ class TestFromMessage(TestCase):
 
     def test_validation(self):
         input_msg = {
-            "uuid": {"userChannel": "web", "userId": 99, "chatId": 80},
+            "uuid": {"userChannel": "web", "userId": "99", "chatId": "80"},
             "messageName": "some_name",
             "messageId": "random_id",
             "sessionId": "random_id",
