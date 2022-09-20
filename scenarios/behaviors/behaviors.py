@@ -1,4 +1,5 @@
 # coding: utf-8
+import math
 import socket
 from collections import namedtuple
 from time import time
@@ -61,9 +62,9 @@ class Behaviors:
             action_params=None):
         host = socket.gethostname()
         text_preprocessing_result_raw = text_preprocessing_result_raw or {}
-        # behavior will be removed after timeout + EXPIRATION_DELAY
+        # behavior will be removed after now + timeout + EXPIRATION_DELAY
         expiration_time = (
-                int(time()) +
+                math.ceil(time()) +
                 self.descriptions[behavior_id].timeout(self._user) +
                 self.EXPIRATION_DELAY
         )
@@ -91,6 +92,8 @@ class Behaviors:
                     "expiration_time": int(expiration_time)})
 
         behavior_description = self.descriptions[behavior_id]
+
+        # add timer with now + behavior.timeout eval time
         expire_time_us = behavior_description.get_expire_time_from_now(self._user)
         self._add_behavior_timeout(expire_time_us, callback_id)
 
