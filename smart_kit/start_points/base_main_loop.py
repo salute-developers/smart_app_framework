@@ -7,6 +7,7 @@ import scenarios.logging.logger_constants as log_const
 from core.db_adapter.db_adapter import DBAdapterException
 from core.db_adapter.db_adapter import db_adapter_factory
 from core.logging.logger_utils import log
+from core.message.from_message import SmartAppFromMessage
 from core.monitoring.monitoring import monitoring
 from core.monitoring.healthcheck_handler import RootResource
 from core.monitoring.twisted_server import TwistedServer
@@ -95,14 +96,14 @@ class BaseMainLoop:
         monitoring.apply_config(monitoring_config)
         monitoring.init_metrics(app_name=self.app_name)
 
-    def load_user(self, db_uid, message):
+    def load_user(self, db_uid, message: SmartAppFromMessage):
         db_data = None
         load_error = False
         try:
             db_data = self.db_adapter.get(db_uid)
         except (DBAdapterException, ValueError):
             log("Failed to get user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                   log_const.REQUEST_VALUE: str(message.value)}, level="ERROR")
+                                                   log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
             load_error = True
             monitoring.counter_load_error(self.app_name)
         return self.user_cls(
@@ -115,7 +116,7 @@ class BaseMainLoop:
             load_error=load_error
         )
 
-    def save_user(self, db_uid, user, message):
+    def save_user(self, db_uid, user, message: SmartAppFromMessage):
         no_collisions = True
         if user.do_not_save:
             log("User %(uid)s will not saved", user=user, params={"uid": user.id,
@@ -133,7 +134,7 @@ class BaseMainLoop:
                     self.db_adapter.save(db_uid, str_data)
             except (DBAdapterException, ValueError):
                 log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                       log_const.REQUEST_VALUE: str(message.value)}, level="ERROR")
+                                                       log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
                 monitoring.counter_save_error(self.app_name)
             if not no_collisions:
                 monitoring.counter_save_collision(self.app_name)
