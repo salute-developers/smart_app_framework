@@ -208,9 +208,8 @@ class ActionOfActions(Action):
         self.actions = self.build_actions()
 
     @list_factory(Action)
-    def build_actions(self) -> List[str]:
+    def build_actions(self) -> List[Action]:
         return self._actions
-
 
 class CompositeAction(ActionOfActions):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -254,7 +253,7 @@ class RandomAction(Action):
         self.actions = self.build_actions()
 
     @list_factory(Action)
-    def build_actions(self) -> List[str]:
+    def build_actions(self) -> List[Action]:
         return self._raw_actions
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,

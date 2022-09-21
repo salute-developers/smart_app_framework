@@ -52,7 +52,7 @@ class CounterSetAction(CounterAction):
     time_shift: Optional[int]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(CounterSetAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.value = items.get("value")
         self.reset_time = items.get("reset_time", False)
         self.time_shift = items.get("time_shift", 0)

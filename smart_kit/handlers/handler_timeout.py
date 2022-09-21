@@ -32,4 +32,4 @@ class HandlerTimeout(HandlerBase):
 
             callback_id = user.message.callback_id
             commands.extend(user.behaviors.timeout(callback_id))
-            return commands
+        return commands

@@ -320,7 +320,7 @@ class ClearAllScenariosAction(Action):
         return commands
 
 
-class ClearScenarioByIdAction(Action):  # wrong inheritance
+class ClearScenarioByIdAction(Action):
     version: Optional[int]
     parametrizer: BasicParametrizer
     scenario_id: str
@@ -341,7 +341,8 @@ class ClearCurrentScenarioFormAction(Action):
     def __init__(self, items, id=None):
         super().__init__(items, id)
 
-    def run(self, user, text_preprocessing_result, params=None) -> List[Command]:
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
