@@ -89,10 +89,6 @@ class SmartAppFromMessage:
                 if r_field not in self.__annotations__:
                     continue
 
-                a = self.__annotations__[r_field]
-                print(a)
-                a = self.as_dict[r_field]
-                print(a)
                 if not isinstance(
                         self.as_dict[r_field],
                         self.__annotations__[r_field],
@@ -271,8 +267,8 @@ class SmartAppFromMessage:
         return self._value
 
     @property
-    def value(self) -> str:
-        return json.dumps(self._value,  ensure_ascii=False)
+    def as_str(self) -> str:
+        return json.dumps(self._value, ensure_ascii=False)
 
 
 basic_error_message = SmartAppFromMessage(

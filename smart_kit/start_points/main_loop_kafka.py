@@ -276,7 +276,7 @@ class MainLoop(BaseMainLoop):
                                 "message_id": message.incremental_id,
                                 "kafka_key": kafka_key,
                                 "incoming_data": str(message.masked_value),
-                                "length": len(message.value),
+                                "length": len(message.as_str),
                                 "headers": str(mq_message.headers()),
                                 "waiting_message": waiting_message_time,
                                 "surface": message.device.surface,
