@@ -186,6 +186,10 @@ class SmartAppFromMessage:
     def payload(self) -> Dict[str, Any]:
         return self.as_dict[self.PAYLOAD]
 
+    @payload.setter
+    def payload(self, payload):
+        self._value[self.PAYLOAD] = payload
+
     @property
     def type(self) -> str:
         return self.as_dict[self.MESSAGE_NAME]
@@ -252,6 +256,10 @@ class SmartAppFromMessage:
     @property
     def message_name(self) -> str:
         return self.as_dict[self.MESSAGE_NAME]
+
+    @message_name.setter
+    def message_name(self, message_name: str):
+        self._value[self.MESSAGE_NAME] = message_name
 
     # unique message_id
     @property
