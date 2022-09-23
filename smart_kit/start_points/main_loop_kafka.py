@@ -255,7 +255,7 @@ class MainLoop(BaseMainLoop):
                             "class_name": self.__class__.__name__
                         }, user=user,
                         level="WARNING")
-                    if self.settings["template_settings"].get("wrong_key_resend"):
+                    if self.settings["template_settings"].get("wrong_key_resend", True):
                         dest_topic = mq_message.topic()
                         self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
                                                                  mq_message.headers())
