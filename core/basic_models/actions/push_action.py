@@ -6,7 +6,10 @@ from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
+from smart_kit.configs import get_app_config
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
+from smart_kit.start_points.main_loop_http import HttpMainLoop
+from smart_kit.action.http import HTTPRequestAction
 
 PUSH_NOTIFY = "PUSH_NOTIFY"
 
@@ -63,6 +66,9 @@ class PushAction(StringAction):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
+        if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
+            HTTPRequestAction.run(user, text_preprocessing_result, params)
+            return []
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
             "clientId": user.message.sub,
