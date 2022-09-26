@@ -57,7 +57,7 @@ class Requirement:
         log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
         log_params["result"] = result
         log_params["raw_items"] = str(self.items)
-        log_params["params"] = str(params)
+        log_params["params"] = params
         if self._descr:
             log_params["descr"] = self._descr
         log(f"TRACING %(requirement)s with id {self.id}: Result is %(result)s.", user, log_params, level="DEBUG")

@@ -47,7 +47,7 @@ class UnifiedTemplate:
             log_params["class_name"] = self.__class__.__name__
             log_params["rendered"] = str(result)
             log_params["raw_items"] = str(self.input)
-            log_params["params"] = str(params_dict)
+            log_params["params"] = params_dict
             log(f"TRACING %(class_name)s. Result is %(rendered)s.", params=log_params, level="DEBUG")
 
         except Exception:
