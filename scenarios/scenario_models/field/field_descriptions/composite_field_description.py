@@ -1,4 +1,4 @@
-from lazy import lazy
+from functools import cached_property
 
 from core.model.factory import dict_factory, factory
 from scenarios.scenario_models.field.field_filler_description import FieldFillerDescription
@@ -11,12 +11,12 @@ class CompositeFieldDescription(BasicFieldDescription):
         super(CompositeFieldDescription, self).__init__(items, id)
         self._fields = items["fields"]
 
-    @lazy
+    @cached_property
     @factory(FieldFillerDescription)
     def filler(self):
         return self._filler
 
-    @lazy
+    @cached_property
     @dict_factory(BasicFieldDescription)
     def fields(self):
         return self._fields

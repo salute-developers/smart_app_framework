@@ -247,7 +247,7 @@ class NonRepeatingAction(ActionOfActions):
 class RandomAction(Action):
     actions: List[Action]
 
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self._raw_actions: List[str] = items["actions"]
         self.actions = self.build_actions()

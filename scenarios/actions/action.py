@@ -1,7 +1,6 @@
 import copy
 import time
-
-from lazy import lazy
+from functools import cached_property
 from typing import Optional, Dict, Any, Union, List
 
 from core.basic_models.actions.basic_actions import Action
@@ -149,11 +148,11 @@ class BasicSelfServiceActionWithState(StringAction):
         self._check_scenario: bool = items.get("check_scenario", True)
         super().__init__(self._command_action, id)
 
-    @lazy
+    @cached_property
     def behavior_action(self) -> SaveBehaviorAction:
         return SaveBehaviorAction({"behavior": self.behavior, "check_scenario": self._check_scenario})
 
-    @lazy
+    @cached_property
     def command_action(self) -> StringAction:
         return StringAction(self._command_action)
 
@@ -338,7 +337,7 @@ class ClearScenarioByIdAction(Action):
 
 
 class ClearCurrentScenarioFormAction(Action):
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -351,11 +350,12 @@ class ClearCurrentScenarioFormAction(Action):
 
 
 class ResetCurrentNodeAction(Action):
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.node_id = items.get('node_id', None)
 
-    def run(self, user, text_preprocessing_result, params=None) -> List[Command]:
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
@@ -459,7 +459,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
     behavior: str
     command_action: Action
 
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.save_params_template_data = self._get_template_tree(items.get("save_params") or {})
         self.rewrite_saved_messages = items.get("rewrite_saved_messages", False)

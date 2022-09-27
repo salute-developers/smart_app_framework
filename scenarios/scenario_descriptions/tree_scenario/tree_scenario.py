@@ -1,5 +1,4 @@
 # coding: utf-8
-from lazy import lazy
 from typing import Dict, Any
 
 from scenarios.scenario_descriptions.form_filling_scenario import FormFillingScenario

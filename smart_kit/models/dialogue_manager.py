@@ -1,9 +1,10 @@
 # coding: utf-8
+from functools import cached_property
+
 from core.logging.logger_utils import log
 from core.names import field
 
 import scenarios.logging.logger_constants as log_const
-from lazy import lazy
 
 from scenarios.scenario_descriptions.form_filling_scenario import FormFillingScenario
 from smart_kit.system_answers.nothing_found_action import NothingFoundAction
@@ -23,7 +24,7 @@ class DialogueManager:
         self.app_name = app_name
         log(f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE})
 
-    @lazy
+    @cached_property
     def _nothing_found_action(self):
         return self.actions.get(self.NOTHING_FOUND_ACTION) or NothingFoundAction()
 

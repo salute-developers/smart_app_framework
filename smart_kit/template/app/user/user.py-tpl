@@ -1,5 +1,5 @@
 from typing import List
-from lazy import lazy
+from functools import cached_property
 
 from core.model.field import Field
 from scenarios.user.user_model import User
@@ -20,7 +20,7 @@ class CustomUser(User):
         """Возвращает список полей с данными пользователя"""
         return super().fields + []
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return CustomParametrizer(self, {})
 
