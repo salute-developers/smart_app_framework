@@ -136,7 +136,7 @@ class HttpMainLoop(BaseHttpMainLoop):
             log("Error in request data", level="ERROR")
             raise Exception("Error in request data")
 
-        message = SmartAppFromMessage(body, headers=headers, headers_required=False,
+        message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
                                       validators=self.from_msg_validators)
 
         status, reason, answer = self.handle_message(message)

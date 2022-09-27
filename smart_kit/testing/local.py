@@ -2,7 +2,7 @@ import cmd
 import json
 import os
 import pprint
-import typing
+from typing import Dict, Optional, Tuple, Any
 from functools import cached_property
 
 from core.descriptions.descriptions import Descriptions
@@ -48,7 +48,7 @@ class CLInterface(cmd.Cmd):
         else:
             self.storaged_predefined_fields = {}
 
-    def after_process_message(self, message) -> typing.Optional[str]:
+    def after_process_message(self, message) -> Optional[str]:
         callback = getattr(self, f"on_{message.name.lower()}", lambda *args, **kwargs: None)
         return callback(message)
 
@@ -139,7 +139,7 @@ class CLInterface(cmd.Cmd):
         self.environment.intent = self.available_scenarios[0]
         print("Текущий сценарий: ", self.environment.intent)
 
-    def process_message(self, raw_message: str, headers: tuple = ()) -> typing.Tuple[typing.Any, list]:
+    def process_message(self, raw_message: Dict, headers: tuple = ()) -> Tuple[Any, list]:
         from smart_kit.configs import get_app_config
         masking_fields = self.settings["template_settings"].get("masking_fields")
         message = SmartAppFromMessage(raw_message, headers=headers, masking_fields=masking_fields,
@@ -157,7 +157,7 @@ class CLInterface(cmd.Cmd):
         if self.lt_settings.DISPLAY_RAW:
             pprint.pprint(self.environment.as_dict)
 
-        user, answers = self.process_message(str(self.environment))
+        user, answers = self.process_message(self.environment.as_dict)
         self.user_data = user.raw_str
 
         answers = combine_commands(answers, user)
@@ -165,7 +165,7 @@ class CLInterface(cmd.Cmd):
             respond = self.after_process_message(answer)
             if respond:
                 _, new_answers = self.process_message(
-                    respond,
+                    json.loads(respond),
                     (('app_callback_id', answer.request_data['app_callback_id'].encode()),),
                 )
                 answers.extend(new_answers or [])

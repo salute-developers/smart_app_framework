@@ -2,9 +2,8 @@
 import json
 import time
 from collections import namedtuple
+from typing import Union, Dict, Optional
 from functools import lru_cache, cached_property
-from typing import Union
-from typing import Optional
 
 from confluent_kafka.cimpl import KafkaException, Message as KafkaMessage
 
@@ -137,8 +136,7 @@ class MainLoop(BaseMainLoop):
 
         return answers
 
-    def _get_timeout_from_message(self, orig_message_raw, callback_id, headers):
-        orig_message_raw = json.dumps(orig_message_raw)
+    def _get_timeout_from_message(self, orig_message_raw: Dict, callback_id, headers):
         timeout_from_message = SmartAppFromMessage(orig_message_raw, headers=headers,
                                                    masking_fields=self.masking_fields,
                                                    validators=self.from_msg_validators)
@@ -225,7 +223,7 @@ class MainLoop(BaseMainLoop):
         message = None
         while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
             save_tries += 1
-            message_value = mq_message.value()
+            message_value = json.loads(mq_message.value())
             message = SmartAppFromMessage(message_value,
                                           headers=mq_message.headers(),
                                           masking_fields=self.masking_fields,
@@ -276,7 +274,7 @@ class MainLoop(BaseMainLoop):
                                 "message_id": message.incremental_id,
                                 "kafka_key": kafka_key,
                                 "incoming_data": str(message.masked_value),
-                                "length": len(message.value),
+                                "length": len(message.as_str),
                                 "headers": str(mq_message.headers()),
                                 "waiting_message": waiting_message_time,
                                 "surface": message.device.surface,

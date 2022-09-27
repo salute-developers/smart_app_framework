@@ -16,7 +16,7 @@ from smart_kit.utils.diff import partial_diff
 
 def run_testfile(path: AnyStr, file: AnyStr, app_model: SmartAppModel, settings: Settings, user_cls: type,
                  parametrizer_cls: type, from_msg_cls: type, test_case_cls: type, storaged_predefined_fields: Dict[str, Any],
-                 csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]],
+                 csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
                  interactive: bool = False) -> Tuple[int, int]:
     test_file_path = os.path.join(path, file)
     if not os.path.isfile(test_file_path) or not test_file_path.endswith('.json'):
@@ -244,7 +244,7 @@ class TestCase:
             defaults["payload"].update({"message": message})
 
         defaults.update(data)
-        return self.__from_msg_cls(json.dumps(defaults), headers=headers)
+        return self.__from_msg_cls(defaults, headers=headers)
 
     def handle_predefined_fields_response(self, predefined_fields_resp, response):
         predefined_fields_resp_data = self.storaged_predefined_fields[predefined_fields_resp]

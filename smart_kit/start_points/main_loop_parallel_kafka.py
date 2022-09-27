@@ -1,4 +1,5 @@
 import concurrent.futures
+import json
 import os
 import threading
 from time import sleep
@@ -45,7 +46,7 @@ class ParallelKafkaMainLoop(KafkaMainLoop):
         # ну тут чутка копипасты
         mutex = None
         try:
-            message_value = mq_message.value()
+            message_value = json.loads(mq_message.value())
             message = SmartAppFromMessage(message_value,
                                           headers=mq_message.headers(),
                                           masking_fields=self.masking_fields)
