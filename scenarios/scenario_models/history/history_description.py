@@ -1,5 +1,5 @@
+from functools import cached_property
 from typing import Union
-from lazy import lazy
 
 from core.model.factory import factory
 from scenarios.scenario_models.history import EventFormatter
@@ -17,7 +17,7 @@ class HistoryDescription:
         self.event_expiration_delay = items.get("event_expiration_delay", self.EVENT_EXPIRATION_DELAY)
         self._formatter = items.get("formatter")
 
-    @lazy
+    @cached_property
     @factory(EventFormatter)
     def formatter(self) -> EventFormatter:
         return self._formatter

@@ -1,10 +1,10 @@
 import hashlib
 from datetime import datetime, timezone
+from functools import cached_property
 from random import random
 from typing import List, Optional, Dict, Any
 
 from croniter import croniter
-from lazy import lazy
 
 import core.logging.logger_constants as log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier, ExternalClassifier
@@ -272,7 +272,7 @@ class ClassifierRequirement(Requirement):
         super(ClassifierRequirement, self).__init__(items=items, id=id)
         self._classifier = items["classifier"]
 
-    @lazy
+    @cached_property
     def classifier(self) -> Classifier:
         return ExternalClassifier(self._classifier)
 

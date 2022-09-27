@@ -44,7 +44,6 @@ setup(
         "ics==0.6",
         "Jinja2==3.0.3",
         "keras>=2.6.0",
-        "lazy",
         "nltk==3.5",
         "numpy",
         "objgraph==3.4.1",
