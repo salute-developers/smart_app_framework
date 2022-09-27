@@ -15,9 +15,11 @@ class NothingFoundAction(Action):
     id: Optional[str]
 
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
-        super(NothingFoundAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._action = StringAction({"command": NOTHING_FOUND})
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        return self._action.run(user, text_preprocessing_result, params=params)
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
+        commands.extend(self._action.run(user, text_preprocessing_result, params=params))
+        return commands

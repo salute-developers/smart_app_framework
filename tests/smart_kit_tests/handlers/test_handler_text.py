@@ -10,7 +10,7 @@ class HandlerTest5(unittest.TestCase):
     def setUp(self):
         self.app_name = "TestAppName"
         self.test_dialog_manager1 = Mock('dialog_manager')
-        self.test_dialog_manager1.run = lambda x, y: ("TestAnswer", True)
+        self.test_dialog_manager1.run = lambda x, y: (["TestAnswer"], True)
         self.test_dialog_manager2 = Mock('dialog_manager')
         self.test_dialog_manager2.run = lambda x, y: ("", False)
         self.test_text_preprocessing_result = Mock('text_preprocessing_result')
@@ -42,12 +42,12 @@ class HandlerTest5(unittest.TestCase):
     def test_handler_text_handle_base(self):
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        self.assertTrue(obj1._handle_base(self.test_text_preprocessing_result, self.test_user) == "TestAnswer")
+        self.assertTrue(obj1._handle_base(self.test_text_preprocessing_result, self.test_user) == ["TestAnswer"])
         self.assertTrue(obj2._handle_base(self.test_text_preprocessing_result, self.test_user) == [])
 
     def test_handler_text_run(self):
         self.assertIsNotNone(handler_text.log_const.NORMALIZED_TEXT_VALUE)
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        self.assertTrue(obj1.run(self.test_payload, self.test_user) == "TestAnswer")
+        self.assertTrue(obj1.run(self.test_payload, self.test_user) == ["TestAnswer"])
         self.assertTrue(obj2.run(self.test_payload, self.test_user) == [])

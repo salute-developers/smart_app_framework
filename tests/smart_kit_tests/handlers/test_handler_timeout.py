@@ -22,7 +22,7 @@ class HandlerTest2(unittest.TestCase):
         self.test_user.message.device.surface = "surface"
 
         self.test_user.behaviors = Mock('behaviors')
-        self.test_user.behaviors.timeout = lambda x: 120
+        self.test_user.behaviors.timeout = lambda x: [120]
         self.test_user.behaviors.has_callback = lambda *x, **y: PicklableMagicMock()
         self.test_user.behaviors.get_callback_action_params = lambda *x, **y: {}
         self.test_payload = Mock('payload')
@@ -31,4 +31,4 @@ class HandlerTest2(unittest.TestCase):
         obj = handler_timeout.HandlerTimeout(self.app_name)
         self.assertIsNotNone(obj.KAFKA_KEY)
         self.assertIsNotNone(handler_timeout.log_const.KEY_NAME)
-        self.assertTrue(obj.run(self.test_payload, self.test_user) == 120)
+        self.assertTrue(obj.run(self.test_payload, self.test_user) == [120])
