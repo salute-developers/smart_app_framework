@@ -1,4 +1,5 @@
 # coding: utf-8
+import math
 import socket
 from collections import namedtuple
 from time import time
@@ -61,9 +62,9 @@ class Behaviors:
             action_params=None):
         host = socket.gethostname()
         text_preprocessing_result_raw = text_preprocessing_result_raw or {}
-        # behavior will be removed after timeout + EXPIRATION_DELAY
+        # behavior will be removed after now + timeout + EXPIRATION_DELAY
         expiration_time = (
-                int(time()) +
+                math.ceil(time()) +
                 self.descriptions[behavior_id].timeout(self._user) +
                 self.EXPIRATION_DELAY
         )
@@ -88,9 +89,11 @@ class Behaviors:
                     log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                     log_const.BEHAVIOR_ID_VALUE: behavior_id,
                     log_const.CHOSEN_SCENARIO_VALUE: scenario_id,
-                    "expiration_time": expiration_time})
+                    "expiration_time": int(expiration_time)})
 
         behavior_description = self.descriptions[behavior_id]
+
+        # add timer with now + behavior.timeout eval time
         expire_time_us = behavior_description.get_expire_time_from_now(self._user)
         self._add_behavior_timeout(expire_time_us, callback_id)
 
@@ -116,7 +119,6 @@ class Behaviors:
                       log_const.CHOSEN_SCENARIO_VALUE: callback.scenario_id,
                       "to_message_name": to_message_name,
                       "behavior_result": behavior_result}
-        log_params.update(app_info)
 
         log(
             f"{self.__class__.__name__}.{behavior_result}: found valid behavior %({log_const.BEHAVIOR_ID_VALUE})s with scenario_id %({log_const.CHOSEN_SCENARIO_VALUE})s for callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s with to_message_name %(to_message_name)s",
@@ -255,7 +257,7 @@ class Behaviors:
                           log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                           log_const.BEHAVIOR_DATA_VALUE: str(self._callbacks[callback_id]),
                           "to_message_name": to_message_name}
-            log_params.update(app_info)
+
             log(
                 f"behavior.expire: if you see this - something went wrong(should be timeout in normal case) callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s,  with to_message_name %(to_message_name)s",
                 params=log_params, level="WARNING", user=self._user)

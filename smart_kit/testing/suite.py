@@ -1,9 +1,8 @@
 import json
 import os
 from csv import DictWriter, QUOTE_MINIMAL
+from functools import cached_property
 from typing import AnyStr, Optional, Tuple, Any, Dict, Callable
-
-from lazy import lazy
 
 from core.configs.global_constants import LINK_BEHAVIOR_FLAG
 from smart_kit.compatibility.commands import combine_commands
@@ -80,20 +79,20 @@ class TestSuite:
         with open(predefined_fields_storage, "r") as f:
             self.storaged_predefined_fields = json.load(f)
 
-    @lazy
+    @cached_property
     def app_model(self):
         return self.app_config.MODEL(
             self.resources, self.app_config.DIALOGUE_MANAGER, custom_settings=self.settings,
             app_name=self.app_config.APP_NAME
         )
 
-    @lazy
+    @cached_property
     def resources(self):
         source = self.settings.get_source()
 
         return self.app_config.RESOURCES(source, self.app_config.REFERENCES_PATH, self.settings)
 
-    @lazy
+    @cached_property
     def settings(self):
         return self.app_config.SETTINGS(config_path=self.app_config.CONFIGS_PATH,
                                         secret_path=self.app_config.SECRET_PATH,

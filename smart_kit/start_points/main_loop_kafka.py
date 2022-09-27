@@ -2,12 +2,10 @@
 import json
 import time
 from collections import namedtuple
-from functools import lru_cache
-from typing import Union, Dict
-from typing import Optional
+from typing import Union, Dict, Optional
+from functools import lru_cache, cached_property
 
 from confluent_kafka.cimpl import KafkaException, Message as KafkaMessage
-from lazy import lazy
 
 import scenarios.logging.logger_constants as log_const
 from core.configs.global_constants import KAFKA_REPLY_TOPIC
@@ -455,7 +453,7 @@ class MainLoop(BaseMainLoop):
     def default_topic_key(self, kafka_key):
         return self.settings["kafka"]["template-engine"][kafka_key].get("default_topic_key")
 
-    @lazy
+    @cached_property
     def masking_fields(self):
         return self.settings["template_settings"].get("masking_fields")
 

@@ -1,10 +1,10 @@
 import hashlib
 from datetime import datetime, timezone
+from functools import cached_property
 from random import random
 from typing import List, Optional, Dict, Any
 
 from croniter import croniter
-from lazy import lazy
 
 import core.logging.logger_constants as log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier, ExternalClassifier
@@ -57,7 +57,7 @@ class Requirement:
         log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
         log_params["result"] = result
         log_params["raw_items"] = str(self.items)
-        log_params["params"] = str(params)
+        log_params["params"] = params
         if self._descr:
             log_params["descr"] = self._descr
         log(f"TRACING %(requirement)s with id {self.id}: Result is %(result)s.", user, log_params, level="DEBUG")
@@ -66,7 +66,7 @@ class Requirement:
     def on_check_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         result = self._on_check_error_result(text_preprocessing_result, user)
         log_params = self._log_params()
-        log_params["masked_message"]: user.message.masked_value
+        log_params["masked_message"]: str(user.message.masked_value)
         log_params["result"]: result
         log("exc_handler: Requirement FAILED to check. Return %(result)s. MESSAGE: %(masked_message)s.",
             user, log_params,
@@ -272,7 +272,7 @@ class ClassifierRequirement(Requirement):
         super(ClassifierRequirement, self).__init__(items=items, id=id)
         self._classifier = items["classifier"]
 
-    @lazy
+    @cached_property
     def classifier(self) -> Classifier:
         return ExternalClassifier(self._classifier)
 

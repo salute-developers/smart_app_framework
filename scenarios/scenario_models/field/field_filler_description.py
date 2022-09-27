@@ -2,11 +2,11 @@ import collections
 import json
 import operator
 import re
+from functools import cached_property
 from itertools import islice
 from typing import Dict, List, Union, Optional, Any, Callable, Pattern, Set
 
 from jinja2 import exceptions as jexcept
-from lazy import lazy
 
 import core.basic_models.classifiers.classifiers_constants as cls_const
 import core.logging.logger_constants as core_log_const
@@ -543,7 +543,7 @@ class ClassifierFiller(FieldFillerDescription):
         self._classifier = items["classifier"]
         self._cls_const_answer_key = cls_const.ANSWER_KEY
 
-    @lazy
+    @cached_property
     def classifier(self) -> Classifier:
         return ExternalClassifier(self._classifier)
 

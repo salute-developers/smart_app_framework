@@ -1,5 +1,5 @@
 import json
-from lazy import lazy
+from functools import cached_property
 
 from core.logging.logger_utils import log
 from core.model.field import Field
@@ -63,7 +63,7 @@ class User(BaseUser):
                                  Field("history", History, self.descriptions["history"]),
                                  Field("gender_selector", ReplySelector)]
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return self.__parametrizer_cls(self, {})
 
