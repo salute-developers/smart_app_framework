@@ -252,18 +252,19 @@ class MainLoop(BaseMainLoop):
                             "class_name": self.__class__.__name__
                         }, user=user,
                         level="WARNING")
-                    dest_topic = mq_message.topic()
-                    self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
-                                                             mq_message.headers())
-                    log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
-                        f"resent again with a valid key: '{valid_key}' to '{dest_topic}'",
-                        params={log_const.KEY_NAME: "kafka_message_key_recovery",
-                                MESSAGE_ID_STR: message.incremental_id,
-                                UID_STR: message.uid,
-                                "class_name": self.__class__.__name__},
-                        user=user,
-                        level="WARNING")
-                    break
+                    if self.settings["template_settings"].get("wrong_key_resend", True):
+                        dest_topic = mq_message.topic()
+                        self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
+                                                                 mq_message.headers())
+                        log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
+                            f"resent again with a valid key: '{valid_key}' to '{dest_topic}'",
+                            params={log_const.KEY_NAME: "kafka_message_key_recovery",
+                                    MESSAGE_ID_STR: message.incremental_id,
+                                    UID_STR: message.uid,
+                                    "class_name": self.__class__.__name__},
+                            user=user,
+                            level="WARNING")
+                        break
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
                         "%(incoming_data)s",
