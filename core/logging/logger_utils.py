@@ -18,6 +18,8 @@ UID_STR = "uid"
 LOGGING_UUID = "logging_uuid"
 CLASS_NAME = "class_name"
 LOG_STORE_FOR = "log_store_for"
+HEADERS = "headers"
+LOGGER_HEADERS = ["kafka_replyTopic", "dp_callback_id", "app_callback_id"]
 
 
 class LoggerMessageCreator:
@@ -88,6 +90,10 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         # TODO: think how to make it more general
         if params and "params" in params:
             params["params"] = str(params["params"])
+
+        if HEADERS in params:
+            if not params[HEADERS] in LOGGER_HEADERS:
+                params.pop(HEADERS)
 
         log_store_for_map = getattr(logging, "log_store_for_map", None)
         if log_store_for_map is not None and params is not None:
