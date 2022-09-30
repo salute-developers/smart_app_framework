@@ -1,3 +1,5 @@
+import inspect
+import logging
 import hashlib
 from datetime import datetime, timezone
 from random import random
@@ -25,6 +27,7 @@ requirements = Registered()
 requirement_factory = build_factory(requirements)
 
 
+
 class Requirement:
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
@@ -32,6 +35,7 @@ class Requirement:
         self.items = items
         self.version = items.get("version", -1)
         self.id = id
+        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(logging.getLevelName("DEBUG"))
 
     def _log_params(self):
         return {
@@ -53,14 +57,15 @@ class Requirement:
             result = self._check(text_preprocessing_result, user, params)
         except:
             return self.on_check_error(text_preprocessing_result, user)
-        log_params = self._log_params()
-        log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
-        log_params["result"] = result
-        log_params["raw_items"] = str(self.items)
-        log_params["params"] = params
-        if self._descr:
-            log_params["descr"] = self._descr
-        log(f"TRACING %(requirement)s with id {self.id}: Result is %(result)s.", user, log_params, level="DEBUG")
+        if self.is_logging_debug_mode:
+            log_params = self._log_params()
+            log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
+            log_params["result"] = result
+            log_params["raw_items"] = str(self.items)
+            log_params["params"] = params
+            if self._descr:
+                log_params["descr"] = self._descr
+            log(f"TRACING %(requirement)s with id {self.id}: Result is %(result)s.", user, log_params, level="DEBUG")
         return result
 
     def on_check_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
