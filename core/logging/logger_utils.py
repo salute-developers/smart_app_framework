@@ -91,7 +91,7 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         if params and "params" in params:
             params["params"] = str(params["params"])
 
-        if HEADERS in params:
+        if params and HEADERS in params:
             if not params[HEADERS] in LOGGER_HEADERS:
                 params.pop(HEADERS)
 
