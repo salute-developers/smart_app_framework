@@ -117,7 +117,7 @@ class PushActionHttp(PushAction):
         super().__init__(items, id)
         self.type_request = items.get("type_request")
         if self.type_request == "apprequest-lite":
-            self.templateContent = items.get("templateContent")
+            self.templateContent = json.loads(json.dumps(items.get("templateContent")))
         elif self.type_request == "apprequest":
             self.payload = json.loads(json.dumps(items.get("payload")))
         self._create_instance_of_http_request_action(items, id)
