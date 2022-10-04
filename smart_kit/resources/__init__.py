@@ -13,7 +13,7 @@ from core.basic_models.actions.counter_actions import CounterIncrementAction, Co
     CounterClearAction, CounterSetAction, CounterCopyAction
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.external_actions import ExternalActions
-from core.basic_models.actions.push_action import PushAction, PUSH_NOTIFY
+from core.basic_models.actions.push_action import PushAction, PushActionHttp, PushAuthenticationActionHttp, PUSH_NOTIFY
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
@@ -315,6 +315,8 @@ class SmartAppResources(BaseConfig):
         actions["set_variable"] = SetVariableAction
         actions["string"] = StringAction
         actions["push"] = PushAction
+        actions["push_authentication"] = PushAuthenticationActionHttp
+        actions["push_http"] = PushActionHttp
         actions["give_me_memory"] = GiveMeMemoryAction
         actions["remember_this"] = RememberThisAction
         actions["smart_geo"] = SmartGeoAction

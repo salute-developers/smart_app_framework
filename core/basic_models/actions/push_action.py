@@ -1,4 +1,5 @@
 # coding: utf-8
+import json
 from typing import Union, Dict, List, Any, Optional
 
 from core.basic_models.actions.command import Command
@@ -6,16 +7,14 @@ from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
-from smart_kit.configs import get_app_config
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
-from smart_kit.start_points.main_loop_http import HttpMainLoop
 from smart_kit.action.http import HTTPRequestAction
 
 PUSH_NOTIFY = "PUSH_NOTIFY"
 
 
 class PushAction(StringAction):
-    """ Action для отправки пуш уведомлений в сервис пушей.
+    """ Action для отправки пуш уведомлений в сервис пушей через Kafka.
         Example:
         {
           "push_advertising_offer": {
@@ -66,9 +65,6 @@ class PushAction(StringAction):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
-        if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
-            HTTPRequestAction.run(user, text_preprocessing_result, params)
-            return []
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
             "clientId": user.message.sub,
@@ -79,3 +75,75 @@ class PushAction(StringAction):
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
         return commands
+
+
+class PushAuthenticationActionHttp(PushAction):
+    """
+    Action для получения токена в сервис пушей через http.
+    Ссылка на документацию с примерами получения токена:
+     - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
+    """
+
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+        super().__init__(items, id)
+        self.scope = items.get("scope")
+        self._create_instance_of_http_request_action(items, id)
+
+    def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
+        self.http_request_action = HTTPRequestAction(items, id)
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        params = params or {}
+        collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
+        params.update(collected)
+        request_body_parameters = {
+            "scope": self.scope
+        }
+        self.http_request_action.method_params["json"] = request_body_parameters
+        self.http_request_action.run(user, text_preprocessing_result, params)
+        return []
+
+
+class PushActionHttp(PushAction):
+    """
+    Action для отправки пуш уведомлений в сервис пушей через http.
+    Аутентификация осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
+    Ссылка на документацию с примерами отправки уведомлений:
+     - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
+    """
+
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+        super().__init__(items, id)
+        self.type_request = items.get("type_request")
+        if self.type_request == "apprequest-lite":
+            self.templateContent = items.get("templateContent")
+        elif self.type_request == "apprequest":
+            self.payload = json.loads(json.dumps(items.get("payload")))
+        self._create_instance_of_http_request_action(items, id)
+
+    def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
+        self.http_request_action = HTTPRequestAction(items, id)
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        params = params or {}
+        collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
+        params.update(collected)
+        if self.type_request == "apprequest-lite":
+            request_body_parameters = {
+                "projectId": user.settings["template_settings"]["project_id"],
+                "clientId": user.message.sub,
+                "surface": self.surface,
+                "templateContent": self.templateContent
+            }
+        elif self.type_request == "apprequest":
+            request_body_parameters = {
+                "protocolVersion": "protocolVersion",
+                "messageId": "messageId",
+                "messageName": "messageName",
+                "payload": self.payload
+            }
+        self.http_request_action.method_params["json"] = request_body_parameters
+        self.http_request_action.run(user, text_preprocessing_result, params)
+        return []
