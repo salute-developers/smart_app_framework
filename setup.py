@@ -50,7 +50,7 @@ setup(
         "dill==0.3.3",
         "ics==0.6",
         "Jinja2==3.0.3",
-        "keras==2.10.0",
+        "keras==2.6.0",
         "nltk==3.5",
         "numpy==1.19.3",
         "objgraph==3.4.1",
@@ -69,6 +69,7 @@ setup(
         "setuptools==62.3.2",
         "tabulate==0.9.0",
         "tatsu==4.4.0",
+        "grpcio==1.49.1",  # library for tensorflow
         "oauthlib==3.2.0",  # library for tensorflow
         "google-auth==2.12.0",  # library for tensorflow
         tf_version(),
