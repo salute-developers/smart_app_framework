@@ -21,8 +21,15 @@ def tf_version():
     return "tensorflow>=2.6.0"
 
 
+NAME = "smart_app_framework"
+if "--name" in sys.argv:
+    index = sys.argv.index("--name")
+    sys.argv.pop(index)  # Removes the '--name'
+    NAME = sys.argv.pop(index)  # Returns the element after the '--name'
+
+
 setup(
-    name="smart_app_framework",
+    name=NAME,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Salute-Developers",
