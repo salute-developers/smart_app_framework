@@ -32,8 +32,10 @@ jobs:
         python setup.py sdist bdist_wheel
         twine upload dist/*
     - name: Build for Sber
+      env:
+        PACKAGE_NAME: sber_nlp_platform_smart_app_framework
       run: |
-        python setup.py sdist bdist_wheel --name sber_nlp_platform_smart_app_framework
+        python setup.py sdist bdist_wheel
     - name: Upload Assets
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')

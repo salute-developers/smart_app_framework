@@ -1,3 +1,4 @@
+import os
 import platform
 import sys
 
@@ -21,14 +22,8 @@ def tf_version():
     return "tensorflow==2.6.0"
 
 
-NAME = "smart_app_framework"
-if "--name" in sys.argv:
-    index = sys.argv.index("--name")
-    NAME = sys.argv.pop(index + 1)  # Returns the element after the '--name'
-
-
 setup(
-    name=NAME,
+    name=os.getenv("PACKAGE_NAME", default="smart_app_framework"),
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Salute-Developers",
