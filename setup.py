@@ -24,8 +24,7 @@ def tf_version():
 NAME = "smart_app_framework"
 if "--name" in sys.argv:
     index = sys.argv.index("--name")
-    sys.argv.pop(index)  # Removes the '--name'
-    NAME = sys.argv.pop(index)  # Returns the element after the '--name'
+    NAME = sys.argv.pop(index + 1)  # Returns the element after the '--name'
 
 
 setup(
