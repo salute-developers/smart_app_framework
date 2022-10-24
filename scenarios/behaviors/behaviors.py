@@ -127,10 +127,6 @@ class Behaviors:
             params=log_params)
 
     def success(self, callback_id: str) -> List[Command]:
-        log(f"behavior.success started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
-            self._user,
-            params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
-                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -147,6 +143,11 @@ class Behaviors:
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
             result = behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params)
+        else:
+            log(f"behavior.success not found valid callback for callback_id {callback_id}",
+                self._user,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
 
