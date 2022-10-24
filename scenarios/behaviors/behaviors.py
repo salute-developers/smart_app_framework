@@ -127,6 +127,10 @@ class Behaviors:
             params=log_params)
 
     def success(self, callback_id: str) -> List[Command]:
+        log(f"behavior.success started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
+            self._user,
+            params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
         result = []
         if callback:
