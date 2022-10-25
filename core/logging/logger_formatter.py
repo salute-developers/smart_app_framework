@@ -1,7 +1,6 @@
 # coding: utf-8
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
-import logging
 from core.model.factory import build_factory
 from core.model.registered import Registered
 
