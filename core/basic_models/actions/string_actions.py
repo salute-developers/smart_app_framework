@@ -23,6 +23,7 @@ class NodeAction(CommandAction):
     "support_templates".
 
     """
+    __slots__ = ['nodes', 'support_templates', '_nodes', '_support_templates', 'no_empty_nodes']
     version: Optional[int]
     command: str
     nodes: Dict[str, List[List[str]]]
@@ -110,6 +111,8 @@ class StringAction(NodeAction):
       }
     }
     """
+    __slots__ = []
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(StringAction, self).__init__(items, id)
 
@@ -149,6 +152,8 @@ class AfinaAnswerAction(NodeAction):
     Output:
     [command1(pronounceText)]
     """
+    __slots__ = []
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(AfinaAnswerAction, self).__init__(items, id)
         self.command: str = ANSWER_TO_USER
@@ -226,6 +231,7 @@ class SDKAnswer(NodeAction):
     INDEX_WILDCARD = "*index*"
     RANDOM_PATH = [['items', INDEX_WILDCARD, 'bubble', 'text'], ['pronounceText'],
                    ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
+    __slots__ = []
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(SDKAnswer, self).__init__(items, id)
@@ -376,6 +382,7 @@ class SDKAnswerToUser(NodeAction):
     ответ c карточками с случайным выбором текстов из random_choice
     карточки на андроиде требуют sdk_version не ниже "20.03.0.0"
     """
+    __slots__ = ['_items', '_suggests', '_suggests_template', '_root', 'items', 'suggests', 'root']
     ITEMS = "items"
     SUGGESTIONS = "suggestions"
     SUGGESTIONS_TEMPLATE = "suggestions_template"
