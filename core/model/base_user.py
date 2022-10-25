@@ -18,6 +18,7 @@ from scenarios.logging.logger_constants import KEY_NAME
 
 
 class BaseUser(Model):
+    __slots__ = ['counters', 'variables', 'private_vars', 'local_vars', 'descriptions', 'id', 'message', 'load_error']
     USER_DB_VERSION = "user_db_data_version"
 
     counters: Counters

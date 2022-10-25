@@ -19,6 +19,8 @@ import scenarios.logging.logger_constants as log_const
 
 
 class User(BaseUser):
+    __slots__ = ['forms', 'last_fields', 'last_scenarios', 'scenario_models', 'preprocessing_messages_for_scenarios',
+                 'behaviors', 'history', 'settings', '__parametrizer_cls', 'do_not_save', 'initial_db_data']
     forms: Forms
     last_fields: LastFields
     last_scenarios: LastScenarios

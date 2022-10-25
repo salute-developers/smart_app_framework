@@ -13,6 +13,7 @@ from core.unified_template.unified_template import UnifiedTemplate
 
 
 class BaseSetVariableAction(Action):
+    __slots__ = ['key', 'loader', 'template']
     key: str
     loader: Optional[str]
     loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
@@ -52,6 +53,7 @@ class BaseSetVariableAction(Action):
 
 
 class SetVariableAction(BaseSetVariableAction):
+    __slots__ = ['parametrizer', 'loader', 'key', 'ttl', 'value']
     version: Optional[int]
     parametrizer: BasicParametrizer
     loader: Optional[str]
@@ -69,6 +71,7 @@ class SetVariableAction(BaseSetVariableAction):
 
 
 class DeleteVariableAction(Action):
+    __slots__ = ['key']
     version: Optional[int]
     key: str
 
@@ -84,6 +87,7 @@ class DeleteVariableAction(Action):
 
 
 class ClearVariablesAction(Action):
+    __slots__ = []
     version: Optional[int]
 
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
@@ -97,5 +101,6 @@ class ClearVariablesAction(Action):
 
 
 class SetLocalVariableAction(BaseSetVariableAction):
+    __slots__ = []
     def _set(self, user, value):
         user.local_vars.set(self.key, value)

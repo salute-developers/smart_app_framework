@@ -23,6 +23,7 @@ class Action:
     используется в качестве идентификатора действия, по которому можно вызвать действие. Атрибут version используется
     для отслеживания версии объекта, например, при обновлении SmartUpdatableDescriptionsItems.
     """
+    __slots__ = ['version', 'id']
     version: Optional[int]
     id: Optional[str]
 
@@ -47,6 +48,7 @@ class CommandAction(Action):
     """ Базовый класс для запроса к другому сервису, хранящий информацию о типе, методе и данных запроса.
 
     """
+    __slots__ = ['command', 'request_type', 'request_data']
     DEFAULT_REQUEST_TYPE = KAFKA
     version: Optional[int]
     command: str
@@ -62,6 +64,7 @@ class CommandAction(Action):
 
 
 class DoingNothingAction(CommandAction):
+    __slots__ = ['nodes']
     version: Optional[int]
     command: str
     nodes: Dict[str, str]
@@ -79,6 +82,7 @@ class DoingNothingAction(CommandAction):
 
 
 class RequirementAction(Action):
+    __slots__ = ['_requirement', '_item', 'requirement', 'internal_item']
     version: Optional[int]
     requirement: Requirement
     internal_item: Action
@@ -112,6 +116,7 @@ class RequirementAction(Action):
 
 
 class ChoiceAction(Action):
+    __slots__ = ['_requirement_items', 'items', '_else_item', 'else_item']
     version: Optional[int]
     items: List[RequirementAction]
     else_item: Optional[Action]
@@ -155,6 +160,7 @@ class ChoiceAction(Action):
 
 
 class ElseAction(Action):
+    __slots__ = ['_requirement', 'item', '_else_item', 'else_item', '_item', 'requirement']
     version: Optional[int]
     requirement: Requirement
     item: Action
@@ -199,6 +205,7 @@ class ElseAction(Action):
 
 
 class ActionOfActions(Action):
+    __slots__ = ['actions', '_actions']
     version: Optional[int]
     actions: List[Action]
 
@@ -212,6 +219,7 @@ class ActionOfActions(Action):
         return self._actions
 
 class CompositeAction(ActionOfActions):
+    __slots__ = []
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -221,6 +229,7 @@ class CompositeAction(ActionOfActions):
 
 
 class NonRepeatingAction(ActionOfActions):
+    __slots__ = ['last_action_ids_storage', '_actions_count', '_last_action_ids_storage']
     last_action_ids_storage: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
@@ -245,6 +254,7 @@ class NonRepeatingAction(ActionOfActions):
 
 
 class RandomAction(Action):
+    __slots__ = ['actions', '_raw_actions']
     actions: List[Action]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):

@@ -8,6 +8,7 @@ from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 
 class CounterAction(Action):
+    __slots__ = ['key', 'value', 'lifetime']
     version: Optional[int]
     key: str
     value: int
@@ -21,6 +22,7 @@ class CounterAction(Action):
 
 
 class CounterIncrementAction(CounterAction):
+    __slots__ = []
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -29,6 +31,7 @@ class CounterIncrementAction(CounterAction):
 
 
 class CounterDecrementAction(CounterAction):
+    __slots__ = []
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -37,6 +40,7 @@ class CounterDecrementAction(CounterAction):
 
 
 class CounterClearAction(CounterAction):
+    __slots__ = []
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -45,6 +49,7 @@ class CounterClearAction(CounterAction):
 
 
 class CounterSetAction(CounterAction):
+    __slots__ = ['reset_time', 'time_shift']
     version: Optional[int]
     key: str
     value: Optional[int]
@@ -65,6 +70,8 @@ class CounterSetAction(CounterAction):
 
 
 class CounterCopyAction(Action):
+    __slots__ = ['src', 'dst', 'reset_time', 'time_shift']
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.src = items["source"]
