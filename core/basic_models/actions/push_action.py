@@ -83,7 +83,6 @@ class PushAuthenticationActionHttp(PushAction):
     Ссылка на документацию с примерами получения токена:
      - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
     """
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.scope = items.get("scope")
@@ -112,7 +111,6 @@ class PushActionHttp(PushAction):
     Ссылка на документацию с примерами отправки уведомлений:
      - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
     """
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.type_request = items.get("type_request")
