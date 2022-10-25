@@ -168,6 +168,11 @@ class Behaviors:
                                callback_action_params)
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
             result = behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params)
+        else:
+            log(f"behavior.fail not found valid callback for callback_id {callback_id}",
+                self._user,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
 
@@ -187,6 +192,11 @@ class Behaviors:
                                callback_action_params)
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
             result = behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params)
+        else:
+            log(f"behavior.timeout not found valid callback for callback_id {callback_id}",
+                self._user,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
 
@@ -207,6 +217,11 @@ class Behaviors:
                                callback_action_params)
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
             result = behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
+        else:
+            log(f"behavior.misstate not found valid callback for callback_id {callback_id}",
+                self._user,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
 
