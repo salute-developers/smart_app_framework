@@ -218,6 +218,7 @@ class ActionOfActions(Action):
     def build_actions(self) -> List[Action]:
         return self._actions
 
+
 class CompositeAction(ActionOfActions):
     __slots__ = []
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,

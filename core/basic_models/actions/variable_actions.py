@@ -102,5 +102,6 @@ class ClearVariablesAction(Action):
 
 class SetLocalVariableAction(BaseSetVariableAction):
     __slots__ = []
+
     def _set(self, user, value):
         user.local_vars.set(self.key, value)

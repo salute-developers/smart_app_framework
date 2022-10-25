@@ -26,6 +26,7 @@ from smart_kit.names.action_params_names import SEND_TIMESTAMP
 
 
 class ClearFormAction(Action):
+    __slots__ = ['parametrizer', 'form']
     version: Optional[int]
     parametrizer: BasicParametrizer
     form: str
@@ -42,6 +43,7 @@ class ClearFormAction(Action):
 
 
 class ClearInnerFormAction(ClearFormAction):
+    __slots__ = ['inner_form']
     version: Optional[int]
     parametrizer: BasicParametrizer
     form: str
@@ -61,6 +63,7 @@ class ClearInnerFormAction(ClearFormAction):
 
 
 class RemoveFormFieldAction(Action):
+    __slots__ = ['parametrizer', 'form', 'field']
     version: Optional[int]
     parametrizer: BasicParametrizer
     form: str
@@ -80,6 +83,7 @@ class RemoveFormFieldAction(Action):
 
 
 class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
+    __slots__ = ['inner_form']
     version: Optional[int]
     parametrizer: BasicParametrizer
     form: str
@@ -100,6 +104,7 @@ class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
 
 
 class BreakScenarioAction(Action):
+    __slots__ = ['scenario_id']
     scenario_id: Optional[str]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
@@ -115,6 +120,7 @@ class BreakScenarioAction(Action):
 
 
 class SaveBehaviorAction(Action):
+    __slots__ = ['parametrizer', 'behavior', 'check_scenario']
     version: Optional[int]
     parametrizer: BasicParametrizer
     behavior: str
@@ -137,6 +143,7 @@ class SaveBehaviorAction(Action):
 
 
 class BasicSelfServiceActionWithState(StringAction):
+    __slots__ = ['parametrizer', 'behavior', 'command_action', '_command_action', '_check_scenario']
     version: Optional[int]
     parametrizer: BasicParametrizer
     behavior: str
@@ -173,6 +180,7 @@ class BasicSelfServiceActionWithState(StringAction):
 
 
 class FillFieldAction(Action):
+    __slots__ = ['parametrizer', 'form', 'field', 'data_path', 'template']
     version: Optional[int]
     parametrizer: BasicParametrizer
     form: str
@@ -204,6 +212,7 @@ class FillFieldAction(Action):
 
 
 class CompositeFillFieldAction(FillFieldAction):
+    __slots__ = ['internal_form']
     version: Optional[int]
     parametrizer: BasicParametrizer
     internal_form: str
@@ -219,6 +228,7 @@ class CompositeFillFieldAction(FillFieldAction):
 
 
 class RunScenarioAction(Action):
+    __slots__ = ['parametrizer', 'scenario']
     version: Optional[int]
     parametrizer: BasicParametrizer
 
@@ -241,6 +251,7 @@ class RunScenarioAction(Action):
 
 
 class RunLastScenarioAction(Action):
+    __slots__ = []
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -252,6 +263,7 @@ class RunLastScenarioAction(Action):
 
 
 class ChoiceScenarioAction(Action):
+    __slots__ = ['_else_item', '_scenarios', '_requirements', 'requirement_items', 'else_item']
     FIELD_SCENARIOS_KEY = "scenarios"
     FIELD_ELSE_KEY = "else_action"
     FIELD_REQUIREMENT_KEY = "requirement"
@@ -302,6 +314,7 @@ def clear_scenario(user, scenario_id):
 
 
 class ClearCurrentScenarioAction(Action):
+    __slots__ = []
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -312,6 +325,7 @@ class ClearCurrentScenarioAction(Action):
 
 
 class ClearAllScenariosAction(Action):
+    __slots__ = []
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -320,6 +334,7 @@ class ClearAllScenariosAction(Action):
 
 
 class ClearScenarioByIdAction(Action):
+    __slots__ = ['parametrizer', 'scenario_id']
     version: Optional[int]
     parametrizer: BasicParametrizer
     scenario_id: str
@@ -337,6 +352,8 @@ class ClearScenarioByIdAction(Action):
 
 
 class ClearCurrentScenarioFormAction(Action):
+    __slots__ = []
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
 
@@ -350,6 +367,8 @@ class ClearCurrentScenarioFormAction(Action):
 
 
 class ResetCurrentNodeAction(Action):
+    __slots__ = ['node_id']
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.node_id = items.get('node_id', None)
@@ -364,6 +383,7 @@ class ResetCurrentNodeAction(Action):
 
 
 class AddHistoryEventAction(Action):
+    __slots__ = ['results', 'event_type', 'event_content']
     results: UnifiedTemplate
     event_type: UnifiedTemplate
     event_content: Dict[str, UnifiedTemplate]
@@ -404,6 +424,8 @@ class AddHistoryEventAction(Action):
 
 
 class EmptyAction(Action):
+    __slots__ = []
+
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -413,6 +435,7 @@ class EmptyAction(Action):
 
 
 class RunScenarioByProjectNameAction(Action):
+    __slots__ = []
     def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -429,6 +452,7 @@ class RunScenarioByProjectNameAction(Action):
 
 
 class ProcessBehaviorAction(Action):
+    __slots__ = []
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
@@ -454,6 +478,7 @@ class ProcessBehaviorAction(Action):
 
 
 class SelfServiceActionWithState(BasicSelfServiceActionWithState):
+    __slots__ = ['save_params_template_data', 'rewrite_saved_messages']
     version: Optional[int]
     parametrizer: Parametrizer
     behavior: str
