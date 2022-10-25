@@ -3,7 +3,7 @@ from datetime import datetime
 import time
 
 from pythonjsonlogger import jsonlogger
-
+import logging
 from core.model.factory import build_factory
 from core.model.registered import Registered
 
@@ -27,3 +27,8 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         log_record['application'] = self.APPLICATION_NAME
         if isinstance(record.args, dict):
             log_record['args'] = record.args
+
+    def format(self, record: logging.LogRecord) -> str:
+        result = super(SmartKitJsonFormatter, self).format(record)
+        log_size = len(result)
+        return f'{result[:-1]},"log_size":{log_size}}}'
