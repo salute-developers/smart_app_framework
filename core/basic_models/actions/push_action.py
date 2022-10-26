@@ -82,16 +82,16 @@ class PushAction(StringAction):
 class PushAuthenticationActionHttp(PushAction):
     """ Action для получения токена для вызова SmartPush API через http.
 
-     Ссылка на документацию с примерами получения токена:
-     - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
+    Ссылка на документацию с примерами получения токена:
+    - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
 
-     Response:
+    Response:
         Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result.
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_authentification_response"]
             - user.variables.value or user.variables.value["push_authentification_response"]
 
-     Example:
+    Example:
         {
             "type": "push_authentication", // обязательный параметр
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/oauth
