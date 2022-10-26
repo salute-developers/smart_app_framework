@@ -12,7 +12,6 @@ from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.action.http import HTTPRequestAction
 
 COMMON_BEHAVIOR = "common_behavior"
-DEFAULT_NAME_STORE = "push_authentification_response"
 PUSH_NOTIFY = "PUSH_NOTIFY"
 
 
@@ -83,10 +82,15 @@ class PushAction(StringAction):
 class PushAuthenticationActionHttp(PushAction):
     """ Action для получения токена для вызова SmartPush API через http.
 
-    Ссылка на документацию с примерами получения токена:
+     Ссылка на документацию с примерами получения токена:
      - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
-     Результат запроса сохраняется в переменной self.store, после выполнения метода process_result.
-     Переменная self.store - это экземпляр класса HTTPRequestAction.
+
+     Response:
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result.
+        Для доступа к данным можно воспользоваться одним из следущих вариантов:
+            - user.variables.raw or user.variables.raw["push_authentification_response"]
+            - user.variables.value or user.variables.value["push_authentification_response"]
+
      Example:
         {
             "type": "push_authentication", // обязательный параметр
@@ -103,7 +107,7 @@ class PushAuthenticationActionHttp(PushAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
-        items["store"] = DEFAULT_NAME_STORE
+        items["store"] = "push_authentification_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
         items["params"] = {"url": items.get("url") or self.URL_OAUTH, "json": {"scope": "SMART_PUSH"}}
         items["params"]["headers"] = {}
@@ -134,11 +138,16 @@ class PushAuthenticationActionHttp(PushAction):
 class PushActionHttp(PushAction):
     """ Action для отправки пуш уведомлений в SmartPush API через http.
 
-    Аутентификация осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
+    Аутентификация:
+     - Осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
     Ссылка на документацию с примерами отправки уведомлений:
      - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
-    Результат запроса сохраняется в переменной self.store, после выполнения метода process_result.
-    Переменная self.store - это экземпляр класса HTTPRequestAction.
+
+    Response:
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result.
+        Для доступа к данным можно воспользоваться одним из следущих вариантов:
+            - user.variables.raw or user.variables.raw["push_http_response"]
+            - user.variables.value or user.variables.value["push_http_response"]
 
     Example Basic Request ("type_request": "apprequest-lite"):
         {
@@ -241,7 +250,7 @@ class PushActionHttp(PushAction):
             self.messageId = items["messageId"]
             self.messageName = items.get("messageName")
 
-        items["store"] = DEFAULT_NAME_STORE
+        items["store"] = "push_http_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
         items["params"]["headers"] = {}
         self.headers = items["params"]["headers"]
