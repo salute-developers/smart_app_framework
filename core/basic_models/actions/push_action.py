@@ -86,7 +86,7 @@ class PushAuthenticationActionHttp(PushAction):
     - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
 
     Response:
-        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result.
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_authentification_response"]
             - user.variables.value or user.variables.value["push_authentification_response"]
@@ -144,7 +144,7 @@ class PushActionHttp(PushAction):
      - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
 
     Response:
-        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result.
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_http_response"]
             - user.variables.value or user.variables.value["push_http_response"]
