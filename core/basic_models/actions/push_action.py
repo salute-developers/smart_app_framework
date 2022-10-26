@@ -81,9 +81,12 @@ class PushAction(StringAction):
 
 
 class PushAuthenticationActionHttp(PushAction):
-    """
+    """ Action для получения токена для вызова SmartPush API через http.
+
     Ссылка на документацию с примерами получения токена:
      - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
+     Результат запроса сохраняется в переменной self.store, после выполнения метода process_result.
+     Переменная self.store - это экземпляр класса HTTPRequestAction.
      Example:
         {
             "type": "push_authentication", // обязательный параметр
@@ -102,7 +105,7 @@ class PushAuthenticationActionHttp(PushAction):
         super().__init__(items, id)
         items["store"] = DEFAULT_NAME_STORE
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
-        items["params"] = {"url": items.get("url") or self.URL_OAUTH}
+        items["params"] = {"url": items.get("url") or self.URL_OAUTH, "json": {"scope": "SMART_PUSH"}}
         items["params"]["headers"] = {}
         self.headers = items["params"]["headers"]
         self.headers["RqUID"] = str(uuid.uuid4())
@@ -124,20 +127,18 @@ class PushAuthenticationActionHttp(PushAction):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        request_body_parameters = {
-            "scope": "SMART_PUSH"
-        }
-        self.http_request_action.method_params["json"] = request_body_parameters
         self.http_request_action.run(user, text_preprocessing_result, params)
         return []
 
 
 class PushActionHttp(PushAction):
-    """
-    Action для отправки пуш уведомлений в SmartPush API через http.
+    """ Action для отправки пуш уведомлений в SmartPush API через http.
+
     Аутентификация осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
     Ссылка на документацию с примерами отправки уведомлений:
      - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
+    Результат запроса сохраняется в переменной self.store, после выполнения метода process_result.
+    Переменная self.store - это экземпляр класса HTTPRequestAction.
 
     Example Basic Request ("type_request": "apprequest-lite"):
         {
