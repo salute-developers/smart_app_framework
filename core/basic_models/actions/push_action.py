@@ -11,8 +11,9 @@ from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.action.http import HTTPRequestAction
 
-PUSH_NOTIFY = "PUSH_NOTIFY"
 COMMON_BEHAVIOR = "common_behavior"
+DEFAULT_NAME_STORE = "push_authentification_response"
+PUSH_NOTIFY = "PUSH_NOTIFY"
 
 
 class PushAction(StringAction):
@@ -99,6 +100,7 @@ class PushAuthenticationActionHttp(PushAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
+        items["store"] = DEFAULT_NAME_STORE
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
         items["params"] = {"url": items.get("url") or self.URL_OAUTH}
         items["params"]["headers"] = {}
@@ -238,6 +240,7 @@ class PushActionHttp(PushAction):
             self.messageId = items["messageId"]
             self.messageName = items.get("messageName")
 
+        items["store"] = DEFAULT_NAME_STORE
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
         items["params"]["headers"] = {}
         self.headers = items["params"]["headers"]
