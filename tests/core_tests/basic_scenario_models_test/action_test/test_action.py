@@ -351,33 +351,21 @@ class ActionTest(unittest.TestCase):
     def test_push_authentication_action_http(self):
         items = {
             "type": "push_authentication",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/oauth",
-                "headers": {
-                    "Authorization": "Basic ZTU2MjM2MjctYmI4Yy00MTJjLTk0Yjct232hNjk5OGU4ZWYzOjg4N2QxNWEyLWNiNGYtNDk5OC05NTkxLTViMjZkNjJkMzc1MQ==",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                }
-            },
-            "scope": "SMART_PUSH"
+            "client_id": "@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3",
+            "surface": "COMPANION",
+            "client_secret": "secret"
         }
 
         action = PushAuthenticationActionHttp(items)
-        self.assertEqual(action.scope, 'SMART_PUSH')
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
 
     def test_push_action_http_with_apprequest_lite_type_request(self):
         items = {
             "type": "push_http",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
-                "headers": {
-                    "Authorization": "Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "callbackUrl": "localhost"
-                }
-            },
             "type_request": "apprequest-lite",
+            "surface": "COMPANION",
+            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
+            "callbackUrl": "some_url",
             "templateContent": {
                 "id": "49061553-27c7-4471-9145-d8d6137657da",
                 "headerValues": {
@@ -404,110 +392,99 @@ class ActionTest(unittest.TestCase):
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
 
     def test_push_action_http_with_apprequest_type_request(self):
-        items = {
-            "type": "push_http",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
-                "headers": {
-                    "Authorization": "Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "callbackUrl": "localhost"
-                }
-            },
-            "type_request": "apprequest",
-            "payload": {
-                "sender": {
-                    "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6",
-                    "application": {
-                        "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-                        "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111"
-                    }
-                },
-                "recipient": {
-                    "clientId": {
-                        "idType": "SUB",
-                        "id": "6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7"
-                    }
-                },
-                "deliveryConfig": {
-                    "deliveryMode": "BROADCAST",
-                    "destinations": [
-                        {
-                            "channel": "COMPANION_B2C",
-                            "surface": "COMPANION",
-                            "templateContent": {
-                                "id": "49061553-27c7-4471-9145-d8d6137657da",
-                                "headerValues": {
-                                    "clientname": "Иван",
-                                    "bandname": "Ласковый май"
-                                },
-                                "bodyValues": {
-                                    "formatname": "альбома",
-                                    "bandname": "Ласковый май",
-                                    "releasename": "Новое"
-                                },
-                                "mobileAppParameters": {
-                                    "deeplinkAndroid": "laskoviyi-mai-listen-android",
-                                    "deeplinkIos": "laskoviyi-mai-listen-ios"
-                                },
-                                "timeFrame": {
-                                    "startTime": "13:30:00",
-                                    "finishTime": "15:00:00",
-                                    "timeZone": "GMT+03:00",
-                                    "startDate": "2020-06-04",
-                                    "endDate": "2020-06-05"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        }
         payload = {
             'sender':
                 {
-                    'projectId': '3fa85f64-5717-4562-b3ab-2c963f66baa6',
-                    'application': {
-                        'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-                        'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
-                    }
+                    'application':
+                        {
+                            'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                            'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                        }
                 },
-            'recipient': {
-                'clientId':
-                    {
-                        'idType': 'SUB',
-                        'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
-                    }
-            },
+            'recipient':
+                {
+                    'clientId':
+                        {
+                            'idType': 'SUB'
+                        }
+                },
             'deliveryConfig':
                 {
-                    'deliveryMode': 'BROADCAST',
-                    'destinations': [
-                        {
-                            'channel': 'COMPANION_B2C', 'surface': 'COMPANION',
-                            'templateContent': {
-                                'id': '49061553-27c7-4471-9145-d8d6137657da',
-                                'headerValues': {'clientname': 'Иван', 'bandname': 'Ласковый май'},
-                                'bodyValues': {
-                                    'formatname': 'альбома',
-                                    'bandname': 'Ласковый май',
-                                    'releasename': 'Новое'
-                                },
-                                'mobileAppParameters':
+                    'deliveryMode': 'broadcast',
+                    'destinations':
+                        [
+                            {
+                                'channel': 'COMPANION_B2C',
+                                'surface': 'COMPANION',
+                                'templateContent':
                                     {
-                                        'deeplinkAndroid': 'laskoviyi-mai-listen-android',
-                                        'deeplinkIos': 'laskoviyi-mai-listen-ios'
-                                    },
-                                'timeFrame':
-                                    {
-                                        'startTime': '13:30:00', 'finishTime': '15:00:00',
-                                        'timeZone': 'GMT+03:00', 'startDate': '2020-06-04',
-                                        'endDate': '2020-06-05'
+                                        'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                        'headerValues':
+                                            {
+                                                'clientname': 'Иван', 'bandname': 'Ласковый май'
+                                            },
+                                        'bodyValues':
+                                            {
+                                                'formatname': 'альбома', 'bandname': 'Ласковый май', 'releasename': 'Новое'
+                                            },
+                                        'mobileAppParameters':
+                                            {
+                                                'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                                'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                            },
+                                        'timeFrame':
+                                            {
+                                                'startTime': '13:30:00',
+                                                'finishTime': '15:00:00',
+                                                'timeZone': 'GMT+03:00',
+                                                'startDate': '2020-06-04',
+                                                'endDate': '2020-06-05'
+                                            }
                                     }
                             }
-                        }
-                    ]
+                        ]
                 }
+        }
+        items = {
+            "type": "push_http",
+            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
+            "type_request": "apprequest",
+            "protocolVersion": "V1",
+            "messageId": "37284759",
+            "senderApplication": {
+              "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+              "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111"
+            },
+            "deliveryMode": "broadcast",
+            "destinations": [
+                {
+                  "channel": "COMPANION_B2C",
+                  "surface": "COMPANION",
+                  "templateContent": {
+                    "id": "49061553-27c7-4471-9145-d8d6137657da",
+                    "headerValues": {
+                      "clientname": "Иван",
+                      "bandname": "Ласковый май"
+                    },
+                    "bodyValues": {
+                      "formatname": "альбома",
+                      "bandname": "Ласковый май",
+                      "releasename": "Новое"
+                    },
+                    "mobileAppParameters": {
+                      "deeplinkAndroid": "laskoviyi-mai-listen-android",
+                      "deeplinkIos": "laskoviyi-mai-listen-ios"
+                    },
+                    "timeFrame": {
+                      "startTime": "13:30:00",
+                      "finishTime": "15:00:00",
+                      "timeZone": "GMT+03:00",
+                      "startDate": "2020-06-04",
+                      "endDate": "2020-06-05"
+                    }
+                  }
+                }
+            ]
         }
 
         action = PushActionHttp(items)
@@ -533,22 +510,28 @@ class ActionTest(unittest.TestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
                 }
             }
         )
         self.set_request_mock_attribute(request_mock)
         items = {
-            "type": "push_authentication",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/oauth",
-                "headers": {
-                    "Authorization": "Basic ZTU2MjM2MjctYmI4Yy00MTJjLTk0Yjct232hNjk5OGU4ZWYzOjg4N2QxNWEyLWNiNGYtNDk5OC05NTkxLTViMjZkNjJkMzc1MQ==",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                }
+            'type': 'push_authentication',
+            'client_id': '@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3',
+            'surface': 'COMPANION', 'client_secret': 'secret',
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'behavior': 'common_behavior',
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/oauth',
+                'headers':
+                    {
+                        'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
+                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
+                    }
             }
         }
+
         http_request_action = HTTPRequestAction(items)
         request_body_parameters = {
             "scope": "SMART_PUSH"
@@ -558,10 +541,10 @@ class ActionTest(unittest.TestCase):
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/oauth",
             headers={
-                'Authorization': 'Basic ZTU2MjM2MjctYmI4Yy00MTJjLTk0Yjct232hNjk5OGU4ZWYzOjg4N2QxNWEyLWNiNGYtNDk5OC05NTkxLTViMjZkNjJkMzc1MQ==',
-                'RqUID': '6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e', 'Content-Type': 'application/x-www-form-urlencoded'
+                'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
+                'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
             },
-            method='POST', timeout=3, json=request_body_parameters
+            method='POST', timeout=4, json=request_body_parameters
         )
 
     @patch('requests.request')
@@ -570,44 +553,65 @@ class ActionTest(unittest.TestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
                 }
             }
         )
         self.set_request_mock_attribute(request_mock)
         items = {
-            "type": "push_http",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
-                "headers": {
-                    "Authorization": "Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "callbackUrl": "localhost"
-                }
-            },
-            "type_request": "apprequest-lite",
-            "templateContent": {
-                "id": "49061553-27c7-4471-9145-d8d6137657da",
-                "headerValues": {
-                    "clientname": "Иван",
-                    "bandname": "Ласковый май"
+            'type': 'push_http',
+            'type_request': 'apprequest-lite',
+            'surface': 'COMPANION',
+            'access_token': 'eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+            'callbackUrl': 'some_url',
+            'templateContent':
+                {
+                    'id': '49061553-27c7-4471-9145-d8d6137657da',
+                    'headerValues':
+                        {
+                            'clientname': 'Иван',
+                            'bandname': 'Ласковый май'
+                        },
+                    'bodyValues':
+                        {
+                            'formatname': 'альбома',
+                            'bandname': 'Ласковый май',
+                            'releasename': 'Новое'
+                        }
                 },
-                "bodyValues": {
-                    "formatname": "альбома",
-                    "bandname": "Ласковый май",
-                    "releasename": "Новое"
-                }
-            }
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'params':
+                {
+                    'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite',
+                    'headers':
+                        {
+                            'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
+                            'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                            'callbackUrl': 'some_url'
+                        },
+                    'method': 'POST'
+                },
+            'behavior': 'common_behavior'
         }
         http_request_action = HTTPRequestAction(items)
         request_body_parameters = {
-            'projectId': 'template-app-id',
-            'clientId': None,
+            'projectId': '83cdd6c6-757a-42ce-b4fe-03912fb7d6e1',
+            'clientId': "1596f2a624c003fdb31eb5000e49f1efe8ccf51fd0001f9b499c5881cdca1d95d24e4bf802c48fe0",
             'surface': 'COMPANION',
             'templateContent': {
                 'id': '49061553-27c7-4471-9145-d8d6137657da',
-                'headerValues': {'clientname': 'Иван', 'bandname': 'Ласковый май'},
-                'bodyValues': {'formatname': 'альбома', 'bandname': 'Ласковый май', 'releasename': 'Новое'}
+                'headerValues':
+                    {
+                        'clientname': 'Иван',
+                        'bandname': 'Ласковый май'
+                    },
+                'bodyValues':
+                    {
+                        'formatname': 'альбома',
+                        'bandname': 'Ласковый май',
+                        'releasename': 'Новое'
+                    }
             }
         }
         http_request_action.method_params["json"] = request_body_parameters
@@ -615,10 +619,11 @@ class ActionTest(unittest.TestCase):
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
             headers={
+                'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
                 'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
-                'RqUID': '6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e', 'callbackUrl': 'localhost'
+                'callbackUrl': 'some_url'
             },
-            method='POST', timeout=3, json=request_body_parameters
+            method='POST', timeout=4, json=request_body_parameters
         )
 
     @patch('requests.request')
@@ -627,119 +632,189 @@ class ActionTest(unittest.TestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
                 }
             }
         )
         self.set_request_mock_attribute(request_mock)
         items = {
-            "type": "push_http",
-            "params": {
-                "url": "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
-                "headers": {
-                    "Authorization": "Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
-                    "RqUID": "6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e",
-                    "callbackUrl": "localhost"
-                }
-            },
-            "type_request": "apprequest",
-            "payload": {
-                "sender": {
-                    "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6",
-                    "application": {
-                        "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-                        "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111"
-                    }
+            'type': 'push_http',
+            'access_token': 'eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+            'type_request': 'apprequest',
+            'protocolVersion': 'V1',
+            'messageId': '37284759',
+            'senderApplication':
+                {
+                    'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                    'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
                 },
-                "recipient": {
-                    "clientId": {
-                        "idType": "SUB",
-                        "id": "6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7"
-                    }
-                },
-                "deliveryConfig": {
-                    "deliveryMode": "BROADCAST",
-                    "destinations": [
-                        {
-                            "channel": "COMPANION_B2C",
-                            "surface": "COMPANION",
-                            "templateContent": {
-                                "id": "49061553-27c7-4471-9145-d8d6137657da",
-                                "headerValues": {
-                                    "clientname": "Иван",
-                                    "bandname": "Ласковый май"
-                                },
-                                "bodyValues": {
-                                    "formatname": "альбома",
-                                    "bandname": "Ласковый май",
-                                    "releasename": "Новое"
-                                },
-                                "mobileAppParameters": {
-                                    "deeplinkAndroid": "laskoviyi-mai-listen-android",
-                                    "deeplinkIos": "laskoviyi-mai-listen-ios"
-                                },
-                                "timeFrame": {
-                                    "startTime": "13:30:00",
-                                    "finishTime": "15:00:00",
-                                    "timeZone": "GMT+03:00",
-                                    "startDate": "2020-06-04",
-                                    "endDate": "2020-06-05"
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        }
-        http_request_action = HTTPRequestAction(items)
-        request_body_parameters = {
-            "protocolVersion": "protocolVersion",
-            "messageId": "messageId",
-            "messageName": "messageName",
-            "payload": {
-                'sender':
+            'deliveryMode': 'broadcast',
+            'destinations':
+                [
                     {
-                        'projectId': '3fa85f64-5717-4562-b3ab-2c963f66baa6',
-                        'application': {
-                            'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-                            'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
-                        }
-                    },
-                'recipient': {
-                    'clientId':
-                        {
-                            'idType': 'SUB',
-                            'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
-                        }
-                },
-                'deliveryConfig':
-                    {
-                        'deliveryMode': 'BROADCAST',
-                        'destinations': [
+                        'channel': 'COMPANION_B2C',
+                        'surface': 'COMPANION',
+                        'templateContent':
                             {
-                                'channel': 'COMPANION_B2C', 'surface': 'COMPANION',
-                                'templateContent': {
-                                    'id': '49061553-27c7-4471-9145-d8d6137657da',
-                                    'headerValues': {'clientname': 'Иван', 'bandname': 'Ласковый май'},
-                                    'bodyValues': {
+                                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                'headerValues':
+                                    {
+                                        'clientname': 'Иван',
+                                        'bandname': 'Ласковый май'
+                                    },
+                                'bodyValues':
+                                    {
                                         'formatname': 'альбома',
                                         'bandname': 'Ласковый май',
                                         'releasename': 'Новое'
                                     },
-                                    'mobileAppParameters':
+                                'mobileAppParameters':
+                                    {
+                                        'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                        'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                    },
+                                'timeFrame':
+                                    {
+                                        'startTime': '13:30:00',
+                                        'finishTime': '15:00:00',
+                                        'timeZone': 'GMT+03:00',
+                                        'startDate': '2020-06-04',
+                                        'endDate': '2020-06-05'
+                                    }
+                            }
+                    }
+                ],
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'payload':
+                {
+                    'sender':
+                        {
+                            'application':
+                                {
+                                    'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                                    'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                                }
+                        },
+                    'recipient':
+                        {
+                            'clientId':
+                                {
+                                    'idType': 'SUB'
+                                }
+                        },
+                    'deliveryConfig':
+                        {
+                            'deliveryMode': 'broadcast',
+                            'destinations':
+                                [
+                                    {
+                                        'channel': 'COMPANION_B2C',
+                                        'surface': 'COMPANION',
+                                        'templateContent':
+                                            {
+                                                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                                'headerValues':
+                                                    {
+                                                        'clientname': 'Иван', 'bandname': 'Ласковый май'
+                                                    },
+                                                'bodyValues':
+                                                    {
+                                                        'formatname': 'альбома',
+                                                        'bandname': 'Ласковый май',
+                                                        'releasename': 'Новое'
+                                                    },
+                                                'mobileAppParameters':
+                                                    {
+                                                        'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                                        'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                                    },
+                                                'timeFrame':
+                                                    {
+                                                        'startTime': '13:30:00',
+                                                        'finishTime': '15:00:00',
+                                                        'timeZone': 'GMT+03:00',
+                                                        'startDate': '2020-06-04',
+                                                        'endDate': '2020-06-05'
+                                                    }
+                                            }
+                                    }
+                                ]
+                        }
+                },
+            'params':
+                {
+                    'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest',
+                    'headers':
+                        {
+                            'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
+                            'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                            'callbackUrl': None
+                        }
+                },
+            'behavior': 'common_behavior'
+        }
+        http_request_action = HTTPRequestAction(items)
+        request_body_parameters = {
+            'protocolVersion': 'V1',
+            'messageId': '37284759',
+            'messageName': None,
+            'payload': {
+                'sender':
+                    {
+                        'application':
+                            {
+                                'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                                'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                            },
+                        'projectId': 'template-app-id'
+                    },
+                'recipient':
+                    {
+                        'clientId':
+                            {
+                                'idType': 'SUB',
+                                'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
+                            }
+                    },
+                'deliveryConfig':
+                    {
+                        'deliveryMode': 'broadcast',
+                        'destinations':
+                            [
+                                {
+                                    'channel': 'COMPANION_B2C',
+                                    'surface': 'COMPANION',
+                                    'templateContent':
                                         {
-                                            'deeplinkAndroid': 'laskoviyi-mai-listen-android',
-                                            'deeplinkIos': 'laskoviyi-mai-listen-ios'
-                                        },
-                                    'timeFrame':
-                                        {
-                                            'startTime': '13:30:00', 'finishTime': '15:00:00',
-                                            'timeZone': 'GMT+03:00', 'startDate': '2020-06-04',
-                                            'endDate': '2020-06-05'
+                                            'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                            'headerValues':
+                                                {
+                                                    'clientname': 'Иван',
+                                                    'bandname': 'Ласковый май'
+                                                },
+                                            'bodyValues':
+                                                {
+                                                    'formatname': 'альбома',
+                                                    'bandname': 'Ласковый май',
+                                                    'releasename': 'Новое'
+                                                },
+                                            'mobileAppParameters':
+                                                {
+                                                    'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                                    'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                                },
+                                            'timeFrame':
+                                                {
+                                                    'startTime': '13:30:00',
+                                                    'finishTime': '15:00:00',
+                                                    'timeZone': 'GMT+03:00',
+                                                    'startDate': '2020-06-04',
+                                                    'endDate': '2020-06-05'
+                                                }
                                         }
                                 }
-                            }
-                        ]
+                            ]
                     }
             }
         }
@@ -748,10 +823,10 @@ class ActionTest(unittest.TestCase):
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
             headers={
-                'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
-                'RqUID': '6f0b1291-c7f3-43c6-bb2e-9f3efb2dc98e', 'callbackUrl': 'localhost'
+                'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
+                'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0'
             },
-            method='POST', timeout=3, json=request_body_parameters
+            method='POST', timeout=4, json=request_body_parameters
         )
 
 
