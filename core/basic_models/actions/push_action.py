@@ -114,6 +114,7 @@ class PushAuthenticationActionHttp(PushAction):
         self.headers = items["params"]["headers"]
         self.headers["RqUID"] = str(uuid.uuid4())
         self.headers["Authorization"] = self._create_authorization_token(items)
+        self.headers["Content-Type"] = "application/x-www-form-urlencoded"
         self._create_instance_of_http_request_action(items, id)
 
     def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
@@ -256,6 +257,7 @@ class PushActionHttp(PushAction):
         self.headers = items["params"]["headers"]
         self.headers["RqUID"] = str(uuid.uuid4())
         self.headers["Authorization"] = self.BEARER_METHOD_AUTH + items["access_token"]
+        self.headers["Content-Type"] = "application/json"
         self.headers["callbackUrl"] = items.get("callbackUrl")
         self._create_instance_of_http_request_action(items, id)
 
