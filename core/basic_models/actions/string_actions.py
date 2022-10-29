@@ -23,7 +23,7 @@ class NodeAction(CommandAction):
     "support_templates".
 
     """
-    __slots__ = ['nodes', 'support_templates', '_nodes', '_support_templates', 'no_empty_nodes']
+    __slots__ = ['support_templates', '_nodes', '_support_templates', 'no_empty_nodes']
     version: Optional[int]
     command: str
     nodes: Dict[str, List[List[str]]]
