@@ -152,10 +152,6 @@ class Behaviors:
         return result
 
     def fail(self, callback_id: str) -> List[Command]:
-        log(f"behavior.fail started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
-            self._user,
-            params={log_const.KEY_NAME: log_const.BEHAVIOR_FAIL_VALUE,
-                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -177,10 +173,6 @@ class Behaviors:
         return result
 
     def timeout(self, callback_id: str) -> List[Command]:
-        log(f"behavior.timeout started: got callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
-            self._user,
-            params={log_const.KEY_NAME: log_const.BEHAVIOR_TIMEOUT_VALUE,
-                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         callback = self._get_callback(callback_id)
         result = []
         if callback:
