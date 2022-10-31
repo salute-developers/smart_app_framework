@@ -167,7 +167,7 @@ class Behaviors:
         else:
             log(f"behavior.fail not found valid callback for callback_id {callback_id}",
                 self._user,
-                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_FAIL_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
@@ -187,7 +187,7 @@ class Behaviors:
         else:
             log(f"behavior.timeout not found valid callback for callback_id {callback_id}",
                 self._user,
-                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_TIMEOUT_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
@@ -208,7 +208,7 @@ class Behaviors:
         else:
             log(f"behavior.misstate not found valid callback for callback_id {callback_id}",
                 self._user,
-                params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
+                params={log_const.KEY_NAME: log_const.BEHAVIOR_MISSTATE_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
         return result
