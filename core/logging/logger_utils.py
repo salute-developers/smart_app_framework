@@ -67,7 +67,10 @@ class LoggerMessageCreator:
     @classmethod
     def filter_headers(cls, params):
         if params and HEADERS in params:
-            params = {k: v for k, v in params[HEADERS].items() if v in cls.LOGGER_HEADERS}
+            if isinstance(params[HEADERS], dict):
+                params = {k: v for k, v in params[HEADERS].items() if v in cls.LOGGER_HEADERS}
+            elif isinstance(params[HEADERS], list) or isinstance(params[HEADERS], tuple):
+                params = {k: v for k, v in params[HEADERS] if v in cls.LOGGER_HEADERS}
         return params
 
 
