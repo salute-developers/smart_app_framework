@@ -243,27 +243,32 @@ class MainLoop(BaseMainLoop):
                                                         uid=message.uid, user=user)
                 valid_key = self._get_valid_message_key(message)
                 if message_key != valid_key:
-                    log(f"%(class_name)s.process_message: Failed to check Kafka message key {message_key} "
-                        f"!= {valid_key}",
+                    log(f"Failed to check Kafka message %(message_name)s key {message_key} != {valid_key}",
                         params={
                             log_const.KEY_NAME: "check_kafka_key_validation",
                             MESSAGE_ID_STR: message.incremental_id,
                             UID_STR: message.uid,
-                            "class_name": self.__class__.__name__
+                            "kafka_key": kafka_key,
+                            "message_key": message_key,
+                            "message_name": message.type,
                         }, user=user,
                         level="WARNING")
                     if self.settings["template_settings"].get("wrong_key_resend", True):
                         dest_topic = mq_message.topic()
                         self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
                                                                  mq_message.headers())
-                        log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
-                            f"resent again with a valid key: '{valid_key}' to '{dest_topic}'",
-                            params={log_const.KEY_NAME: "kafka_message_key_recovery",
-                                    MESSAGE_ID_STR: message.incremental_id,
-                                    UID_STR: message.uid,
-                                    "class_name": self.__class__.__name__},
-                            user=user,
-                            level="WARNING")
+                        log("Kafka message %(message_name)s with invalid Kafka message key %(message_key)s "
+                            f"resend again with a valid key: '{valid_key}' to '{dest_topic}'",
+                            params={
+                                log_const.KEY_NAME: "kafka_message_key_recovery",
+                                MESSAGE_ID_STR: message.incremental_id,
+                                UID_STR: message.uid,
+                                "kafka_key": kafka_key,
+                                "message_key": message_key,
+                                "message_name": message.type,
+                            }, user=user,
+                            level=self.settings["template_settings"].get("kafka_message_key_recovery_log_level",
+                                                                         "WARNING"))
                         break
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
