@@ -65,12 +65,9 @@ class LoggerMessageCreator:
         return masked_params
 
     @classmethod
-    def filter_headers(cls, params: dict):
-        if HEADERS in params:
-            if isinstance(params[HEADERS], dict):
-                params = {key: v for key, v in params[HEADERS].items() if key in cls.LOGGER_HEADERS}
-            elif isinstance(params[HEADERS], (list, tuple)):
-                params = {key: v for key, v in params[HEADERS] if key in cls.LOGGER_HEADERS}
+    def filter_headers(cls, params: dict) -> dict:
+        if HEADERS in params and isinstance(params[HEADERS], list):
+            params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
         return params
 
 
