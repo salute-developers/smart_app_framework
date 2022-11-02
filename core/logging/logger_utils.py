@@ -57,7 +57,7 @@ class LoggerMessageCreator:
     @classmethod
     def make_message(cls, user=None, params=None, cls_name='', log_store_for=1):
         params = params or {}
-        params = cls.filter_headers(params)
+        cls.filter_headers(params)
         if user:
             cls.update_user_params(user, params)
         masked_params = masking(params)
@@ -65,10 +65,9 @@ class LoggerMessageCreator:
         return masked_params
 
     @classmethod
-    def filter_headers(cls, params: dict) -> dict:
+    def filter_headers(cls, params: dict):
         if HEADERS in params and isinstance(params[HEADERS], list):
             params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
-        return params
 
 
 default_logger = logging.getLogger()
