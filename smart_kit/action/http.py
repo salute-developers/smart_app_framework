@@ -66,7 +66,7 @@ class HTTPRequestAction(NodeAction):
                     del headers[header_name]
         return headers
 
-    def _make_response(self, request_parameters, user):
+    def _make_response(self, request_parameters: dict, user: BaseUser) -> requests.Response:
         try:
             with requests.request(**request_parameters) as response:
                 response.raise_for_status()

@@ -16,7 +16,7 @@ from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMP
 T = TypeVar("T")
 
 ANSWER_TO_USER = "ANSWER_TO_USER"
-SAVED_COOKIE = "SAVED_COOKIE"
+SAVED_COOKIES = "SAVED_COOKIES"
 
 
 class NodeAction(CommandAction):
@@ -132,11 +132,11 @@ class StringAction(NodeAction):
         params = params or {}
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
 
-        if self.command == ANSWER_TO_USER and user.private_vars.get(SAVED_COOKIE):
+        if self.command == ANSWER_TO_USER and user.private_vars.get(SAVED_COOKIES):
             command_params["items"].append({
                 "command": {
                     "type": "setcookie",
-                    "cookies": user.local_vars.get(SAVED_COOKIE, {}).copy()
+                    "cookies": user.private_vars.get(SAVED_COOKIES, {})
                 }
             })
 
