@@ -19,6 +19,7 @@ LOGGING_UUID = "logging_uuid"
 CLASS_NAME = "class_name"
 LOG_STORE_FOR = "log_store_for"
 HEADERS = "headers"
+CALLER_INFO = "caller_info"
 
 
 class LoggerMessageCreator:
@@ -82,6 +83,12 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         logger = logging.getLogger(module_name)
         if not logger.isEnabledFor(level_name):
             return
+
+        caller_info = inspect.getframeinfo(previous_frame)
+        caller = {"filename": caller_info.filename, "function": caller_info.function, "line_num": caller_info.lineno}
+        params = params or {}
+        params.update(caller)
+
         instance = previous_frame.f_locals.get('self', None)
 
         from smart_kit.configs import get_app_config
