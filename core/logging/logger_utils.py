@@ -84,10 +84,10 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         if not logger.isEnabledFor(level_name):
             return
 
-        caller_info = inspect.getframeinfo(previous_frame)
-        caller = {"filename": caller_info.filename, "function": caller_info.function, "line_num": caller_info.lineno}
+        caller = inspect.getframeinfo(previous_frame)
+        caller_info = {"filename": caller.filename, "function": caller.function, "line_num": caller.lineno}
         params = params or {}
-        params.update(caller)
+        params[CALLER_INFO] = caller_info
 
         instance = previous_frame.f_locals.get('self', None)
 
