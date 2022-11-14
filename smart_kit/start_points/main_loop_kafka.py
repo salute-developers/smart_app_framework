@@ -466,7 +466,7 @@ class MainLoop(BaseMainLoop):
                 params={log_const.KEY_NAME: "adding_local_timeout",
                         "class_name": self.__class__.__name__,
                         "callback_id": callback_id,
-                        "unique_key": unique_key})
+                        "unique_key": unique_key, MESSAGE_ID_STR: user.message.incremental_id})
             self.behaviors_timeouts.push(unique_key, self.behaviors_timeouts_value_cls._make(
                 (user.message.db_uid, callback_id, mq_message, kafka_key)))
 
