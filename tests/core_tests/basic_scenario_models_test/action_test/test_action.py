@@ -456,35 +456,31 @@ class ActionTest(unittest.TestCase):
               "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111"
             },
             "deliveryMode": "broadcast",
-            "destinations": [
-                {
-                  "channel": "COMPANION_B2C",
-                  "surface": "COMPANION",
-                  "templateContent": {
-                    "id": "49061553-27c7-4471-9145-d8d6137657da",
-                    "headerValues": {
-                      "clientname": "Иван",
-                      "bandname": "Ласковый май"
-                    },
-                    "bodyValues": {
-                      "formatname": "альбома",
-                      "bandname": "Ласковый май",
-                      "releasename": "Новое"
-                    },
-                    "mobileAppParameters": {
-                      "deeplinkAndroid": "laskoviyi-mai-listen-android",
-                      "deeplinkIos": "laskoviyi-mai-listen-ios"
-                    },
-                    "timeFrame": {
-                      "startTime": "13:30:00",
-                      "finishTime": "15:00:00",
-                      "timeZone": "GMT+03:00",
-                      "startDate": "2020-06-04",
-                      "endDate": "2020-06-05"
-                    }
-                  }
+            "channel": "COMPANION_B2C",
+            "surface": "COMPANION",
+            "templateContent": {
+                "id": "49061553-27c7-4471-9145-d8d6137657da",
+                "headerValues": {
+                  "clientname": "Иван",
+                  "bandname": "Ласковый май"
+                },
+                "bodyValues": {
+                  "formatname": "альбома",
+                  "bandname": "Ласковый май",
+                  "releasename": "Новое"
+                },
+                "mobileAppParameters": {
+                  "deeplinkAndroid": "laskoviyi-mai-listen-android",
+                  "deeplinkIos": "laskoviyi-mai-listen-ios"
+                },
+                "timeFrame": {
+                  "startTime": "13:30:00",
+                  "finishTime": "15:00:00",
+                  "timeZone": "GMT+03:00",
+                  "startDate": "2020-06-04",
+                  "endDate": "2020-06-05"
                 }
-            ]
+            }
         }
 
         action = PushActionHttp(items)
