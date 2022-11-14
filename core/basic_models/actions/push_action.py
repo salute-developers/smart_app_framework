@@ -83,7 +83,9 @@ class PushAuthenticationActionHttp(PushAction):
     """ Action для получения токена для вызова SmartPush API через http.
 
     Ссылка на документацию с примерами получения токена:
-    - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
+     - Аутентификация (получение токена): https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/access
+    Шаблонная генерация:
+     - Для всех полей доступна шаблонная генерация. Можно также передавать значение обычной строкой.
 
     Response:
         Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
@@ -96,7 +98,6 @@ class PushAuthenticationActionHttp(PushAction):
             "type": "push_authentication", // обязательный параметр
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/oauth
             "client_id": "@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3", // обязательный параметр
-            "surface": "COMPANION", // опциональный параметр, по дефолту "COMPANION", без шаблонной генерации
             "client_secret": "secret", // обязательный параметр
             "behavior": "some_behavior" // опциональный параметр
         }
@@ -143,6 +144,8 @@ class PushActionHttp(PushAction):
      - Осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
     Ссылка на документацию с примерами отправки уведомлений:
      - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
+    Шаблонная генерация:
+     - Для всех полей доступна шаблонная генерация. Можно также передавать значение обычной строкой.
 
     Response:
         Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
@@ -155,7 +158,7 @@ class PushActionHttp(PushAction):
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest-lite", // обязательный параметр
             "behavior": "some_behavior", // опциональный параметр
-            "surface": "COMPANION", // опциональный параметр, по дефолту "COMPANION", без шаблонной генерации
+            "surface": "{{message.device.surface}}", // обязательный параметр.
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
@@ -181,7 +184,7 @@ class PushActionHttp(PushAction):
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest
             "protocolVersion": "V1", // обязательный параметр (Формат протокола)
-            "messageId": 37284759, // обязательный параметр (Идентификатор клиентского сообщения в рамках сессии)
+            "messageId": "{{message.as_dict.messageId}}", // обязательный параметр (Идентификатор клиентского сообщения в рамках сессии).
             "messageName": "SEND_PUSH", // опциональный параметр (Тип сообщения)
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
             "senderApplication": { // опциональный параметр (Информация о приложении)
@@ -189,35 +192,31 @@ class PushActionHttp(PushAction):
               "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111" // обязательный параметр (Идентификатор версии смартапа)
             },
             "deliveryMode": "broadcast", // обязательный параметр (Тип доставки. Возможные значения: broadcast, sequential)
-            "destinations": [
-                {
-                  "channel": "COMPANION_B2C", // обязательный параметр (Канал получателя)
-                  "surface": "COMPANION", // обязательный параметр (Поверхность получателя)
-                  "templateContent": { // обязательный параметр (Содержимое настроек для получателя под текущим номером)
-                    "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
-                    "headerValues": { // опциональный параметр (Набор значений переменных заголовка из шаблона)
-                        "clientname": "Иван", // Произвольная переменная из заголовка шаблона
-                        "bandname": "Ласковый май" // Произвольная переменная из заголовка шаблона
-                    },
-                    "bodyValues": { // опциональный параметр (Набор значений переменных текста из шаблона)
-                        "formatname": "альбома", // Произвольная переменная из текста шаблона
-                        "bandname": "Ласковый май", // Произвольная переменная из текста шаблона
-                        "releasename": "Новое" // Произвольная переменная из текста шаблона
-                    }
-                    "mobileAppParameters": { // опциональный параметр (Блок с параметрами для отправки в мобильное приложение Салют)
-                      "deeplinkAndroid": "laskoviyi-mai-listen-android", // опциональный параметр (Сценарий для Android-устройств)
-                      "deeplinkIos": "laskoviyi-mai-listen-ios" // опциональный параметр (Сценарий для iOS-устройств)
-                    },
-                    "timeFrame": { // опциональный параметр (Настройки времени для отложенной отправки push-уведомления под текущим номером)
-                      "startTime": "13:30:00", // обязательный параметр (Стартовое время отправки push-уведомления)
-                      "finishTime": "15:00:00", // обязательный параметр (Финальное время отправки push-уведомления)
-                      "timeZone": "GMT+03:00", // обязательный параметр (Часовой пояс пользователя в формате GMT+hh:mm)
-                      "startDate": "2020-06-04", // обязательный параметр (Стартовая дата отправки push-уведомления)
-                      "endDate": "2020-06-05" // опциональный параметр (Финальная дата отправки push-уведомления)
-                    }
-                  }
+            "channel": "{{message.device.channel}}", // обязательный параметр (Канал получателя).
+            "surface": "{{message.device.surface}}", // обязательный параметр (Поверхность получателя).
+            "templateContent": { // обязательный параметр (Содержимое настроек для получателя под текущим номером)
+                "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
+                "headerValues": { // опциональный параметр (Набор значений переменных заголовка из шаблона)
+                    "clientname": "Иван", // Произвольная переменная из заголовка шаблона
+                    "bandname": "Ласковый май" // Произвольная переменная из заголовка шаблона
+                },
+                "bodyValues": { // опциональный параметр (Набор значений переменных текста из шаблона)
+                    "formatname": "альбома", // Произвольная переменная из текста шаблона
+                    "bandname": "Ласковый май", // Произвольная переменная из текста шаблона
+                    "releasename": "Новое" // Произвольная переменная из текста шаблона
                 }
-            ]
+                "mobileAppParameters": { // опциональный параметр (Блок с параметрами для отправки в мобильное приложение Салют)
+                  "deeplinkAndroid": "laskoviyi-mai-listen-android", // опциональный параметр (Сценарий для Android-устройств)
+                  "deeplinkIos": "laskoviyi-mai-listen-ios" // опциональный параметр (Сценарий для iOS-устройств)
+                },
+                "timeFrame": { // опциональный параметр (Настройки времени для отложенной отправки push-уведомления под текущим номером)
+                  "startTime": "13:30:00", // обязательный параметр (Стартовое время отправки push-уведомления)
+                  "finishTime": "15:00:00", // обязательный параметр (Финальное время отправки push-уведомления)
+                  "timeZone": "GMT+03:00", // обязательный параметр (Часовой пояс пользователя в формате GMT+hh:mm)
+                  "startDate": "2020-06-04", // обязательный параметр (Стартовая дата отправки push-уведомления)
+                  "endDate": "2020-06-05" // опциональный параметр (Финальная дата отправки push-уведомления)
+                }
+            }
         }
     """
 
@@ -231,6 +230,7 @@ class PushActionHttp(PushAction):
 
         self.type_request = items.get("type_request")
         if self.type_request == "apprequest-lite":
+            self.surface = items["surface"]
             self.templateContent = items.get("templateContent")
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST_LITE}
         elif self.type_request == "apprequest":
@@ -244,11 +244,20 @@ class PushActionHttp(PushAction):
             self.sender["application"] = items.get("senderApplication")
             self.clientId["idType"] = self.CLIENT_ID_TYPE
             self.deliveryConfig["deliveryMode"] = items["deliveryMode"]
-            self.deliveryConfig["destinations"] = items["destinations"]
+            self.destinations = self.deliveryConfig["destinations"] = []
+
+            self.surface = items["surface"]
+            self.channel = items["channel"]
+            self.messageId = items["messageId"]
+            destinations = {
+                "channel": self.channel,
+                "surface": self.surface,
+                "templateContent": items["templateContent"]
+            }
+            self.destinations.append(destinations)
 
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST}
             self.protocolVersion = items["protocolVersion"]
-            self.messageId = items["messageId"]
             self.messageName = items.get("messageName")
 
         items["store"] = "push_http_response"
