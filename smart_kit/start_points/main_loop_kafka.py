@@ -444,7 +444,7 @@ class MainLoop(BaseMainLoop):
     def _log_request(self, user, request, answer, original_mq_message):
         log("OUTGOING TO TOPIC_KEY: %(topic_key)s DATA: %(data)s",
             params={log_const.KEY_NAME: "outgoing_message",
-                    "topic_key": request.topic_key,
+                    "topic": request.topic_key,
                     "headers": request._get_new_headers(original_mq_message),
                     "data": answer.masked_value,
                     "length": len(answer.value),
@@ -470,7 +470,7 @@ class MainLoop(BaseMainLoop):
             log("%(class_name)s: adding local_timeout on callback %(callback_id)s with timeout on %(unique_key)s",
                 params={log_const.KEY_NAME: "adding_local_timeout",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                         "unique_key": unique_key})
             self.behaviors_timeouts.push(unique_key, self.behaviors_timeouts_value_cls._make(
                 (user.message.db_uid, callback_id, mq_message, kafka_key)))
@@ -479,7 +479,7 @@ class MainLoop(BaseMainLoop):
             log("%(class_name)s: removing local_timeout on callback %(callback_id)s",
                 params={log_const.KEY_NAME: "removing_local_timeout",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id})
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
             self.behaviors_timeouts.remove(callback_id)
 
     def stop(self, signum, frame):
