@@ -34,7 +34,7 @@ class HandlerRespond(HandlerBase):
         action_name = self.get_action_name(payload, user)
         params = {
             log_const.KEY_NAME: "process_time",
-            "callback_id": str(callback_id),
+            log_const.BEHAVIOR_CALLBACK_ID_VALUE: str(callback_id),
             "process_time": self.get_processing_time(user),
             "action_name": action_name,
             "surface": user.message.device.surface,

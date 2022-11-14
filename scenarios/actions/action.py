@@ -437,13 +437,13 @@ class ProcessBehaviorAction(Action):
         log("%(class_name)s.run: got callback_id %(callback_id)s.",
             params={log_const.KEY_NAME: "process_behavior_action",
                     "class_name": self.__class__.__name__,
-                    "callback_id": callback_id}, user=user)
+                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id}, user=user)
 
         if not user.behaviors.has_callback(callback_id):
             log("%(class_name)s.run: user.behaviors has no callback %(callback_id)s.",
                 params={log_const.KEY_NAME: "process_behavior_action_warning",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id}, level="WARNING", user=user)
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id}, level="WARNING", user=user)
             return commands
 
         if user.message.payload:
