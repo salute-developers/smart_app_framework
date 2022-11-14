@@ -39,7 +39,10 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
         return words
 
     def __load_everything(self):
-        nltk.download('punkt')
+        try:
+            nltk.data.find("tokenizers/punkt")
+        except LookupError:
+            nltk.download("punkt")
 
         from smart_kit.configs import get_app_config
         app_config = get_app_config()
