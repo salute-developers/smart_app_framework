@@ -395,17 +395,19 @@ class ActionTest(unittest.TestCase):
         payload = {
             'sender':
                 {
+                    'projectId': '3fa85f64-5717-4562-b3ab-2c963f66baa6',
                     'application':
                         {
-                            'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-                            'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                            'appId': None,
+                            'versionId': None
                         }
                 },
             'recipient':
                 {
                     'clientId':
                         {
-                            'idType': 'SUB'
+                            'idType': 'SUB',
+                            'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
                         }
                 },
             'deliveryConfig':
@@ -449,41 +451,51 @@ class ActionTest(unittest.TestCase):
             "type": "push_http",
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
             "type_request": "apprequest",
-            "protocolVersion": "V1",
-            "messageId": "37284759",
-            "senderApplication": {
-              "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-              "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111"
+            "sender": {
+              "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6"
             },
-            "deliveryMode": "broadcast",
-            "channel": "COMPANION_B2C",
-            "surface": "COMPANION",
-            "templateContent": {
-                "id": "49061553-27c7-4471-9145-d8d6137657da",
-                "headerValues": {
-                  "clientname": "Иван",
-                  "bandname": "Ласковый май"
-                },
-                "bodyValues": {
-                  "formatname": "альбома",
-                  "bandname": "Ласковый май",
-                  "releasename": "Новое"
-                },
-                "mobileAppParameters": {
-                  "deeplinkAndroid": "laskoviyi-mai-listen-android",
-                  "deeplinkIos": "laskoviyi-mai-listen-ios"
-                },
-                "timeFrame": {
-                  "startTime": "13:30:00",
-                  "finishTime": "15:00:00",
-                  "timeZone": "GMT+03:00",
-                  "startDate": "2020-06-04",
-                  "endDate": "2020-06-05"
+            "recipient": {
+                "clientId": {
+                    "idType": "SUB",
+                    "id": "6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7"
                 }
+            },
+            "deliveryConfig": {
+                "deliveryMode": "broadcast",
+                "destinations": [
+                    {
+                        "channel": "COMPANION_B2C",
+                        "surface": "COMPANION",
+                        "templateContent": {
+                            "id": "49061553-27c7-4471-9145-d8d6137657da",
+                            "headerValues": {
+                                "clientname": "Иван",
+                                "bandname": "Ласковый май"
+                            },
+                            "bodyValues": {
+                                "formatname": "альбома",
+                                "bandname": "Ласковый май",
+                                "releasename": "Новое"
+                            },
+                            "mobileAppParameters": {
+                                "deeplinkAndroid": "laskoviyi-mai-listen-android",
+                                "deeplinkIos": "laskoviyi-mai-listen-ios"
+                            },
+                            "timeFrame": {
+                                "startTime": "13:30:00",
+                                "finishTime": "15:00:00",
+                                "timeZone": "GMT+03:00",
+                                "startDate": "2020-06-04",
+                                "endDate": "2020-06-05"
+                            }
+                        }
+                    }
+                ]
             }
         }
 
         action = PushActionHttp(items)
+        print(action.payload)
         self.assertEqual(action.type_request, 'apprequest')
         self.assertEqual(action.payload, payload)
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))

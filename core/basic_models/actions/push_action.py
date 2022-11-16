@@ -99,7 +99,7 @@ class PushAuthenticationActionHttp(PushAction):
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/oauth
             "client_id": "@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3", // обязательный параметр
             "client_secret": "secret", // обязательный параметр
-            "behavior": "some_behavior" // опциональный параметр
+            "behavior": "some_behavior" // опциональный параметр, по дефолту "common_behavior"
         }
     """
 
@@ -157,7 +157,7 @@ class PushActionHttp(PushAction):
         {
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest-lite", // обязательный параметр
-            "behavior": "some_behavior", // опциональный параметр
+            "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
             "surface": "{{message.device.surface}}", // обязательный параметр.
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
@@ -180,42 +180,44 @@ class PushActionHttp(PushAction):
         {
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest", // обязательный параметр
-            "behavior": "some_behavior", // опциональный параметр
+            "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest
-            "protocolVersion": "V1", // обязательный параметр (Формат протокола)
-            "messageId": "{{message.as_dict.messageId}}", // обязательный параметр (Идентификатор клиентского сообщения в рамках сессии).
-            "messageName": "SEND_PUSH", // опциональный параметр (Тип сообщения)
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
-            "senderApplication": { // опциональный параметр (Информация о приложении)
-              "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa7", // обязательный параметр (Идентификатор смартапа)
-              "versionId": "fcac2f61-57a7-4d6d-b3fc-2c963f66a111" // обязательный параметр (Идентификатор версии смартапа)
+            "sender": {
+                "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6"
             },
-            "deliveryMode": "broadcast", // обязательный параметр (Тип доставки. Возможные значения: broadcast, sequential)
-            "channel": "{{message.device.channel}}", // обязательный параметр (Канал получателя).
-            "surface": "{{message.device.surface}}", // обязательный параметр (Поверхность получателя).
-            "templateContent": { // обязательный параметр (Содержимое настроек для получателя под текущим номером)
-                "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
-                "headerValues": { // опциональный параметр (Набор значений переменных заголовка из шаблона)
-                    "clientname": "Иван", // Произвольная переменная из заголовка шаблона
-                    "bandname": "Ласковый май" // Произвольная переменная из заголовка шаблона
-                },
-                "bodyValues": { // опциональный параметр (Набор значений переменных текста из шаблона)
-                    "formatname": "альбома", // Произвольная переменная из текста шаблона
-                    "bandname": "Ласковый май", // Произвольная переменная из текста шаблона
-                    "releasename": "Новое" // Произвольная переменная из текста шаблона
-                }
-                "mobileAppParameters": { // опциональный параметр (Блок с параметрами для отправки в мобильное приложение Салют)
-                  "deeplinkAndroid": "laskoviyi-mai-listen-android", // опциональный параметр (Сценарий для Android-устройств)
-                  "deeplinkIos": "laskoviyi-mai-listen-ios" // опциональный параметр (Сценарий для iOS-устройств)
-                },
-                "timeFrame": { // опциональный параметр (Настройки времени для отложенной отправки push-уведомления под текущим номером)
-                  "startTime": "13:30:00", // обязательный параметр (Стартовое время отправки push-уведомления)
-                  "finishTime": "15:00:00", // обязательный параметр (Финальное время отправки push-уведомления)
-                  "timeZone": "GMT+03:00", // обязательный параметр (Часовой пояс пользователя в формате GMT+hh:mm)
-                  "startDate": "2020-06-04", // обязательный параметр (Стартовая дата отправки push-уведомления)
-                  "endDate": "2020-06-05" // опциональный параметр (Финальная дата отправки push-уведомления)
-                }
+            "deliveryConfig": {
+                "deliveryMode": "broadcast", // обязательный параметр (Тип доставки. Возможные значения: broadcast, sequential)
+                "destinations": [
+                    {
+                        "channel": "{{message.device.channel}}", // обязательный параметр (Канал получателя).
+                        "surface": "{{message.device.surface}}", // обязательный параметр (Поверхность получателя).
+                        "templateContent": { // обязательный параметр (Содержимое настроек для получателя под текущим номером)
+                            "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
+                            "headerValues": { // опциональный параметр (Набор значений переменных заголовка из шаблона)
+                                "clientname": "Иван", // Произвольная переменная из заголовка шаблона
+                                "bandname": "Ласковый май" // Произвольная переменная из заголовка шаблона
+                            },
+                            "bodyValues": { // опциональный параметр (Набор значений переменных текста из шаблона)
+                                "formatname": "альбома", // Произвольная переменная из текста шаблона
+                                "bandname": "Ласковый май", // Произвольная переменная из текста шаблона
+                                "releasename": "Новое" // Произвольная переменная из текста шаблона
+                            }
+                            "mobileAppParameters": { // опциональный параметр (Блок с параметрами для отправки в мобильное приложение Салют)
+                              "deeplinkAndroid": "laskoviyi-mai-listen-android", // опциональный параметр (Сценарий для Android-устройств)
+                              "deeplinkIos": "laskoviyi-mai-listen-ios" // опциональный параметр (Сценарий для iOS-устройств)
+                            },
+                            "timeFrame": { // опциональный параметр (Настройки времени для отложенной отправки push-уведомления под текущим номером)
+                              "startTime": "13:30:00", // обязательный параметр (Стартовое время отправки push-уведомления)
+                              "finishTime": "15:00:00", // обязательный параметр (Финальное время отправки push-уведомления)
+                              "timeZone": "GMT+03:00", // обязательный параметр (Часовой пояс пользователя в формате GMT+hh:mm)
+                              "startDate": "2020-06-04", // обязательный параметр (Стартовая дата отправки push-уведомления)
+                              "endDate": "2020-06-05" // опциональный параметр (Финальная дата отправки push-уведомления)
+                            }
+                        }
+                    }
+                ]
             }
         }
     """
@@ -223,42 +225,24 @@ class PushActionHttp(PushAction):
     BEARER_METHOD_AUTH = "Bearer "
     URL_OAUTH_APPREQUEST_LITE = "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite"
     URL_OAUTH_APPREQUEST = "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest"
-    CLIENT_ID_TYPE = "SUB"
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
-
         self.type_request = items.get("type_request")
+
         if self.type_request == "apprequest-lite":
             self.surface = items["surface"]
-            self.templateContent = items.get("templateContent")
+            self.templateContent = items["templateContent"]
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST_LITE}
         elif self.type_request == "apprequest":
             items["payload"] = {}
             self.payload = items["payload"]
-            self.sender = self.payload["sender"] = {}
-            self.recipient = self.payload["recipient"] = {}
-            self.clientId = self.recipient["clientId"] = {}
-            self.deliveryConfig = self.payload["deliveryConfig"] = {}
-
-            self.sender["application"] = items.get("senderApplication")
-            self.clientId["idType"] = self.CLIENT_ID_TYPE
-            self.deliveryConfig["deliveryMode"] = items["deliveryMode"]
-            self.destinations = self.deliveryConfig["destinations"] = []
-
-            self.surface = items["surface"]
-            self.channel = items["channel"]
-            self.messageId = items["messageId"]
-            destinations = {
-                "channel": self.channel,
-                "surface": self.surface,
-                "templateContent": items["templateContent"]
-            }
-            self.destinations.append(destinations)
-
+            self.payload["sender"] = items["sender"]
+            self.payload["sender"]["application"] = {"appId": None, "versionId": None}
+            self.payload["recipient"] = items["recipient"]
+            self.payload["deliveryConfig"] = items["deliveryConfig"]
+            self.protocolVersion = "V1"
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST}
-            self.protocolVersion = items["protocolVersion"]
-            self.messageName = items.get("messageName")
 
         items["store"] = "push_http_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
@@ -280,23 +264,19 @@ class PushActionHttp(PushAction):
         params.update(collected)
         if self.type_request == "apprequest-lite":
             request_body_parameters = {
-                "projectId": user.settings["template_settings"]["project_id"],
+                "projectId": user.message.app_info.project_id,
                 "clientId": user.message.sub,
                 "surface": self.surface,
                 "templateContent": self.templateContent
             }
         elif self.type_request == "apprequest":
-            self.sender["projectId"] = user.settings["template_settings"]["project_id"]
-            self.clientId["id"] = user.message.sub
+            self.payload["sender"]["application"]["appId"] = user.message.app_info.application_id
+            self.payload["sender"]["application"]["versionId"] = user.message.app_info.app_version_id
             request_body_parameters = {
                 "protocolVersion": self.protocolVersion,
-                "messageId": self.messageId,
-                "messageName": self.messageName,
-                "payload": {
-                    "sender": self.sender,
-                    "recipient": self.recipient,
-                    "deliveryConfig": self.deliveryConfig
-                }
+                "messageId": user.message.incremental_id,
+                "messageName": "SEND_PUSH",
+                "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
         self.http_request_action.run(user, text_preprocessing_result, params)
