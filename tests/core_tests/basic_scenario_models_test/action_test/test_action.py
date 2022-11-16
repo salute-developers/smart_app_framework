@@ -495,7 +495,6 @@ class ActionTest(unittest.TestCase):
         }
 
         action = PushActionHttp(items)
-        print(action.payload)
         self.assertEqual(action.type_request, 'apprequest')
         self.assertEqual(action.payload, payload)
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))

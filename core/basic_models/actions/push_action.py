@@ -241,7 +241,6 @@ class PushActionHttp(PushAction):
             self.payload["sender"]["application"] = {"appId": None, "versionId": None}
             self.payload["recipient"] = items["recipient"]
             self.payload["deliveryConfig"] = items["deliveryConfig"]
-            self.protocolVersion = "V1"
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST}
 
         items["store"] = "push_http_response"
@@ -273,7 +272,7 @@ class PushActionHttp(PushAction):
             self.payload["sender"]["application"]["appId"] = user.message.app_info.application_id
             self.payload["sender"]["application"]["versionId"] = user.message.app_info.app_version_id
             request_body_parameters = {
-                "protocolVersion": self.protocolVersion,
+                "protocolVersion": "V1",
                 "messageId": user.message.incremental_id,
                 "messageName": "SEND_PUSH",
                 "payload": self.payload
