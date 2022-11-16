@@ -66,8 +66,10 @@ class LoggerMessageCreator:
 
     @classmethod
     def filter_headers(cls, params: dict):
-        if HEADERS in params and isinstance(params[HEADERS], list):
-            params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
+        if HEADERS in params:
+            if isinstance(params[HEADERS], list):
+                params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
+            params[HEADERS] = str(params[HEADERS])
 
 
 default_logger = logging.getLogger()
