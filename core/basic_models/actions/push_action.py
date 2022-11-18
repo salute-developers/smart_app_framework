@@ -110,7 +110,7 @@ class PushAuthenticationActionHttp(PushAction):
         super().__init__(items, id)
         items["store"] = "push_authentification_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
-        items["params"] = {"url": items.get("url") or self.URL_OAUTH, "json": {"scope": "SMART_PUSH"}}
+        items["params"] = {"url": items.get("url") or self.URL_OAUTH, "data": "scope=SMART_PUSH".encode()}
         items["params"]["headers"] = {}
         self.headers = items["params"]["headers"]
         self.headers["RqUID"] = str(uuid.uuid4())
@@ -133,8 +133,7 @@ class PushAuthenticationActionHttp(PushAction):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        self.http_request_action.run(user, text_preprocessing_result, params)
-        return []
+        return self.http_request_action.run(user, text_preprocessing_result, params)
 
 
 class PushActionHttp(PushAction):
@@ -228,7 +227,7 @@ class PushActionHttp(PushAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
-        self.type_request = items.get("type_request")
+        self.type_request = items["type_request"]
 
         if self.type_request == "apprequest-lite":
             self.surface = items["surface"]
@@ -242,6 +241,8 @@ class PushActionHttp(PushAction):
             self.payload["recipient"] = items["recipient"]
             self.payload["deliveryConfig"] = items["deliveryConfig"]
             items["params"] = {"url": items.get("url") or self.URL_OAUTH_APPREQUEST}
+        else:
+            raise Exception("Invalid items[type_request]")
 
         items["store"] = "push_http_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
@@ -278,5 +279,4 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        self.http_request_action.run(user, text_preprocessing_result, params)
-        return []
+        return self.http_request_action.run(user, text_preprocessing_result, params)
