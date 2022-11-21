@@ -268,7 +268,7 @@ class MainLoop(BaseMainLoop):
                                 "message_name": message.type,
                             }, user=user,
                             level=self.settings["template_settings"].get("kafka_message_key_recovery_log_level",
-                                                                         "WARNING"))
+                                                                         "DEBUG"))
                         break
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
