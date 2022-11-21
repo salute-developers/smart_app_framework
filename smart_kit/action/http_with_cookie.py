@@ -18,7 +18,7 @@ class HTTPRequestActionWithCookie(HTTPRequestAction):
         all_cookies.update(cookies_to_save)
         user.private_vars.set(SAVED_COOKIES, all_cookies)
         log("Cookies set", user, {
-            "saved_cookies": str(cookies_to_save)
+            "saved_cookies": str(all_cookies)
         }, level="DEBUG")
 
     def _make_response(self, request_parameters: dict, user: User) -> requests.Response:

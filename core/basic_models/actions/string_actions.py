@@ -136,10 +136,9 @@ class StringAction(NodeAction):
             command_params["items"].append({
                 "command": {
                     "type": "setcookie",
-                    "cookies": user.private_vars.get(SAVED_COOKIES, {})
+                    "cookies": user.private_vars.get(SAVED_COOKIES)
                 }
             })
-
 
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=self.request_data)]
