@@ -136,6 +136,54 @@ class PushAuthenticationActionHttp(PushAction):
         return self.http_request_action.run(user, text_preprocessing_result, params)
 
 
+class GetRuntimePermissionsAction(PushAction):
+    """ Action для получения разрешения на отправку пуш уведомлений в SmartPush API через http.
+
+    Ссылка на документацию с примерами получения разрешения на уведомления:
+     - Разрешение на уведомления: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications
+
+    Response (Error codes):
+        - 001 (SUCCESS): Данные существуют и получено клиентское согласие;
+        - 101 (CLIENT DENIED): Клиент отклонил разрешение;
+        - 102 (FORBIDDEN): Запрещенный вызов от смартапа для GET_RUNTIME_PERMISSIONS.
+
+    Example:
+        {
+            "type": "get_runtime_permissions"
+        }
+    """
+
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+        super().__init__(items, id)
+
+    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        params = params or {}
+        self.nodes = {
+            "messageName": "GET_RUNTIME_PERMISSIONS",
+            "sessionId": user.message.session_id,
+            "messageId": user.message.incremental_id,
+            "uuid": {
+                "sub": user.message.sub,
+                "userId": user.message.uuid["userId"],
+                "userChannel": user.message.uuid["userChannel"]
+            },
+            "payload": {
+                "server_action": {
+                    "parameters": {
+                        "need_actions": {
+                            "types": ["service_push"]
+                        }
+                    }
+                }
+            }
+        }
+        command_params = self._generate_command_context(user, text_preprocessing_result, params)
+        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
+                            request_data=self.request_data, need_payload_wrap=False, need_message_name=False)]
+        return commands
+
+
 class PushActionHttp(PushAction):
     """ Action для отправки пуш уведомлений в SmartPush API через http.
 
