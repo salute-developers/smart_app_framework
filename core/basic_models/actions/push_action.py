@@ -6,6 +6,7 @@ from typing import Union, Dict, List, Any, Optional
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
 from core.text_preprocessing.base import BaseTextPreprocessingResult
+from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
@@ -13,6 +14,7 @@ from smart_kit.action.http import HTTPRequestAction
 
 COMMON_BEHAVIOR = "common_behavior"
 PUSH_NOTIFY = "PUSH_NOTIFY"
+GET_RUNTIME_PERMISSIONS = "GET_RUNTIME_PERMISSIONS"
 
 
 class PushAction(StringAction):
@@ -155,12 +157,17 @@ class GetRuntimePermissionsAction(PushAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
+        self.behavior = items.get("behavior") or COMMON_BEHAVIOR
+        self.command = GET_RUNTIME_PERMISSIONS
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
+        scenario_id = user.last_scenarios.last_scenario_name
+        user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
+                           text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
         self.nodes = {
-            "messageName": "GET_RUNTIME_PERMISSIONS",
+            "messageName": GET_RUNTIME_PERMISSIONS,
             "sessionId": user.message.session_id,
             "messageId": user.message.incremental_id,
             "uuid": {

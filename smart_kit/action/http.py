@@ -72,14 +72,11 @@ class HTTPRequestAction(NodeAction):
             with requests.request(**request_parameters) as response:
                 response.raise_for_status()
                 self._log_response(user, response)
-                print("///////////////////", response)
                 return response
         except requests.exceptions.Timeout:
             self.error = self.TIMEOUT
-            print("///////////////////", self.TIMEOUT)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError):
             self.error = self.CONNECTION
-            print("///////////////////", self.CONNECTION)
 
     def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                             params: Optional[Dict[str, Union[str, float, int]]] = None):
