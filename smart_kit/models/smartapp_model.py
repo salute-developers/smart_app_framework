@@ -25,7 +25,7 @@ from core.monitoring.monitoring import monitoring
 class SmartAppModel:
     # additional_handlers format:
     # {"MESSAGE_NAME": {"handler": HandlerText, "params": {"dialogue_manager": custom_dialogue_manager}}}
-    # "params" is optional
+    # "params" are passed as kwargs to handler.__init__(), optional
     additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):

@@ -97,12 +97,8 @@ class ActionTest(unittest.TestCase):
     def test_base(self):
         items = {"nodes": "test"}
         action = Action(items)
-        try:
-            action.run(None, None)
-            result = False
-        except NotImplementedError:
-            result = True
-        self.assertEqual(result, True)
+        result = action.run(None, None)
+        self.assertEqual(result, [])
 
     def test_external(self):
         items = {"action": "test_action_key"}
@@ -134,18 +130,18 @@ class ActionTest(unittest.TestCase):
         items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
         action = RequirementAction(items)
         result = action.run(None, None)
-        self.assertIsNone(result)
+        self.assertEqual([], result)
 
     def test_requirement_choice(self):
         items = {"requirement_actions": [
-            {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
-            {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": "action2"}}
+            {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action1"]}},
+            {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": ["action2"]}}
         ]}
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
         result = choice_action.run(None, None)
-        self.assertEqual(result, "action2")
+        self.assertEqual(result, ["action2"])
 
     def test_requirement_choice_else(self):
         items = {
@@ -153,13 +149,13 @@ class ActionTest(unittest.TestCase):
                 {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
                 {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action2"}},
             ],
-            "else_action": {"type": "test", "result": "action3"}
+            "else_action": {"type": "test", "result": ["action3"]}
         }
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
         result = choice_action.run(None, None)
-        self.assertEqual(result, "action3")
+        self.assertEqual(result, ["action3"])
 
     def test_string_action(self):
         expected = [Command("cmd_id", {"item": "template", "params": "params"})]
@@ -185,11 +181,11 @@ class ActionTest(unittest.TestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "action": {"type": "test", "result": ["main_action"]},
+            "else_action": {"type": "test", "result": ["else_action"]}
         }
         action = ElseAction(items)
-        self.assertEqual(action.run(user, None), "main_action")
+        self.assertEqual(action.run(user, None), ["main_action"])
 
     def test_else_action_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -199,11 +195,11 @@ class ActionTest(unittest.TestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "action": {"type": "test", "result": ["main_action"]},
+            "else_action": {"type": "test", "result": ["else_action"]}
         }
         action = ElseAction(items)
-        self.assertEqual(action.run(user, None), "else_action")
+        self.assertEqual(action.run(user, None), ["else_action"])
 
     def test_else_action_no_else_if(self):
         registered_factories[Requirement] = requirement_factory
@@ -213,10 +209,10 @@ class ActionTest(unittest.TestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
+            "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
-        self.assertEqual(action.run(user, None), "main_action")
+        self.assertEqual(action.run(user, None), ["main_action"])
 
     def test_else_action_no_else_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -226,11 +222,11 @@ class ActionTest(unittest.TestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
+            "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
         result = action.run(user, None)
-        self.assertIsNone(result)
+        self.assertEqual([], result)
 
     def test_composite_action(self):
         registered_factories[Action] = action_factory
@@ -879,8 +875,8 @@ class ActionTest(unittest.TestCase):
 
 class NonRepeatingActionTest(unittest.TestCase):
     def setUp(self):
-        self.expected = PicklableMock()
-        self.expected1 = PicklableMock()
+        self.expected = [PicklableMock()]
+        self.expected1 = [PicklableMock()]
         self.action = NonRepeatingAction({"actions": [{"type": "action_mock",
                                                        "result": self.expected},
                                                       {"type": "action_mock",

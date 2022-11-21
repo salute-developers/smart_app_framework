@@ -343,7 +343,7 @@ class ScenarioActionTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         scen = PicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
         result = action.run(user, PicklableMock())
@@ -357,7 +357,7 @@ class ScenarioActionTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {"data": params})
         scen = PicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"ANNA.pipeline.scenario": scen}}
         result = action.run(user, PicklableMock())
@@ -372,14 +372,14 @@ class ScenarioActionTest(unittest.TestCase):
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
         result = action.run(user, PicklableMock())
-        self.assertEqual(result, None)
+        self.assertEqual(result, [])
 
     def test_scenario_action_without_jinja(self):
         action = RunScenarioAction({"scenario": "next_scenario"})
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         scen = PicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
         result = action.run(user, PicklableMock())
@@ -392,7 +392,7 @@ class RunLastScenarioActionTest(unittest.TestCase):
         action = RunLastScenarioAction({})
         user = PicklableMock()
         scen = PicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
         user.last_scenarios = PicklableMock()
@@ -436,7 +436,7 @@ class ChoiceScenarioActionTest(unittest.TestCase):
             ],
             "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
         }
-        expected_scen_result = "test_N_done"
+        expected_scen_result = ["test_N_done"]
         real_scen_result = self.mock_and_perform_action(
             test_items, expected_result=expected_scen_result, expected_scen="test_N")
         self.assertEqual(real_scen_result, expected_scen_result)
@@ -456,7 +456,7 @@ class ChoiceScenarioActionTest(unittest.TestCase):
             ]
         }
         real_scen_result = self.mock_and_perform_action(test_items)
-        self.assertIsNone(real_scen_result)
+        self.assertEqual([], real_scen_result)
 
     def test_choice_scenario_action_with_else_action(self):
         # Проверяем, что выполняется else_action в случае если ни один сценарий не запустился т.к их requirement=False
@@ -471,9 +471,9 @@ class ChoiceScenarioActionTest(unittest.TestCase):
                     "requirement": {"cond": False}
                 }
             ],
-            "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
+            "else_action": {"type": "test", "result": ["ELSE ACTION IS DONE"]}
         }
-        expected_scen_result = "ELSE ACTION IS DONE"
+        expected_scen_result = ["ELSE ACTION IS DONE"]
         real_scen_result = self.mock_and_perform_action(test_items, expected_result=expected_scen_result)
         self.assertEqual(real_scen_result, expected_scen_result)
 
@@ -493,7 +493,7 @@ class ClearCurrentScenarioActionTest(unittest.TestCase):
 
         action = ClearCurrentScenarioAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
 
@@ -506,7 +506,7 @@ class ClearCurrentScenarioActionTest(unittest.TestCase):
 
         action = ClearCurrentScenarioAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
 
@@ -525,7 +525,7 @@ class ClearScenarioByIdActionTest(unittest.TestCase):
 
         action = ClearScenarioByIdAction({"scenario_id": scenario_name})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
 
@@ -537,7 +537,7 @@ class ClearScenarioByIdActionTest(unittest.TestCase):
 
         action = ClearScenarioByIdAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
 
@@ -557,7 +557,7 @@ class ClearCurrentScenarioFormActionTest(unittest.TestCase):
 
         action = ClearCurrentScenarioFormAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.forms.clear_form.assert_called_once()
 
     def test_action_with_empty_last_scenario(self):
@@ -574,7 +574,7 @@ class ClearCurrentScenarioFormActionTest(unittest.TestCase):
 
         action = ClearCurrentScenarioFormAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.forms.remove_item.assert_not_called()
 
 
@@ -589,7 +589,7 @@ class ResetCurrentNodeActionTest(unittest.TestCase):
 
         action = ResetCurrentNodeAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertIsNone(user.scenario_models['test_scenario'].current_node)
 
     def test_action_with_empty_last_scenario(self):
@@ -602,7 +602,7 @@ class ResetCurrentNodeActionTest(unittest.TestCase):
 
         action = ResetCurrentNodeAction({})
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertEqual('some_node', user.scenario_models['test_scenario'].current_node)
 
     def test_specific_target(self):
@@ -618,7 +618,7 @@ class ResetCurrentNodeActionTest(unittest.TestCase):
         }
         action = ResetCurrentNodeAction(items)
         result = action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertEqual('another_node', user.scenario_models['test_scenario'].current_node)
 
 

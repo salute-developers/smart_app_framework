@@ -1,6 +1,6 @@
+from functools import cached_property
 from typing import Iterable
 import json
-from lazy import lazy
 from copy import copy
 
 from core.utils.masking_message import masking
@@ -23,7 +23,7 @@ class SmartAppToMessage:
         self.masking_fields = masking_fields
         self.validators = validators
 
-    @lazy
+    @cached_property
     def payload(self):
         payload = copy(self.command.payload)
         for field in self.forward_fields:
@@ -34,7 +34,7 @@ class SmartAppToMessage:
             payload[field] = self.incoming_message.payload[field]
         return payload
 
-    @lazy
+    @cached_property
     def as_dict(self):
         fields = {
             "messageId": self.incoming_message.incremental_id,
@@ -58,7 +58,7 @@ class SmartAppToMessage:
         uuid.userChannel = data_as_dict["uuid"]["userChannel"]
         return message
 
-    @lazy
+    @cached_property
     def masked_value(self):
         masked_data = masking(self.as_dict, self.masking_fields)
         if self.command.loader == "json.dumps":
@@ -67,7 +67,7 @@ class SmartAppToMessage:
             protobuf_message = self.as_protobuf_message(masked_data)
             return protobuf_message.SerializeToString()
 
-    @lazy
+    @cached_property
     def value(self):
         if self.command.loader == "json.dumps":
             return json.dumps(self.as_dict, ensure_ascii=False)

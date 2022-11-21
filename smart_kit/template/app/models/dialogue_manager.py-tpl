@@ -2,10 +2,8 @@ from smart_kit.models.dialogue_manager import DialogueManager
 
 
 class CustomDialogueManager(DialogueManager):
+    """DialogueManager отвечает за логику обработки входящих интентов
 
+    Для использования данного dialogue manager присвойте переменной LOCAL_TESTING в app_config этот класс как значение.
     """
-        В собственном DialogManager можно переопределить логику, связанную с вызовом сценариев по входяшему интенту
-    """
-    
-    def __init__(self, scenario_descriptions, app_name, **kwargs):
-        super(CustomDialogueManager, self).__init__(scenario_descriptions, app_name, **kwargs)
+    pass

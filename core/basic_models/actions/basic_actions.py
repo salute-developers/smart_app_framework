@@ -22,19 +22,18 @@ class Action:
     Запуск действия обеспечивается методом run. В случае ошибки выполнения вызывается метод on_run_error. Атрибут id
     используется в качестве идентификатора действия, по которому можно вызвать действие. Атрибут version используется
     для отслеживания версии объекта, например, при обновлении SmartUpdatableDescriptionsItems.
-
     """
     version: Optional[int]
     id: Optional[str]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: Optional[Dict[str, Any]] = None, id: Optional[str] = None):
         items = items or {}
         self.id = id
         self.version = items.get("version", -1)
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        raise NotImplementedError
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        return []
 
     def on_run_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         log("exc_handler: Action failed to run. Return None. MESSAGE: %(masked_message)s.", user,
@@ -55,16 +54,11 @@ class CommandAction(Action):
     request_data: Optional[Dict[str, str]]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(CommandAction, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.command = items.get("command")
         self.request_type = items.get("request_type") or self.DEFAULT_REQUEST_TYPE
         self.request_data = items.get("request_data")
-
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        super(CommandAction, self).run(user, text_preprocessing_result, params)
-        return None
 
 
 class DoingNothingAction(CommandAction):
@@ -73,13 +67,14 @@ class DoingNothingAction(CommandAction):
     nodes: Dict[str, str]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(DoingNothingAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.nodes = items.get("nodes") or {}
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = [Command(self.command, self.nodes, self.id, request_type=self.request_type,
-                            request_data=self.request_data)]
+        commands = super().run(user, text_preprocessing_result, params)
+        commands.append(Command(self.command, self.nodes, self.id, request_type=self.request_type,
+                                request_data=self.request_data))
         return commands
 
 
@@ -91,7 +86,7 @@ class RequirementAction(Action):
     FIELD_KEY = "action"
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(RequirementAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirement: str = items["requirement"]
         # can be used not only with actions but with every entity which implements Action interface
         # to not change statics "item" key is added
@@ -109,11 +104,11 @@ class RequirementAction(Action):
         return self._item
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        result = None
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         if self.requirement.check(text_preprocessing_result, user, params):
-            result = self.internal_item.run(user, text_preprocessing_result, params)
-        return result
+            commands.extend(self.internal_item.run(user, text_preprocessing_result, params))
+        return commands
 
 
 class ChoiceAction(Action):
@@ -125,7 +120,7 @@ class ChoiceAction(Action):
     FIELD_ELSE_KEY = "else_action"
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(ChoiceAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirement_items: List[str] = items[self.FIELD_REQUIREMENT_KEY]
         self._else_item: Optional[str] = items.get(self.FIELD_ELSE_KEY)
 
@@ -145,18 +140,18 @@ class ChoiceAction(Action):
         return self._else_item
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        result = None
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         choice_is_made = False
         for item in self.items:
             checked = item.requirement.check(text_preprocessing_result, user, params)
             if checked:
-                result = item.internal_item.run(user, text_preprocessing_result, params)
+                commands.extend(item.internal_item.run(user, text_preprocessing_result, params))
                 choice_is_made = True
                 break
         if not choice_is_made and self._else_item:
-            result = self.else_item.run(user, text_preprocessing_result, params)
-        return result
+            commands.extend(self.else_item.run(user, text_preprocessing_result, params))
+        return commands
 
 
 class ElseAction(Action):
@@ -169,7 +164,7 @@ class ElseAction(Action):
     FIELD_ELSE_KEY = "else_action"
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(ElseAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirement: str = items["requirement"]
         self._item: str = items[self.FIELD_ITEM_KEY]
         self._else_item: Optional[str] = items.get(self.FIELD_ELSE_KEY)
@@ -194,50 +189,48 @@ class ElseAction(Action):
         return self._else_item
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> Optional[List[Command]]:
-        result = None
+            params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         if self.requirement.check(text_preprocessing_result, user, params):
-            result = self.item.run(user, text_preprocessing_result, params)
+            commands.extend(self.item.run(user, text_preprocessing_result, params))
         elif self._else_item:
-            result = self.else_item.run(user, text_preprocessing_result, params)
-        return result
+            commands.extend(self.else_item.run(user, text_preprocessing_result, params))
+        return commands
 
 
-class CompositeAction(Action):
+class ActionOfActions(Action):
     version: Optional[int]
     actions: List[Action]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(CompositeAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._actions: List[str] = items.get("actions") or []
         self.actions = self.build_actions()
 
     @list_factory(Action)
-    def build_actions(self) -> List[str]:
+    def build_actions(self) -> List[Action]:
         return self._actions
 
+class CompositeAction(ActionOfActions):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        commands = []
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         for action in self.actions:
-            action_result = action.run(user, text_preprocessing_result, params)
-            if action_result:
-                commands += action_result
+            commands.extend(action.run(user, text_preprocessing_result, params))
         return commands
 
 
-class NonRepeatingAction(CompositeAction):
-    version: Optional[int]
-    actions: List[Action]
+class NonRepeatingAction(ActionOfActions):
     last_action_ids_storage: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(NonRepeatingAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._actions_count = len(items["actions"])
         self._last_action_ids_storage = items["last_action_ids_storage"]
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         last_ids = user.last_action_ids[self._last_action_ids_storage]
         all_indexes = list(range(self._actions_count))
         max_last_ids_count = self._actions_count - 1
@@ -247,24 +240,26 @@ class NonRepeatingAction(CompositeAction):
         action_index = random.choice(available_indexes)
         action = self.actions[action_index]
         last_ids.add(action_index)
-        result = action.run(user, text_preprocessing_result, params)
-        return result
+        commands.extend(action.run(user, text_preprocessing_result, params))
+        return commands
 
 
 class RandomAction(Action):
     actions: List[Action]
 
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self._raw_actions: List[str] = items["actions"]
         self.actions = self.build_actions()
 
     @list_factory(Action)
-    def build_actions(self) -> List[str]:
+    def build_actions(self) -> List[Action]:
         return self._raw_actions
 
-    def run(self, user, text_preprocessing_result, params=None):
+    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         pos = random.randint(0, len(self._raw_actions) - 1)
         action = self.actions[pos]
-        commands = action.run(user, text_preprocessing_result, params=params)
+        commands.extend(action.run(user, text_preprocessing_result, params=params))
         return commands
