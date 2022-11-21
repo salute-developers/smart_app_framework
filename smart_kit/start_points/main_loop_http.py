@@ -103,7 +103,6 @@ class BaseHttpMainLoop(BaseMainLoop):
 
     def _generate_answers(self, user, commands, message, **kwargs):
         commands = combine_commands(commands, user)
-        print(commands)
         if len(commands) > 1:
             raise ValueError
         answer = commands.pop() if commands else None

@@ -11,13 +11,15 @@ from core.basic_models.actions.command import Command
 from core.basic_models.actions.counter_actions import CounterIncrementAction, CounterDecrementAction, \
     CounterClearAction, CounterSetAction, CounterCopyAction
 from core.basic_models.actions.external_actions import ExternalAction
-from core.basic_models.actions.push_action import PushAction, PushAuthenticationActionHttp, PushActionHttp
+from core.basic_models.actions.push_action import PushAction, PushAuthenticationActionHttp, PushActionHttp, \
+    GetRuntimePermissionsAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser, NodeAction
 from core.basic_models.answer_items.answer_items import SdkAnswerItem, items_factory, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink
 from core.basic_models.requirement.basic_requirements import requirement_factory, Requirement, requirements
 from core.model.registered import registered_factories
+from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME
 from smart_kit.action.http import HTTPRequestAction
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
@@ -358,6 +360,44 @@ class ActionTest(unittest.TestCase):
 
         action = PushAuthenticationActionHttp(items)
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
+
+    def test_get_runtime_permissions(self):
+        params = {
+            "day_time": "morning",
+            "deep_link_url": "some_url",
+            "icon_url": "some_icon_url"
+        }
+        settings = {"template_settings": {"project_id": "project_id"}}
+        items = {
+            "type": "get_runtime_permissions"
+        }
+        user = PicklableMagicMock()
+
+        expected = {
+            "messageName": "GET_RUNTIME_PERMISSIONS",
+            "sessionId": user.message.session_id,
+            "messageId": user.message.incremental_id,
+            "uuid": {
+                "sub": user.message.sub,
+                "userId": user.message.uuid["userId"],
+                "userChannel": user.message.uuid["userChannel"]
+            },
+            "payload": {
+                "server_action": {
+                    "parameters": {
+                        "need_actions": {
+                            "types": ["service_push"]
+                        }
+                    }
+                }
+            }
+        }
+        action = GetRuntimePermissionsAction(items)
+        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
+        user.settings = settings
+        text_preprocessing_result = BaseTextPreprocessingResult(items)
+        command = action.run(user=user, text_preprocessing_result=text_preprocessing_result)[0]
+        self.assertEqual(command.raw, expected)
 
     def test_push_action_http_with_apprequest_lite_type_request(self):
         items = {
