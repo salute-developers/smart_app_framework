@@ -1,10 +1,11 @@
 import collections
 import json
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, List
 
 from jinja2 import exceptions as jexcept
 
 from core.basic_models.actions.basic_actions import Action
+from core.basic_models.actions.command import Command
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
@@ -18,7 +19,7 @@ class BaseSetVariableAction(Action):
     value: Union[str, Dict]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(BaseSetVariableAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.key: str = items["key"]
         self.loader = items.get('loader')
         value: str = items["value"]
@@ -28,7 +29,8 @@ class BaseSetVariableAction(Action):
         raise NotImplemented
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
@@ -46,6 +48,7 @@ class BaseSetVariableAction(Action):
                 value = None
 
         self._set(user, value)
+        return commands
 
 
 class SetVariableAction(BaseSetVariableAction):
@@ -58,7 +61,7 @@ class SetVariableAction(BaseSetVariableAction):
     value: Union[str, Dict]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SetVariableAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.ttl: int = items.get("ttl")
 
     def _set(self, user, value):
@@ -70,23 +73,27 @@ class DeleteVariableAction(Action):
     key: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(DeleteVariableAction, self).__init__(items, id)
+        super().__init__(items, id)
         self.key: str = items["key"]
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         user.variables.delete(self.key)
+        return commands
 
 
 class ClearVariablesAction(Action):
     version: Optional[int]
 
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
-        super(ClearVariablesAction, self).__init__(items, id)
+        super().__init__(items, id)
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
+            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = super().run(user, text_preprocessing_result, params)
         user.variables.clear()
+        return commands
 
 
 class SetLocalVariableAction(BaseSetVariableAction):

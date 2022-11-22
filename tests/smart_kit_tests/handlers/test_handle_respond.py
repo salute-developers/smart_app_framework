@@ -24,7 +24,7 @@ class HandlerTest4(unittest.TestCase):
         self.test_user1.behaviors = PicklableMagicMock()
 
         self.test_action = Mock('action')
-        self.test_action.run = lambda x, y, z: 10  # пусть что то возвращает
+        self.test_action.run = lambda x, y, z: [10]  # пусть что то возвращает
         self.test_user2 = MagicMock('user')
         self.test_user2.id = '123-345-678'  # пусть чему-то равняется
         self.test_user2.descriptions = {'external_actions': {'any action name': self.test_action}}
@@ -71,4 +71,4 @@ class HandlerTest4(unittest.TestCase):
         obj2 = handle_respond.HandlerRespond(self.app_name, "any action name")
         with self.assertRaises(KeyError):
             obj1.run(self.test_payload, self.test_user1)
-        self.assertTrue(obj2.run(self.test_payload, self.test_user2) == 10)
+        self.assertTrue(obj2.run(self.test_payload, self.test_user2) == [10])

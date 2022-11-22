@@ -18,9 +18,12 @@ UID_STR = "uid"
 LOGGING_UUID = "logging_uuid"
 CLASS_NAME = "class_name"
 LOG_STORE_FOR = "log_store_for"
+HEADERS = "headers"
+CALLER_INFO = "caller_info"
 
 
 class LoggerMessageCreator:
+    LOGGER_HEADERS = ["kafka_replyTopic", "app_callback_id"]
     ART_NAMES = [
         "channel", "type", "device_channel", "device_channel_version", "device_platform", "group",
         "device_platform_version", "device_platform_client_type", "csa_profile_id", "test_deploy"
@@ -55,11 +58,20 @@ class LoggerMessageCreator:
     @classmethod
     def make_message(cls, user=None, params=None, cls_name='', log_store_for=1):
         params = params or {}
+        cls.filter_headers(params)
+        if HEADERS in params:
+            params[HEADERS] = str(params[HEADERS])
         if user:
             cls.update_user_params(user, params)
         masked_params = masking(params)
         cls.update_other_params(user, masked_params, cls_name, log_store_for)
         return masked_params
+
+    @classmethod
+    def filter_headers(cls, params: dict):
+        if HEADERS in params:
+            if isinstance(params[HEADERS], list):
+                params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
 
 
 default_logger = logging.getLogger()
@@ -74,6 +86,12 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         logger = logging.getLogger(module_name)
         if not logger.isEnabledFor(level_name):
             return
+
+        caller = inspect.getframeinfo(previous_frame)
+        caller_info = {"filename": caller.filename, "function": caller.function, "line_num": caller.lineno}
+        params = params or {}
+        params[CALLER_INFO] = caller_info
+
         instance = previous_frame.f_locals.get('self', None)
 
         from smart_kit.configs import get_app_config
@@ -83,6 +101,11 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
                 raise AttributeError
         except AttributeError:
             message_maker = LoggerMessageCreator
+
+        # cast log_params["params"] to str
+        # TODO: think how to make it more general
+        if params and "params" in params:
+            params["params"] = str(params["params"])
 
         log_store_for_map = getattr(logging, "log_store_for_map", None)
         if log_store_for_map is not None and params is not None:

@@ -36,7 +36,7 @@ class HTTPRequestAction(NodeAction):
     TIMEOUT = "TIMEOUT"
     CONNECTION = "CONNECTION"
 
-    def __init__(self, items, id=None):
+    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
         self.method_params = items["params"]
         self.method_params.setdefault("method", self.DEFAULT_METHOD)

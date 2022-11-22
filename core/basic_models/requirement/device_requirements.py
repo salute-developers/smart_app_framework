@@ -2,7 +2,6 @@
 from core.model.base_user import BaseUser
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.utils import convert_version_to_list_of_int
-from lazy import lazy
 from typing import List, Optional, Dict, Any
 
 from core.model.factory import factory

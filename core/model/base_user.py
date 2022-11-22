@@ -1,8 +1,7 @@
 # coding: utf-8
 import json
+from functools import cached_property
 from typing import List
-
-from lazy import lazy
 
 from core.descriptions.descriptions import Descriptions
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
@@ -39,7 +38,7 @@ class BaseUser(Model):
         """Add here some things to do after creating fields."""
         pass
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return BasicParametrizer(self, {})
 

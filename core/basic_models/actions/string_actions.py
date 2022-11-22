@@ -1,10 +1,9 @@
 # coding: utf-8
 import random
 from copy import copy
+from functools import cached_property
 from itertools import chain
 from typing import Union, Dict, List, Any, Optional, Tuple, TypeVar, Type
-
-from lazy import lazy
 
 from core.basic_models.actions.basic_actions import CommandAction
 from core.basic_models.actions.command import Command
@@ -36,11 +35,11 @@ class NodeAction(CommandAction):
         self._support_templates = items.get("support_templates") or {}
         self.no_empty_nodes = items.get("no_empty_nodes", False)
 
-    @lazy
+    @cached_property
     def nodes(self) -> Dict[str, Union[str, T]]:
         return {k: self._get_template_tree(t) for k, t in self._nodes.items()}
 
-    @lazy
+    @cached_property
     def support_templates(self) -> Dict[str, Union[str, T]]:
         return {k: self._get_template_tree(t) for k, t in self._support_templates.items()}
 

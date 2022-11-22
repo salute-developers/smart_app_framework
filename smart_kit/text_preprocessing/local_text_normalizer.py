@@ -1,7 +1,7 @@
+from functools import cached_property
 from typing import List, Sequence
 
 import nltk
-from lazy import lazy
 from rusenttokenize import ru_sent_tokenize
 
 from core.repositories.file_repository import FileRepository
@@ -28,7 +28,7 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
         self.__ready_to_use = False
         self._morph = None
 
-    @lazy
+    @cached_property
     def morph(self):
         self._morph = Pymorphy2MorphWrapper()
         return self._morph
@@ -39,7 +39,10 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
         return words
 
     def __load_everything(self):
-        nltk.download('punkt')
+        try:
+            nltk.data.find("tokenizers/punkt")
+        except LookupError:
+            nltk.download("punkt")
 
         from smart_kit.configs import get_app_config
         app_config = get_app_config()
