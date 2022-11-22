@@ -168,19 +168,10 @@ class GetRuntimePermissionsAction(PushAction):
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
         self.nodes = {
             "messageName": GET_RUNTIME_PERMISSIONS,
-            "sessionId": user.message.session_id,
-            "messageId": user.message.incremental_id,
-            "uuid": {
-                "sub": user.message.sub,
-                "userId": user.message.uuid["userId"],
-                "userChannel": user.message.uuid["userChannel"]
-            },
-            "payload": {
-                "server_action": {
-                    "parameters": {
-                        "need_actions": {
-                            "types": ["service_push"]
-                        }
+            "server_action": {
+                "parameters": {
+                    "need_actions": {
+                        "types": ["service_push"]
                     }
                 }
             }
