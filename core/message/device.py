@@ -48,7 +48,7 @@ class Device:
 
     @cached_property
     def ram_gb(self) -> str:
-        return self._value.get("ram_gb") or ""
+        return self._value.get("ramGb") or ""
 
     @cached_property
     def cpu(self) -> str:
