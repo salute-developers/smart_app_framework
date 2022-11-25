@@ -68,7 +68,6 @@ class HTTPRequestAction(NodeAction):
 
     def _make_response(self, request_parameters, user):
         try:
-            print(request_parameters)
             with requests.request(**request_parameters) as response:
                 response.raise_for_status()
                 self._log_response(user, response)
