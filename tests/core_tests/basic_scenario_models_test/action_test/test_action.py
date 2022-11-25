@@ -371,19 +371,10 @@ class ActionTest(unittest.TestCase):
 
         expected = {
             "messageName": "GET_RUNTIME_PERMISSIONS",
-            "sessionId": user.message.session_id,
-            "messageId": user.message.incremental_id,
-            "uuid": {
-                "sub": user.message.sub,
-                "userId": user.message.uuid["userId"],
-                "userChannel": user.message.uuid["userChannel"]
-            },
-            "payload": {
-                "server_action": {
-                    "parameters": {
-                        "need_actions": {
-                            "types": ["service_push"]
-                        }
+            "server_action": {
+                "parameters": {
+                    "need_actions": {
+                        "types": ["service_push"]
                     }
                 }
             }
