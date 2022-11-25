@@ -509,9 +509,12 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
 
     def _get_save_params(self, user, action_params, command_action_params):
         save_params = self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
+        keys_to_pop = []
         for key in save_params.keys():
             if key not in SAVED_BEHAVIOR_PARAMS_FIELDS:
-                save_params.pop(key, None)
+                keys_to_pop.append(key)
+        for key in keys_to_pop:
+            save_params.pop(key)
         save_params.update({SAVED_MESSAGES: action_params.get(SAVED_MESSAGES, {})})
         save_params.update({REQUEST_FIELD: action_params.get(REQUEST_FIELD, {})})
         save_params.update({SEND_TIMESTAMP: time.time()})
