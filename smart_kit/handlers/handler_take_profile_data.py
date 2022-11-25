@@ -15,7 +15,6 @@ class HandlerTakeProfileData(HandlerBase):
         commands = super().run(payload, user)
         log(f"{self.__class__.__name__} started", user)
 
-
         if payload.get(STATUS_CODE, {}).get(CODE) == self.SUCCESS_CODE:
             commands.extend(user.behaviors.success(user.message.callback_id))
             user.variables.set("smart_geo", payload.get(PROFILE_DATA, {}).get(GEO))
