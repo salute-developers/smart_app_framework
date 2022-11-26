@@ -151,7 +151,11 @@ class GetRuntimePermissionsAction(PushAction):
 
     Example:
         {
-            "type": "get_runtime_permissions"
+            "type": "get_runtime_permissions", // обязательный параметр
+            "behavior": "common_behavior" // обязательный параметр.
+            В common_behavior.success_action необходимо прописать продолжение сценария с использованием PushActionHttp.
+            Так как запрос прав на отправку пуш уведомлений в SmartPush API происходит 1 раз на сессию.
+            Также это одно из решений исправления ошибки ValueError в main_loop_http.
         }
     """
 
@@ -203,9 +207,9 @@ class PushActionHttp(PushAction):
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest-lite", // обязательный параметр
             "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
-            "surface": "{{message.device.surface}}", // обязательный параметр.
+            "surface": "COMPANION", // обязательный параметр.
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite
-            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
+            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
             "templateContent": { // обязательный параметр (Параметры шаблона)
                 "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
@@ -226,7 +230,7 @@ class PushActionHttp(PushAction):
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest", // обязательный параметр
             "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
-            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
+            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
             "sender": {
@@ -236,8 +240,8 @@ class PushActionHttp(PushAction):
                 "deliveryMode": "broadcast", // обязательный параметр (Тип доставки. Возможные значения: broadcast, sequential)
                 "destinations": [
                     {
-                        "channel": "{{message.device.channel}}", // обязательный параметр (Канал получателя).
-                        "surface": "{{message.device.surface}}", // обязательный параметр (Поверхность получателя).
+                        "channel": "COMPANION_B2C", // обязательный параметр (Канал получателя).
+                        "surface": "COMPANION", // обязательный параметр (Поверхность получателя).
                         "templateContent": { // обязательный параметр (Содержимое настроек для получателя под текущим номером)
                             "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
                             "headerValues": { // опциональный параметр (Набор значений переменных заголовка из шаблона)
