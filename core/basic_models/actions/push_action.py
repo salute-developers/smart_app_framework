@@ -144,6 +144,9 @@ class GetRuntimePermissionsAction(PushAction):
     Ссылка на документацию с примерами получения разрешения на уведомления:
      - Разрешение на уведомления: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications
 
+    Note: Навык на HTTP не поддерживает использование двух команд на один сценарий, поэтому в success_action'е
+          behavior'а необходимо прописать продолжение сценария с использованием PushActionHttp.
+
     Response (Error codes):
         - 001 (SUCCESS): Данные существуют и получено клиентское согласие;
         - 101 (CLIENT DENIED): Клиент отклонил разрешение;
@@ -153,9 +156,6 @@ class GetRuntimePermissionsAction(PushAction):
         {
             "type": "get_runtime_permissions", // обязательный параметр
             "behavior": "common_behavior" // обязательный параметр.
-            В common_behavior.success_action необходимо прописать продолжение сценария с использованием PushActionHttp.
-            Так как запрос прав на отправку пуш уведомлений в SmartPush API происходит 1 раз на сессию.
-            Также это одно из решений исправления ошибки ValueError в main_loop_http.
         }
     """
 
