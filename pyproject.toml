@@ -66,7 +66,7 @@ lint = "flake8 . --max-line-length=120 --max-complexity=10"
 unit_test = "python -m unittest discover -s tests -v"
 runapp_http_test = """python -m smart_kit create_app http_test_app &&
                       cd http_test_app &&
-                      PYTHONPATH=".." gtimeout 10 python manage.py run_app || code=$?;
+                      PYTHONPATH=".." timeout 10 python manage.py run_app || code=$?;
                       if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi"""
 runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        python -m smart_kit create_app kafka_test_app &&
@@ -76,7 +76,7 @@ runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        echo 'from smart_kit.start_points.main_loop_kafka import MainLoop' >> app_config.py &&
                        echo 'MAIN_LOOP = MainLoop' >> app_config.py
                        docker-compose -f ../.github/docker-compose.yml exec -T kafka kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 3 --topic toTestApp &&
-                       PYTHONPATH=".." gtimeout 10 python manage.py run_app || code=$?;
+                       PYTHONPATH=".." timeout 10 python manage.py run_app || code=$?;
                        if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi"""
 
 [build-system]
