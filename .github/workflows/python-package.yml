@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         uname -a
-        poetry install --no-interaction
+        poetry install --no-interaction --no-root
     - name: Lint with flake8
       run: poetry run task lint
     - name: Test with unittest
