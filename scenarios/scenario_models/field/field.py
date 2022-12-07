@@ -69,7 +69,7 @@ class BasicField:
                   "class_name": self.__class__.__name__,
                   "description_id": self.description.id,
                   "field_value": str(masked_dict_value[self.description.name])}
-        log(message, None, params)
+        log(message, self._user, params)
 
     def set_available(self):
         self._available = True
