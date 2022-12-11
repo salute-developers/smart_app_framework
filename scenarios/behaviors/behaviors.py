@@ -142,7 +142,7 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params) or []
         else:
             log(f"behavior.success not found valid callback for callback_id {callback_id}",
                 self._user,
@@ -163,7 +163,7 @@ class Behaviors:
                                monitoring.counter_behavior_fail, "fail",
                                callback_action_params)
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params) or []
         else:
             log(f"behavior.fail not found valid callback for callback_id {callback_id}",
                 self._user,
@@ -183,7 +183,7 @@ class Behaviors:
                                monitoring.counter_behavior_timeout, "timeout",
                                callback_action_params)
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params) or []
         else:
             log(f"behavior.timeout not found valid callback for callback_id {callback_id}",
                 self._user,

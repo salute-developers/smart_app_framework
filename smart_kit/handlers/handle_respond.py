@@ -59,7 +59,7 @@ class HandlerRespond(HandlerBase):
             log("text preprocessing result: '%(normalized_text)s'", user, params, level="DEBUG")
 
         action = user.descriptions["external_actions"][action_name]
-        commands.extend(action.run(user, text_preprocessing_result, action_params))
+        commands.extend(action.run(user, text_preprocessing_result, action_params) or [])
         return commands
 
     @staticmethod
