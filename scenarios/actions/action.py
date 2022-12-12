@@ -161,7 +161,7 @@ class BasicSelfServiceActionWithState(StringAction):
 
     def _run(self, user, text_preprocessing_result, params=None) -> List[Command]:
         self.behavior_action.run(user, text_preprocessing_result, params)
-        command_action_result = self.command_action.run(user, text_preprocessing_result, params)
+        command_action_result = self.command_action.run(user, text_preprocessing_result, params) or []
         return command_action_result
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -290,7 +290,7 @@ class ChoiceScenarioAction(Action):
                 break
 
         if not choice_is_made and self._else_item:
-            commands.extend(self.else_item.run(user, text_preprocessing_result, params))
+            commands.extend(self.else_item.run(user, text_preprocessing_result, params) or [])
 
         return commands
 

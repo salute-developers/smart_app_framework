@@ -21,5 +21,5 @@ class NothingFoundAction(Action):
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = super().run(user, text_preprocessing_result, params)
-        commands.extend(self._action.run(user, text_preprocessing_result, params=params))
+        commands.extend(self._action.run(user, text_preprocessing_result, params=params) or [])
         return commands
