@@ -30,7 +30,8 @@ class RequirementFiller(RequirementAction):
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
                 user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
-        return self.run(user, text_preprocessing_result, params)
+        if self.requirement.check(text_preprocessing_result, user, params):
+            return self.internal_item.run(user, text_preprocessing_result, params)
 
 
 class ChoiceFiller(ChoiceAction):
@@ -62,7 +63,11 @@ class ChoiceFiller(ChoiceAction):
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
                 user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
-        return self.run(user, text_preprocessing_result, params)
+        for item in self.items:
+            if item.requirement.check(text_preprocessing_result, user, params):
+                return item.internal_item.run(user, text_preprocessing_result, params)
+        if self._else_item:
+            return self.else_item.run(user, text_preprocessing_result, params)
 
 
 class ElseFiller(ElseAction):
@@ -94,4 +99,7 @@ class ElseFiller(ElseAction):
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
                 user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
-        return self.run(user, text_preprocessing_result, params)
+        if self.requirement.check(text_preprocessing_result, user, params):
+            return self.item.run(user, text_preprocessing_result, params)
+        elif self._else_item:
+            return self.else_item.run(user, text_preprocessing_result, params)
