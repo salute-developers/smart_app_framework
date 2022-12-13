@@ -1,10 +1,14 @@
 [tool.poetry]
 name = "smart-app-framework"
-version = "1.0.8"
+version = "1.0.9rc10"
 description = "Python-фреймворк, который позволяет создавать смартапы для виртуальных ассистентов Салют."
-authors = ["Your Name <you@example.com>"]
+authors = ["Salute Developers <?@sberbank.ru>"]
 readme = "README.md"
-packages = [{include = "smart_app_framework"}]
+packages = [
+    {include = "core"},
+    {include = "scenarios"},
+    {include = "smart_kit"},
+]
 classifiers = [
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux"
