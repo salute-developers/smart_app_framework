@@ -101,9 +101,13 @@ class BaseHttpMainLoop(BaseMainLoop):
         return list(headers.items())
 
     def _generate_answers(self, user, commands, message, **kwargs):
+        """ Метод генерирует ответы """
         commands = combine_commands(commands, user)
         if len(commands) > 1:
-            raise ValueError
+            raise ValueError("Используется несколько команд, а взаимодействие предполагает только один ответ. "
+                             "Скорее всего, вы использовали ANSWER_TO_USER и другую команду, например, "
+                             "GET_RUNTIME_PERMISSIONS. Попробуйте использовать только одну команду на сценарий "
+                             "+ behavior, продолжающий сценарий.")
         answer = commands.pop() if commands else None
 
         return answer

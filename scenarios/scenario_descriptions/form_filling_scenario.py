@@ -1,6 +1,7 @@
 # coding: utf-8
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 
+from core.basic_models.actions.command import Command
 from core.basic_models.scenarios.base_scenario import BaseScenario
 from core.monitoring.monitoring import monitoring
 from core.logging.logger_utils import log
@@ -113,7 +114,7 @@ class FormFillingScenario(BaseScenario):
                                                                 text_normalization_result, user, params))
         return result
 
-    def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params):
+    def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params) -> List[Command]:
         error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)
@@ -130,7 +131,7 @@ class FormFillingScenario(BaseScenario):
                 break
         return error_msgs
 
-    def _fill_form(self, user, text_preprocessing_result, form, data_extracted):
+    def _fill_form(self, user, text_preprocessing_result, form, data_extracted) -> Tuple[List[Command], bool]:
         on_filled_actions = []
         fields = form.fields
         scenario_model = user.scenario_models[self.id]
@@ -148,7 +149,7 @@ class FormFillingScenario(BaseScenario):
                     return _action, is_break
         return on_filled_actions, is_break
 
-    def get_reply(self, user, text_preprocessing_result, reply_actions, field, form):
+    def get_reply(self, user, text_preprocessing_result, reply_actions, field, form) -> List[Command]:
         action_params = {}
         if field:
             field.set_available()
@@ -175,7 +176,7 @@ class FormFillingScenario(BaseScenario):
         return action_messages
 
     @monitoring.got_histogram("scenario_time")
-    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
+    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)
@@ -185,8 +186,8 @@ class FormFillingScenario(BaseScenario):
         logging_params.update(self._log_params())
         log("Extracted data=%(data_extracted_str)s", user, logging_params)
 
-        validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
-                                                             form, data_extracted, params)
+        validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result, form, data_extracted,
+                                                             params)
         if validation_error_msg:
             reply_messages = validation_error_msg
         else:

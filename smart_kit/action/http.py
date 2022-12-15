@@ -38,13 +38,13 @@ class HTTPRequestAction(NodeAction):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super().__init__(items, id)
-        self.method_params = items['params']
+        self.method_params = items["params"]
         self.method_params.setdefault("method", self.DEFAULT_METHOD)
         self.error = None
         self.init_save_params(items)
 
     def init_save_params(self, items):
-        self.store = items["store"]
+        self.store = items.get("store")
         self.behavior = items.get("behavior")
 
     def preprocess(self, user, text_processing, params):
@@ -67,7 +67,7 @@ class HTTPRequestAction(NodeAction):
                     del headers[header_name]
         return headers
 
-    def _make_response(self, request_parameters, user):
+    def _make_response(self, request_parameters: dict, user: BaseUser) -> requests.Response:
         try:
             with requests.request(**request_parameters) as response:
                 response.raise_for_status()
@@ -133,4 +133,6 @@ class HTTPRequestAction(NodeAction):
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)
         self._log_request(user, request_parameters)
         response = self._make_response(request_parameters, user)
+        if response:
+            log("response data: %(body)s", params={"body": response.json()}, level="INFO")
         return self.process_result(response, user, text_preprocessing_result, params)

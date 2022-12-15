@@ -1,4 +1,5 @@
 import json
+import logging
 from copy import copy
 import jinja2
 from distutils.util import strtobool
@@ -37,18 +38,22 @@ class UnifiedTemplate:
             self.support_templates = {k: UnifiedTemplate(t) for k, t in input.get("support_templates", dict()).items()}
         else:
             raise Exception("template must be string or dict with type='{}'".format(UNIFIED_TEMPLATE_TYPE_NAME))
+        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(
+            logging.getLevelName("DEBUG")
+        )
 
     def render(self, *args, **kwargs):
         params_dict = dict(*args, **kwargs)
         try:
             result = self.silent_render(params_dict)
-            log_params = dict()
-            log_params[log_const.KEY_NAME] = log_const.TEMPLATE_TRACE_VALUE
-            log_params["class_name"] = self.__class__.__name__
-            log_params["rendered"] = str(result)
-            log_params["raw_items"] = str(self.input)
-            log_params["params"] = params_dict
-            log("TRACING %(class_name)s. Result is %(rendered)s.", params=log_params, level="DEBUG")
+            if self.is_logging_debug_mode:
+                log_params = dict()
+                log_params[log_const.KEY_NAME] = log_const.TEMPLATE_TRACE_VALUE
+                log_params["class_name"] = self.__class__.__name__
+                log_params["rendered"] = str(result)
+                log_params["raw_items"] = str(self.input)
+                log_params["params"] = params_dict
+                log(f"TRACING %(class_name)s. Result is %(rendered)s.", params=log_params, level="DEBUG")
 
         except Exception:
             log("Failed to render template: %(template)s with params %(params_dict_str)s",

@@ -243,28 +243,32 @@ class MainLoop(BaseMainLoop):
                                                         uid=message.uid, user=user)
                 valid_key = self._get_valid_message_key(message)
                 if message_key != valid_key:
-                    log(f"%(class_name)s.process_message: Failed to check Kafka message key {message_key} "
-                        f"!= {valid_key}",
+                    log(f"Failed to check Kafka message %(message_name)s key {message_key} != {valid_key}",
                         params={
                             log_const.KEY_NAME: "check_kafka_key_validation",
                             MESSAGE_ID_STR: message.incremental_id,
                             UID_STR: message.uid,
-                            "class_name": self.__class__.__name__
+                            "kafka_key": kafka_key,
+                            "message_key": message_key,
+                            "message_name": message.type,
                         }, user=user,
                         level="WARNING")
                     if self.settings["template_settings"].get("wrong_key_resend", True):
                         dest_topic = mq_message.topic()
                         self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
                                                                  mq_message.headers())
-                        log("%(class_name)s.process_message:"
-                            f" Kafka message with invalid Kafka message key '{message_key}'"
-                            f" resent again with a valid key: '{valid_key}' to '{dest_topic}'",
-                            params={log_const.KEY_NAME: "kafka_message_key_recovery",
-                                    MESSAGE_ID_STR: message.incremental_id,
-                                    UID_STR: message.uid,
-                                    "class_name": self.__class__.__name__},
-                            user=user,
-                            level="WARNING")
+                        log("Kafka message %(message_name)s with invalid Kafka message key %(message_key)s "
+                            f"resend again with a valid key: '{valid_key}' to '{dest_topic}'",
+                            params={
+                                log_const.KEY_NAME: "kafka_message_key_recovery",
+                                MESSAGE_ID_STR: message.incremental_id,
+                                UID_STR: message.uid,
+                                "kafka_key": kafka_key,
+                                "message_key": message_key,
+                                "message_name": message.type,
+                            }, user=user,
+                            level=self.settings["template_settings"].get("kafka_message_key_recovery_log_level",
+                                                                         "DEBUG"))
                         break
                 else:
                     log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
@@ -277,7 +281,7 @@ class MainLoop(BaseMainLoop):
                                 "kafka_key": kafka_key,
                                 "incoming_data": str(message.masked_value),
                                 "length": len(message.as_str),
-                                "headers": str(mq_message.headers()),
+                                "headers": mq_message.headers(),
                                 "waiting_message": waiting_message_time,
                                 "surface": message.device.surface,
                                 MESSAGE_ID_STR: message.incremental_id},
@@ -441,7 +445,7 @@ class MainLoop(BaseMainLoop):
         log("OUTGOING TO TOPIC_KEY: %(topic_key)s DATA: %(data)s",
             params={log_const.KEY_NAME: "outgoing_message",
                     "topic_key": request.topic_key,
-                    "headers": str(request._get_new_headers(original_mq_message)),
+                    "headers": request._get_new_headers(original_mq_message),
                     "data": answer.masked_value,
                     "length": len(answer.value),
                     "message_key": (original_mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
@@ -466,7 +470,7 @@ class MainLoop(BaseMainLoop):
             log("%(class_name)s: adding local_timeout on callback %(callback_id)s with timeout on %(unique_key)s",
                 params={log_const.KEY_NAME: "adding_local_timeout",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
                         "unique_key": unique_key})
             self.behaviors_timeouts.push(unique_key, self.behaviors_timeouts_value_cls._make(
                 (user.message.db_uid, callback_id, mq_message, kafka_key)))
@@ -475,7 +479,7 @@ class MainLoop(BaseMainLoop):
             log("%(class_name)s: removing local_timeout on callback %(callback_id)s",
                 params={log_const.KEY_NAME: "removing_local_timeout",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id})
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
             self.behaviors_timeouts.remove(callback_id)
 
     def stop(self, signum, frame):

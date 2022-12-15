@@ -84,7 +84,7 @@ class BaseScenario:
                            actions: List[Action], params: Dict[str, Any] = None) -> List[Command]:
         results = []
         for action in actions:
-            result = action.run(user, text_preprocessing_result, params)
+            result = action.run(user, text_preprocessing_result, params) or []
             log_params = self._log_params()
             log_params["class"] = action.__class__.__name__
             log("called action: %(class)s", user, log_params)

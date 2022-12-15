@@ -1,6 +1,7 @@
 # coding: utf-8
-from typing import Dict, Any
+from typing import Dict, Any, List
 
+from core.basic_models.actions.command import Command
 from scenarios.scenario_descriptions.form_filling_scenario import FormFillingScenario
 from scenarios.scenario_descriptions.tree_scenario.tree_scenario_node import TreeScenarioNode
 from core.model.factory import dict_factory
@@ -84,7 +85,7 @@ class TreeScenario(FormFillingScenario):
         return all_forms_fields
 
     @monitoring.got_histogram("scenario_time")
-    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
+    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         main_form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)

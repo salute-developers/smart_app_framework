@@ -161,7 +161,7 @@ class BasicSelfServiceActionWithState(StringAction):
 
     def _run(self, user, text_preprocessing_result, params=None) -> List[Command]:
         self.behavior_action.run(user, text_preprocessing_result, params)
-        command_action_result = self.command_action.run(user, text_preprocessing_result, params)
+        command_action_result = self.command_action.run(user, text_preprocessing_result, params) or []
         return command_action_result
 
     def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
@@ -290,7 +290,7 @@ class ChoiceScenarioAction(Action):
                 break
 
         if not choice_is_made and self._else_item:
-            commands.extend(self.else_item.run(user, text_preprocessing_result, params))
+            commands.extend(self.else_item.run(user, text_preprocessing_result, params) or [])
 
         return commands
 
@@ -437,13 +437,13 @@ class ProcessBehaviorAction(Action):
         log("%(class_name)s.run: got callback_id %(callback_id)s.",
             params={log_const.KEY_NAME: "process_behavior_action",
                     "class_name": self.__class__.__name__,
-                    "callback_id": callback_id}, user=user)
+                    log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id}, user=user)
 
         if not user.behaviors.has_callback(callback_id):
             log("%(class_name)s.run: user.behaviors has no callback %(callback_id)s.",
                 params={log_const.KEY_NAME: "process_behavior_action_warning",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id}, level="WARNING", user=user)
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id}, level="WARNING", user=user)
             return commands
 
         if user.message.payload:
@@ -509,9 +509,12 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
 
     def _get_save_params(self, user, action_params, command_action_params):
         save_params = self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
+        keys_to_pop = []
         for key in save_params.keys():
             if key not in SAVED_BEHAVIOR_PARAMS_FIELDS:
-                save_params.pop(key, None)
+                keys_to_pop.append(key)
+        for key in keys_to_pop:
+            save_params.pop(key)
         save_params.update({SAVED_MESSAGES: action_params.get(SAVED_MESSAGES, {})})
         save_params.update({REQUEST_FIELD: action_params.get(REQUEST_FIELD, {})})
         save_params.update({SEND_TIMESTAMP: time.time()})
