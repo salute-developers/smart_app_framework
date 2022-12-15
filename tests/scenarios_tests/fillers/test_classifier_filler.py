@@ -54,7 +54,8 @@ class TestClassifierFillerMeta(TestCase):
         self.mock_user.descriptions = {
             "external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "нет", "score": 1.0, "other": False}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "нет", "score": 1.0, "other": False}])
     def test_filler_extract(self, mock_classifier_model):
         """Тест кейз проверяет что мы получаем тот же самый ответ, что вернула модель."""
         expected_res = [{"answer": "нет", "score": 1.0, "other": False}]

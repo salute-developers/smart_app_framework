@@ -52,9 +52,8 @@ class TextPrerocessingTest1(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.assertTrue(obj1.normalize(self.test_text) == 'any text')
         with self.assertRaises(NotImplementedError):
-            self.assertTrue(obj1.normalize(self.test_text,  *(1, 2)) == 'any text')
+            self.assertTrue(obj1.normalize(self.test_text, *(1, 2)) == 'any text')
         with self.assertRaises(NotImplementedError):
             self.assertTrue(obj1.normalize(self.test_text, **{'first': 1, 'second': 2}) == 'any text')
         with self.assertRaises(NotImplementedError):
             self.assertTrue(obj1.normalize(self.test_text, *(1, 2), **{'first': 1, 'second': 2}) == 'any text')
-

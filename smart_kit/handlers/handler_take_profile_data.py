@@ -2,8 +2,6 @@ from typing import List, Any, Dict
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
-from core.names.field import MESSAGE
-from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from scenarios.user.user_model import User
 
 from smart_kit.handlers.handler_base import HandlerBase

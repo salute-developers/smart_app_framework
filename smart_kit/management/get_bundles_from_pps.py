@@ -84,7 +84,7 @@ class GetBundleCommand:
                     items_from_pps = payload.get("items_from_pps")
                 else:
                     items_from_pps = self.get_default_items(text, key, bundle_name)
-            except:
+            except Exception:
                 items_from_pps = self.get_default_items(text, key, bundle_name)
             if items_from_pps:
                 if not os.path.exists(self.bundle_path):

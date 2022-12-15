@@ -105,4 +105,3 @@ class ModelsTest1(unittest.TestCase):
                                                self.app_name)
         self.assertTrue(obj.run_scenario(1, self.test_text_preprocessing_result, self.test_user1) == "ResultTestName")
         self.assertTrue(obj.run_scenario(2, self.test_text_preprocessing_result, self.test_user1) == "TestNameResult")
-

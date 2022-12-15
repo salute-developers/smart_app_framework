@@ -14,14 +14,14 @@ class FolderRepository(ShardRepository):
                 shard_binary_data = shard_stream.read()
                 shard_data = shard_binary_data.decode()
                 loaded_data = self.loader(shard_data)
-        except:
+        except Exception:
             params = {
                 "error_repository_path": str(self.path),
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE
             }
             log("FolderRepository.__load_item loading failed with file %(error_repository_path)s",
-                          params=params,
-                          level="WARNING")
+                params=params,
+                level="WARNING")
             raise
         return loaded_data
 
@@ -45,9 +45,9 @@ class FolderRepository(ShardRepository):
             desc_slice = shard_desc[i: i + count]
             self.fill_on_top(self._form_file_upload_map(desc_slice))
             log("FolderRepository.load_in_parts start loading [%(current_count)s/%(all_count)s]",
-                          params={"current_count": i + len(desc_slice),
-                                  "all_count": len(shard_desc)},
-                          level="WARNING")
+                params={"current_count": i + len(desc_slice),
+                        "all_count": len(shard_desc)},
+                level="WARNING")
             super(FolderRepository, self).load()
 
     def get_shard_desc(self):
@@ -58,7 +58,7 @@ class FolderRepository(ShardRepository):
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE
             }
             log("FolderRepository.load got empty or nonexistent folder path %(error_repository_path)s",
-                          params=params, level="WARNING")
+                params=params, level="WARNING")
         return shard_desc
 
     def check_load_in_parts(self):

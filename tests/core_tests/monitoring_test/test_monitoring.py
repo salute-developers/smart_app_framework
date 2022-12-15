@@ -108,4 +108,3 @@ class MonitoringTest(unittest.TestCase):
         self.assertEqual(obj.some_method(), "test")
 
         self.assertIn('test_histogram', monitoring._monitoring_items[Monitoring.HISTOGRAM].keys())
-

@@ -26,7 +26,7 @@ class BaseSetVariableAction(Action):
         self.template: UnifiedTemplate = UnifiedTemplate(value)
 
     def _set(self, user, value):
-        raise NotImplemented
+        raise NotImplementedError
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:

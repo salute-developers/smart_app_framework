@@ -36,7 +36,7 @@ class RunScenarioByProjectNameActionTest1(unittest.TestCase):
         obj1 = RunScenarioByProjectNameAction(self.items)
         # без оглядки на аннотации из PEP 484
         self.assertEqual(obj1.run(self.test_user1, self.test_text_preprocessing_result, {'any_attr': {'any_data'}}),
-                        ['result to run scenario'])
+                         ['result to run scenario'])
         obj2 = RunScenarioByProjectNameAction(self.items)
         self.assertEqual([], obj2.run(self.test_user2, self.test_text_preprocessing_result))
 

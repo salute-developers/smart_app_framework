@@ -211,6 +211,7 @@ class ActionOfActions(Action):
     def build_actions(self) -> List[Action]:
         return self._actions
 
+
 class CompositeAction(ActionOfActions):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:

@@ -299,10 +299,12 @@ class Num2Ordinal:
         return result.strip()
 
     def replace_everything_in_text(self, text, sex='m', case='nomn', only_explicit=False):
-        repl = lambda m: " {} ".format(self(int(m.groups()[0]), **self.end2form[m.groups()[1]]))
+        def repl(m):
+            return " {} ".format(self(int(m.groups()[0]), **self.end2form[m.groups()[1]]))
         text = self.re_explicit_ord.sub(repl=repl, string=" {} ".format(text)).strip().replace("  ", " ").strip()
         if not only_explicit:
-            repl = lambda x: " {} ".format(self(int(x.group()), sex=sex, case=case))
+            def repl(x):
+                return " {} ".format(self(int(x.group()), sex=sex, case=case))
             text = self.re_any_ord.sub(repl=repl, string=" {} ".format(text)).strip().replace("  ", " ").strip()
         return text
 
@@ -319,8 +321,8 @@ class Num2Ordinal:
                 order = 10 ** order_lvl
                 up_order = up1000 // order
                 raw_for_one_word = up_order % 1000
-                result = self._gen_sub1000_orders(raw_for_one_word, self.before_orders, sex, case) + \
-                         self.orders[order_lvl][sex][case]
+                result = (self._gen_sub1000_orders(raw_for_one_word, self.before_orders, sex, case) +
+                          self.orders[order_lvl][sex][case])
                 if result.startswith("одно"):
                     result = result[4:]
                 raw_for_num = (up_order - raw_for_one_word) * order

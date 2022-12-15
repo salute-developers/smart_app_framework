@@ -4,7 +4,7 @@ from tqdm import tqdm
 from typing import List, Sequence
 
 from smart_kit.text_preprocessing.base_text_normalizer import BaseTextNormalizer
-from smart_kit.utils.cache import Cache, ItemExpired
+from smart_kit.utils.cache import ItemExpired
 
 
 def words_tokenized_set(text):

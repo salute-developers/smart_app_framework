@@ -8,7 +8,7 @@ SENTENCE_ENDPOINT_TOKEN = "SENTENCE_ENDPOINT_TOKEN"
 
 class NLTKWordTokenizer:
     URL = re.compile(
-        "(?:(?:https?|ftp)://)?(?:www)?[a-zA-Zа-яА-Я0-9_-]+(?:\\.[a-zA-Zа-яА-Я0-9_-]+)?\\.(?:com|ru|рф|org|bz|ua|ge|by|mp|net|cn)(?:/[a-zA-Zа-яА-Я0-9_\\-\\#\\&\\=\\?\\(\\)]+)*(?:\\.html|\\.xml)?/?")
+        "(?:(?:https?|ftp)://)?(?:www)?[a-zA-Zа-яА-Я0-9_-]+(?:\\.[a-zA-Zа-яА-Я0-9_-]+)?\\.(?:com|ru|рф|org|bz|ua|ge|by|mp|net|cn)(?:/[a-zA-Zа-яА-Я0-9_\\-\\#\\&\\=\\?\\(\\)]+)*(?:\\.html|\\.xml)?/?")  # noqa
     MAIL = re.compile(r"[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}")
     SPACES = re.compile("^\s+$")
     QUASIPUNCT = "=…№-——'"
@@ -131,7 +131,7 @@ class NLTKWordTokenizer:
                 final_tokens = self._quasipunct_removal(token, new_token, final_tokens)
             elif len(token) == 0:
                 continue
-            elif re.match("\s+", token):
+            elif re.match(r"\s+", token):
                 continue
             elif "/" in token or "\\" in token:
                 if token == "/":
@@ -145,8 +145,7 @@ class NLTKWordTokenizer:
             elif token == "..":
                 final_tokens.append({TEXT: "."})
                 final_tokens.append({TEXT: "."})
-            elif len(arr_of_tokens) > i + 1 and token in self.false_stoppings and arr_of_tokens[
-                i + 1] == ".":
+            elif len(arr_of_tokens) > i + 1 and token in self.false_stoppings and arr_of_tokens[i + 1] == ".":
                 final_tokens.append({TEXT: token + "."})
                 skip = True
             elif "." in token and len(token) == 3 and len(arr_of_tokens) > i + 1 and arr_of_tokens[i + 1] == ".":

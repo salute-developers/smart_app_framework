@@ -58,8 +58,10 @@ class TokenizeHelper:
         return result
 
     @staticmethod
-    def return_lemmas_only(token_desc_list: list, include_sentence_endpoint: bool = True, show_verb_mood: bool =
-    False, consider_stop_words: bool = False) -> str:
+    def return_lemmas_only(token_desc_list: list,
+                           include_sentence_endpoint: bool = True,
+                           show_verb_mood: bool = False,
+                           consider_stop_words: bool = False) -> str:
         """
         Конвертировать список токенов в строку без пунктуации, содержащую леммы и замены на тип токена.
         Предложения разделяются точкой. Если перед этим нет грамматической инфо - возвращается поле токена TEXT
@@ -160,12 +162,12 @@ class TokenizeHelper:
                 if token[IS_BEGINNING_OF_COMPOSITE]:
                     composite_beginning_index = i
                     has_length_one = token[COMPOSITE_TOKEN_LENGTH] == 1
-                    final_dependent_adpositions = []  ##надо не потерять у гипертокенов
+                    final_dependent_adpositions = []  # надо не потерять у гипертокенов
                     final_dependent_adpositions.extend(dependent_adpositions)
-                    if not has_length_one:  ##не проскипать кейс, когда этот же токен и есть последний
+                    if not has_length_one:  # не проскипать кейс, когда этот же токен и есть последний
                         continue
-                if i - composite_beginning_index != token[COMPOSITE_TOKEN_LENGTH] - 1:  ##кладем последний токен,
-                    ##когда есть только первый компонент гипертокена, мы еще не знаем всех зависимых предлогов
+                if i - composite_beginning_index != token[COMPOSITE_TOKEN_LENGTH] - 1:  # кладем последний токен,
+                    # когда есть только первый компонент гипертокена, мы еще не знаем всех зависимых предлогов
                     final_dependent_adpositions.extend(dependent_adpositions)
                     continue
                 else:
@@ -212,8 +214,8 @@ class TokenizeHelper:
 
     @staticmethod
     def get_human_normalized_text(list_of_tokens: list):
-        return " ".join([t[LEMMA] for t in list_of_tokens if t.get(TOKEN_TYPE) != SENTENCE_ENDPOINT_TOKEN
-                         and LEMMA in t])
+        return " ".join([t[LEMMA] for t in list_of_tokens if t.get(TOKEN_TYPE) != SENTENCE_ENDPOINT_TOKEN and
+                         LEMMA in t])
 
     @staticmethod
     def get_human_normalized_text_with_anaphora(list_of_tokens: list):
@@ -221,7 +223,7 @@ class TokenizeHelper:
         for t in list_of_tokens:
             if t.get(IS_BEGINNING_OF_ANAPHOR):
                 list_of_lemmas.append(t[ANTECEDENT_LEMMA])
-            elif t.get(IS_BEGINNING_OF_ANAPHOR) == False:
+            elif not t.get(IS_BEGINNING_OF_ANAPHOR):
                 continue
             elif t.get(TOKEN_TYPE) != SENTENCE_ENDPOINT_TOKEN:
                 list_of_lemmas.append(t[LEMMA])

@@ -15,7 +15,8 @@ class TestFields(TestCase):
         items = {"descr1": PicklableMock(), "descr2": 2}
         descriptions = {"descr1": descr1, "descr2": descr2}
 
-        factory = lambda descr, raw_data, user, lifetime: Mock(value=raw_data, lifetime=lifetime, description=descr)
+        def factory(descr, raw_data, user, lifetime):
+            return Mock(value=raw_data, lifetime=lifetime, description=descr)
         user = PicklableMock()
         fields = Fields(items, descriptions, user, factory, lifetime=lifetime)
         values = fields.values

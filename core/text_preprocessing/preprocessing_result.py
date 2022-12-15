@@ -68,7 +68,9 @@ class TextPreprocessingResult(BaseTextPreprocessingResult):
             from smart_kit.configs import get_app_config
             app_config = get_app_config()
 
-            self._tokenized_elements_list_pymorphy = app_config.NORMALIZER(self.original_text)["tokenized_elements_list"]
+            self._tokenized_elements_list_pymorphy = app_config.NORMALIZER(self.original_text)[
+                "tokenized_elements_list"
+            ]
 
         return self._tokenized_elements_list_pymorphy
 
@@ -79,8 +81,10 @@ class TextPreprocessingResult(BaseTextPreprocessingResult):
             from smart_kit.configs import get_app_config
             app_config = get_app_config()
 
-            normalized_words = [app_config.NORMALIZER.morph.pymorphy_analyzer.parse(tokenized_word)[0].normalized.normal_form
-                                for tokenized_word in nltk.tokenize.word_tokenize(self.original_text)]
+            normalized_words = [
+                app_config.NORMALIZER.morph.pymorphy_analyzer.parse(tokenized_word)[0].normalized.normal_form
+                for tokenized_word in nltk.tokenize.word_tokenize(self.original_text)
+            ]
             self._normalized_text_pymorphy = " ".join(normalized_words)
 
         return self._normalized_text_pymorphy

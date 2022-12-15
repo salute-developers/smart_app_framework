@@ -212,4 +212,3 @@ class Environment(TypeCastByAnnotation):
 
 class Settings(TypeCastByAnnotation):
     DISPLAY_RAW: bool = False
-

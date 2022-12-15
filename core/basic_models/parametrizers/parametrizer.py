@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 class BasicParametrizer:
-    def __init__(self,  user, items):
+    def __init__(self, user, items):
         self._user = user
         self._filter = items.get("filter") or {}
 

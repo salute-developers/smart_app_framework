@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
 from core.basic_models.actions.command import Command
@@ -85,7 +84,7 @@ class TestTreeScenario(TestCase):
 
         scenario = TreeScenario(items, 1)
 
-        result = scenario.run(text_preprocessing_result, user)
+        _ = scenario.run(text_preprocessing_result, user)
         self.assertIsNone(current_node_mock.current_node)
         context_forms.new.assert_called_once_with(form_type)
 

@@ -73,7 +73,7 @@ class MainLoop(BaseMainLoop):
             self.behaviors_timeouts = HeapqKV(value_to_key_func=lambda val: val.callback_id)
             log("%(class_name)s.__init__ completed.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
                                                               "class_name": self.__class__.__name__})
-        except:
+        except Exception:
             log("%(class_name)s.__init__ exception.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
                                                               "class_name": self.__class__.__name__},
                 level="ERROR", exc_info=True)
@@ -203,7 +203,7 @@ class MainLoop(BaseMainLoop):
                 self.save_behavior_timeouts(user, mq_message, kafka_key)
                 for answer in answers:
                     self._send_request(user, answer, mq_message)
-            except:
+            except Exception:
                 log("%(class_name)s error.", params={log_const.KEY_NAME: "error_handling_timeout",
                                                      "class_name": self.__class__.__name__,
                                                      log_const.REQUEST_VALUE: str(mq_message.value())},
@@ -256,8 +256,9 @@ class MainLoop(BaseMainLoop):
                         dest_topic = mq_message.topic()
                         self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
                                                                  mq_message.headers())
-                        log(f"%(class_name)s.process_message: Kafka message with invalid Kafka message key '{message_key}' "
-                            f"resent again with a valid key: '{valid_key}' to '{dest_topic}'",
+                        log("%(class_name)s.process_message:"
+                            f" Kafka message with invalid Kafka message key '{message_key}'"
+                            f" resent again with a valid key: '{valid_key}' to '{dest_topic}'",
                             params={log_const.KEY_NAME: "kafka_message_key_recovery",
                                     MESSAGE_ID_STR: message.incremental_id,
                                     UID_STR: message.uid,
@@ -342,9 +343,9 @@ class MainLoop(BaseMainLoop):
             else:
                 try:
                     data = message.masked_value
-                except:
+                except Exception:
                     data = "<DATA FORMAT ERROR>"
-                log(f"Message validation failed, skip message handling.",
+                log("Message validation failed, skip message handling.",
                     params={log_const.KEY_NAME: "invalid_message",
                             "data": data,
                             "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
@@ -423,8 +424,8 @@ class MainLoop(BaseMainLoop):
 
         for kb_setting in kafka_broker_settings:
             if (
-                    kb_setting["from_channel"] == answer.incoming_message.channel
-                    and kb_setting["to_topic"] == request.topic_key
+                    kb_setting["from_channel"] == answer.incoming_message.channel and
+                    kb_setting["to_topic"] == request.topic_key
             ):
                 request.kafka_key = kb_setting["route_to_broker"]
 

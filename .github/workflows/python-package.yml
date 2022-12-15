@@ -34,7 +34,7 @@ jobs:
         uname -a
         poetry install --no-interaction --no-root
     - name: Lint with flake8
-      run: poetry run task lint || true  # TODO: SUPPRESSED
+      run: poetry run task lint
     - name: Test with unittest
       run: poetry run task unit_test
     - name: Test run_app on HttpMainLoop

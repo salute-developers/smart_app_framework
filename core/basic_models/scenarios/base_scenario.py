@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import Dict, Any, List, Union, Optional
+from typing import Dict, Any, List
 
 import core.logging.logger_constants as log_const
 import scenarios.logging.logger_constants as scenarios_log_const

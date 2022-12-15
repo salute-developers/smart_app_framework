@@ -7,7 +7,7 @@ from smart_kit.utils.picklable_mock import PicklableMock
 
 class ScenarioDescription:
     def __init__(self, dict):
-        self._dict=dict
+        self._dict = dict
 
     def __contains__(self, item):
         return item in self._dict.keys()
@@ -19,9 +19,18 @@ class ScenarioDescription:
 class TestLastScenarios(TestCase):
 
     def setUp(self):
-        self.forms_dict = {'pay_phone_scenario':
-                                {'fields': {'amount': {'value': 100.0}, 'approve': {'available': True, 'value': True}},
-                                 'remove_time': 1506418333}, 'callcenter_scenario': {'remove_time': 2506421370}}
+        self.forms_dict = {
+            'pay_phone_scenario': {
+                'fields': {
+                    'amount': {'value': 100.0},
+                    'approve': {'available': True, 'value': True}
+                },
+                'remove_time': 1506418333
+            },
+            'callcenter_scenario': {
+                'remove_time': 2506421370
+            },
+        }
 
     def remove_item(self, item):
         self.forms_dict.pop(item)
@@ -60,11 +69,18 @@ class TestLastScenarios(TestCase):
         new_scenario = "callcenter_scenario"
         ls.add(new_scenario, None)
         self.assertSequenceEqual(["pay_phone_scenario", "callcenter_scenario"], ls.raw)
-        self.assertSequenceEqual({"pay_phone_scenario":
-                                      {"fields": {"amount": {"value": 100.0},
-                                                  "approve": {"available": True, "value": True}},
-                                       "remove_time": 1506418333},
-                                  "callcenter_scenario": {"remove_time": 2506421370}}, self.forms_dict)
+        self.assertSequenceEqual({
+            "pay_phone_scenario": {
+                "fields": {
+                    "amount": {"value": 100.0},
+                    "approve": {"available": True, "value": True}
+                },
+                "remove_time": 1506418333
+            },
+            "callcenter_scenario": {
+                "remove_time": 2506421370
+            }
+        }, self.forms_dict)
 
     def test_add_3(self):
         items = ["pay_phone_scenario"]

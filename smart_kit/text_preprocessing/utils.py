@@ -6,7 +6,7 @@ from typing import Dict
 
 from core.text_preprocessing.constants import ANIMACY_TOKEN
 from core.text_preprocessing.grammem.grammem_constants import TEXT, LEMMA, TOKEN_TYPE, LIST_OF_TOKEN_TYPES_DATA, \
-    TOKEN_VALUE, VALUE, COMPOSITE_TOKEN_TYPE, IS_BEGINNING_OF_COMPOSITE, GRAMMEM_INFO, PART_OF_SPEECH, IS_STOP_WORD, \
+    TOKEN_VALUE, VALUE, COMPOSITE_TOKEN_TYPE, IS_BEGINNING_OF_COMPOSITE, GRAMMEM_INFO, IS_STOP_WORD, \
     PART_OF_SPEECH_PYMORPHY
 
 NUM_TOKEN = "NUM_TOKEN"
@@ -136,8 +136,8 @@ def return_lemmas_only(token_desc_list: list, include_sentence_endpoint: bool = 
 
 class BaseNormalizePhoneNumbers(object):
     def __init__(self):
-        self.boundary_start = '(?:[^\d\+]|^)'
-        self.boundary_end = '(?:[^\d\-\:]|$)'
+        self.boundary_start = r"(?:[^\d\+]|^)"
+        self.boundary_end = r"(?:[^\d\-\:]|$)"
         self.plus_regex = re.compile(r"(\+ *)(\+7\d{10})")
 
     def remove_additional_phone_pluses(self, text: str) -> str:
@@ -177,21 +177,21 @@ class BaseNormalizePhoneNumbers(object):
 class NormalizePhoneNumbers(BaseNormalizePhoneNumbers):
     def __init__(self):
         super(NormalizePhoneNumbers, self).__init__()
-        self.phone_start = '(\+?[78]?'
-        self.phone_delim = '[\s\-\(\)]?'
-        self.phone_delim_with_dash = '[\) ][\- ]'
-        self.phone_delim_dash_twice = '[\s\-\(\)]{,2}'
+        self.phone_start = r'(\+?[78]?'
+        self.phone_delim = r'[\s\-\(\)]?'
+        self.phone_delim_with_dash = r'[\) ][\- ]'
+        self.phone_delim_dash_twice = r'[\s\-\(\)]{,2}'
 
-        t1 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, '\d{3}',
-                                         self.phone_delim, '\d{3}', self.phone_delim, '\d{2}', self.phone_delim,
-                                         '\d{2})')
-        t2 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, '\d{4}',
-                                         self.phone_delim, '\d{2}', self.phone_delim, '\d{2}', self.phone_delim,
-                                         '\d{2})')
-        t3 = "{}{}{}{}".format(self.phone_start, '\d{10}', self.phone_delim, ')')
-        t4 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim_dash_twice, '\d{3}',
-                                         self.phone_delim_with_dash, '\d{3}', self.phone_delim, '\d{2}',
-                                         self.phone_delim, '\d{2})')
+        t1 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, r'\d{3}',
+                                         self.phone_delim, r'\d{3}', self.phone_delim, r'\d{2}', self.phone_delim,
+                                         r'\d{2})')
+        t2 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, r'\d{4}',
+                                         self.phone_delim, r'\d{2}', self.phone_delim, r'\d{2}', self.phone_delim,
+                                         r'\d{2})')
+        t3 = "{}{}{}{}".format(self.phone_start, r'\d{10}', self.phone_delim, ')')
+        t4 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim_dash_twice, r'\d{3}',
+                                         self.phone_delim_with_dash, r'\d{3}', self.phone_delim, r'\d{2}',
+                                         self.phone_delim, r'\d{2})')
         regex_phone_number_template = '|'.join([t1, t2, t3, t4])
         regex_phone_number_template = '{}(?:{}){}'.format(self.boundary_start, regex_phone_number_template,
                                                           self.boundary_end)
@@ -234,7 +234,7 @@ class MergeCardNumbers(object):
                             "виза", "visa", "мастеркард", "кард", "mastercard", "card", "maestro", "маэстро",
                             "мир"]
         self.words = "({}) ".format("|".join(self._card_words))
-        self.card_regex = "((\d{4} \d{4} \d{4} \d{4})|(\d{4} \d{4} \d{10}))(?:(?!\d)|$)"
+        self.card_regex = r"((\d{4} \d{4} \d{4} \d{4})|(\d{4} \d{4} \d{10}))(?:(?!\d)|$)"
         self.regex_str = self.words + self.card_regex
         self._regex_card_number = re.compile(self.regex_str, re.IGNORECASE)
 
@@ -308,8 +308,10 @@ class UnicodeSymbolsConverter:
 
 class ReplaceSynonyms(object):
     """
-    class to replace whole words in text avoiding replacements inside words based on regular expressions and synonyms dictionary from __init__
-    example on "сбер": 'храните деньги в сберегательных кассах. сбер.' -> 'храните средства в сберегательных кассах. сбербанк.'
+    class to replace whole words in text avoiding replacements inside words
+    based on regular expressions and synonyms dictionary from __init__
+    example on "сбер":
+     'храните деньги в сберегательных кассах. сбер.' -> 'храните средства в сберегательных кассах. сбербанк.'
     requires lowered text without punctuation
     """
 
@@ -452,8 +454,8 @@ class CurrencyTokensOneIterationMerger(object):
                 roubles = False
             else:
                 is_amount = self._is_amount(tokenized_elements, i)
-                looks_like_2_amounts = is_amount and self._is_amount(tokenized_elements, i - 2) \
-                                       and self._denominator_are_ok(tokenized_elements, i)
+                looks_like_2_amounts = (is_amount and self._is_amount(tokenized_elements, i - 2) and
+                                        self._denominator_are_ok(tokenized_elements, i))
                 if looks_like_2_amounts:
                     final_tokens = self._sum_2_amounts(final_tokens, tokenized_elements, i)
                     skip = True

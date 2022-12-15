@@ -19,8 +19,10 @@ class PushAction(StringAction):
             "type": "push",
             "surface": "COMPANION", // не обязательное, по дефолту "COMPANION", без шаблонной генерации
             "content": {
-                "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",
-                "fullText": "В нашем магазине большой ассортимент{% if day_time = 'evening' %}. Успей заказать!{% endif %}",
+                "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!"
+                                      "{% else %}Хотите что нибудь заказать?{% endif %}",
+                "fullText": "В нашем магазине большой ассортимент"
+                            "{% if day_time = 'evening' %}. Успей заказать!{% endif %}",
                 "mobileAppParameters": {
                     "DeeplinkAndroid": "{[ deep_link_url }}",
                     "DeeplinkIos": "{{ deep_link_url }}",

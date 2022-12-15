@@ -23,6 +23,6 @@ def get_leaking_objects(file=None, limit=5):
 
 
 if __name__ == "__main__":
-    while 1 :
+    while 1:
         print(show_most_common_types())
         time.sleep(1)

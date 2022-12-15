@@ -84,7 +84,7 @@ class Num2Text:
 
     def replace_everything_in_text(self, text, sex='m'):
         return re.sub(
-            pattern="[+-]?\d+(?:\.\d+)?",
+            pattern=r"[+-]?\d+(?:\.\d+)?",
             repl=lambda x: " {} ".format(self(float(x.group()), sex=sex)),
             string=" {} ".format(text)
         ).strip().replace("  ", " ")
