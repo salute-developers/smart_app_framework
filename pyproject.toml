@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "smart-app-framework"
-version = "1.0.9rc10"
+version = "0.0.0"
 description = "Python-фреймворк, который позволяет создавать смартапы для виртуальных ассистентов Салют."
-authors = ["Salute Developers <?@sberbank.ru>"]
+authors = ["Salute Developers <developer@sberdevices.ru>"]
 readme = "README.md"
 packages = [
     {include = "core"},
@@ -84,5 +84,10 @@ runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi"""
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "pep440"
