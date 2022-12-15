@@ -27,7 +27,6 @@ requirements = Registered()
 requirement_factory = build_factory(requirements)
 
 
-
 class Requirement:
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
@@ -35,7 +34,9 @@ class Requirement:
         self.items = items
         self.version = items.get("version", -1)
         self.id = id
-        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(logging.getLevelName("DEBUG"))
+        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(
+            logging.getLevelName("DEBUG")
+        )
 
     def _log_params(self):
         return {

@@ -25,4 +25,3 @@ class HTTPRequestActionWithCookie(HTTPRequestAction):
         response = super()._make_response(request_parameters, user)
         self._set_cookies(user, response.cookies)
         return response
-

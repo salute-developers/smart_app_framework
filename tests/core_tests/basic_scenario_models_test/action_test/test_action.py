@@ -443,7 +443,9 @@ class ActionTest(unittest.TestCase):
                                             },
                                         'bodyValues':
                                             {
-                                                'formatname': 'альбома', 'bandname': 'Ласковый май', 'releasename': 'Новое'
+                                                'formatname': 'альбома',
+                                                'bandname': 'Ласковый май',
+                                                'releasename': 'Новое'
                                             },
                                         'mobileAppParameters':
                                             {
@@ -468,7 +470,7 @@ class ActionTest(unittest.TestCase):
             "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
             "type_request": "apprequest",
             "sender": {
-              "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6"
+                "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6"
             },
             "recipient": {
                 "clientId": {
@@ -550,7 +552,7 @@ class ActionTest(unittest.TestCase):
                 'headers':
                     {
                         'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
-                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
+                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='  # noqa
                     }
             }
         }
@@ -565,7 +567,8 @@ class ActionTest(unittest.TestCase):
             url="https://salute.online.sberbank.ru:9443/api/v2/oauth",
             headers={
                 'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
-                'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
+                'Authorization':
+                    'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
             },
             method='POST', timeout=4, json=request_body_parameters
         )
@@ -587,34 +590,29 @@ class ActionTest(unittest.TestCase):
             'surface': 'COMPANION',
             'access_token': 'eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
             'callbackUrl': 'some_url',
-            'templateContent':
-                {
-                    'id': '49061553-27c7-4471-9145-d8d6137657da',
-                    'headerValues':
-                        {
-                            'clientname': 'Иван',
-                            'bandname': 'Ласковый май'
-                        },
-                    'bodyValues':
-                        {
-                            'formatname': 'альбома',
-                            'bandname': 'Ласковый май',
-                            'releasename': 'Новое'
-                        }
+            'templateContent': {
+                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                'headerValues': {
+                    'clientname': 'Иван',
+                    'bandname': 'Ласковый май'
                 },
+                'bodyValues': {
+                    'formatname': 'альбома',
+                    'bandname': 'Ласковый май',
+                    'releasename': 'Новое'
+                }
+            },
             'nodes': {},
             'command': 'PUSH_NOTIFY',
-            'params':
-                {
-                    'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite',
-                    'headers':
-                        {
-                            'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
-                            'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
-                            'callbackUrl': 'some_url'
-                        },
-                    'method': 'POST'
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite',
+                'headers': {
+                    'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
+                    'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                    'callbackUrl': 'some_url'
                 },
+                'method': 'POST',
+            },
             'behavior': 'common_behavior'
         }
         http_request_action = HTTPRequestAction(items)
@@ -666,115 +664,95 @@ class ActionTest(unittest.TestCase):
             'type_request': 'apprequest',
             'protocolVersion': 'V1',
             'messageId': '37284759',
-            'senderApplication':
-                {
-                    'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-                    'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
-                },
+            'senderApplication': {
+                'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+            },
             'deliveryMode': 'broadcast',
-            'destinations':
-                [
-                    {
-                        'channel': 'COMPANION_B2C',
-                        'surface': 'COMPANION',
-                        'templateContent':
-                            {
-                                'id': '49061553-27c7-4471-9145-d8d6137657da',
-                                'headerValues':
-                                    {
-                                        'clientname': 'Иван',
-                                        'bandname': 'Ласковый май'
-                                    },
-                                'bodyValues':
-                                    {
-                                        'formatname': 'альбома',
-                                        'bandname': 'Ласковый май',
-                                        'releasename': 'Новое'
-                                    },
-                                'mobileAppParameters':
-                                    {
-                                        'deeplinkAndroid': 'laskoviyi-mai-listen-android',
-                                        'deeplinkIos': 'laskoviyi-mai-listen-ios'
-                                    },
-                                'timeFrame':
-                                    {
-                                        'startTime': '13:30:00',
-                                        'finishTime': '15:00:00',
-                                        'timeZone': 'GMT+03:00',
-                                        'startDate': '2020-06-04',
-                                        'endDate': '2020-06-05'
-                                    }
-                            }
+            'destinations': [
+                {
+                    'channel': 'COMPANION_B2C',
+                    'surface': 'COMPANION',
+                    'templateContent': {
+                        'id': '49061553-27c7-4471-9145-d8d6137657da',
+                        'headerValues': {
+                            'clientname': 'Иван',
+                            'bandname': 'Ласковый май'
+                        },
+                        'bodyValues': {
+                            'formatname': 'альбома',
+                            'bandname': 'Ласковый май',
+                            'releasename': 'Новое'
+                        },
+                        'mobileAppParameters': {
+                            'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                            'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                        },
+                        'timeFrame': {
+                            'startTime': '13:30:00',
+                            'finishTime': '15:00:00',
+                            'timeZone': 'GMT+03:00',
+                            'startDate': '2020-06-04',
+                            'endDate': '2020-06-05'
+                        }
                     }
-                ],
+                }
+            ],
             'nodes': {},
             'command': 'PUSH_NOTIFY',
-            'payload':
-                {
-                    'sender':
-                        {
-                            'application':
-                                {
-                                    'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-                                    'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
-                                }
-                        },
-                    'recipient':
-                        {
-                            'clientId':
-                                {
-                                    'idType': 'SUB'
-                                }
-                        },
-                    'deliveryConfig':
-                        {
-                            'deliveryMode': 'broadcast',
-                            'destinations':
-                                [
-                                    {
-                                        'channel': 'COMPANION_B2C',
-                                        'surface': 'COMPANION',
-                                        'templateContent':
-                                            {
-                                                'id': '49061553-27c7-4471-9145-d8d6137657da',
-                                                'headerValues':
-                                                    {
-                                                        'clientname': 'Иван', 'bandname': 'Ласковый май'
-                                                    },
-                                                'bodyValues':
-                                                    {
-                                                        'formatname': 'альбома',
-                                                        'bandname': 'Ласковый май',
-                                                        'releasename': 'Новое'
-                                                    },
-                                                'mobileAppParameters':
-                                                    {
-                                                        'deeplinkAndroid': 'laskoviyi-mai-listen-android',
-                                                        'deeplinkIos': 'laskoviyi-mai-listen-ios'
-                                                    },
-                                                'timeFrame':
-                                                    {
-                                                        'startTime': '13:30:00',
-                                                        'finishTime': '15:00:00',
-                                                        'timeZone': 'GMT+03:00',
-                                                        'startDate': '2020-06-04',
-                                                        'endDate': '2020-06-05'
-                                                    }
-                                            }
-                                    }
-                                ]
-                        }
+            'payload': {
+                'sender': {
+                    'application': {
+                        'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                        'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                    }
                 },
-            'params':
-                {
-                    'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest',
-                    'headers':
-                        {
-                            'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
-                            'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
-                            'callbackUrl': None
-                        }
+                'recipient': {
+                    'clientId': {
+                        'idType': 'SUB'
+                    }
                 },
+                'deliveryConfig': {
+                    'deliveryMode': 'broadcast',
+                    'destinations': [
+                        {
+                            'channel': 'COMPANION_B2C',
+                            'surface': 'COMPANION',
+                            'templateContent': {
+                                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                'headerValues': {
+                                    'clientname': 'Иван',
+                                    'bandname': 'Ласковый май'
+                                },
+                                'bodyValues': {
+                                    'formatname': 'альбома',
+                                    'bandname': 'Ласковый май',
+                                    'releasename': 'Новое'
+                                },
+                                'mobileAppParameters': {
+                                    'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                    'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                },
+                                'timeFrame': {
+                                    'startTime': '13:30:00',
+                                    'finishTime': '15:00:00',
+                                    'timeZone': 'GMT+03:00',
+                                    'startDate': '2020-06-04',
+                                    'endDate': '2020-06-05'
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest',
+                'headers': {
+                    'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
+                    'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                    'callbackUrl': None
+                }
+            },
             'behavior': 'common_behavior'
         }
         http_request_action = HTTPRequestAction(items)

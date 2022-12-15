@@ -53,7 +53,7 @@ class UnifiedTemplate:
                 log_params["rendered"] = str(result)
                 log_params["raw_items"] = str(self.input)
                 log_params["params"] = params_dict
-                log(f"TRACING %(class_name)s. Result is %(rendered)s.", params=log_params, level="DEBUG")
+                log("TRACING %(class_name)s. Result is %(rendered)s.", params=log_params, level="DEBUG")
 
         except Exception:
             log("Failed to render template: %(template)s with params %(params_dict_str)s",
