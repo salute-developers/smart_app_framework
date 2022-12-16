@@ -173,7 +173,7 @@ class RequirementTest(unittest.TestCase):
     def test_regexp_in_template_req_true(self):
         items = {
             "template": "{{ payload.message.strip() }}",
-            "regexp": r"(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
+            "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
         }
         requirement = RegexpInTemplateRequirement(items)
         params = {"payload": {
@@ -190,7 +190,7 @@ class RequirementTest(unittest.TestCase):
     def test_regexp_in_template_req_false(self):
         items = {
             "template": "{{ payload.message.strip() }}",
-            "regexp": r"(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
+            "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
         }
         requirement = RegexpInTemplateRequirement(items)
         params = {"payload": {

@@ -95,7 +95,7 @@ def merge_numbers(text):
     def remove_whitespace(number_match):
         return number_match.group().replace(" ", "")
 
-    regex = re.compile(r"\d+(\s\d+)+")
+    regex = re.compile("\d+(\s\d+)+")
     return regex.sub(remove_whitespace, text)
 
 

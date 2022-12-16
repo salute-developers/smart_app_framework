@@ -131,7 +131,7 @@ class NLTKWordTokenizer:
                 final_tokens = self._quasipunct_removal(token, new_token, final_tokens)
             elif len(token) == 0:
                 continue
-            elif re.match(r"\s+", token):
+            elif re.match("\s+", token):
                 continue
             elif "/" in token or "\\" in token:
                 if token == "/":

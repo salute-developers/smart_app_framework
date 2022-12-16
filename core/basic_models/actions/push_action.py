@@ -92,8 +92,7 @@ class PushAuthenticationActionHttp(PushAction):
      - Для всех полей доступна шаблонная генерация. Можно также передавать значение обычной строкой.
 
     Response:
-        Результат запроса сохраняется в переменной user.variables,
-         после выполнения метода process_result класса HTTPRequestAction.
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.  # noqa
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_authentification_response"]
             - user.variables.value or user.variables.value["push_authentification_response"]
@@ -145,8 +144,7 @@ class GetRuntimePermissionsAction(PushAction):
     """ Action для получения разрешения на отправку пуш уведомлений в SmartPush API через http.
 
     Ссылка на документацию с примерами получения разрешения на уведомления:
-     - Разрешение на уведомления:
-     https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications
+     - Разрешение на уведомления: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications  # noqa
 
     Note: Навык на HTTP не поддерживает использование двух команд на один сценарий, поэтому в success_action'е
           behavior'а необходимо прописать продолжение сценария с использованием PushActionHttp.
