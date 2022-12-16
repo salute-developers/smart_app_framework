@@ -467,7 +467,7 @@ class MainLoop(BaseMainLoop):
         for i, (expire_time_us, callback_id) in enumerate(user.behaviors.get_behavior_timeouts()):
             # two behaviors can be created in one query, so we need add some salt to make theirs key unique
             unique_key = expire_time_us + i * 1e-5
-            log("%(class_name)s: adding local_timeout on callback %(callback_id)s with timeout on %(unique_key)s",
+            log(f"%(class_name)s: adding local_timeout on callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s with timeout on %(unique_key)s",
                 params={log_const.KEY_NAME: "adding_local_timeout",
                         "class_name": self.__class__.__name__,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
@@ -476,7 +476,7 @@ class MainLoop(BaseMainLoop):
                 (user.message.db_uid, callback_id, mq_message, kafka_key)))
 
         for callback_id in user.behaviors.get_returned_callbacks():
-            log("%(class_name)s: removing local_timeout on callback %(callback_id)s",
+            log(f"%(class_name)s: removing local_timeout on callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 params={log_const.KEY_NAME: "removing_local_timeout",
                         "class_name": self.__class__.__name__,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
