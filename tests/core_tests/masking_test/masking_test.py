@@ -123,6 +123,6 @@ class MaskingTest(TestCase):
         self.assertEqual(expected, masked_message)
 
         input_message = {"masked": {12, 13, 14}}
-        expected = {"masked": ["***","***","***"]}
-        masked_message = masking(input_message, masking_fields={"masked":2})
+        expected = {"masked": ["***", "***", "***"]}
+        masked_message = masking(input_message, masking_fields={"masked": 2})
         self.assertEqual(expected, masked_message)

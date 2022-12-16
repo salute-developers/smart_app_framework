@@ -14,7 +14,7 @@ def build_factory(registry_models: Registered) -> Callable:
         model = registry_models[type]
         try:
             return model(items, *args, **kwargs)
-        except:
+        except Exception:
             raise
 
     return _inner

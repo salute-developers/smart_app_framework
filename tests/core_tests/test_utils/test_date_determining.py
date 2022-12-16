@@ -165,7 +165,7 @@ def test_period_determiner_9():
 @freeze_time('2021-11-23')
 def test_period_determiner_10():
     # если конкретный квартал ипользуется
-    current_date = datetime.now()
+    _ = datetime.now()
 
     words_to_process = [
         '3',
@@ -354,7 +354,6 @@ def test_period_determiner_23():
     # если используется форма "с 2 по 17 июня"
     current_date = datetime.now()
 
-    count_of_months: int = 2
     words_to_process = [
         'с',
         '2',

@@ -415,8 +415,7 @@ class DatePeriodFiller(FieldFillerDescription):
 
         is_determined: bool = False
         is_error: bool = False
-        if not (begin_str == '' or begin_str == 'error'
-            or end_str == '' or end_str == 'error'):
+        if not (begin_str == '' or begin_str == 'error' or end_str == '' or end_str == 'error'):
             is_determined = True
 
         if begin_str == 'error' or end_str == 'error':
@@ -573,6 +572,6 @@ class ClassifierFiller(FieldFillerDescription):
 
 class ClassifierFillerMeta(ClassifierFiller):
 
-    def _get_result(self, answers: List[Dict[str, Union[str, float, bool]]]) -> List[
-        Dict[str, Union[str, float, bool]]]:
+    def _get_result(self,
+                    answers: List[Dict[str, Union[str, float, bool]]]) -> List[Dict[str, Union[str, float, bool]]]:
         return answers

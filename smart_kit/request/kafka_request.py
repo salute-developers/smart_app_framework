@@ -1,5 +1,3 @@
-from typing import Dict
-
 from core.configs.global_constants import CALLBACK_ID_HEADER, KAFKA_REPLY_TOPIC
 from core.request.kafka_request import KafkaRequest
 

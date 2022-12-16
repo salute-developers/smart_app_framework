@@ -358,12 +358,16 @@ class RequirementTest(unittest.TestCase):
         ]
         self.assertFalse(requirement.check(text_normalization_result, user))
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "нет", "score": 1.0, "other": False}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "нет", "score": 1.0, "other": False}])
     def test_classifier_requirement_true(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает True, если результат классификации запроса относится к одной
         из указанных категорий, прошедших порог, но не равной классу other.
         """
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"},
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -373,17 +377,24 @@ class RequirementTest(unittest.TestCase):
     @patch.object(ExternalClassifier, "find_best_answer", return_value=[])
     def test_classifier_requirement_false(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если модель классификации не вернула ответ."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
         result = classifier_requirement.check(PicklableMock(), mock_user)
         self.assertFalse(result)
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "other", "score": 1.0, "other": True}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "other", "score": 1.0, "other": True}])
     def test_classifier_requirement_false_if_class_other(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если наиболее вероятный вариант есть класс other."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"},
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -500,14 +511,32 @@ class RequirementTest(unittest.TestCase):
         req = IntersectionWithTokensSetRequirement({"input_words": ["погода", "время"]})
 
         text_preprocessing_result = PicklableMock()
-        text_preprocessing_result.raw = {"tokenized_elements_list_pymorphy": [
-            {"text": "прогноз", "grammem_info": {
-                "animacy": "inan", "case": "acc", "gender": "masc", "number": "sing", "raw_gram_info":
-                    "animacy=inan|case=acc|gender=masc|number=sing", "part_of_speech": "NOUN"}, "lemma": "прогноз"},
-            {"text": "погоды", "grammem_info": {
-                "animacy": "inan", "case": "gen", "gender": "fem", "number": "sing",
-                "raw_gram_info": "animacy=inan|case=gen|gender=fem|number=sing",
-                "part_of_speech": "NOUN"}, "lemma": "погода"}
+        text_preprocessing_result.raw = {
+            "tokenized_elements_list_pymorphy": [
+                {
+                    "text": "прогноз",
+                    "grammem_info": {
+                        "animacy": "inan",
+                        "case": "acc",
+                        "gender": "masc",
+                        "number": "sing",
+                        "raw_gram_info": "animacy=inan|case=acc|gender=masc|number=sing",
+                        "part_of_speech": "NOUN"
+                    },
+                    "lemma": "прогноз"
+                },
+                {
+                    "text": "погоды",
+                    "grammem_info": {
+                        "animacy": "inan",
+                        "case": "gen",
+                        "gender": "fem",
+                        "number": "sing",
+                        "raw_gram_info": "animacy=inan|case=gen|gender=fem|number=sing",
+                        "part_of_speech": "NOUN"
+                    },
+                    "lemma": "погода"
+                }
             ]}
 
         self.assertTrue(req.check(text_preprocessing_result, PicklableMock()))

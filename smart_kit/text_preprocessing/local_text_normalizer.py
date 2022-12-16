@@ -80,7 +80,8 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
         self.sentence_tokenizer = ru_sent_tokenize
         self.word_tokenizer = NLTKWordTokenizer(word_false_stoppings, words_without_splitting_point)
 
-        skip_func = lambda x: x
+        def skip_func(x):
+            return x
         self.converter_pipeline = {
             'Объединение цифр после stt': NumbersUnionAfterSTT(text2num),
             'Конверсия юникодовых символов': UnicodeSymbolsConverter(unicode_symbols),

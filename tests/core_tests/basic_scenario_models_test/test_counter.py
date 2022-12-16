@@ -228,7 +228,7 @@ class CountersTest(unittest.TestCase):
         test_counter_2 = Counter(counter_2)
         counters._items[name_1] = test_counter_1
         counters._items[name_2] = test_counter_2
-        self.assertDictEqual(counters.raw, { name_1: counter_1, name_2: counter_2})
+        self.assertDictEqual(counters.raw, {name_1: counter_1, name_2: counter_2})
 
     def test_clear(self):
         time_shift = 100

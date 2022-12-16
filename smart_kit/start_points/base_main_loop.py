@@ -59,11 +59,11 @@ class BaseMainLoop:
             self._init_monitoring_config(template_settings)
 
             log("%(class_name)s.__init__ completed.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
-                                                                        "class_name": self.__class__.__name__})
-        except:
+                                                              "class_name": self.__class__.__name__})
+        except Exception:
             log("%(class_name)s.__init__ exception.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
-                                                                        "class_name": self.__class__.__name__},
-                          level="ERROR", exc_info=True)
+                                                              "class_name": self.__class__.__name__},
+                level="ERROR", exc_info=True)
             raise
 
     def get_db(self):

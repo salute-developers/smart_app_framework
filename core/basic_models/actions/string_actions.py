@@ -103,7 +103,7 @@ class StringAction(NodeAction):
         "type": "string",
         "command": "recharge_mobile",
         "nodes": {
-          "phone": "{% if approve and phone_number is defined and phone_number not in (None, 1) %}{{ phone_number }}{% endif %}",
+          "phone": "{% if approve and phone_number is defined and phone_number not in (None, 1) %}{{ phone_number }}{% endif %}",  # noqa
           "amount": "{% if approve and amount is defined %}{{ amount | int }}{% endif%}",
           "currency": "{% if approve and currency is defined %}{{ currency }}{% endif%}",
           "card": "{% if approve and card is defined %}{{ card }}{% endif %}"

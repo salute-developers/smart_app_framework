@@ -46,9 +46,9 @@ class IgniteAdapter(DBAdapter):
             log("IgniteAdapter to servers %(pyignite_addresses)s created", params=logger_args, level="WARNING")
         except Exception:
             log("IgniteAdapter connect error",
-                          params={log_const.KEY_NAME: log_const.HANDLED_EXCEPTION_VALUE},
-                          level="ERROR",
-                          exc_info=True)
+                params={log_const.KEY_NAME: log_const.HANDLED_EXCEPTION_VALUE},
+                level="ERROR",
+                exc_info=True)
             monitoring.got_counter("ignite_connection_exception")
             raise
 

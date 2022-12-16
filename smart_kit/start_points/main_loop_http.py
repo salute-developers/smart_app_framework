@@ -38,13 +38,12 @@ class BaseHttpMainLoop(BaseMainLoop):
                 result[2].as_dict
             except (json.JSONDecodeError, KeyError):
                 result = 400, "BAD REQUEST", SmartAppToMessage(
-                        self.BAD_REQUEST_COMMAND,
-                        message=basic_error_message,
-                        request=None,
-                    )
+                    self.BAD_REQUEST_COMMAND,
+                    message=basic_error_message,
+                    request=None,
+                )
             finally:
                 return result
-
 
         answer, stats = self.process_message(message)
         if not answer:
@@ -152,7 +151,7 @@ class HttpMainLoop(BaseHttpMainLoop):
         self._server = make_server('0.0.0.0', 8000, self.iterate)
         log(
             '''
-                Application start via "python manage.py run_app" recommended only for local testing. 
+                Application start via "python manage.py run_app" recommended only for local testing.
                 For production it is recommended to start using "gunicorn --config wsgi_config.py 'wsgi:create_app()'
             ''',
             level="WARNING")

@@ -27,36 +27,17 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
     - name: Install dependencies
       run: |
         uname -a
-        python -m pip install --upgrade pip
-        python -m pip install flake8 
-        python -m pip install .
+        poetry install --no-interaction --no-root
     - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      run: poetry run task lint
     - name: Test with unittest
-      run: |
-        python -m unittest discover -s tests -v
+      run: poetry run task unit_test
     - name: Test run_app on HttpMainLoop
-      run: |
-        python -m smart_kit create_app http_test_app
-        cd http_test_app
-        timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
-        cd ..
+      run: poetry run task runapp_http_test
     - name: Test run_app on KafkaMainLoop
-      run: |
-        docker-compose -f .github/docker-compose.yml up -d
-        python -m smart_kit create_app kafka_test_app
-        cp .github/kafka_config.yml kafka_test_app/static/configs/kafka_config.yml
-        cp .github/logging_config.yml kafka_test_app/static/configs/logging_config.yml
-        cd kafka_test_app
-        echo 'from smart_kit.start_points.main_loop_kafka import MainLoop' >> app_config.py
-        echo 'MAIN_LOOP = MainLoop' >> app_config.py
-        docker-compose -f ../.github/docker-compose.yml exec -T kafka kafka-topics.sh --create --bootstrap-server localhost:9092  --partitions 3 --topic toTestApp
-        timeout 10 python manage.py run_app || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
-        cd ..
+      run: poetry run task runapp_kafka_test

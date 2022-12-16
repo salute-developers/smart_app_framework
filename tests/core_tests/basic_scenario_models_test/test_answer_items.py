@@ -83,7 +83,7 @@ class BubbleItemTest(unittest.TestCase):
         }
         self.assertRaises(KeyError, BubbleText, items)
 
-    def test_BubbleText(self):
+    def test_BubbleText_snd(self):
         nodes = {
             "ans": 42
         }

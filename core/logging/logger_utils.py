@@ -123,7 +123,7 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         logger.log(level_name, message, params, exc_info=exc_info)
     except timeout_decorator.TimeoutError:
         raise
-    except:
+    except Exception:
         default_logger.log(logging.getLevelName("ERROR"), "Failed to write a log. Exception occurred",
                            params, exc_info=True, stack_info=True)
 

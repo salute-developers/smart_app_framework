@@ -51,7 +51,7 @@ class Text2Num:
                                           number_info[ADJECTIVAL_POS]]
                     # надо обработать без пятнадцати шесть
                 elif prev_number_info[BEZ_POS] and number_info[NUMBER_POS] in HOURS_RANGE and not \
-                        number_info[TOKEN_POS].isdigit() and (number_info[TOKEN_POS].endswith("ь") or \
+                        number_info[TOKEN_POS].isdigit() and (number_info[TOKEN_POS].endswith("ь") or
                                                               number_info[TOKEN_POS].lower() in BEG_LIST):
                     result_numbers = [[number_info[NUMBER_POS], number_info[ADJECTIVAL_POS]] for number_info in
                                       numbers_info]

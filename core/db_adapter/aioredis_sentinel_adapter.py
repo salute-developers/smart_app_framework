@@ -1,6 +1,5 @@
 import copy
 
-import aioredis
 import typing
 
 from aioredis.sentinel import Sentinel
@@ -27,7 +26,6 @@ class AIORedisSentinelAdapter(DBAdapter):
     @monitoring.got_histogram("save_time")
     async def save(self, id, data):
         return await self._run(self._save, id, data)
-
 
     @monitoring.got_histogram("save_time")
     async def replace_if_equals(self, id, sample, data):

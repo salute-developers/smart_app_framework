@@ -23,7 +23,7 @@ def silence_it(func):
         except MetricDisabled as error:
             log(f"Metrics: {error}",
                 params={KEY_NAME: "metrics_disabled"}, level="DEBUG")
-        except:
+        except Exception:
             log("Metrics: Failed send. Exception occurred.",
                 params={KEY_NAME: "metrics_fail"}, level="ERROR", exc_info=True)
     return wrap

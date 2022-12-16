@@ -1,4 +1,3 @@
-import os
 import time
 
 from core.db_adapter.os_adapter import OSAdapter

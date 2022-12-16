@@ -16,7 +16,6 @@ def field_model_factory(description, raw_data, user, lifetime):
 
 
 class BasicField:
-
     def __init__(self, description, items, user, lifetime):
         items = items or {}
         self.description = description
@@ -40,8 +39,8 @@ class BasicField:
 
     def check_can_be_filled(self, text_preprocessing_result, user):
         return (
-                self.description.requirement.check(text_preprocessing_result, user) and
-                self.description.filler.run(user, text_preprocessing_result) is not None
+            self.description.requirement.check(text_preprocessing_result, user) and
+            self.description.filler.run(user, text_preprocessing_result) is not None
         )
 
     @property
@@ -65,10 +64,12 @@ class BasicField:
         dict_value = {self.description.name: value}
         masked_dict_value = masking(dict_value, self._masking_fields)
         message = "%(class_name)s: %(description_id)s filled by value: %(field_value)s"
-        params = {log_const.KEY_NAME: log_const.FILLER_RESULT_VALUE,
-                  "class_name": self.__class__.__name__,
-                  "description_id": self.description.id,
-                  "field_value": str(masked_dict_value[self.description.name])}
+        params = {
+            log_const.KEY_NAME: log_const.FILLER_RESULT_VALUE,
+            "class_name": self.__class__.__name__,
+            "description_id": self.description.id,
+            "field_value": str(masked_dict_value[self.description.name]),
+        }
         log(message, None, params)
 
     def set_available(self):
@@ -80,7 +81,7 @@ class BasicField:
     @property
     def raw(self):
         result = {}
-        is_value_changed = (self._value is not None and self._value != self.description.default_value)
+        is_value_changed = self._value is not None and self._value != self.description.default_value
         if is_value_changed:
             result["value"] = self._value
         if self._available != self.description.available:

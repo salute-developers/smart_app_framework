@@ -48,8 +48,8 @@ class ClassifierRepository(BaseRepository):
         res = False
         # Проверяем что существуют обе директории: с конфигами классификаторов и чекпоинтами моделей,
         # также проверяем что эти обе директории не пустые
-        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path))
-                and os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
+        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path)) and
+                os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
             res = True
         return res
 

@@ -125,7 +125,7 @@ class TreeScenario(FormFillingScenario):
                         fill_other = fill_other and field_descr.fill_other
                         field_data = {field_key: extracted}
                         _validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
-                                                                               internal_form, field_data, params)
+                                                                              internal_form, field_data, params)
                         if _validation_error_msg:
                             # return only first validation message in form
                             validation_error_msg = validation_error_msg or _validation_error_msg
@@ -159,8 +159,7 @@ class TreeScenario(FormFillingScenario):
                 self._set_current_node_id(user, current_node.id)
             new_node = self.get_next_node(user, current_node, text_preprocessing_result, params)
 
-        field = self._find_field(form, text_preprocessing_result,
-                                                   user, params) if form else None
+        field = self._find_field(form, text_preprocessing_result, user, params) if form else None
 
         reply_commands = on_filled_actions
         if field:

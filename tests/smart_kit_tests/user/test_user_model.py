@@ -26,9 +26,9 @@ class UserTest2(unittest.TestCase):
 
     def test_smart_app_user_init(self):
         obj1 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
-                                       self.test_parametrizer_cls)
+                               self.test_parametrizer_cls)
         obj2 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
-                                       self.test_parametrizer_cls, True)
+                               self.test_parametrizer_cls, True)
         self.assertTrue(len(obj1.fields) > 0)
         self.assertTrue(obj1.id == self.test_id)
         self.assertTrue(not obj1.do_not_save)
@@ -36,11 +36,11 @@ class UserTest2(unittest.TestCase):
 
     def test_smart_app_user_fields(self):
         obj1 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
-                                       self.test_parametrizer_cls)
+                               self.test_parametrizer_cls)
         self.assertTrue(len(obj1.fields) == 14)
         self.assertTrue(isinstance(obj1.fields[0], Field))
 
     def test_smart_app_user_parametrizer(self):
         obj1 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
-                                       self.test_parametrizer_cls)
+                               self.test_parametrizer_cls)
         self.assertTrue(obj1.parametrizer == {})

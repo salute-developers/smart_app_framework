@@ -153,7 +153,7 @@ class FormsTest(TestCase):
         description_credit = MockDescription('sbm_credit', False, fields_descriptions)
         description_off_MB = MockDescription('Turn_off_MB', False, fields_descriptions)
         _descriptions = {'Turn_on_MB': description_MB, 'sbm_credit': description_credit,
-                        'Turn_off_MB': description_off_MB}
+                         'Turn_off_MB': description_off_MB}
         descriptions = MockDescriptions(_descriptions)
         forms = Forms(self.mock_1, descriptions, user)
         result = forms.collect_form_fields()
@@ -161,12 +161,24 @@ class FormsTest(TestCase):
         self.assertSetEqual(set(result.keys()), expected_fields)
 
     def test_clear_form(self):
-        expected_result = {'sbm_credit': {'fields': {'amount': {'value': 100.0},
-                                                     'currency': {'filler': {'type': 'currency_first'},
-                                                                  'questions': [ {'action': 'sbm_currency_question',
-                                                                                  'type': 'external'} ],
-                                                                  'required': True}},
-                                          'remove_time': 1506418333}}
+        expected_result = {
+            'sbm_credit': {
+                'fields': {
+                    'amount': {'value': 100.0},
+                    'currency': {
+                        'filler': {'type': 'currency_first'},
+                        'questions': [
+                            {
+                                'action': 'sbm_currency_question',
+                                'type': 'external'
+                            }
+                        ],
+                        'required': True
+                    }
+                },
+                'remove_time': 1506418333
+            }
+        }
         description_MB = MockDescription('Turn_on_MB', False)
         description_credit = MockDescription('sbm_credit', False)
         description_off_MB = MockDescription('Turn_off_MB', False)
@@ -174,8 +186,8 @@ class FormsTest(TestCase):
                                                        'sbm_credit': description_credit,
                                                        'Turn_off_MB': description_off_MB}),
                         "forms": MockDescriptions({'Turn_on_MB': description_MB,
-                                                       'sbm_credit': description_credit,
-                                                       'Turn_off_MB': description_off_MB})
+                                                   'sbm_credit': description_credit,
+                                                   'Turn_off_MB': description_off_MB})
                         }
         user = PicklableMock()
         user.descriptions = descriptions

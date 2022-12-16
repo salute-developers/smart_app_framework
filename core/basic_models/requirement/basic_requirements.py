@@ -27,7 +27,6 @@ requirements = Registered()
 requirement_factory = build_factory(requirements)
 
 
-
 class Requirement:
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
@@ -35,7 +34,9 @@ class Requirement:
         self.items = items
         self.version = items.get("version", -1)
         self.id = id
-        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(logging.getLevelName("DEBUG"))
+        self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(
+            logging.getLevelName("DEBUG")
+        )
 
     def _log_params(self):
         return {
@@ -44,7 +45,7 @@ class Requirement:
         }
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return True
 
     def _on_check_error_result(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser) -> bool:
@@ -55,7 +56,7 @@ class Requirement:
               params: Dict[str, Any] = None) -> bool:
         try:
             result = self._check(text_preprocessing_result, user, params)
-        except:
+        except Exception:
             return self.on_check_error(text_preprocessing_result, user)
         if self.is_logging_debug_mode:
             log_params = self._log_params()
@@ -95,7 +96,7 @@ class CompositeRequirement(Requirement):
 class AndRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return all(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
                    for requirement in self.requirements)
 
@@ -103,7 +104,7 @@ class AndRequirement(CompositeRequirement):
 class OrRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return any(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
                    for requirement in self.requirements)
 
@@ -121,7 +122,7 @@ class NotRequirement(Requirement):
         return self._requirement
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return not self.requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
 
 
@@ -146,7 +147,7 @@ class RandomRequirement(Requirement):
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         result = random() * 100
         return result < self.percent
 
@@ -159,7 +160,7 @@ class TopicRequirement(Requirement):
         self.topics = items["topics"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return user.message.topic_key in self.topics
 
 
@@ -169,7 +170,7 @@ class TemplateRequirement(Requirement):
         self._template = UnifiedTemplate(items["template"])
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
@@ -190,7 +191,7 @@ class RollingRequirement(Requirement):
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         id = user.id
         s = id.encode('utf-8')
         hash = int(hashlib.sha256(s).hexdigest(), 16)
@@ -282,7 +283,7 @@ class ClassifierRequirement(Requirement):
         return ExternalClassifier(self._classifier)
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         check_res = True
         classifier = self.classifier
         with StatsTimer() as timer:
@@ -309,7 +310,7 @@ class FormFieldValueRequirement(Requirement):
         self.value = items["value"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return user.forms[self.form_name].fields[self.field_name].value == self.value
 
 
@@ -330,7 +331,7 @@ class EnvironmentRequirement(Requirement):
         self.check_result = self.environment in self.values if self.environment else False
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return self.check_result
 
 
@@ -344,7 +345,7 @@ class CharacterIdRequirement(Requirement):
         self.values = items["values"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return user.message.payload["character"]["id"] in self.values
 
 
@@ -358,5 +359,5 @@ class FeatureToggleRequirement(Requirement):
         self.toggle_name = items["toggle_name"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-              params: Dict[str, Any] = None) -> bool:
+               params: Dict[str, Any] = None) -> bool:
         return user.settings["template_settings"].get(self.toggle_name, False)

@@ -14,10 +14,19 @@ from smart_kit.testing.utils import Environment
 from smart_kit.utils.diff import partial_diff
 
 
-def run_testfile(path: AnyStr, file: AnyStr, app_model: SmartAppModel, settings: Settings, user_cls: type,
-                 parametrizer_cls: type, from_msg_cls: type, test_case_cls: type, storaged_predefined_fields: Dict[str, Any],
-                 csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
-                 interactive: bool = False) -> Tuple[int, int]:
+def run_testfile(
+        path: AnyStr,
+        file: AnyStr,
+        app_model: SmartAppModel,
+        settings: Settings,
+        user_cls: type,
+        parametrizer_cls: type,
+        from_msg_cls: type,
+        test_case_cls: type,
+        storaged_predefined_fields: Dict[str, Any],
+        csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
+        interactive: bool = False
+) -> Tuple[int, int]:
     test_file_path = os.path.join(path, file)
     if not os.path.isfile(test_file_path) or not test_file_path.endswith('.json'):
         raise FileNotFoundError
@@ -59,7 +68,7 @@ class TestSuite:
         if make_csv:
             field_names = ['file', 'test_case', 'success', 'diff']
             results_csv_writer = DictWriter(
-                open(os.path.join(path, f'tests_results.csv'), 'wt'),
+                open(os.path.join(path, 'tests_results.csv'), 'wt'),
                 fieldnames=field_names,
                 quoting=QUOTE_MINIMAL
             )
@@ -204,7 +213,10 @@ class TestCase:
                 if self.csv_case_callback:
                     self.csv_case_callback(diff)
                 # Последний app_callback_id в answers, используется в заголовках следующего сообщения
-                app_callback_id = actual.request.values.get(self.__from_msg_cls.CALLBACK_ID_HEADER_NAME, app_callback_id)
+                app_callback_id = actual.request.values.get(
+                    self.__from_msg_cls.CALLBACK_ID_HEADER_NAME,
+                    app_callback_id
+                )
 
             user_diff = partial_diff(expected_user, user.raw)
             if user_diff:

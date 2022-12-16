@@ -8,10 +8,10 @@ from smart_kit.request import kafka_request
 class RequestTest1(unittest.TestCase):
     def setUp(self):
         self.test_items1 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10,
-                           "app_callback_id": 22, "kafka_key": "54321"}  # пусть
+                            "app_callback_id": 22, "kafka_key": "54321"}  # пусть
         self.test_items2 = {"topic_key": "12345", "timeout": 10}  # пусть
         self.test_items3 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10}  # пусть
-        self.test_items4 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10, "topic": "topic123"}  # пусть
+        self.test_items4 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10, "topic": "topic123"}
         self.test_source_mq_message = Mock('source_mq_message')
         self.test_source_mq_message.headers = lambda: [("any header 1", 1)]
 
@@ -21,7 +21,7 @@ class RequestTest1(unittest.TestCase):
         self.assertTrue(obj1.KAFKA_KEY == "kafka_key")
         self.assertTrue(obj1.topic_key == "12345")
         with self.assertRaises(AttributeError):
-            obj2 = kafka_request.SmartKitKafkaRequest("")
+            _ = kafka_request.SmartKitKafkaRequest("")
         self.assertTrue(obj1._callback_id == 22)
         self.assertTrue(obj1._kafka_replyTopic == "any theme")
 

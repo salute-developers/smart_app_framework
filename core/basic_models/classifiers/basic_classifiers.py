@@ -157,7 +157,11 @@ class ExtendedClassifier(Classifier):
             mask: Optional[Dict[str, bool]] = None,
             scenario_classifiers: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Union[str, float, bool]]]:
-        vector = vectorizers[self._vectorizer].vectorize(text_preprocessing_result) if self._vectorizer else np.array([])
+        vector = (
+            vectorizers[self._vectorizer].vectorize(text_preprocessing_result)
+            if self._vectorizer
+            else np.array([])
+        )
         weights = sorted(self._get_weights(text_preprocessing_result, vector).items(), key=lambda x: x[1], reverse=True)
         answers = []
         for weight in weights:
