@@ -215,7 +215,8 @@ class Behaviors:
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
             result = behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
         else:
-            log(f"behavior.misstate not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
+            log("behavior.misstate not found valid callback"
+                f" for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
                 params={log_const.KEY_NAME: log_const.BEHAVIOR_MISSTATE_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
