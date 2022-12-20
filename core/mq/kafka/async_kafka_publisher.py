@@ -30,7 +30,7 @@ class AsyncKafkaPublisher(KafkaPublisher):
             }
             log("KafkaProducer: Local producer queue is full (%(queue_amount)s messages awaiting delivery):"
                 " try again\n", params=params, level="ERROR")
-            monitoring.monitoring.got_counter("kafka_producer_exception")
+            monitoring.got_counter("kafka_producer_exception")
 
     def send_to_topic(self, value, key=None, topic=None, headers=None):
         try:
@@ -52,7 +52,7 @@ class AsyncKafkaPublisher(KafkaPublisher):
             }
             log("KafkaProducer: Local producer queue is full (%(queue_amount)s messages awaiting delivery):"
                 " try again\n", params=params, level="ERROR")
-            monitoring.monitoring.got_counter("kafka_producer_exception")
+            monitoring.got_counter("kafka_producer_exception")
 
     def _poll_for_callbacks(self):
         poll_timeout = self._config.get("poll_timeout", 1)

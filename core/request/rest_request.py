@@ -37,7 +37,7 @@ class RestRequest(BaseRequest):
             return method(data)
 
     def on_timeout_error(self, *args, **kwarg):
-        monitoring.monitoring.got_counter("core_rest_run_timeout")
+        monitoring.got_counter("core_rest_run_timeout")
 
     def _requests_get(self, params):
         return requests.get(self.url, params=params, **self.rest_args).text

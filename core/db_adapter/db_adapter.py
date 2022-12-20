@@ -144,5 +144,5 @@ class AsyncDBAdapter(DBAdapter):
             result = await self._async_run(action, *args, _try_count=_try_count, **kwargs)
             counter_name = self._get_counter_name()
             if counter_name:
-                monitoring.monitoring.got_counter(f"{counter_name}_exception")
+                monitoring.got_counter(f"{counter_name}_exception")
         return result
