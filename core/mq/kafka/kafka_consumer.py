@@ -107,7 +107,7 @@ class KafkaConsumer(BaseKafkaConsumer):
             log_const.KEY_NAME: log_const.EXCEPTION_VALUE
         }
         log("KafkaConsumer: Error: %(error)s", params=params, level="WARNING")
-        monitoring.monitoring.got_counter("kafka_consumer_exception")
+        monitoring.got_counter("kafka_consumer_exception")
 
     # noinspection PyMethodMayBeStatic
     def _process_message(self, msg: KafkaMessage):
@@ -116,7 +116,7 @@ class KafkaConsumer(BaseKafkaConsumer):
             if err.code() == KafkaError._PARTITION_EOF:
                 return None
             else:
-                monitoring.monitoring.got_counter("kafka_consumer_exception")
+                monitoring.got_counter("kafka_consumer_exception")
                 params = {
                     "code": err.code(),
                     "pid": os.getpid(),

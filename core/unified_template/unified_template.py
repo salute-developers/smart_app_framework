@@ -49,7 +49,7 @@ class UnifiedTemplate:
                         "params_dict_str": str(params_dict)},
                 level="ERROR",
                 exc_info=True)
-            monitoring.monitoring.got_counter("core_jinja_template_error")
+            monitoring.got_counter("core_jinja_template_error")
             raise
         return result
 

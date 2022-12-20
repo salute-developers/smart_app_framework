@@ -35,7 +35,7 @@ class CephAdapter(DBAdapter):
                 params={log_const.KEY_NAME: log_const.HANDLED_EXCEPTION_VALUE},
                 level="ERROR",
                 exc_info=True)
-            monitoring.monitoring.got_counter("ceph_connection_exception")
+            monitoring.got_counter("ceph_connection_exception")
             raise
 
     @property
