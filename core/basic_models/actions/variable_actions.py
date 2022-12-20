@@ -30,7 +30,7 @@ class BaseSetVariableAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
@@ -78,7 +78,7 @@ class DeleteVariableAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         user.variables.delete(self.key)
         return commands
 
@@ -91,7 +91,7 @@ class ClearVariablesAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         user.variables.clear()
         return commands
 

@@ -190,7 +190,7 @@ class SelfServiceActionWithStateTest(unittest.TestCase):
         action = SelfServiceActionWithState(data)
         result = action.run(self.user, None)
         behavior.add.assert_not_called()
-        self.assertIsNone(result)
+        self.assertEqual(result, [])
 
     def test_action_3(self):
         data = {"behavior": "test", "command_action": {"command": "cmd_id", "nodes": {}, "request_data": {}}}
