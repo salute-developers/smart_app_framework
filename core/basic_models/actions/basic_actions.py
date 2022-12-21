@@ -33,7 +33,7 @@ class Action:
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        return []
+        raise NotImplementedError
 
     def on_run_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         log("exc_handler: Action failed to run. Return None. MESSAGE: %(masked_message)s.", user,
