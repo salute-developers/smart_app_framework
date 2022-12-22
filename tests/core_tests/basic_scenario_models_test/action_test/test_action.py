@@ -109,8 +109,7 @@ class ActionTest(unittest.TestCase):
     def test_base(self):
         items = {"nodes": "test"}
         action = Action(items)
-        result = action.run(None, None)
-        self.assertEqual(result, [])
+        self.assertRaises(NotImplementedError, action.run, None, None)
 
     def test_external(self):
         items = {"action": "test_action_key"}
