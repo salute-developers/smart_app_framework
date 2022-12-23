@@ -33,7 +33,7 @@ class Action:
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        return []
+        raise NotImplementedError
 
     def on_run_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         log("exc_handler: Action failed to run. Return None. MESSAGE: %(masked_message)s.", user,
@@ -72,7 +72,7 @@ class DoingNothingAction(CommandAction):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         commands.append(Command(self.command, self.nodes, self.id, request_type=self.request_type,
                                 request_data=self.request_data))
         return commands
@@ -105,7 +105,7 @@ class RequirementAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         if self.requirement.check(text_preprocessing_result, user, params):
             commands.extend(self.internal_item.run(user, text_preprocessing_result, params) or [])
         return commands
@@ -141,7 +141,7 @@ class ChoiceAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         choice_is_made = False
         for item in self.items:
             checked = item.requirement.check(text_preprocessing_result, user, params)
@@ -190,7 +190,7 @@ class ElseAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         if self.requirement.check(text_preprocessing_result, user, params):
             commands.extend(self.item.run(user, text_preprocessing_result, params) or [])
         elif self._else_item:
@@ -215,7 +215,7 @@ class ActionOfActions(Action):
 class CompositeAction(ActionOfActions):
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         for action in self.actions:
             commands.extend(action.run(user, text_preprocessing_result, params) or [])
         return commands
@@ -231,7 +231,7 @@ class NonRepeatingAction(ActionOfActions):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         last_ids = user.last_action_ids[self._last_action_ids_storage]
         all_indexes = list(range(self._actions_count))
         max_last_ids_count = self._actions_count - 1
@@ -259,7 +259,7 @@ class RandomAction(Action):
 
     def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
             params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = []
         pos = random.randint(0, len(self._raw_actions) - 1)
         action = self.actions[pos]
         commands.extend(action.run(user, text_preprocessing_result, params=params) or [])
