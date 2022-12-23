@@ -8,9 +8,9 @@ class Test_regexps_filler(IsolatedAsyncioTestCase):
     def setUp(self):
         self.items = {}
         self.items["exps"] = ["номер[а-я]*\.?\s?(\d+)", "n\.?\s?(\d+)", "nn\.?\s?(\d+)", "#\.?\s?(\d+)",
-                             "##\.?\s?(\d+)",
-                             "№\.?\s?(\d+)", "№№\.?\s?(\d+)", "платеж[а-я]+\.?\s?(\d+)", "поручен[а-я]+\.?\s?(\d+)",
-                             "п\\s?,\\s?п\.?\s?(\d+)", "п\\s?\\/\\s?п\.?\s?(\d+)"]
+                              "##\.?\s?(\d+)",
+                              "№\.?\s?(\d+)", "№№\.?\s?(\d+)", "платеж[а-я]+\.?\s?(\d+)", "поручен[а-я]+\.?\s?(\d+)",
+                              "п\\s?,\\s?п\.?\s?(\d+)", "п\\s?\\/\\s?п\.?\s?(\d+)"]
         self.items["delimiter"] = "|"
 
         self.filler = AllRegexpsFieldFiller(self.items)

@@ -262,7 +262,7 @@ class MainLoop(BaseMainLoop):
                 mq_message = consumer.poll()
             log_params["kafka_polling"] = poll_timer.msecs
             if poll_timer.msecs > self.MAX_LOG_TIME:
-                log(f"Long poll time: %(kafka_polling)s msecs\n", params=log_params, level="WARNING")
+                log("Long poll time: %(kafka_polling)s msecs\n", params=log_params, level="WARNING")
             if mq_message:
                 kwargs = {"kafka_key": kafka_key,
                           "mq_message": mq_message}
@@ -272,7 +272,7 @@ class MainLoop(BaseMainLoop):
             else:
                 await asyncio.sleep(self.no_kafka_messages_poll_time)  # callbacks can work here
 
-        log(f"Stop poll_kafka consumer.")
+        log("Stop poll_kafka consumer.")
 
     async def put_to_queue(self, mq_message, executable, kwargs):
         key = mq_message.key()

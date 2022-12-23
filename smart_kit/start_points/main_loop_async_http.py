@@ -23,7 +23,8 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
         self.app.add_routes([aiohttp.web.route('*', '/health', self.get_health_check)])
         self.app.add_routes([aiohttp.web.route('*', '/{tail:.*}', self.iterate)])
 
-    async def async_init(self):await self.db_adapter.connect()
+    async def async_init(self):
+        await self.db_adapter.connect()
 
     def get_db(self):
         db_adapter = db_adapter_factory(self.settings["template_settings"].get("db_adapter", {}))

@@ -109,16 +109,12 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_base(self):
         items = {"nodes": "test"}
         action = Action(items)
-<<<<<<< HEAD
         try:
             await action.run(None, None)
             result = False
         except NotImplementedError:
             result = True
         self.assertEqual(result, True)
-=======
-        self.assertRaises(NotImplementedError, action.run, None, None)
->>>>>>> release/2.0.0
 
     async def test_external(self):
         items = {"action": "test_action_key"}
@@ -149,7 +145,6 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await action.run(None, None), ["test action run"])
         items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
         action = RequirementAction(items)
-<<<<<<< HEAD
         result = await action.run(None, None)
         self.assertIsNone(result)
 
@@ -163,23 +158,6 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(choice_action.items[0], RequirementAction)
         result = await choice_action.run(None, None)
         self.assertEqual(result, "action2")
-=======
-        result = action.run(None, None)
-        self.assertEqual([], result)
-
-    def test_requirement_choice(self):
-        items = {
-            "requirement_actions": [
-                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action1"]}},
-                {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": ["action2"]}},
-            ]
-        }
-        choice_action = ChoiceAction(items)
-        self.assertIsInstance(choice_action.items, list)
-        self.assertIsInstance(choice_action.items[0], RequirementAction)
-        result = choice_action.run(None, None)
-        self.assertEqual(result, ["action2"])
->>>>>>> release/2.0.0
 
     async def test_requirement_choice_else(self):
         items = {
@@ -192,13 +170,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
-<<<<<<< HEAD
         result = await choice_action.run(None, None)
-        self.assertEqual(result, "action3")
-=======
-        result = choice_action.run(None, None)
         self.assertEqual(result, ["action3"])
->>>>>>> release/2.0.0
 
     async def test_string_action(self):
         expected = [Command("cmd_id", {"item": "template", "params": "params"})]
@@ -226,11 +199,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
-<<<<<<< HEAD
-        self.assertEqual(await action.run(user, None), "main_action")
-=======
-        self.assertEqual(action.run(user, None), ["main_action"])
->>>>>>> release/2.0.0
+        self.assertEqual(await action.run(user, None), ["main_action"])
 
     async def test_else_action_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -244,11 +213,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
-<<<<<<< HEAD
-        self.assertEqual(await action.run(user, None), "else_action")
-=======
-        self.assertEqual(action.run(user, None), ["else_action"])
->>>>>>> release/2.0.0
+        self.assertEqual(await action.run(user, None), ["else_action"])
 
     async def test_else_action_no_else_if(self):
         registered_factories[Requirement] = requirement_factory
@@ -261,11 +226,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
-<<<<<<< HEAD
-        self.assertEqual(await action.run(user, None), "main_action")
-=======
-        self.assertEqual(action.run(user, None), ["main_action"])
->>>>>>> release/2.0.0
+        self.assertEqual(await action.run(user, None), ["main_action"])
 
     async def test_else_action_no_else_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -278,13 +239,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
-<<<<<<< HEAD
         result = await action.run(user, None)
-        self.assertIsNone(result)
-=======
-        result = action.run(user, None)
         self.assertEqual([], result)
->>>>>>> release/2.0.0
 
     async def test_composite_action(self):
         registered_factories[Action] = action_factory
@@ -292,7 +248,6 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {"actions": [{"type": "action_mock"}, {"type": "action_mock"}]}
         action = CompositeAction(items)
-<<<<<<< HEAD
         result = await action.run(user, None)
         self.assertEqual(['test action run', 'test action run'], result)
 
@@ -302,13 +257,6 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "email": "heyho@sberbank.ru",
             "name": "Buratino"
         }
-=======
-        result = action.run(user, None)
-        self.assertEqual(["test action run", "test action run"], result)
-
-    def test_node_action_support_templates(self):
-        params = {"markup": "italic", "email": "heyho@sberbank.ru", "name": "Buratino"}
->>>>>>> release/2.0.0
         items = {
             "support_templates": {
                 "markup": "{%if markup=='italic'%}i{% else %}b{% endif %}",
@@ -328,16 +276,11 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         output = (await action.run(user=user, text_preprocessing_result=None))[0].payload["answer"]
         self.assertEqual(output, expected)
 
-<<<<<<< HEAD
     async def test_string_action_support_templates(self):
         params = {
             "answer_text": "some_text",
             "buttons_number": 3
         }
-=======
-    def test_string_action_support_templates(self):
-        params = {"answer_text": "some_text", "buttons_number": 3}
->>>>>>> release/2.0.0
         items = {
             "nodes": {
                 "answer": "{{ answer_text }}",
@@ -355,17 +298,12 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         output = (await action.run(user=user, text_preprocessing_result=None))[0].payload
         self.assertEqual(output, expected)
 
-<<<<<<< HEAD
     async def test_push_action(self):
         params = {
             "day_time": "morning",
             "deep_link_url": "some_url",
             "icon_url": "some_icon_url"
         }
-=======
-    def test_push_action(self):
-        params = {"day_time": "morning", "deep_link_url": "some_url", "icon_url": "some_icon_url"}
->>>>>>> release/2.0.0
         settings = {"template_settings": {"project_id": "project_id"}}
         items = {
             "request_data": {"kafka_extraHeaders": {"request-id": "{{ 1 }}"}},
@@ -992,16 +930,9 @@ class CounterCopyActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = {"src": counter_src, "dst": counter_dst}
         items = {"source": "src", "destination": "dst"}
         action = CounterCopyAction(items)
-<<<<<<< HEAD
         await action.run(user, None)
         user.counters["dst"].set.assert_called_once_with(user.counters["src"].value,
                                                          action.reset_time, action.time_shift)
-=======
-        action.run(user, None)
-        user.counters["dst"].set.assert_called_once_with(
-            user.counters["src"].value, action.reset_time, action.time_shift
-        )
->>>>>>> release/2.0.0
 
 
 class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
@@ -1041,18 +972,9 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(expected[0]._name, result[0].name)
         self.assertEqual(expected[0].raw, result[0].raw)
 
-<<<<<<< HEAD
     async def test_typical_answer_with_pers_info(self):
         expected = [MagicMock(_name="ANSWER_TO_USER", raw={'messageName': 'ANSWER_TO_USER',
                                                            'payload': {'answer': 'Ivan Ivanov'}})]
-=======
-    def test_typical_answer_with_pers_info(self):
-        expected = [
-            MagicMock(
-                _name="ANSWER_TO_USER", raw={"messageName": "ANSWER_TO_USER", "payload": {"answer": "Ivan Ivanov"}}
-            )
-        ]
->>>>>>> release/2.0.0
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         user.message = PicklableMock()
@@ -1241,11 +1163,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in expect_arr)
             self.assertFalse(json.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
 
-<<<<<<< HEAD
     async def test_typical_answer_without_items(self):
-=======
-    def test_typical_answer_without_items(self):
->>>>>>> release/2.0.0
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         user.message = PicklableMock()
@@ -1499,16 +1417,11 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockParametrizer(user, {})
         items = {"type": "sdk_answer_to_user", "items": [{"type": "bubble_text", "text": "42"}]}
         action = SDKAnswerToUser(items)
-<<<<<<< HEAD
         result = await action.run(user, None)
-        self.assertDictEqual(result[0].raw, {'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': '42', 'markdown': True}}]}})
-=======
-        result = action.run(user, None)
         self.assertDictEqual(
             result[0].raw,
-            {"messageName": "ANSWER_TO_USER", "payload": {"items": [{"bubble": {"text": "42", "markdown": True}}]}},
+            {'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': '42', 'markdown': True}}]}}
         )
->>>>>>> release/2.0.0
 
     async def test_SDKItemAnswer_suggestions_template(self):
 
@@ -1539,13 +1452,8 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                     "suggestions": {
                         "buttons": [{"title": "some title", "action": {"type": "text", "text": "some text"}}]
                     }
-<<<<<<< HEAD
                 }
             }
-=======
-                },
-            },
->>>>>>> release/2.0.0
         )
 
 

@@ -23,7 +23,7 @@ class AsyncKafkaPublisher(KafkaPublisher):
             if key is not None:
                 producer_params["key"] = key
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
-        except BufferError as e:
+        except BufferError:
             params = {
                 "queue_amount": len(self._producer),
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE
@@ -45,7 +45,7 @@ class AsyncKafkaPublisher(KafkaPublisher):
             if key is not None:
                 producer_params["key"] = key
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
-        except BufferError as e:
+        except BufferError:
             params = {
                 "queue_amount": len(self._producer),
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE

@@ -275,7 +275,6 @@ class SmartAppFromMessage:
         return json.dumps(self._value, ensure_ascii=False)
 
 
-
 basic_error_message = SmartAppFromMessage(
     {
         "messageName": "ERROR",

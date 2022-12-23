@@ -29,7 +29,7 @@ class RequirementFiller(RequirementAction):
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
     async def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+                      user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
         if await self.requirement.check(text_preprocessing_result, user, params):
             return await self.internal_item.run(user, text_preprocessing_result, params)
 

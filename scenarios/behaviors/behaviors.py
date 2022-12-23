@@ -89,7 +89,7 @@ class Behaviors:
                 log_const.CHOSEN_SCENARIO_VALUE: scenario_id,
                 "expiration_time": int(expiration_time),
             },
-        )
+            )
 
         behavior_description = self.descriptions[behavior_id]
         # add timer with now + behavior.timeout eval time
@@ -145,7 +145,8 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = await behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.success not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
@@ -186,7 +187,8 @@ class Behaviors:
                 callback_id, "behavior_timeout", monitoring.counter_behavior_timeout, "timeout", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = await behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.timeout not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
@@ -211,7 +213,8 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = await behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log("behavior.misstate not found valid callback"
                 f" for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",

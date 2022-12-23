@@ -113,7 +113,12 @@ class FormFillingScenario(BaseScenario):
                                                                       text_normalization_result, user, params))
         return result
 
-    async def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params) -> List[Command]:
+    async def _validate_extracted_data(self,
+                                       user,
+                                       text_preprocessing_result,
+                                       form,
+                                       data_extracted,
+                                       params) -> List[Command]:
         error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)

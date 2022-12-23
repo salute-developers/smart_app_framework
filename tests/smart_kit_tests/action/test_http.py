@@ -69,7 +69,9 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             "value": "my_value"
         }
         await HTTPRequestAction(items).run(self.user, None, params)
-        request_mock.assert_called_with(url="https://my.url.com", method='POST', timeout=ClientTimeout(3), json={"param": "my_value"})
+        request_mock.assert_called_with(
+            url="https://my.url.com", method='POST', timeout=ClientTimeout(3), json={"param": "my_value"}
+        )
 
     @patch('aiohttp.request')
     async def test_headers_fix(self, request_mock):

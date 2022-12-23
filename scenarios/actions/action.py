@@ -261,12 +261,13 @@ class RunScenarioAction(Action):
         scenario_id = self.scenario.render(params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
-            return await scenario.run(text_preprocessing_result, user, params)
+            commands.extend(await scenario.run(text_preprocessing_result, user, params))
+        return commands
 
 
 class RunLastScenarioAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
