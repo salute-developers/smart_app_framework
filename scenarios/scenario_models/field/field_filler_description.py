@@ -2,11 +2,11 @@ import collections
 import json
 import operator
 import re
+from functools import cached_property
 from itertools import islice
 from typing import Dict, List, Union, Optional, Any, Callable, Pattern, Set
 
 from jinja2 import exceptions as jexcept
-from lazy import lazy
 
 import core.basic_models.classifiers.classifiers_constants as cls_const
 import core.logging.logger_constants as core_log_const
@@ -416,8 +416,7 @@ class DatePeriodFiller(FieldFillerDescription):
 
         is_determined: bool = False
         is_error: bool = False
-        if not (begin_str == '' or begin_str == 'error'
-                or end_str == '' or end_str == 'error'):
+        if not (begin_str == '' or begin_str == 'error' or end_str == '' or end_str == 'error'):
             is_determined = True
 
         if begin_str == 'error' or end_str == 'error':
@@ -543,7 +542,7 @@ class ClassifierFiller(FieldFillerDescription):
         self._classifier = items["classifier"]
         self._cls_const_answer_key = cls_const.ANSWER_KEY
 
-    @lazy
+    @cached_property
     def classifier(self) -> Classifier:
         return ExternalClassifier(self._classifier)
 
@@ -573,6 +572,6 @@ class ClassifierFiller(FieldFillerDescription):
 
 class ClassifierFillerMeta(ClassifierFiller):
 
-    def _get_result(self, answers: List[Dict[str, Union[str, float, bool]]]) \
-            -> List[Dict[str, Union[str, float, bool]]]:
+    def _get_result(self,
+                    answers: List[Dict[str, Union[str, float, bool]]]) -> List[Dict[str, Union[str, float, bool]]]:
         return answers

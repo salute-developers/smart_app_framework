@@ -29,7 +29,7 @@ class RequirementTest1(unittest.IsolatedAsyncioTestCase):
             obj2 = device_requirements.PlatformTypeRequirement("", self.test_id)
             self.assertTrue(obj2.items == {})
         with self.assertRaises(KeyError):
-            obj3 = device_requirements.PlatformTypeRequirement(self.test_items2, self.test_id)
+            _ = device_requirements.PlatformTypeRequirement(self.test_items2, self.test_id)
 
     async def test_platform_type_requirement_check(self):
         obj1 = device_requirements.PlatformTypeRequirement(self.test_items1, self.test_id)
@@ -47,4 +47,3 @@ class RequirementTest2(unittest.TestCase):
         obj1 = device_requirements.BasicVersionRequirement(self.test_items1, self.test_id1)
         self.assertTrue(obj1._operator == self.test_items1["operator"])
         self.assertTrue(obj1.id == self.test_id1)
-

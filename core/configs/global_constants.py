@@ -3,6 +3,7 @@ import core.names.field as core_field
 CALLBACK_ID_HEADER = "app_callback_id"
 LINK_BEHAVIOR_FLAG = "link_previous_behavior"
 KAFKA = "kafka"
+KAFKA_REPLY_TOPIC = "kafka_replyTopic"
 
 ORIGINAL_INTENT = "original_intent"
 NEW_SESSION = "new_session"

@@ -49,6 +49,6 @@ def get_top_malloc(trace_limit=3):
 
 
 if __name__ == "__main__":
-    while 1 :
+    while 1:
         print(show_most_common_types())
         time.sleep(1)

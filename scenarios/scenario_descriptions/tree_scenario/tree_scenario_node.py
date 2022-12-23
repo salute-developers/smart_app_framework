@@ -1,5 +1,5 @@
 # coding: utf-8
-from lazy import lazy
+from functools import cached_property
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.requirement.basic_requirements import Requirement
@@ -15,12 +15,12 @@ class TreeScenarioNode:
         self._actions = items.get("actions")
         self.available_nodes = items.get("available_nodes")
 
-    @lazy
+    @cached_property
     @factory(Requirement)
     def requirement(self):
         return self._requirement
 
-    @lazy
+    @cached_property
     @list_factory(Action)
     def actions(self):
         return self._actions

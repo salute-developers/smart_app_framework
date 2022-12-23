@@ -36,7 +36,8 @@ class BaseConfig:
         items = self.registered_repositories
         return {key: items[key].data for key in items}
 
-    def _override_repositories(self, main_rep: List[BaseRepository], new_repo: List[BaseRepository]) -> List[BaseRepository]:
+    def _override_repositories(self, main_rep: List[BaseRepository],
+                               new_repo: List[BaseRepository]) -> List[BaseRepository]:
         """
         Метод предназначе для переопределения источников для чтения по умолчанию на
         пользовательские

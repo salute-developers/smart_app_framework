@@ -10,7 +10,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
-            "values": ["DISTRICT", "REGION"]
+            "values": ["DISTRICT", "REGION"],
         }
         token_val = {
             'value': 'Амадора',
@@ -22,7 +22,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -31,7 +31,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
-            "values": ["DISTRICT", "CITY"]
+            "values": ["DISTRICT", "CITY"],
         }
         token_val = {
             'value': 'Амадора',
@@ -43,7 +43,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertTrue(await requirement.check(token_val))
@@ -52,7 +52,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
-            "values": []
+            "values": [],
         }
         token_val = {
             'value': 'Амадора',
@@ -64,7 +64,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
             'country_hidden': False,
-            'locality_type': []
+            'locality_type': [],
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -73,7 +73,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
-            "values": []
+            "values": [],
         }
         token_val = {
             'value': 'Амадора',
@@ -85,7 +85,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
             'country_hidden': False,
-            'locality_type': None
+            'locality_type': None,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -94,7 +94,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "value",
-            "values": 'cba'
+            "values": "cba",
         }
         token_val = {
             'value': 'abc',
@@ -105,7 +105,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -114,7 +114,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "country_hidden",
-            "values": [1, 2, 3]
+            "values": [1, 2, 3],
         }
         token_val = {
             'value': 'Амадора',
@@ -125,7 +125,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -134,7 +134,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'capital',
-            "values": [-9.23083]
+            "values": [-9.23083],
         }
         token_val = {
             'value': 'Амадора',
@@ -145,7 +145,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))
@@ -154,7 +154,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'timezone',
-            "values": [[[None, 1.0]]]
+            "values": [[[None, 1.0]]],
         }
         token_val = {
             'value': 'Амадора',
@@ -174,7 +174,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'timezone',
-            "values": [[[1.0, None]]]
+            "values": [[[1.0, None]]],
         }
         token_val = {
             'value': 'Амадора',
@@ -185,7 +185,7 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'timezone': [[None, 1.0]],
             'currency': ['EUR', 'евро'],
             'country': 'Португалия',
-            'country_hidden': False
+            'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
         self.assertFalse(await requirement.check(token_val))

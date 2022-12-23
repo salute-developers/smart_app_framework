@@ -1,35 +1,37 @@
-# coding=utf-8
+import asyncio
 import cProfile
+import concurrent.futures
 import gc
 import hashlib
 import json
 import pstats
 import signal
-import concurrent.futures
+import time
 import tracemalloc
-import asyncio
-from functools import lru_cache
+from functools import lru_cache, cached_property
+from typing import Union, Dict, Optional
 
-from confluent_kafka.cimpl import KafkaException
+from confluent_kafka.cimpl import KafkaException, Message as KafkaMessage
 
 import scenarios.logging.logger_constants as log_const
+from core.basic_models.actions.command import Command
+from core.configs.global_constants import KAFKA_REPLY_TOPIC
 from core.logging.logger_utils import log, UID_STR, MESSAGE_ID_STR
-
 from core.message.from_message import SmartAppFromMessage
+from core.model.base_user import BaseUser
+from core.monitoring.monitoring import monitoring
 from core.mq.kafka.async_kafka_publisher import AsyncKafkaPublisher
 from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.stats_timer import StatsTimer
-from core.basic_models.actions.command import Command
-from core.utils.utils import current_time_ms
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.names import message_names
+from smart_kit.names.message_names import ANSWER_TO_USER, RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.start_points.base_main_loop import BaseMainLoop
-from core.monitoring.monitoring import monitoring
 from smart_kit.start_points.constants import WORKER_EXCEPTION, POD_UP
 
 
@@ -82,10 +84,8 @@ class MainLoop(BaseMainLoop):
 
             consumers = {}
             publishers = {}
-            log(
-                "%(class_name)s START CONSUMERS/PUBLISHERS CREATE",
-                params={"class_name": self.__class__.__name__}, level="WARNING"
-            )
+            log("%(class_name)s START CONSUMERS/PUBLISHERS CREATE",
+                params={"class_name": self.__class__.__name__}, level="WARNING")
             kafka_config_copy = pickle_deepcopy(kafka_config)
             for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
@@ -317,7 +317,12 @@ class MainLoop(BaseMainLoop):
 
         for command in commands:
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
-            request.update_empty_items({"topic_key": topic_key, "kafka_key": kafka_key})
+            request.update_empty_items({
+                "kafka_key": kafka_key,
+                "topic_key": topic_key,
+                "topic": user.private_vars.get(KAFKA_REPLY_TOPIC) if command.name == ANSWER_TO_USER else None
+            })
+
             to_message = get_to_message(command.name)
             answer = to_message(command=command, message=message, request=request,
                                 masking_fields=self.masking_fields,
@@ -331,209 +336,203 @@ class MainLoop(BaseMainLoop):
 
         return answers
 
-    def _get_timeout_from_message(self, orig_message_raw, callback_id, headers):
-        orig_message_raw = json.dumps(orig_message_raw)
+    def _get_timeout_from_message(self, orig_message_raw: Dict, callback_id, headers):
         timeout_from_message = SmartAppFromMessage(orig_message_raw, headers=headers,
                                                    masking_fields=self.masking_fields,
                                                    validators=self.from_msg_validators)
         timeout_from_message.callback_id = callback_id
         return timeout_from_message
 
-    def _get_topic_key(self, mq_message, kafka_key):
+    def _get_topic_key(self, mq_message: KafkaMessage, kafka_key):
         topic_names_2_key = self._topic_names_2_key(kafka_key)
         return self.default_topic_key(kafka_key) or topic_names_2_key[mq_message.topic()]
 
-    async def process_message(self, mq_message, consumer, kafka_key, stats, log_params):
-        user = None
+    async def process_message(self, mq_message: KafkaMessage, consumer, kafka_key, stats):
+        topic_key = self._get_topic_key(mq_message, kafka_key)
+
         save_tries = 0
-        user_save_ok = False
-        skip_timeout = False
+        user_save_no_collisions = False
+        user = None
         db_uid = None
-        validation_failed = False
         message = None
-        while save_tries < self.user_save_collisions_tries and not user_save_ok:
+        while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
             save_tries += 1
-            message_value = mq_message.value()
-            message = SmartAppFromMessage(message_value, headers=mq_message.headers(),
+            message_value = json.loads(mq_message.value())
+            message = SmartAppFromMessage(message_value,
+                                          headers=mq_message.headers(),
                                           masking_fields=self.masking_fields,
                                           creation_time=consumer.get_msg_create_time(mq_message))
 
             if message.validate():
-                log(
-                    "Incoming RAW message: %(message)s", params={"message": message.masked_value},
-                    level="DEBUG")
                 waiting_message_time = 0
                 if message.creation_time:
-                    waiting_message_time = current_time_ms() - message.creation_time
-                    stats += f"Waiting message: {waiting_message_time} msecs\n"
-                    log_params["waiting_message"] = waiting_message_time
+                    waiting_message_time = time.time() * 1000 - message.creation_time
+                    stats += "Waiting message: {} msecs\n".format(waiting_message_time)
 
-                stats += f"Mid: {message.incremental_id}\n"
-                log_params[MESSAGE_ID_STR] = message.incremental_id
-
+                stats += "Mid: {}\n".format(message.incremental_id)
                 monitoring.sampling_mq_waiting_time(self.app_name, waiting_message_time / 1000)
 
-                if self._is_message_timeout_to_skip(message, waiting_message_time):
-                    skip_timeout = True
-                    break
-
-                db_uid = message.db_uid
-                with StatsTimer() as load_timer:
-                    user = await self.load_user(db_uid, message)
-                self.check_message_key(message, mq_message.key(), user)
-                stats += f"Loading user time from DB time: {load_timer.msecs} msecs\n"
-                log_params["user_loading"] = load_timer.msecs
-                monitoring.sampling_load_time(self.app_name, load_timer.secs)
-
-                self._incoming_message_log(user, mq_message, message, kafka_key, waiting_message_time)
-
-                with StatsTimer() as script_timer:
-                    commands = await self.model.answer(message, user)
-
-                topic_key = self._get_topic_key(mq_message, kafka_key)
-                answers = self._generate_answers(user=user, commands=commands, message=message, topic_key=topic_key,
-                                                 kafka_key=kafka_key)
-
-                stats += f"Script time: {script_timer.msecs} msecs\n"
-                log_params["script_time"] = script_timer.msecs
-                monitoring.sampling_script_time(self.app_name, script_timer.secs)
-
-                with StatsTimer() as save_timer:
-                    user_save_ok = await self.save_user(db_uid, user, message)
-
-                stats += f"Saving user to DB time: {save_timer.msecs} msecs\n"
-                log_params["user_saving"] = save_timer.msecs
-                monitoring.sampling_save_time(self.app_name, save_timer.secs)
-                if not user_save_ok:
-                    log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
-                        user=user,
-                        params={log_const.KEY_NAME: "ignite_collision",
-                                "db_uid": db_uid,
-                                "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace'),
-                                "message_partition": mq_message.partition(),
-                                "kafka_key": kafka_key,
-                                "uid": user.id,
-                                "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                # check_message_key
+                message_key = self._get_str_message_key(mq_message.key(), incremental_id=message.incremental_id,
+                                                        uid=message.uid, user=user)
+                valid_key = self._get_valid_message_key(message)
+                if message_key != valid_key:
+                    log(f"Failed to check Kafka message %(message_name)s key {message_key} != {valid_key}",
+                        params={
+                            log_const.KEY_NAME: "check_kafka_key_validation",
+                            MESSAGE_ID_STR: message.incremental_id,
+                            UID_STR: message.uid,
+                            "kafka_key": kafka_key,
+                            "message_key": message_key,
+                            "message_name": message.type,
+                        }, user=user,
                         level="WARNING")
-                    continue
+                    if self.settings["template_settings"].get("wrong_key_resend", True):
+                        dest_topic = mq_message.topic()
+                        self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
+                                                                 mq_message.headers())
+                        log("Kafka message %(message_name)s with invalid Kafka message key %(message_key)s "
+                            f"resend again with a valid key: '{valid_key}' to '{dest_topic}'",
+                            params={
+                                log_const.KEY_NAME: "kafka_message_key_recovery",
+                                MESSAGE_ID_STR: message.incremental_id,
+                                UID_STR: message.uid,
+                                "kafka_key": kafka_key,
+                                "message_key": message_key,
+                                "message_name": message.type,
+                            }, user=user,
+                            level=self.settings["template_settings"].get("kafka_message_key_recovery_log_level",
+                                                                         "DEBUG"))
+                        break
+                else:
+                    log("INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: "
+                        "%(incoming_data)s",
+                        params={log_const.KEY_NAME: "incoming_message",
+                                "topic": mq_message.topic(),
+                                "message_partition": mq_message.partition(),
+                                "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace'),
+                                "message_id": message.incremental_id,
+                                "kafka_key": kafka_key,
+                                "incoming_data": str(message.masked_value),
+                                "length": len(message.as_str),
+                                "headers": mq_message.headers(),
+                                "waiting_message": waiting_message_time,
+                                "surface": message.device.surface,
+                                MESSAGE_ID_STR: message.incremental_id},
+                        user=user)
 
-                if answers:
+                    db_uid = message.db_uid
+                    with StatsTimer() as load_timer:
+                        user = await self.load_user(db_uid, message)
+                    monitoring.sampling_load_time(self.app_name, load_timer.secs)
+                    stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+                    if KAFKA_REPLY_TOPIC in message.headers and \
+                            message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
+                        if user.private_vars.get(KAFKA_REPLY_TOPIC):
+                            log("MainLoop.iterate: kafka_replyTopic collision",
+                                params={log_const.KEY_NAME: "ignite_collision",
+                                        "db_uid": db_uid,
+                                        "message_key": mq_message.key(),
+                                        "message_partition": mq_message.partition(),
+                                        "kafka_key": kafka_key,
+                                        "uid": user.id,
+                                        "saved_topic": user.private_vars.get(KAFKA_REPLY_TOPIC),
+                                        "current_topic": message.headers[KAFKA_REPLY_TOPIC]},
+                                user=user, level="WARNING")
+                        user.private_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
+                    with StatsTimer() as script_timer:
+                        commands = await self.model.answer(message, user)
+
+                    answers = self._generate_answers(user=user, commands=commands, message=message,
+                                                     topic_key=topic_key,
+                                                     kafka_key=kafka_key)
+                    monitoring.sampling_script_time(self.app_name, script_timer.secs)
+                    stats += "Script time: {} msecs\n".format(script_timer.msecs)
+
+                    with StatsTimer() as save_timer:
+                        user_save_no_collisions = await self.save_user(db_uid, user, message)
+
+                    monitoring.sampling_save_time(self.app_name, save_timer.secs)
+                    stats += "Saving time: {} msecs\n".format(save_timer.msecs)
+                    if not user_save_no_collisions:
+                        log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
+                            user=user,
+                            params={log_const.KEY_NAME: "ignite_collision",
+                                    "db_uid": db_uid,
+                                    "message_key": mq_message.key(),
+                                    "message_partition": mq_message.partition(),
+                                    "kafka_key": kafka_key,
+                                    "uid": user.id,
+                                    "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
+                            level="WARNING")
+                        continue
+
                     self.save_behavior_timeouts(user, mq_message, kafka_key)
 
-                if answers:
-                    for answer in answers:
-                        with StatsTimer() as publish_timer:
-                            self._send_request(user, answer, mq_message)
-                            monitoring.counter_outgoing(self.app_name, answer.command.name, answer, user)
-                        stats += f"Publishing to Kafka time: {publish_timer.msecs} msecs\n"
-                        log_params["kafka_publishing"] = publish_timer.msecs
+                    if mq_message.headers() is None:
+                        mq_message.set_headers([])
+
+                    if answers:
+                        for answer in answers:
+                            with StatsTimer() as publish_timer:
+                                self._send_request(user, answer, mq_message)
+                            stats += "Publishing time: {} msecs".format(publish_timer.msecs)
+                            log(stats, user=user)
             else:
-                validation_failed = True
-                data = None
-                mid = None
                 try:
                     data = message.masked_value
-                    mid = message.incremental_id
-                except:
-                    pass
-                log(f"Message validation failed, skip message handling.",
+                except Exception:
+                    data = "<DATA FORMAT ERROR>"
+                log("Message validation failed, skip message handling.",
                     params={log_const.KEY_NAME: "invalid_message",
                             "data": data,
-                            MESSAGE_ID_STR: mid}, level="ERROR")
+                            "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
+                    level="ERROR")
                 monitoring.counter_invalid_message(self.app_name)
-                break
-        if stats:
-            log(stats, user=user, params=log_params)
-
-        if user and not user_save_ok and not validation_failed and not skip_timeout:
+        if user and not user_save_no_collisions:
             log("MainLoop.iterate: db_save collision all tries left on uid %(uid)s db_version %(db_version)s.",
                 user=user,
                 params={log_const.KEY_NAME: "ignite_collision",
                         "db_uid": db_uid,
-                        "message_key": (mq_message.key() or b"").decode('utf-8', 'backslashreplace'),
+                        "message_key": mq_message.key(),
                         "message_partition": mq_message.partition(),
                         "kafka_key": kafka_key,
                         "uid": user.id,
-                        "db_version": str(user.variables.get(user.USER_DB_VERSION))},
+                        "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
                 level="WARNING")
-            await self.postprocessor.postprocess(user, message)
+            self.postprocessor.postprocess(user, message)
             monitoring.counter_save_collision_tries_left(self.app_name)
-
         consumer.commit_offset(mq_message)
 
-        if user and message and message.callback_id:
-            # --(не понятно причем тут таймеры колбеков, когда была обработка сообщения)--
-            # теперь понятно(нужно прибить таймер если вернулся колбек, иначе он сработает позже вхолостую)
-            self.remove_timer(message)
+    def _get_valid_message_key(self, from_message: SmartAppFromMessage):
+        return "_".join([i for i in [from_message.channel, from_message.sub, from_message.uid] if i])
 
-    def remove_timer(self, kafka_message):
-        if kafka_message and kafka_message.has_callback_id:
-            timer = self._timers.pop(kafka_message.callback_id, None)
-            if timer is not None:
-                log(f"Removing aio timer for callback {kafka_message.callback_id}. Have {len(self._timers)} running "
-                    f"timers.", level="DEBUG")
-                timer.cancel()
-
-    def _is_message_timeout_to_skip(self, message, waiting_message_time):
-        # Returns True if timeout is found
-        log_level = None
-        make_break = False
-
-        if waiting_message_time >= self.skip_delay:
-            # Too old message
-            log_level = "ERROR"
-            monitoring.counter_mq_skip_waiting(self.app_name)
-            make_break = True
-
-        elif waiting_message_time >= self.warning_delay:
-            # Warn, but continue message processing
-            log_level = "WARNING"
-            monitoring.counter_mq_long_waiting(self.app_name)
-
-        if log_level is not None:
-            log(
-                f"Out of time message %(waiting_message_time)s msecs, "
-                f"mid: %(mid)s {message.as_dict}",
-                params={
-                    log_const.KEY_NAME: "waiting_message_timeout",
-                    "waiting_message_time": waiting_message_time,
-                    "mid": message.incremental_id
-                },
-                level=log_level)
-        return make_break
-
-    def check_message_key(self, from_message, message_key, user):
-        sub = from_message.sub
-        channel = from_message.channel
-        uid = from_message.uid
-        valid_key = "_".join([i for i in [channel, sub, uid] if i])
-
+    def _get_str_message_key(self, message_key: Union[str, bytes], incremental_id: int, uid: str, user: BaseUser):
+        message_key = message_key or b""
         try:
-            message_key = message_key or b""
             if isinstance(message_key, bytes):
                 message_key = message_key.decode()
         except UnicodeDecodeError:
-            log(f"Decode error to check Kafka message key {message_key}",
+            log(f"MainLoop._get_str_message_key: Decode error of Kafka message key {message_key}",
                 params={log_const.KEY_NAME: "check_kafka_key_error",
-                        MESSAGE_ID_STR: from_message.incremental_id,
-                        UID_STR: uid
-                        }, user=user, level="ERROR")
+                        MESSAGE_ID_STR: incremental_id,
+                        UID_STR: uid},
+                user=user, level="ERROR")
 
-        if message_key != valid_key:
-            log(f"Failed to check Kafka message key {message_key} != {valid_key}",
-                params={
-                    log_const.KEY_NAME: "check_kafka_key_validation",
-                    MESSAGE_ID_STR: from_message.incremental_id,
-                    UID_STR: uid
-                }, user=user,
-                level="WARNING")
+        return message_key
 
-    def _send_request(self, user, answer, mq_message):
+    def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
+        kafka_broker_settings = self.settings["template_settings"].get(
+            "route_kafka_broker"
+        ) or []
+
         request = answer.request
 
-        for kb_setting in self.kafka_broker_settings:
-            if kb_setting["from_channel"] == answer.incoming_message.channel and \
-                    kb_setting["to_topic"] == request.topic_key:
+        for kb_setting in kafka_broker_settings:
+            if (
+                    kb_setting["from_channel"] == answer.incoming_message.channel and
+                    kb_setting["to_topic"] == request.topic_key
+            ):
                 request.kafka_key = kb_setting["route_to_broker"]
 
         request_params = dict()
@@ -548,9 +547,11 @@ class MainLoop(BaseMainLoop):
         log("OUTGOING TO TOPIC_KEY: %(topic_key)s DATA: %(data)s",
             params={log_const.KEY_NAME: "outgoing_message",
                     "topic_key": request.topic_key,
-                    "headers": str(request._get_new_headers(original_mq_message)),
+                    "headers": request._get_new_headers(original_mq_message),
                     "data": answer.masked_value,
-                    "length": len(answer.value)}, user=user)
+                    "length": len(answer.value),
+                    "message_key": (original_mq_message.key() or b"").decode('utf-8', 'backslashreplace')},
+            user=user)
 
     @lru_cache()
     def _topic_names_2_key(self, kafka_key):
@@ -560,125 +561,30 @@ class MainLoop(BaseMainLoop):
     def default_topic_key(self, kafka_key):
         return self.settings["kafka"]["template-engine"][kafka_key].get("default_topic_key")
 
-    def save_behavior_timeouts(self, user, mq_message, kafka_key):
-        for (behavior_delay, callback_id) in user.behaviors.get_behavior_timeouts():
-            log("%(class_name)s: adding local_timeout on callback %(callback_id)s with delay in %(delay)s seconds.",
+    @cached_property
+    def masking_fields(self):
+        return self.settings["template_settings"].get("masking_fields")
+
+    def save_behavior_timeouts(self, user, mq_message: KafkaMessage, kafka_key):
+        for i, (expire_time_us, callback_id) in enumerate(user.behaviors.get_behavior_timeouts()):
+            # two behaviors can be created in one query, so we need add some salt to make theirs key unique
+            unique_key = expire_time_us + i * 1e-5
+            log("%(class_name)s: adding local_timeout"
+                f" on callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s with timeout on %(unique_key)s",
                 params={log_const.KEY_NAME: "adding_local_timeout",
                         "class_name": self.__class__.__name__,
-                        "callback_id": callback_id,
-                        "delay": behavior_delay})
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id,
+                        "unique_key": unique_key})
+            self.behaviors_timeouts.push(unique_key, self.behaviors_timeouts_value_cls._make(
+                (user.message.db_uid, callback_id, mq_message, kafka_key)))
 
-            kwargs = {"kafka_key": kafka_key,
-                      "mq_message": mq_message,
-                      "callback_id": callback_id,
-                      "db_uid": user.message.db_uid}
-
-            self._timers[callback_id] = self.loop.call_later(behavior_delay,
-                                                             self.loop.create_task,
-                                                             self.put_to_queue(mq_message,
-                                                                               self.do_behavior_timeout,
-                                                                               kwargs)
-                                                             )
+        for callback_id in user.behaviors.get_returned_callbacks():
+            log(f"%(class_name)s: removing local_timeout on callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
+                params={log_const.KEY_NAME: "removing_local_timeout",
+                        "class_name": self.__class__.__name__,
+                        log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
+            self.behaviors_timeouts.remove(callback_id)
 
     def stop(self, signum, frame):
         log("Stop signal handler!")
         self.is_work = False
-
-    async def do_behavior_timeout_handle(self, kwargs, worker_kwargs):
-        mq_message, kafka_key = kwargs.get("mq_message"), kwargs.get("kafka_key")
-        callback_id, db_uid = kwargs.get("callback_id"), kwargs.get("db_uid")
-
-        self.concurrent_messages += 1
-        try:
-            await self.do_behavior_timeout(db_uid, callback_id, mq_message, kafka_key)
-        except:
-            log("%(class_name)s error.", params={log_const.KEY_NAME: "error_handling_timeout",
-                                                 "class_name": self.__class__.__name__,
-                                                 log_const.REQUEST_VALUE: str(mq_message.value())},
-                level="ERROR", exc_info=True)
-        finally:
-            self.concurrent_messages -= 1
-
-    async def do_behavior_timeout(self, db_uid, callback_id, mq_message, kafka_key):
-        save_tries = 0
-        user_save_ok = False
-        answers = []
-        user = None
-        timeout_from_message = None
-        callback_found = False
-        while save_tries < self.user_save_collisions_tries and not user_save_ok:
-            callback_found = False
-            save_tries += 1
-            orig_message_raw = json.loads(mq_message.value())
-            orig_message_raw[SmartAppFromMessage.MESSAGE_NAME] = message_names.LOCAL_TIMEOUT
-            timeout_from_message = self._get_timeout_from_message(orig_message_raw, callback_id,
-                                                                  headers=mq_message.headers())
-            log(f"MainLoop.do_behavior_timeout: handling callback {callback_id}. for db_uid {db_uid}. try "
-                f"{save_tries}.", params={log_const.KEY_NAME: "MainLoop"})
-
-            user = await self.load_user(db_uid, timeout_from_message)
-            # TODO:  not to load user to check behaviors.has_callback ?
-
-            if user.behaviors.has_callback(callback_id):
-                callback_found = True
-                commands = await self.model.answer(timeout_from_message, user)
-                topic_key = self._get_topic_key(mq_message, kafka_key)
-                answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
-                                                 topic_key=topic_key,
-                                                 kafka_key=kafka_key)
-
-                user_save_ok = await self.save_user(db_uid, user, mq_message)
-
-                if not user_save_ok:
-                    log("MainLoop.do_behavior_timeout: save user got collision on uid %(uid)s db_version %("
-                        "db_version)s.",
-                        user=user,
-                        params={log_const.KEY_NAME: "ignite_collision",
-                                "db_uid": db_uid,
-                                "message_key": mq_message.key(),
-                                "kafka_key": kafka_key,
-                                "uid": user.id,
-                                "db_version": str(user.variables.get(user.USER_DB_VERSION))},
-                        level="WARNING")
-            else:
-                break
-
-        self.remove_timer(timeout_from_message)
-
-        if not user_save_ok and callback_found:
-            log("MainLoop.do_behavior_timeout: db_save collision all tries left on uid %(uid)s db_version "
-                "%(db_version)s.",
-                user=user,
-                params={log_const.KEY_NAME: "ignite_collision",
-                        "db_uid": db_uid,
-                        "message_key": mq_message.key(),
-                        "message_partition": mq_message.partition(),
-                        "kafka_key": kafka_key,
-                        "uid": user.id,
-                        "db_version": str(user.variables.get(user.USER_DB_VERSION))},
-                level="WARNING")
-
-            monitoring.counter_save_collision_tries_left(self.app_name)
-        if user_save_ok:
-            self.save_behavior_timeouts(user, mq_message, kafka_key)
-            for answer in answers:
-                self._send_request(user, answer, mq_message)
-
-    def _incoming_message_log(self, user, mq_message, message, kafka_key, waiting_message_time):
-        log(
-            "INCOMING FROM TOPIC: %(topic)s partition %(message_partition)s HEADERS: %(headers)s DATA: %("
-            "incoming_data)s",
-            params={log_const.KEY_NAME: "incoming_message",
-                    "topic": mq_message.topic(),
-                    "message_partition": mq_message.partition(),
-                    "message_key": mq_message.key(),
-                    "message_id": message.incremental_id,
-                    "kafka_key": kafka_key,
-                    "incoming_data": str(message.masked_value),
-                    "length": len(message.value),
-                    "headers": str(mq_message.headers()),
-                    "waiting_message": waiting_message_time,
-                    "surface": message.device.surface,
-                    MESSAGE_ID_STR: message.incremental_id},
-            user=user
-        )

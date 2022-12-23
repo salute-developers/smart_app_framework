@@ -1,5 +1,5 @@
 import json
-from lazy import lazy
+from functools import cached_property
 
 from core.logging.logger_utils import log
 from core.model.field import Field
@@ -44,8 +44,8 @@ class User(BaseUser):
         self.initial_db_data = db_data
 
     def _initialize(self):
-        db_version = self.variables.get(self.USER_DB_VERSION, default=0)
-        self.variables.set(self.USER_DB_VERSION, db_version + 1)
+        db_version = self.private_vars.get(self.USER_DB_VERSION, default=0)
+        self.private_vars.set(self.USER_DB_VERSION, db_version + 1)
         log("%(class_name)s.__init__ USER %(uid)s LOAD db_version = %(db_version)s.", self,
             params={"db_version": str(db_version),
                     "uid": str(self.id), log_const.KEY_NAME: "user_load"})
@@ -63,7 +63,7 @@ class User(BaseUser):
                                  Field("history", History, self.descriptions["history"]),
                                  Field("gender_selector", ReplySelector)]
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return self.__parametrizer_cls(self, {})
 

@@ -1,5 +1,5 @@
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import Mock, MagicMock, AsyncMock
+from unittest.mock import AsyncMock
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
 from core.basic_models.actions.command import Command
@@ -86,7 +86,7 @@ class TestTreeScenario(IsolatedAsyncioTestCase):
 
         scenario = TreeScenario(items, 1)
 
-        await scenario.run(text_preprocessing_result, user)
+        _ = await scenario.run(text_preprocessing_result, user)
         self.assertIsNone(current_node_mock.current_node)
         context_forms.new.assert_called_once_with(form_type)
 

@@ -1,19 +1,17 @@
 import unittest
 from typing import Dict, Any, Union, Optional
-from unittest.mock import Mock, ANY, AsyncMock
+from unittest.mock import Mock, ANY
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
+from core.basic_models.actions.variable_actions import SetVariableAction, DeleteVariableAction, ClearVariablesAction
 from core.model.registered import registered_factories
 from scenarios.actions.action import (
     ChoiceScenarioAction,
     ClearCurrentScenarioAction,
     ClearCurrentScenarioFormAction,
     ClearScenarioByIdAction,
-    ClearVariablesAction,
     CompositeFillFieldAction,
-    DeleteVariableAction,
     FillFieldAction,
-    SetVariableAction,
     SelfServiceActionWithState,
     SaveBehaviorAction,
     RunScenarioAction,
@@ -191,7 +189,7 @@ class SelfServiceActionWithStateTest(unittest.IsolatedAsyncioTestCase):
         action = SelfServiceActionWithState(data)
         result = await action.run(self.user, None)
         behavior.add.assert_not_called()
-        self.assertIsNone(result)
+        self.assertEqual(result, [])
 
     async def test_action_3(self):
         data = {"behavior": "test", "command_action": {"command": "cmd_id", "nodes": {}, "request_data": {}}}
@@ -344,7 +342,7 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         scen = AsyncPicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
         result = await action.run(user, PicklableMock())
@@ -358,7 +356,7 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {"data": params})
         scen = AsyncPicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"ANNA.pipeline.scenario": scen}}
         result = await action.run(user, PicklableMock())
@@ -373,14 +371,14 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
         result = await action.run(user, PicklableMock())
-        self.assertEqual(result, None)
+        self.assertEqual(result, [])
 
     async def test_scenario_action_without_jinja(self):
         action = RunScenarioAction({"scenario": "next_scenario"})
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         scen = AsyncPicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
         result = await action.run(user, PicklableMock())
@@ -393,7 +391,7 @@ class RunLastScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         action = RunLastScenarioAction({})
         user = PicklableMock()
         scen = AsyncPicklableMock()
-        scen_result = 'done'
+        scen_result = ['done']
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
         user.last_scenarios = PicklableMock()
@@ -437,10 +435,8 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
             ],
             "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
         }
-        expected_scen_result = "test_N_done"
-        real_scen_result = await self.mock_and_perform_action(
-            test_items, expected_result=expected_scen_result, expected_scen="test_N"
-        )
+        real_scen_result = await self.mock_and_perform_action(test_items, expected_scen="test_N")
+        expected_scen_result = ["test_N_done"]
         self.assertEqual(real_scen_result, expected_scen_result)
 
     async def test_choice_scenario_action_no_else_action(self):
@@ -458,7 +454,7 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
             ]
         }
         real_scen_result = await self.mock_and_perform_action(test_items)
-        self.assertIsNone(real_scen_result)
+        self.assertEqual([], real_scen_result)
 
     async def test_choice_scenario_action_with_else_action(self):
         # Проверяем, что выполняется else_action в случае если ни один сценарий не запустился т.к их requirement=False
@@ -473,10 +469,10 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
                     "requirement": {"cond": False}
                 }
             ],
-            "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
+            "else_action": {"type": "test", "result": ["ELSE ACTION IS DONE"]}
         }
-        expected_scen_result = "ELSE ACTION IS DONE"
-        real_scen_result = await self.mock_and_perform_action(test_items, expected_result=expected_scen_result)
+        expected_scen_result = ["ELSE ACTION IS DONE"]
+        real_scen_result = await self.mock_and_perform_action(test_items)
         self.assertEqual(real_scen_result, expected_scen_result)
 
 
@@ -495,7 +491,7 @@ class ClearCurrentScenarioActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearCurrentScenarioAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
 
@@ -508,7 +504,7 @@ class ClearCurrentScenarioActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearCurrentScenarioAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
 
@@ -527,7 +523,7 @@ class ClearScenarioByIdActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearScenarioByIdAction({"scenario_id": scenario_name})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
 
@@ -539,7 +535,7 @@ class ClearScenarioByIdActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearScenarioByIdAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
 
@@ -559,7 +555,7 @@ class ClearCurrentScenarioFormActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearCurrentScenarioFormAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.forms.clear_form.assert_called_once()
 
     async def test_action_with_empty_last_scenario(self):
@@ -576,7 +572,7 @@ class ClearCurrentScenarioFormActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ClearCurrentScenarioFormAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         user.forms.remove_item.assert_not_called()
 
 
@@ -591,7 +587,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ResetCurrentNodeAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertIsNone(user.scenario_models['test_scenario'].current_node)
 
     async def test_action_with_empty_last_scenario(self):
@@ -604,7 +600,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
 
         action = ResetCurrentNodeAction({})
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertEqual('some_node', user.scenario_models['test_scenario'].current_node)
 
     async def test_specific_target(self):
@@ -620,7 +616,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
         }
         action = ResetCurrentNodeAction(items)
         result = await action.run(user, {}, {})
-        self.assertIsNone(result)
+        self.assertEqual([], result)
         self.assertEqual('another_node', user.scenario_models['test_scenario'].current_node)
 
 
@@ -651,7 +647,7 @@ class AddHistoryEventActionTest(unittest.IsolatedAsyncioTestCase):
         }
         expected = Event(
             type='type',
-            results='result',
+            result='result',
             content={'foo': 'bar'},
             scenario='name',
             scenario_version='1.0'
@@ -688,7 +684,7 @@ class AddHistoryEventActionTest(unittest.IsolatedAsyncioTestCase):
         }
         expected = Event(
             type='type',
-            results='CLIENT_INFO_RESPONSE',
+            result='CLIENT_INFO_RESPONSE',
             content={'field_1': 'value_1'},
             scenario='name',
             scenario_version='1.0'

@@ -110,6 +110,7 @@ def timestamp_to_date(raw_datetime):
 
     return show_date
 
+
 # functions
 jinja2.defaults.DEFAULT_NAMESPACE["datetime_today"] = datetime.datetime.today
 jinja2.defaults.DEFAULT_NAMESPACE["now"] = datetime.datetime.utcnow
@@ -161,7 +162,7 @@ jinja2.filters.FILTERS["fromjson"] = json.loads
 jinja2.filters.FILTERS["any"] = any
 jinja2.filters.FILTERS["all"] = all
 jinja2.filters.FILTERS["pan2service"] = pan2service
-jinja2.filters.FILTERS["shuffle"] = lambda l: random.sample(l, len(l))
+jinja2.filters.FILTERS["shuffle"] = lambda it: random.sample(it, len(it))
 
 # absolutely custom
 jinja2.filters.FILTERS["okko_sec2text"] = okko_sec2text
@@ -169,7 +170,8 @@ jinja2.filters.FILTERS["okko_sec2text"] = okko_sec2text
 # Base64 encoding-decoding
 # Additional padding in decode functions added to prevent 'Invalid padding error' for incorrectly-padded base64 strings
 # len(input_string) must be divisible by 4, if not it should be padded with '=' char to match the requirement
-# '===' is added to cover all cases, if string ends with '=' it is truncated to the nearest multiplier of 4 (internal impl)
+# '===' is added to cover all cases,
+# if string ends with '=' it is truncated to the nearest multiplier of 4 (internal impl)
 jinja2.filters.FILTERS["b64decode"] = lambda a: base64.b64decode(a + '===')
 jinja2.filters.FILTERS["b64encode"] = base64.b64encode
 jinja2.filters.FILTERS["urlsafe_b64decode"] = lambda a: base64.urlsafe_b64decode(a + '===')
@@ -180,5 +182,5 @@ jinja2.filters.FILTERS["tob64urlsafe"] = lambda x: base64.urlsafe_b64encode(byte
 jinja2.filters.FILTERS["codecs_decode"] = lambda b, encoding='utf-8': codecs.decode(b, encoding=encoding)
 jinja2.filters.FILTERS["codecs_encode"] = lambda s, encoding='utf-8': codecs.decode(s, encoding=encoding)
 
-#localization
+# localization
 jinja2.filters.FILTERS["phone_number_ru"] = phone_number_ru

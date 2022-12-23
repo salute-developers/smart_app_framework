@@ -13,7 +13,7 @@ class LazyItems:
     def _clear_removed_items(self):
         keys_for_delete = []
         for key in self._raw_items:
-            if not key in self._descriptions:
+            if key not in self._descriptions:
                 keys_for_delete.append(key)
         for key in keys_for_delete:
             self._raw_items.pop(key)

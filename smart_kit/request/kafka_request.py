@@ -1,9 +1,9 @@
-from core.configs.global_constants import CALLBACK_ID_HEADER
+from core.configs.global_constants import CALLBACK_ID_HEADER, KAFKA_REPLY_TOPIC
 from core.request.kafka_request import KafkaRequest
 
 
 class SmartKitKafkaRequest(KafkaRequest):
-    KAFKA_REPLY_TOPIC = "kafka_replyTopic"
+    KAFKA_REPLY_TOPIC = KAFKA_REPLY_TOPIC
     KAFKA_EXTRA_HEADERS = "kafka_extraHeaders"
 
     def __init__(self, items, id=None):

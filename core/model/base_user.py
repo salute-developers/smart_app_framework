@@ -1,7 +1,9 @@
 # coding: utf-8
 import json
-from lazy import lazy
+from functools import cached_property
+from typing import List
 
+from core.descriptions.descriptions import Descriptions
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
     LimitedQueuedHashableObjectsDescription
 from core.model.queued_objects.limited_queued_hashable_objects import LimitedQueuedHashableObjects, \
@@ -20,7 +22,9 @@ class BaseUser(Model):
 
     counters: Counters
     variables: Variables
+    private_vars: Variables
     local_vars: Variables
+    descriptions: Descriptions
 
     def __init__(self, id, message, values, descriptions, load_error=False):
         self.id = id
@@ -34,18 +38,19 @@ class BaseUser(Model):
         """Add here some things to do after creating fields."""
         pass
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return BasicParametrizer(self, {})
 
     @property
-    def fields(self):
+    def fields(self) -> List[Field]:
         return [
             Field("counters", Counters),
             Field("last_action_ids", LimitedQueuedHashableObjectsItems, self.descriptions["last_action_ids"]),
             Field("last_messages_ids", LimitedQueuedHashableObjects, LimitedQueuedHashableObjectsDescription(None)),
             Field("local_vars", Variables, None, False),
             Field("variables", Variables),
+            Field("private_vars", Variables),
         ]
 
     @property
@@ -54,7 +59,7 @@ class BaseUser(Model):
         raw = json.dumps(self.raw, default=lambda o: f"<non-serializable: {type(o).__qualname__}>")
         log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s. "
             "Saving User %(uid)s. Serialized utf8 json length is %(user_length)s symbols.", self,
-            {"db_version": str(self.variables.get(self.USER_DB_VERSION)),
+            {"db_version": str(self.private_vars.get(self.USER_DB_VERSION)),
              "uid": str(self.id), "user_length": len(raw),
              KEY_NAME: "user_save"})
         return raw
@@ -62,4 +67,5 @@ class BaseUser(Model):
     def expire(self):
         self.counters.expire()
         self.variables.expire()
+        self.private_vars.expire()
         self.local_vars.expire()

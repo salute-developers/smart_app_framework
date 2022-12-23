@@ -58,6 +58,9 @@ class Settings(BaseConfig, metaclass=Singleton):
         return os.path.join(self.secret_path, filename)
 
     def get_source(self):
+        if hasattr(self, "_source"):
+            return self._source
+
         adapter_key = self.registered_repositories["template_settings"].data.get(
             "data_adapter") or Settings.OSAdapterKey
         adapter_settings = self.registered_repositories[
@@ -68,4 +71,6 @@ class Settings(BaseConfig, metaclass=Singleton):
         else:
             adapter.connect()
         source = adapter.source
+
+        self._source = source
         return source

@@ -8,6 +8,6 @@ class TestStatsTimer(TestCase):
     def test_1(self):
         timer = StatsTimer()
         with timer:
-            a = 3
+            _ = 3
 
         self.assertTrue(timer.msecs > 0)

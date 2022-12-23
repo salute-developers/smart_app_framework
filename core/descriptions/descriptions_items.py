@@ -1,8 +1,9 @@
 # coding=utf-8
+from typing import Callable
 
 
 class DescriptionsItems:
-    def __init__(self, factory, items, ordered=False):
+    def __init__(self, factory: Callable, items, ordered=False):
         items = items or {}
         self._factory = factory
         self._raw_items = None

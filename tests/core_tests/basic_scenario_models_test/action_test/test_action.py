@@ -4,21 +4,38 @@ import unittest
 import uuid
 from unittest.mock import Mock, MagicMock, patch
 
-from core.basic_models.actions.basic_actions import Action, DoingNothingAction, action_factory, RequirementAction, \
-    actions, ChoiceAction, ElseAction, CompositeAction, NonRepeatingAction
+from core.basic_models.actions.basic_actions import (
+    Action,
+    DoingNothingAction,
+    action_factory,
+    RequirementAction,
+    actions,
+    ChoiceAction,
+    ElseAction,
+    CompositeAction,
+    NonRepeatingAction,
+)
 from core.basic_models.actions.client_profile_actions import GiveMeMemoryAction, RememberThisAction
 from core.basic_models.actions.command import Command
-from core.basic_models.actions.counter_actions import CounterIncrementAction, CounterDecrementAction, \
-    CounterClearAction, CounterSetAction, CounterCopyAction
+from core.basic_models.actions.counter_actions import (
+    CounterIncrementAction,
+    CounterDecrementAction,
+    CounterClearAction,
+    CounterSetAction,
+    CounterCopyAction,
+)
 from core.basic_models.actions.external_actions import ExternalAction
-from core.basic_models.actions.push_action import PushAction
+from core.basic_models.actions.push_action import PushAction, PushAuthenticationActionHttp, PushActionHttp, \
+    GetRuntimePermissionsAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser, NodeAction
 from core.basic_models.answer_items.answer_items import SdkAnswerItem, items_factory, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink
 from core.basic_models.requirement.basic_requirements import requirement_factory, Requirement, requirements
 from core.model.registered import registered_factories
+from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME
+from smart_kit.action.http import HTTPRequestAction
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
@@ -31,9 +48,7 @@ class MockParametrizer:
         self.filter = items.get("filter") or False
 
     def collect(self, text_preprocessing_result=None, filter_params=None):
-        data = {
-            "payload": self.user.message.payload
-        }
+        data = {"payload": self.user.message.payload}
         data.update(self.data)
         if self.filter:
             data.update({"filter": "filter_out"})
@@ -82,7 +97,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = NodeAction(items)
         nodes = action.nodes
         action_key = list(nodes.keys())[0]
-        self.assertEqual(action_key, 'answer')
+        self.assertEqual(action_key, "answer")
         self.assertIsInstance(nodes[action_key], UnifiedTemplate)
 
     def test_nodes_2(self):
@@ -94,12 +109,16 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_base(self):
         items = {"nodes": "test"}
         action = Action(items)
+<<<<<<< HEAD
         try:
             await action.run(None, None)
             result = False
         except NotImplementedError:
             result = True
         self.assertEqual(result, True)
+=======
+        self.assertRaises(NotImplementedError, action.run, None, None)
+>>>>>>> release/2.0.0
 
     async def test_external(self):
         items = {"action": "test_action_key"}
@@ -130,6 +149,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await action.run(None, None), ["test action run"])
         items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
         action = RequirementAction(items)
+<<<<<<< HEAD
         result = await action.run(None, None)
         self.assertIsNone(result)
 
@@ -143,6 +163,23 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(choice_action.items[0], RequirementAction)
         result = await choice_action.run(None, None)
         self.assertEqual(result, "action2")
+=======
+        result = action.run(None, None)
+        self.assertEqual([], result)
+
+    def test_requirement_choice(self):
+        items = {
+            "requirement_actions": [
+                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action1"]}},
+                {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": ["action2"]}},
+            ]
+        }
+        choice_action = ChoiceAction(items)
+        self.assertIsInstance(choice_action.items, list)
+        self.assertIsInstance(choice_action.items[0], RequirementAction)
+        result = choice_action.run(None, None)
+        self.assertEqual(result, ["action2"])
+>>>>>>> release/2.0.0
 
     async def test_requirement_choice_else(self):
         items = {
@@ -150,13 +187,18 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                 {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
                 {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action2"}},
             ],
-            "else_action": {"type": "test", "result": "action3"}
+            "else_action": {"type": "test", "result": ["action3"]},
         }
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
+<<<<<<< HEAD
         result = await choice_action.run(None, None)
         self.assertEqual(result, "action3")
+=======
+        result = choice_action.run(None, None)
+        self.assertEqual(result, ["action3"])
+>>>>>>> release/2.0.0
 
     async def test_string_action(self):
         expected = [Command("cmd_id", {"item": "template", "params": "params"})]
@@ -166,9 +208,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"render_templates": template}
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        items = {"command": "cmd_id",
-                 "nodes":
-                     {"item": "template", "params": "{{params}}"}}
+        items = {"command": "cmd_id", "nodes": {"item": "template", "params": "{{params}}"}}
         action = StringAction(items)
         result = await action.run(user, None)
         self.assertEqual(expected[0].name, result[0].name)
@@ -182,11 +222,15 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "action": {"type": "test", "result": ["main_action"]},
+            "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
+<<<<<<< HEAD
         self.assertEqual(await action.run(user, None), "main_action")
+=======
+        self.assertEqual(action.run(user, None), ["main_action"])
+>>>>>>> release/2.0.0
 
     async def test_else_action_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -196,11 +240,15 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
-            "else_action": {"type": "test", "result": "else_action"}
+            "action": {"type": "test", "result": ["main_action"]},
+            "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
+<<<<<<< HEAD
         self.assertEqual(await action.run(user, None), "else_action")
+=======
+        self.assertEqual(action.run(user, None), ["else_action"])
+>>>>>>> release/2.0.0
 
     async def test_else_action_no_else_if(self):
         registered_factories[Requirement] = requirement_factory
@@ -210,10 +258,14 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": True},
-            "action": {"type": "test", "result": "main_action"},
+            "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
+<<<<<<< HEAD
         self.assertEqual(await action.run(user, None), "main_action")
+=======
+        self.assertEqual(action.run(user, None), ["main_action"])
+>>>>>>> release/2.0.0
 
     async def test_else_action_no_else_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -223,23 +275,24 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {
             "requirement": {"type": "test", "result": False},
-            "action": {"type": "test", "result": "main_action"},
+            "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
+<<<<<<< HEAD
         result = await action.run(user, None)
         self.assertIsNone(result)
+=======
+        result = action.run(user, None)
+        self.assertEqual([], result)
+>>>>>>> release/2.0.0
 
     async def test_composite_action(self):
         registered_factories[Action] = action_factory
         actions["action_mock"] = MockAction
         user = PicklableMock()
-        items = {
-            "actions": [
-                {"type": "action_mock"},
-                {"type": "action_mock"}
-            ]
-        }
+        items = {"actions": [{"type": "action_mock"}, {"type": "action_mock"}]}
         action = CompositeAction(items)
+<<<<<<< HEAD
         result = await action.run(user, None)
         self.assertEqual(['test action run', 'test action run'], result)
 
@@ -249,16 +302,21 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "email": "heyho@sberbank.ru",
             "name": "Buratino"
         }
+=======
+        result = action.run(user, None)
+        self.assertEqual(["test action run", "test action run"], result)
+
+    def test_node_action_support_templates(self):
+        params = {"markup": "italic", "email": "heyho@sberbank.ru", "name": "Buratino"}
+>>>>>>> release/2.0.0
         items = {
             "support_templates": {
                 "markup": "{%if markup=='italic'%}i{% else %}b{% endif %}",
                 "email": "{%if email%}<{{markup}}>Email: {{email}}</{{markup}}>\n{% endif %}",
                 "name": "{%if name%}<{{markup}}>Name: {{name}}</{{markup}}>\n{% endif %}",
-                "result": "{{email}}{{name}}"
+                "result": "{{email}}{{name}}",
             },
-            "nodes": {
-                "answer": "{{result|trim}}"
-            }
+            "nodes": {"answer": "{{result|trim}}"},
         }
         expected = "<i>Email: heyho@sberbank.ru</i>\n<i>Name: Buratino</i>"
 
@@ -270,53 +328,58 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         output = (await action.run(user=user, text_preprocessing_result=None))[0].payload["answer"]
         self.assertEqual(output, expected)
 
+<<<<<<< HEAD
     async def test_string_action_support_templates(self):
         params = {
             "answer_text": "some_text",
             "buttons_number": 3
         }
+=======
+    def test_string_action_support_templates(self):
+        params = {"answer_text": "some_text", "buttons_number": 3}
+>>>>>>> release/2.0.0
         items = {
             "nodes": {
                 "answer": "{{ answer_text }}",
                 "buttons": {
                     "type": UNIFIED_TEMPLATE_TYPE_NAME,
                     "template": "{{range(buttons_number)|list}}",
-                    "loader": "json"
-                }
+                    "loader": "json",
+                },
             }
         }
-        expected = {
-            "answer": "some_text",
-            "buttons": [0, 1, 2]
-        }
+        expected = {"answer": "some_text", "buttons": [0, 1, 2]}
         action = StringAction(items)
         user = PicklableMagicMock()
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         output = (await action.run(user=user, text_preprocessing_result=None))[0].payload
         self.assertEqual(output, expected)
 
+<<<<<<< HEAD
     async def test_push_action(self):
         params = {
             "day_time": "morning",
             "deep_link_url": "some_url",
             "icon_url": "some_icon_url"
         }
+=======
+    def test_push_action(self):
+        params = {"day_time": "morning", "deep_link_url": "some_url", "icon_url": "some_icon_url"}
+>>>>>>> release/2.0.0
         settings = {"template_settings": {"project_id": "project_id"}}
         items = {
-            "request_data": {
-                "kafka_extraHeaders": {
-                    "request-id": "{{ 1 }}"
-                }
-            },
+            "request_data": {"kafka_extraHeaders": {"request-id": "{{ 1 }}"}},
             "content": {
-                "notificationHeader": "{% if day_time == 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",
-                "fullText": "В нашем магазине большой ассортимент{% if day_time == 'evening' %}. Успей заказать!{% endif %}",
+                "notificationHeader": "{% if day_time == 'morning' %}Время завтракать!"
+                                      "{% else %}Хотите что нибудь заказать?{% endif %}",
+                "fullText": "В нашем магазине большой ассортимент"
+                            "{% if day_time == 'evening' %}. Успей заказать!{% endif %}",
                 "mobileAppParameters": {
                     "DeeplinkAndroid": "{{ deep_link_url }}",
                     "DeeplinkIos": "{{ deep_link_url }}",
-                    "Logo": "{{ icon_url }}"
-                }
-            }
+                    "Logo": "{{ icon_url }}",
+                },
+            },
         }
         user = PicklableMagicMock()
 
@@ -330,9 +393,9 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                 "mobileAppParameters": {
                     "DeeplinkAndroid": "some_url",
                     "DeeplinkIos": "some_url",
-                    "Logo": "some_icon_url"
-                }
-            }
+                    "Logo": "some_icon_url",
+                },
+            },
         }
         action = PushAction(items)
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
@@ -342,22 +405,520 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         # проверяем наличие кастомных хэдеров для сервиса пушей
         self.assertTrue(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS in command.request_data)
         headers = command.request_data.get(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS)
-        self.assertTrue('request-id' in headers)
-        self.assertTrue('sender-id' in headers)
-        self.assertEqual(headers.get('request-id'), "1")
-        self.assertTrue(uuid.UUID(headers.get('sender-id'), version=3))
+        self.assertTrue("request-id" in headers)
+        self.assertTrue("sender-id" in headers)
+        self.assertEqual(headers.get("request-id"), "1")
+        self.assertTrue(uuid.UUID(headers.get("sender-id"), version=3))
+
+    def test_push_authentication_action_http(self):
+        items = {
+            "type": "push_authentication",
+            "client_id": "@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3",
+            "surface": "COMPANION",
+            "client_secret": "secret"
+        }
+
+        action = PushAuthenticationActionHttp(items)
+        self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
+
+    def test_get_runtime_permissions(self):
+        params = {
+            "day_time": "morning",
+            "deep_link_url": "some_url",
+            "icon_url": "some_icon_url"
+        }
+        settings = {"template_settings": {"project_id": "project_id"}}
+        items = {
+            "type": "get_runtime_permissions"
+        }
+        user = PicklableMagicMock()
+
+        expected = {
+            "messageName": "GET_RUNTIME_PERMISSIONS",
+            "server_action": {
+                "parameters": {
+                    "need_actions": {
+                        "types": ["service_push"]
+                    }
+                }
+            }
+        }
+        action = GetRuntimePermissionsAction(items)
+        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
+        user.settings = settings
+        text_preprocessing_result = BaseTextPreprocessingResult(items)
+        command = action.run(user=user, text_preprocessing_result=text_preprocessing_result)[0]
+        self.assertEqual(command.raw, expected)
+
+    def test_push_action_http_with_apprequest_lite_type_request(self):
+        items = {
+            "type": "push_http",
+            "type_request": "apprequest-lite",
+            "surface": "COMPANION",
+            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
+            "callbackUrl": "some_url",
+            "templateContent": {
+                "id": "49061553-27c7-4471-9145-d8d6137657da",
+                "headerValues": {
+                    "clientname": "Иван",
+                    "bandname": "Ласковый май"
+                },
+                "bodyValues": {
+                    "formatname": "альбома",
+                    "bandname": "Ласковый май",
+                    "releasename": "Новое"
+                }
+            }
+        }
+
+        templateContent = {
+            'id': '49061553-27c7-4471-9145-d8d6137657da',
+            'headerValues': {'clientname': 'Иван', 'bandname': 'Ласковый май'},
+            'bodyValues': {'formatname': 'альбома', 'bandname': 'Ласковый май', 'releasename': 'Новое'}
+        }
+
+        action = PushActionHttp(items)
+        self.assertEqual(action.type_request, 'apprequest-lite')
+        self.assertEqual(action.templateContent, templateContent)
+        self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
+
+    def test_push_action_http_with_apprequest_type_request(self):
+        payload = {
+            'sender':
+                {
+                    'projectId': '3fa85f64-5717-4562-b3ab-2c963f66baa6',
+                    'application':
+                        {
+                            'appId': None,
+                            'versionId': None
+                        }
+                },
+            'recipient':
+                {
+                    'clientId':
+                        {
+                            'idType': 'SUB',
+                            'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
+                        }
+                },
+            'deliveryConfig':
+                {
+                    'deliveryMode': 'broadcast',
+                    'destinations':
+                        [
+                            {
+                                'channel': 'COMPANION_B2C',
+                                'surface': 'COMPANION',
+                                'templateContent':
+                                    {
+                                        'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                        'headerValues':
+                                            {
+                                                'clientname': 'Иван', 'bandname': 'Ласковый май'
+                                            },
+                                        'bodyValues':
+                                            {
+                                                'formatname': 'альбома',
+                                                'bandname': 'Ласковый май',
+                                                'releasename': 'Новое'
+                                            },
+                                        'mobileAppParameters':
+                                            {
+                                                'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                                'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                            },
+                                        'timeFrame':
+                                            {
+                                                'startTime': '13:30:00',
+                                                'finishTime': '15:00:00',
+                                                'timeZone': 'GMT+03:00',
+                                                'startDate': '2020-06-04',
+                                                'endDate': '2020-06-05'
+                                            }
+                                    }
+                            }
+                        ]
+                }
+        }
+        items = {
+            "type": "push_http",
+            "access_token": "eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0",
+            "type_request": "apprequest",
+            "sender": {
+                "projectId": "3fa85f64-5717-4562-b3ab-2c963f66baa6"
+            },
+            "recipient": {
+                "clientId": {
+                    "idType": "SUB",
+                    "id": "6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7"
+                }
+            },
+            "deliveryConfig": {
+                "deliveryMode": "broadcast",
+                "destinations": [
+                    {
+                        "channel": "COMPANION_B2C",
+                        "surface": "COMPANION",
+                        "templateContent": {
+                            "id": "49061553-27c7-4471-9145-d8d6137657da",
+                            "headerValues": {
+                                "clientname": "Иван",
+                                "bandname": "Ласковый май"
+                            },
+                            "bodyValues": {
+                                "formatname": "альбома",
+                                "bandname": "Ласковый май",
+                                "releasename": "Новое"
+                            },
+                            "mobileAppParameters": {
+                                "deeplinkAndroid": "laskoviyi-mai-listen-android",
+                                "deeplinkIos": "laskoviyi-mai-listen-ios"
+                            },
+                            "timeFrame": {
+                                "startTime": "13:30:00",
+                                "finishTime": "15:00:00",
+                                "timeZone": "GMT+03:00",
+                                "startDate": "2020-06-04",
+                                "endDate": "2020-06-05"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        action = PushActionHttp(items)
+        self.assertEqual(action.type_request, 'apprequest')
+        self.assertEqual(action.payload, payload)
+        self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
+
+    @staticmethod
+    def set_request_mock_attribute(request_mock, return_value=None):
+        return_value = return_value or {}
+        request_mock.return_value = Mock(
+            __enter__=Mock(return_value=Mock(
+                json=Mock(return_value=return_value),
+                cookies={},
+                headers={},
+            ), ),
+            __exit__=Mock()
+        )
+
+    @patch('requests.request')
+    def test_push_authentication_action_http_call(self, request_mock: Mock):
+        user = Mock(
+            parametrizer=Mock(collect=lambda *args, **kwargs: {}),
+            descriptions={
+                "behaviors": {
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                }
+            }
+        )
+        self.set_request_mock_attribute(request_mock)
+        items = {
+            'type': 'push_authentication',
+            'client_id': '@!89FB.4D62.3A51.A9EB!0001!96E5.AE89!0008!B1AF.DB7D.1586.84F3',
+            'surface': 'COMPANION', 'client_secret': 'secret',
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'behavior': 'common_behavior',
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/oauth',
+                'headers':
+                    {
+                        'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
+                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='  # noqa
+                    }
+            }
+        }
+
+        http_request_action = HTTPRequestAction(items)
+        request_body_parameters = {
+            "scope": "SMART_PUSH"
+        }
+        http_request_action.method_params["json"] = request_body_parameters
+        http_request_action.run(user, None, None)
+        request_mock.assert_called_with(
+            url="https://salute.online.sberbank.ru:9443/api/v2/oauth",
+            headers={
+                'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
+                'Authorization':
+                    'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
+            },
+            method='POST', timeout=4, json=request_body_parameters
+        )
+
+    @patch('requests.request')
+    def test_push_action_http_call_with_apprequest_lite_type_request(self, request_mock: Mock):
+        user = Mock(
+            parametrizer=Mock(collect=lambda *args, **kwargs: {}),
+            descriptions={
+                "behaviors": {
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                }
+            }
+        )
+        self.set_request_mock_attribute(request_mock)
+        items = {
+            'type': 'push_http',
+            'type_request': 'apprequest-lite',
+            'surface': 'COMPANION',
+            'access_token': 'eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+            'callbackUrl': 'some_url',
+            'templateContent': {
+                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                'headerValues': {
+                    'clientname': 'Иван',
+                    'bandname': 'Ласковый май'
+                },
+                'bodyValues': {
+                    'formatname': 'альбома',
+                    'bandname': 'Ласковый май',
+                    'releasename': 'Новое'
+                }
+            },
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite',
+                'headers': {
+                    'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
+                    'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                    'callbackUrl': 'some_url'
+                },
+                'method': 'POST',
+            },
+            'behavior': 'common_behavior'
+        }
+        http_request_action = HTTPRequestAction(items)
+        request_body_parameters = {
+            'projectId': '83cdd6c6-757a-42ce-b4fe-03912fb7d6e1',
+            'clientId': "1596f2a624c003fdb31eb5000e49f1efe8ccf51fd0001f9b499c5881cdca1d95d24e4bf802c48fe0",
+            'surface': 'COMPANION',
+            'templateContent': {
+                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                'headerValues':
+                    {
+                        'clientname': 'Иван',
+                        'bandname': 'Ласковый май'
+                    },
+                'bodyValues':
+                    {
+                        'formatname': 'альбома',
+                        'bandname': 'Ласковый май',
+                        'releasename': 'Новое'
+                    }
+            }
+        }
+        http_request_action.method_params["json"] = request_body_parameters
+        http_request_action.run(user, None, None)
+        request_mock.assert_called_with(
+            url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
+            headers={
+                'RqUID': '6b27efc2-17f7-4c72-80a3-9a4c349cd07b',
+                'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                'callbackUrl': 'some_url'
+            },
+            method='POST', timeout=4, json=request_body_parameters
+        )
+
+    @patch('requests.request')
+    def test_push_action_http_call_with_apprequest_type_request(self, request_mock: Mock):
+        user = Mock(
+            parametrizer=Mock(collect=lambda *args, **kwargs: {}),
+            descriptions={
+                "behaviors": {
+                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                }
+            }
+        )
+        self.set_request_mock_attribute(request_mock)
+        items = {
+            'type': 'push_http',
+            'access_token': 'eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+            'type_request': 'apprequest',
+            'protocolVersion': 'V1',
+            'messageId': '37284759',
+            'senderApplication': {
+                'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+            },
+            'deliveryMode': 'broadcast',
+            'destinations': [
+                {
+                    'channel': 'COMPANION_B2C',
+                    'surface': 'COMPANION',
+                    'templateContent': {
+                        'id': '49061553-27c7-4471-9145-d8d6137657da',
+                        'headerValues': {
+                            'clientname': 'Иван',
+                            'bandname': 'Ласковый май'
+                        },
+                        'bodyValues': {
+                            'formatname': 'альбома',
+                            'bandname': 'Ласковый май',
+                            'releasename': 'Новое'
+                        },
+                        'mobileAppParameters': {
+                            'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                            'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                        },
+                        'timeFrame': {
+                            'startTime': '13:30:00',
+                            'finishTime': '15:00:00',
+                            'timeZone': 'GMT+03:00',
+                            'startDate': '2020-06-04',
+                            'endDate': '2020-06-05'
+                        }
+                    }
+                }
+            ],
+            'nodes': {},
+            'command': 'PUSH_NOTIFY',
+            'payload': {
+                'sender': {
+                    'application': {
+                        'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                        'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                    }
+                },
+                'recipient': {
+                    'clientId': {
+                        'idType': 'SUB'
+                    }
+                },
+                'deliveryConfig': {
+                    'deliveryMode': 'broadcast',
+                    'destinations': [
+                        {
+                            'channel': 'COMPANION_B2C',
+                            'surface': 'COMPANION',
+                            'templateContent': {
+                                'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                'headerValues': {
+                                    'clientname': 'Иван',
+                                    'bandname': 'Ласковый май'
+                                },
+                                'bodyValues': {
+                                    'formatname': 'альбома',
+                                    'bandname': 'Ласковый май',
+                                    'releasename': 'Новое'
+                                },
+                                'mobileAppParameters': {
+                                    'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                    'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                },
+                                'timeFrame': {
+                                    'startTime': '13:30:00',
+                                    'finishTime': '15:00:00',
+                                    'timeZone': 'GMT+03:00',
+                                    'startDate': '2020-06-04',
+                                    'endDate': '2020-06-05'
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'params': {
+                'url': 'https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest',
+                'headers': {
+                    'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
+                    'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
+                    'callbackUrl': None
+                }
+            },
+            'behavior': 'common_behavior'
+        }
+        http_request_action = HTTPRequestAction(items)
+        request_body_parameters = {
+            'protocolVersion': 'V1',
+            'messageId': '37284759',
+            'messageName': None,
+            'payload': {
+                'sender':
+                    {
+                        'application':
+                            {
+                                'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+                                'versionId': 'fcac2f61-57a7-4d6d-b3fc-2c963f66a111'
+                            },
+                        'projectId': 'template-app-id'
+                    },
+                'recipient':
+                    {
+                        'clientId':
+                            {
+                                'idType': 'SUB',
+                                'id': '6852d76cea737bb751f89e82523a2d97f9765c0d7b8a6eaf821497c1b17df87ba3028e64eea639f7'
+                            }
+                    },
+                'deliveryConfig':
+                    {
+                        'deliveryMode': 'broadcast',
+                        'destinations':
+                            [
+                                {
+                                    'channel': 'COMPANION_B2C',
+                                    'surface': 'COMPANION',
+                                    'templateContent':
+                                        {
+                                            'id': '49061553-27c7-4471-9145-d8d6137657da',
+                                            'headerValues':
+                                                {
+                                                    'clientname': 'Иван',
+                                                    'bandname': 'Ласковый май'
+                                                },
+                                            'bodyValues':
+                                                {
+                                                    'formatname': 'альбома',
+                                                    'bandname': 'Ласковый май',
+                                                    'releasename': 'Новое'
+                                                },
+                                            'mobileAppParameters':
+                                                {
+                                                    'deeplinkAndroid': 'laskoviyi-mai-listen-android',
+                                                    'deeplinkIos': 'laskoviyi-mai-listen-ios'
+                                                },
+                                            'timeFrame':
+                                                {
+                                                    'startTime': '13:30:00',
+                                                    'finishTime': '15:00:00',
+                                                    'timeZone': 'GMT+03:00',
+                                                    'startDate': '2020-06-04',
+                                                    'endDate': '2020-06-05'
+                                                }
+                                        }
+                                }
+                            ]
+                    }
+            }
+        }
+        http_request_action.method_params["json"] = request_body_parameters
+        http_request_action.run(user, None, None)
+        request_mock.assert_called_with(
+            url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
+            headers={
+                'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
+                'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0'
+            },
+            method='POST', timeout=4, json=request_body_parameters
+        )
 
 
 class NonRepeatingActionTest(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        self.expected = PicklableMock()
-        self.expected1 = PicklableMock()
-        self.action = NonRepeatingAction({"actions": [{"type": "action_mock",
-                                                       "result": self.expected},
-                                                      {"type": "action_mock",
-                                                       "result": self.expected1}
-                                                      ],
-                                          "last_action_ids_storage": "last_action_ids_storage"})
+        self.expected = [PicklableMock()]
+        self.expected1 = [PicklableMock()]
+        self.action = NonRepeatingAction(
+            {
+                "actions": [
+                    {"type": "action_mock", "result": self.expected},
+                    {"type": "action_mock", "result": self.expected1},
+                ],
+                "last_action_ids_storage": "last_action_ids_storage",
+            }
+        )
         self.user = PicklableMagicMock()
         registered_factories[Action] = action_factory
         actions["action_mock"] = MockAction
@@ -431,17 +992,25 @@ class CounterCopyActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = {"src": counter_src, "dst": counter_dst}
         items = {"source": "src", "destination": "dst"}
         action = CounterCopyAction(items)
+<<<<<<< HEAD
         await action.run(user, None)
         user.counters["dst"].set.assert_called_once_with(user.counters["src"].value,
                                                          action.reset_time, action.time_shift)
+=======
+        action.run(user, None)
+        user.counters["dst"].set.assert_called_once_with(
+            user.counters["src"].value, action.reset_time, action.time_shift
+        )
+>>>>>>> release/2.0.0
 
 
 class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_typical_answer(self):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
-        expected = [MagicMock(_name="ANSWER_TO_USER", raw={'messageName': 'ANSWER_TO_USER',
-                                                           'payload': {'answer': 'a1'}})]
+        expected = [
+            MagicMock(_name="ANSWER_TO_USER", raw={"messageName": "ANSWER_TO_USER", "payload": {"answer": "a1"}})
+        ]
         items = {
             "nodes": {
                 "answer": ["a1", "a1", "a1"],
@@ -455,25 +1024,35 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_typical_answer_with_other(self):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
-        expected = [MagicMock(_name="ANSWER_TO_USER", raw={'messageName': 'ANSWER_TO_USER',
-                                                           'payload': {'answer': 'a1',
-                                                                       "pronounce_text": 'pt2',
-                                                                       "picture": "1.jpg"}})]
+        expected = [
+            MagicMock(
+                _name="ANSWER_TO_USER",
+                raw={
+                    "messageName": "ANSWER_TO_USER",
+                    "payload": {"answer": "a1", "pronounce_text": "pt2", "picture": "1.jpg"},
+                },
+            )
+        ]
         items = {
-            "nodes": {
-                "answer": ["a1", "a1", "a1"],
-                "pronounce_text": ["pt2"],
-                "picture": ["1.jpg", "1.jpg", "1.jpg"]
-            }
+            "nodes": {"answer": ["a1", "a1", "a1"], "pronounce_text": ["pt2"], "picture": ["1.jpg", "1.jpg", "1.jpg"]}
         }
         action = AfinaAnswerAction(items)
         result = await action.run(user, None)
         self.assertEqual(expected[0]._name, result[0].name)
         self.assertEqual(expected[0].raw, result[0].raw)
 
+<<<<<<< HEAD
     async def test_typical_answer_with_pers_info(self):
         expected = [MagicMock(_name="ANSWER_TO_USER", raw={'messageName': 'ANSWER_TO_USER',
                                                            'payload': {'answer': 'Ivan Ivanov'}})]
+=======
+    def test_typical_answer_with_pers_info(self):
+        expected = [
+            MagicMock(
+                _name="ANSWER_TO_USER", raw={"messageName": "ANSWER_TO_USER", "payload": {"answer": "Ivan Ivanov"}}
+            )
+        ]
+>>>>>>> release/2.0.0
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         user.message = PicklableMock()
@@ -518,46 +1097,141 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             "nodes": {
                 "pronounceText": ["pronounceText1", "{{payload.personInfo.name}}"],
                 "items": [
-                  {
-                    "bubble": {
-                      "text": ["Text1", "Text2"]
-                    }
-                  },
-                  {
-                    "card": {
-                      "type": "simple_list",
-                      "header": "1 доллар США ",
-                      "items": [
-                        {
-                          "title": "Купить",
-                          "body": "67.73 RUR"
-                        },
-                        {
-                          "title": "Продать",
-                          "body": "64.56 RUR"
+                    {"bubble": {"text": ["Text1", "Text2"]}},
+                    {
+                        "card": {
+                            "type": "simple_list",
+                            "header": "1 доллар США ",
+                            "items": [
+                                {"title": "Купить", "body": "67.73 RUR"},
+                                {"title": "Продать", "body": "64.56 RUR"},
+                            ],
+                            "footer": "{{payload.personInfo.name}} Сбербанк Онлайн "
+                                      "на сегодня 17:53 при обмене до 1000 USD",
                         }
-                      ],
-                      "footer": "{{payload.personInfo.name}} Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD"
-                    }
-                  }
+                    },
                 ],
                 "suggestions": {
-                     "buttons": [{
-                        "title": ["Отделения"],
-                        "action": {
-                          "text": "Где ближайщие отделения сбера?",
-                          "type": "text"
-                        }
-                     }]
-                }
-            }
+                    "buttons": [
+                        {"title": ["Отделения"], "action": {"text": "Где ближайщие отделения сбера?", "type": "text"}}
+                    ]
+                },
+            },
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        exp1 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "Ivan Ivanov",
+                    "items": [
+                        {"bubble": {"text": "Text2"}},
+                        {
+                            "card": {
+                                "type": "simple_list",
+                                "header": "1 доллар США ",
+                                "items": [
+                                    {"title": "Купить", "body": "67.73 RUR"},
+                                    {"title": "Продать", "body": "64.56 RUR"},
+                                ],
+                                "footer": "Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD",
+                            }
+                        },
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Отделения", "action": {"text": "Где ближайщие отделения сбера?", "type": "text"}}
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
+        exp2 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "items": [
+                        {"bubble": {"text": "Text1"}},
+                        {
+                            "card": {
+                                "type": "simple_list",
+                                "header": "1 доллар США ",
+                                "items": [
+                                    {"title": "Купить", "body": "67.73 RUR"},
+                                    {"title": "Продать", "body": "64.56 RUR"},
+                                ],
+                                "footer": "Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD",
+                            }
+                        },
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Отделения", "action": {"text": "Где ближайщие отделения сбера?", "type": "text"}}
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'Ivan Ivanov', 'items': [{'bubble': {'text': 'Text1'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
-        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'items': [{'bubble': {'text': 'Text2'}}, {'card': {'type': 'simple_list', 'header': '1 доллар США ', 'items': [{'title': 'Купить', 'body': '67.73 RUR'}, {'title': 'Продать', 'body': '64.56 RUR'}], 'footer': 'Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD'}}], 'suggestions': {'buttons': [{'title': 'Отделения', 'action': {'text': 'Где ближайщие отделения сбера?', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp1 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "Ivan Ivanov",
+                    "items": [
+                        {"bubble": {"text": "Text1"}},
+                        {
+                            "card": {
+                                "type": "simple_list",
+                                "header": "1 доллар США ",
+                                "items": [
+                                    {"title": "Купить", "body": "67.73 RUR"},
+                                    {"title": "Продать", "body": "64.56 RUR"},
+                                ],
+                                "footer": "Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD",
+                            }
+                        },
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Отделения", "action": {"text": "Где ближайщие отделения сбера?", "type": "text"}}
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
+        nexp2 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "items": [
+                        {"bubble": {"text": "Text2"}},
+                        {
+                            "card": {
+                                "type": "simple_list",
+                                "header": "1 доллар США ",
+                                "items": [
+                                    {"title": "Купить", "body": "67.73 RUR"},
+                                    {"title": "Продать", "body": "64.56 RUR"},
+                                ],
+                                "footer": "Ivan Ivanov Сбербанк Онлайн на сегодня 17:53 при обмене до 1000 USD",
+                            }
+                        },
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Отделения", "action": {"text": "Где ближайщие отделения сбера?", "type": "text"}}
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
         not_expect_arr = [nexp1, nexp2]
 
         for i in range(10):
@@ -567,7 +1241,11 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in expect_arr)
             self.assertFalse(json.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
 
+<<<<<<< HEAD
     async def test_typical_answer_without_items(self):
+=======
+    def test_typical_answer_without_items(self):
+>>>>>>> release/2.0.0
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         user.message = PicklableMock()
@@ -576,10 +1254,14 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             "type": "sdk_answer",
             "nodes": {
                 "pronounceText": ["pronounceText1", "pronounceText2"],
-            }
+            },
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1'}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText2'}}, sort_keys=True)
+        exp1 = json.dumps(
+            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText1"}}, sort_keys=True
+        )
+        exp2 = json.dumps(
+            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText2"}}, sort_keys=True
+        )
         exp_list = [exp1, exp2]
         for i in range(10):
             action = SDKAnswer(items)
@@ -593,33 +1275,80 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
-                "type": "sdk_answer",
-                "pronounceText": ["pronounceText1"],
-                "suggestions": {
-                    "buttons": [
-                        {
-                            "title": ["{{payload.personInfo.name}}", "отделения2"],
-                            "action": {
-                                "text": "отделения",
-                                "type": "text"
-                            }
-                        },
-                        {
-                            "title": ["кредит1", "кредит2"],
-                            "action": {
-                                "text": "кредит",
-                                "type": "text"
-                            }
-                        }
-                    ]
-                }
+            "type": "sdk_answer",
+            "pronounceText": ["pronounceText1"],
+            "suggestions": {
+                "buttons": [
+                    {
+                        "title": ["{{payload.personInfo.name}}", "отделения2"],
+                        "action": {"text": "отделения", "type": "text"},
+                    },
+                    {"title": ["кредит1", "кредит2"], "action": {"text": "кредит", "type": "text"}},
+                ]
+            },
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        exp1 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Ivan Ivanov", "action": {"text": "отделения", "type": "text"}},
+                            {"title": "кредит1", "action": {"text": "кредит", "type": "text"}},
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
+        exp2 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "отделения2", "action": {"text": "отделения", "type": "text"}},
+                            {"title": "кредит2", "action": {"text": "кредит", "type": "text"}},
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'Ivan Ivanov', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит2', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
-        nexp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'pronounceText1', 'suggestions': {'buttons': [{'title': 'отделения2', 'action': {'text': 'отделения', 'type': 'text'}}, {'title': 'кредит1', 'action': {'text': 'кредит', 'type': 'text'}}]}}}, sort_keys=True)
+        nexp1 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "Ivan Ivanov", "action": {"text": "отделения", "type": "text"}},
+                            {"title": "кредит2", "action": {"text": "кредит", "type": "text"}},
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
+        nexp2 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "pronounceText": "pronounceText1",
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "отделения2", "action": {"text": "отделения", "type": "text"}},
+                            {"title": "кредит1", "action": {"text": "кредит", "type": "text"}},
+                        ]
+                    },
+                },
+            },
+            sort_keys=True,
+        )
         not_expect_arr = [nexp1, nexp2]
         for i in range(10):
             action = SDKAnswer(items)
@@ -649,70 +1378,77 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
             "type": "sdk_answer_to_user",
-            "static":
-                {
-                    "static_text": "st1",
-                    "card1": {"cards_params": "a lot of params"},
-                    "dl": "www.ww.w"
-                },
+            "static": {"static_text": "st1", "card1": {"cards_params": "a lot of params"}, "dl": "www.ww.w"},
             "random_choice": [
+                {"pron": "p1", "txt": "{{payload.personInfo.name}}", "title": "title1"},
+                {"pron": "p2", "txt": "t2", "title": "title2"},
+            ],
+            "items": [
+                {"type": "item_card", "text": "txt", "requirement": {"type": "test", "result": False}},
+                {"type": "bubble_text", "text": "txt", "markdown": False},
+                {"type": "item_card", "text": "card1", "requirement": {"type": "test", "result": True}},
+            ],
+            "root": [
                 {
-                    "pron": "p1",
-                    "txt": "{{payload.personInfo.name}}",
-                    "title": "title1"
+                    "type": "pronounce_text",
+                    "text": "pron",
+                }
+            ],
+            "suggestions": [
+                {
+                    "type": "suggest_text",
+                    "title": "pron",
+                    "text": "txt",
                 },
                 {
-                    "pron": "p2",
-                    "txt": "t2",
-                    "title": "title2"
-                }],
-            "items":
-                [
-                    {
-                        'type': "item_card",
-                        "text": "txt",
-                        "requirement": {"type": "test", "result": False}
-                    },
-                    {
-                        'type': "bubble_text",
-                        "text": "txt",
-                        "markdown": False
-                    },
-                    {
-                        'type': "item_card",
-                        "text": "card1",
-                        "requirement": {"type": "test", "result": True}
-                    }
-                ],
-            "root":
-                [
-                    {
-                        'type': "pronounce_text",
-                        "text": "pron",
-                    }
-                ],
-            "suggestions":
-                [
-                    {
-                        "type": "suggest_text",
-                        "title": "pron",
-                        "text": "txt",
-                    },
-                    {
-                        "type": "suggest_text",
-                        "title": "pron",
-                        "text": "txt",
-                        "requirement": {"type": "test", "result": True}
-                    },
-                    {
-                        "type": "suggest_deeplink",
-                        "title": "pron",
-                        "deep_link": "dl"
-                    }
-                ]
+                    "type": "suggest_text",
+                    "title": "pron",
+                    "text": "txt",
+                    "requirement": {"type": "test", "result": True},
+                },
+                {"type": "suggest_deeplink", "title": "pron", "deep_link": "dl"},
+            ],
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 't2', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'text': 't2', 'type': 'text'}}, {'title': 'p2', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p2'}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': 'Ivan Ivanov', 'markdown': False}}, {'card': {'cards_params': 'a lot of params'}}], 'suggestions': {'buttons': [{'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'text': 'Ivan Ivanov', 'type': 'text'}}, {'title': 'p1', 'action': {'deep_link': 'www.ww.w', 'type': 'deep_link'}}]}, 'pronounceText': 'p1'}}, sort_keys=True)
+        exp1 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "items": [
+                        {"bubble": {"text": "t2", "markdown": False}},
+                        {"card": {"cards_params": "a lot of params"}},
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "p2", "action": {"text": "t2", "type": "text"}},
+                            {"title": "p2", "action": {"text": "t2", "type": "text"}},
+                            {"title": "p2", "action": {"deep_link": "www.ww.w", "type": "deep_link"}},
+                        ]
+                    },
+                    "pronounceText": "p2",
+                },
+            },
+            sort_keys=True,
+        )
+        exp2 = json.dumps(
+            {
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "items": [
+                        {"bubble": {"text": "Ivan Ivanov", "markdown": False}},
+                        {"card": {"cards_params": "a lot of params"}},
+                    ],
+                    "suggestions": {
+                        "buttons": [
+                            {"title": "p1", "action": {"text": "Ivan Ivanov", "type": "text"}},
+                            {"title": "p1", "action": {"text": "Ivan Ivanov", "type": "text"}},
+                            {"title": "p1", "action": {"deep_link": "www.ww.w", "type": "deep_link"}},
+                        ]
+                    },
+                    "pronounceText": "p1",
+                },
+            },
+            sort_keys=True,
+        )
 
         action = SDKAnswerToUser(items)
         for i in range(3):
@@ -728,40 +1464,26 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         answer_items["suggest_text"] = SuggestText
         answer_items["suggest_deeplink"] = SuggestDeepLink
 
-
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         user.message = PicklableMock()
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {
             "type": "sdk_answer_to_user",
-            "static":
-                {
-                    "static_text": "st1",
-                    "card1": {"cards_params": "a lot of params"},
-                    "dl": "www.ww.w"
-                },
+            "static": {"static_text": "st1", "card1": {"cards_params": "a lot of params"}, "dl": "www.ww.w"},
             "random_choice": [
+                {"pron": "p1", "txt": "{{payload.personInfo.name}}", "title": "title1"},
+                {"pron": "p2", "txt": "t2", "title": "title2"},
+            ],
+            "root": [
                 {
-                    "pron": "p1",
-                    "txt": "{{payload.personInfo.name}}",
-                    "title": "title1"
+                    "type": "pronounce_text",
+                    "text": "pron",
                 },
-                {
-                    "pron": "p2",
-                    "txt": "t2",
-                    "title": "title2"
-                }],
-            "root":
-                [
-                    {
-                        'type': "pronounce_text",
-                        "text": "pron",
-                    },
-                ]
+            ],
         }
-        exp1 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p1'}}, sort_keys=True)
-        exp2 = json.dumps({'messageName': 'ANSWER_TO_USER', 'payload': {'pronounceText': 'p2'}}, sort_keys=True)
+        exp1 = json.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p1"}}, sort_keys=True)
+        exp2 = json.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p2"}}, sort_keys=True)
 
         action = SDKAnswerToUser(items)
         for i in range(3):
@@ -775,19 +1497,18 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
 
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
-        items = {
-            "type": "sdk_answer_to_user",
-            "items":
-                [
-                    {
-                        'type': "bubble_text",
-                        "text": "42"
-                    }
-                ]
-        }
+        items = {"type": "sdk_answer_to_user", "items": [{"type": "bubble_text", "text": "42"}]}
         action = SDKAnswerToUser(items)
+<<<<<<< HEAD
         result = await action.run(user, None)
         self.assertDictEqual(result[0].raw, {'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': '42', 'markdown': True}}]}})
+=======
+        result = action.run(user, None)
+        self.assertDictEqual(
+            result[0].raw,
+            {"messageName": "ANSWER_TO_USER", "payload": {"items": [{"bubble": {"text": "42", "markdown": True}}]}},
+        )
+>>>>>>> release/2.0.0
 
     async def test_SDKItemAnswer_suggestions_template(self):
 
@@ -799,28 +1520,32 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         items = {
             "type": "sdk_answer_to_user",
             "support_templates": {
-                "suggestions_from_template": '{ "buttons": [ { "title": "some title", "action": { "type": "text", "text": "some text" } } ]}'
+                "suggestions_from_template": '{ "buttons": [ { "title": "some title", "action": { "type": "text", '
+                                             '"text": "some text" } } ]}'
             },
             "suggestions_template": {
                 "type": "unified_template",
                 "template": "{{ suggestions_from_template }}",
-                "loader": "json"
-            }
+                "loader": "json",
+            },
         }
         action = SDKAnswerToUser(items)
         result = await action.run(user, None)
         self.assertDictEqual(
             result[0].raw,
             {
-                'messageName': 'ANSWER_TO_USER',
-                'payload': {
-                    'suggestions': {
-                        'buttons': [
-                            {'title': 'some title', 'action': {'type': 'text', 'text': 'some text'}}
-                        ]
+                "messageName": "ANSWER_TO_USER",
+                "payload": {
+                    "suggestions": {
+                        "buttons": [{"title": "some title", "action": {"type": "text", "text": "some text"}}]
                     }
+<<<<<<< HEAD
                 }
             }
+=======
+                },
+            },
+>>>>>>> release/2.0.0
         )
 
 
@@ -828,67 +1553,38 @@ class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
     @patch("smart_kit.configs.settings.Settings")
     async def test_run(self, settings_mock: MagicMock):
         expected = [
-            Command("GIVE_ME_MEMORY",
-                    {
-                        'root_nodes': {
-                            'protocolVersion': 1
-                        },
-                        'consumer': {
-                            'projectId': '0'
-                        },
-                        "tokenType": 0,
-                        'profileEmployee': 0,
-                        'memory': [
-                            {
-                                'memoryPartition': 'confidentialMemo',
-                                'tags': [
-                                    'userAgreement',
-                                    'userAgreementProject'
-                                ]
-                            },
-                            {
-                                'memoryPartition': 'projectPrivateMemo',
-                                'tags': [
-                                    'test'
-                                ]
-                            }
-                        ]
-                    },
-                    None, "kafka", {"topic_key": "client_info", "kafka_key": "main", "kafka_replyTopic": "app"})
+            Command(
+                "GIVE_ME_MEMORY",
+                {
+                    "root_nodes": {"protocolVersion": 1},
+                    "consumer": {"projectId": "0"},
+                    "tokenType": 0,
+                    "profileEmployee": 0,
+                    "memory": [
+                        {"memoryPartition": "confidentialMemo", "tags": ["userAgreement", "userAgreementProject"]},
+                        {"memoryPartition": "projectPrivateMemo", "tags": ["test"]},
+                    ],
+                },
+                None,
+                "kafka",
+                {"topic_key": "client_info", "kafka_key": "main", "kafka_replyTopic": "app"},
+            )
         ]
         user = PicklableMagicMock()
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        settings = {
-            "template_settings": {
-                "project_id": "0",
-                "consumer_topic": "app"
-            }
-        }
+        settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
         settings_mock.return_value = settings
         items = {
             "behavior": "my_behavior",
             "nodes": {
                 "memory": {
-                    "confidentialMemo": [
-                        "userAgreement",
-                        "userAgreementProject"
-                    ],
-                    "projectPrivateMemo": [
-                        "{{ 'test' }}"
-                    ]
+                    "confidentialMemo": ["userAgreement", "userAgreementProject"],
+                    "projectPrivateMemo": ["{{ 'test' }}"],
                 },
-                "profileEmployee": {
-                    "type": "unified_template",
-                    "template": "{{ 0 }}",
-                    "loader": "json"
-                },
-                "tokenType": {
-                    "type": "unified_template",
-                    "template": "{{ 0 }}",
-                    "loader": "json"
-                }
-            }
+                "profileEmployee": {"type": "unified_template", "template": "{{ 0 }}", "loader": "json"},
+                "tokenType": {"type": "unified_template", "template": "{{ 0 }}", "loader": "json"},
+            },
         }
         text_preprocessing_result = PicklableMock()
         action = GiveMeMemoryAction(items)
@@ -900,128 +1596,83 @@ class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
 class RememberThisActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_run(self):
         expected = [
-            Command("REMEMBER_THIS",
-                    {
-                        'root_nodes': {
-                            'protocolVersion': 3
-                        },
-                        'consumer': {
-                            'projectId': '0'
-                        },
-                        'clientIds': 0,
-                        'memory': [
-                            {
-                                'memoryPartition': 'publicMemo',
-                                'partitionData': [
-                                    {
-                                        'tag': 'historyInfo',
-                                        'action': {
-                                            'type': 'upsert',
-                                            'params': {
-                                                'operation': [
-                                                    {
-                                                        'selector': {
-                                                            'intent': {
-                                                                '$eq': 'run_app'
-                                                            },
-                                                            'surface': {
-                                                                '$eq': '0'
-                                                            },
-                                                            'channel': {
-                                                                '$eq': '0'
-                                                            },
-                                                            'projectId': {
-                                                                '$eq': '0'
-                                                            }
-                                                        },
-                                                        'updater': [
-                                                            {
-                                                                '$set': {
-                                                                    '$.lastExecuteDateTime': '0'
-                                                                }
-                                                            },
-                                                            {
-                                                                '$inc': {
-                                                                    '$.executeCounter': 1
-                                                                }
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    None, "kafka", {
-                        "topic_key": 'client_info_remember',
-                        "kafka_key": "main",
-                        "kafka_replyTopic": "app"
-                    })
+            Command(
+                "REMEMBER_THIS",
+                {
+                    "root_nodes": {"protocolVersion": 3},
+                    "consumer": {"projectId": "0"},
+                    "clientIds": 0,
+                    "memory": [
+                        {
+                            "memoryPartition": "publicMemo",
+                            "partitionData": [
+                                {
+                                    "tag": "historyInfo",
+                                    "action": {
+                                        "type": "upsert",
+                                        "params": {
+                                            "operation": [
+                                                {
+                                                    "selector": {
+                                                        "intent": {"$eq": "run_app"},
+                                                        "surface": {"$eq": "0"},
+                                                        "channel": {"$eq": "0"},
+                                                        "projectId": {"$eq": "0"},
+                                                    },
+                                                    "updater": [
+                                                        {"$set": {"$.lastExecuteDateTime": "0"}},
+                                                        {"$inc": {"$.executeCounter": 1}},
+                                                    ],
+                                                }
+                                            ]
+                                        },
+                                    },
+                                }
+                            ],
+                        }
+                    ],
+                },
+                None,
+                "kafka",
+                {"topic_key": "client_info_remember", "kafka_key": "main", "kafka_replyTopic": "app"},
+            )
         ]
         user = PicklableMagicMock()
-        user.settings = {
-            "template_settings": {
-                "project_id": "0",
-                "consumer_topic": "app"
-            }
-        }
+        user.settings = {"template_settings": {"project_id": "0", "consumer_topic": "app"}}
         params = {"params": "params"}
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         items = {
             "nodes": {
-              "clientIds": {
-                "type": "unified_template",
-                "template": "{{ 0 }}",
-                "loader": "json"
-              },
-              "memory": [
-                {
-                  "memoryPartition": "publicMemo",
-                  "partitionData": [
+                "clientIds": {"type": "unified_template", "template": "{{ 0 }}", "loader": "json"},
+                "memory": [
                     {
-                      "tag": "historyInfo",
-                      "action": {
-                        "type": "upsert",
-                        "params": {
-                          "operation": [
+                        "memoryPartition": "publicMemo",
+                        "partitionData": [
                             {
-                              "selector": {
-                                "intent": {
-                                  "$eq": "run_app"
+                                "tag": "historyInfo",
+                                "action": {
+                                    "type": "upsert",
+                                    "params": {
+                                        "operation": [
+                                            {
+                                                "selector": {
+                                                    "intent": {"$eq": "run_app"},
+                                                    "surface": {"$eq": "{{ 0 }}"},
+                                                    "channel": {"$eq": "{{ 0 }}"},
+                                                    "projectId": {"$eq": "{{ 0 }}"},
+                                                },
+                                                "updater": [
+                                                    {"$set": {"$.lastExecuteDateTime": "{{ 0 }}"}},
+                                                    {"$inc": {"$.executeCounter": 1}},
+                                                ],
+                                            }
+                                        ]
+                                    },
                                 },
-                                "surface": {
-                                  "$eq": "{{ 0 }}"
-                                },
-                                "channel": {
-                                  "$eq": "{{ 0 }}"
-                                },
-                                "projectId": {
-                                  "$eq": "{{ 0 }}"
-                                }
-                              },
-                              "updater": [
-                                {
-                                  "$set": {
-                                    "$.lastExecuteDateTime": "{{ 0 }}"
-                                  }
-                                },
-                                {
-                                  "$inc": {
-                                    "$.executeCounter": 1
-                                  }
-                                }
-                              ]
                             }
-                          ]
-                        }
-                      }
+                        ],
                     }
-                  ]
-                }
-              ]
+                ],
             }
         }
         action = RememberThisAction(items)

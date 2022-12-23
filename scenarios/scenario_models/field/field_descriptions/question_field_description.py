@@ -1,5 +1,5 @@
 # coding: utf-8
-from lazy import lazy
+from functools import cached_property
 
 from core.basic_models.actions.basic_actions import Action
 from core.model.factory import list_factory
@@ -16,7 +16,7 @@ class QuestionFieldDescription(BasicFieldDescription):
         self._on_filled_actions = items.get("on_filled_actions", [])
         self._ask_again_requests = items.get("ask_again_questions", [])
 
-    @lazy
+    @cached_property
     @list_factory(Action)
     def ask_again_requests(self):
         return self._ask_again_requests

@@ -1,6 +1,8 @@
 KEY_NAME = "key_name"
 SCENARIO_VALUE = "scenario"
 REQUIREMENT_CHECK_VALUE = "requirement_check"
+REQUIREMENT_TRACE_VALUE = "requirement_trace"
+TEMPLATE_TRACE_VALUE = "jinja2_trace"
 EXCEPTION_VALUE = "exception"
 HANDLED_EXCEPTION_VALUE = "handled_exception"
 IGNITE_VALUE = "ignite"

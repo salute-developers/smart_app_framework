@@ -1,7 +1,6 @@
 # coding: utf-8
 import time
-
-from lazy import lazy
+from functools import cached_property
 
 from core.basic_models.actions.basic_actions import Action
 from core.model.factory import factory
@@ -22,22 +21,22 @@ class BehaviorDescription:
         setting_timeout = user.settings["template_settings"].get("services_timeout", {}).get(self.id)
         return setting_timeout or self._timeout
 
-    @lazy
+    @cached_property
     @factory(Action)
     def success_action(self):
         return self._success_action
 
-    @lazy
+    @cached_property
     @factory(Action)
     def fail_action(self):
         return self._fail_action
 
-    @lazy
+    @cached_property
     @factory(Action)
     def misstate(self):
         return self._misstate
 
-    @lazy
+    @cached_property
     @factory(Action)
     def timeout_action(self):
         return self._timeout_action

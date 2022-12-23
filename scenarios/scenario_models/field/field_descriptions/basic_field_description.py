@@ -1,5 +1,5 @@
 # coding: utf-8
-from lazy import lazy
+from functools import cached_property
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.requirement.basic_requirements import Requirement
@@ -33,12 +33,12 @@ class BasicFieldDescription:
         self.fill_other = items.get("fill_other", True)
         self._ask_again_requests = items.get("ask_again_questions", [])
 
-    @lazy
+    @cached_property
     @list_factory(Action)
     def requests(self):
         return self._requests
 
-    @lazy
+    @cached_property
     @list_factory(Action)
     def on_filled_actions(self):
         return self._on_filled_actions
@@ -51,17 +51,17 @@ class BasicFieldDescription:
     def required(self):
         return self._required
 
-    @lazy
+    @cached_property
     @factory(Requirement)
     def requirement(self):
         return self._requirement
 
-    @lazy
+    @cached_property
     @factory(FieldFillerDescription)
     def filler(self):
         return self._filler
 
-    @lazy
+    @cached_property
     @factory(FieldValidator)
     def field_validator(self):
         return self._field_validator

@@ -40,21 +40,21 @@ class TestRegexpStringOperationsFiller(IsolatedAsyncioTestCase):
 
     async def test_extract_upper(self):
         field_value = "1-rsar09a"
-        self.items["operations"] = [{"type":"upper"}]
+        self.items["operations"] = [{"type": "upper"}]
 
         result = await self._test_extract(field_value)
         self.assertEqual(field_value.upper(), result)
 
     async def test_extract_rstrip(self):
         field_value = "1-RSAR09A !)"
-        self.items["operations"] = [{"type":"rstrip", "amount": "!) "}]
+        self.items["operations"] = [{"type": "rstrip", "amount": "!) "}]
 
         result = await self._test_extract(field_value)
         self.assertEqual(field_value.rstrip("!) "), result)
 
     async def test_extract_upper_rstrip(self):
         field_value = "1-rsar09a !)"
-        self.items["operations"] = [ {"type":"upper"}, {"type":"rstrip", "amount": "!) "} ]
+        self.items["operations"] = [{"type": "upper"}, {"type": "rstrip", "amount": "!) "}]
 
         result = await self._test_extract(field_value)
         self.assertEqual(field_value.upper().rstrip("!) "), result)
@@ -65,4 +65,3 @@ class TestRegexpStringOperationsFiller(IsolatedAsyncioTestCase):
 
         result = await self._test_extract(field_value)
         self.assertIsNone(result)
-

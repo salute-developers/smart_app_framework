@@ -17,7 +17,8 @@ class TestJinjaTemplates(TestCase):
 
     def test_inflect(self):
         template = jinja2.Template(
-            "Поставим слово '{{ word }}' в множественное число, родительный падеж: '{{ word|inflect(['plur', 'gent']) }}'")
+            "Поставим слово '{{ word }}' в множественное число, родительный падеж: "
+            "'{{ word|inflect(['plur', 'gent']) }}'")
         self.assertEqual(
             "Поставим слово 'бутявка' в множественное число, родительный падеж: 'бутявок'",
             template.render({"word": "бутявка"})
@@ -149,7 +150,7 @@ class TestJinjaTemplates(TestCase):
 
         expected = "".join(map(str, [date.year, "{:02d}".format(date.month), "{:02d}".format(date.day)]))
         got = core.unified_template.jinja_filters.generate_ics(date)
-        timestring = got.split()[2] #Third row contains date
+        timestring = got.split()[2]  # Third row contains date
         self.assertTrue(expected in timestring)
 
     def test_date_from_timestamp(self):

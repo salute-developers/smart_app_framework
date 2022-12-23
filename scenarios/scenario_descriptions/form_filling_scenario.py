@@ -1,6 +1,7 @@
 # coding: utf-8
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 
+from core.basic_models.actions.command import Command
 from core.basic_models.scenarios.base_scenario import BaseScenario
 from core.monitoring.monitoring import monitoring
 from core.logging.logger_utils import log
@@ -44,7 +45,7 @@ class FormFillingScenario(BaseScenario):
             Event(type=HistoryConstants.types.FIELD_EVENT,
                   scenario=self.root_id,
                   content={HistoryConstants.content_fields.FIELD: question_field.description.id},
-                  results=HistoryConstants.event_results.ASK_QUESTION))
+                  result=HistoryConstants.event_results.ASK_QUESTION))
 
         return await question.run(user, text_preprocessing_result, params)
 
@@ -87,7 +88,7 @@ class FormFillingScenario(BaseScenario):
             event = Event(type=HistoryConstants.types.FIELD_EVENT,
                           scenario=self.root_id,
                           content={HistoryConstants.content_fields.FIELD: field_key},
-                          results=HistoryConstants.event_results.FILLED)
+                          result=HistoryConstants.event_results.FILLED)
             user.history.add_event(event)
         return result
 
@@ -112,7 +113,7 @@ class FormFillingScenario(BaseScenario):
                                                                       text_normalization_result, user, params))
         return result
 
-    async def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params):
+    async def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params) -> List[Command]:
         error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)
@@ -130,7 +131,7 @@ class FormFillingScenario(BaseScenario):
                 break
         return error_msgs
 
-    async def _fill_form(self, user, text_preprocessing_result, form, data_extracted):
+    async def _fill_form(self, user, text_preprocessing_result, form, data_extracted) -> Tuple[List[Command], bool]:
         on_filled_actions = []
         fields = form.fields
         scenario_model = user.scenario_models[self.id]
@@ -148,7 +149,7 @@ class FormFillingScenario(BaseScenario):
                     return _action, is_break
         return on_filled_actions, is_break
 
-    async def get_reply(self, user, text_preprocessing_result, reply_actions, field, form):
+    async def get_reply(self, user, text_preprocessing_result, reply_actions, field, form) -> List[Command]:
         action_params = {}
         if field:
             field.set_available()
@@ -175,7 +176,7 @@ class FormFillingScenario(BaseScenario):
         return action_messages
 
     @monitoring.got_histogram("scenario_time")
-    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
+    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)
@@ -198,7 +199,8 @@ class FormFillingScenario(BaseScenario):
                         Event(type=HistoryConstants.types.FIELD_EVENT,
                               scenario=self.root_id,
                               content={HistoryConstants.content_fields.FIELD: field.description.id},
-                              results=HistoryConstants.event_results.ASK_QUESTION))
+                              result=HistoryConstants.event_results.ASK_QUESTION)
+                    )
                 reply = await self.get_reply(user, text_preprocessing_result, self.actions, field, form)
                 reply_messages.extend(reply)
 

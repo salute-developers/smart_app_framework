@@ -13,7 +13,7 @@ class Event(NamedTuple):
     scenario: Optional[str] = None
     scenario_version: Optional[str] = None
     node: Optional[str] = None
-    results: Optional[str] = None
+    result: Optional[str] = None
     content: Optional[Dict[str, str]] = None
     created_time: float = time()
 

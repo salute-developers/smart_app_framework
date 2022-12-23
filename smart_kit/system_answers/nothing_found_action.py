@@ -15,9 +15,11 @@ class NothingFoundAction(Action):
     id: Optional[str]
 
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
-        super(NothingFoundAction, self).__init__(items, id)
+        super().__init__(items, id)
         self._action = StringAction({"command": NOTHING_FOUND})
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        return await self._action.run(user, text_preprocessing_result, params=params)
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
+        commands.extend(await self._action.run(user, text_preprocessing_result, params=params) or [])
+        return commands

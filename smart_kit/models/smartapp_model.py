@@ -1,16 +1,20 @@
 # coding: utf-8
 import sys
 import traceback
+from typing import List, Optional
 
+from core.basic_models.actions.command import Command
 from core.descriptions.descriptions import Descriptions
 from core.logging.logger_utils import log
 from core.utils.exception_handlers import exc_handler
 
 import scenarios.logging.logger_constants as log_const
 from smart_kit.handlers.handle_close_app import HandlerCloseApp
+from smart_kit.handlers.handle_take_runtime_permissions import HandlerTakeRuntimePermissions
+from smart_kit.handlers.handler_base import HandlerBase
 from smart_kit.handlers.handler_take_profile_data import HandlerTakeProfileData
 from smart_kit.names.message_names import MESSAGE_TO_SKILL, LOCAL_TIMEOUT, RUN_APP, SERVER_ACTION, CLOSE_APP, \
-    TAKE_PROFILE_DATA
+    TAKE_PROFILE_DATA, TAKE_RUNTIME_PERMISSIONS
 from smart_kit.handlers.handler_run_app import HandlerRunApp
 from smart_kit.handlers.handle_respond import HandlerRespond
 from smart_kit.handlers.handler_text import HandlerText
@@ -24,7 +28,7 @@ from core.monitoring.monitoring import monitoring
 class SmartAppModel:
     # additional_handlers format:
     # {"MESSAGE_NAME": {"handler": HandlerText, "params": {"dialogue_manager": custom_dialogue_manager}}}
-    # "params" is optional
+    # "params" are passed as kwargs to handler.__init__(), optional
     additional_handlers = {}
 
     def __init__(self, resources: SmartAppResources, dialogue_manager_cls, custom_settings, **kwargs):
@@ -45,6 +49,7 @@ class SmartAppModel:
             SERVER_ACTION: HandlerServerAction(self.app_name),
             CLOSE_APP: HandlerCloseApp(self.app_name),
             TAKE_PROFILE_DATA: HandlerTakeProfileData(self.app_name),
+            TAKE_RUNTIME_PERMISSIONS: HandlerTakeRuntimePermissions(self.app_name),
         }
         self._handlers.update({
             message_name: HandlerRespond(self.app_name, action_name=action_name)
@@ -56,7 +61,7 @@ class SmartAppModel:
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    def get_handler(self, message_type):
+    def get_handler(self, message_type) -> HandlerBase:
         return self._handlers[message_type]
 
     def init_additional_handlers(self):
@@ -66,7 +71,7 @@ class SmartAppModel:
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
-    async def answer(self, message, user):
+    async def answer(self, message, user) -> Optional[List[Command]]:
         user.expire()
         handler = self.get_handler(message.type)
 

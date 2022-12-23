@@ -39,13 +39,12 @@ class BaseHttpMainLoop(BaseMainLoop):
                 result[2].as_dict
             except (json.JSONDecodeError, KeyError):
                 result = 400, "BAD REQUEST", SmartAppToMessage(
-                        self.BAD_REQUEST_COMMAND,
-                        message=basic_error_message,
-                        request=None,
-                    )
+                    self.BAD_REQUEST_COMMAND,
+                    message=basic_error_message,
+                    request=None,
+                )
             finally:
                 return result
-
 
         answer, stats = self.process_message(message)
         if not answer:
@@ -103,9 +102,13 @@ class BaseHttpMainLoop(BaseMainLoop):
         return list(headers.items())
 
     def _generate_answers(self, user, commands, message, **kwargs):
+        """ Метод генерирует ответы """
         commands = combine_commands(commands, user)
         if len(commands) > 1:
-            raise ValueError
+            raise ValueError("Используется несколько команд, а взаимодействие предполагает только один ответ. "
+                             "Скорее всего, вы использовали ANSWER_TO_USER и другую команду, например, "
+                             "GET_RUNTIME_PERMISSIONS. Попробуйте использовать только одну команду на сценарий "
+                             "+ behavior, продолжающий сценарий.")
         answer = commands.pop() if commands else None
 
         return answer
@@ -137,7 +140,7 @@ class HttpMainLoop(BaseHttpMainLoop):
             log("Error in request data", level="ERROR")
             raise Exception("Error in request data")
 
-        message = SmartAppFromMessage(body, headers=headers, headers_required=False,
+        message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
                                       validators=self.from_msg_validators)
 
         status, reason, answer = self.handle_message(message)
@@ -149,7 +152,7 @@ class HttpMainLoop(BaseHttpMainLoop):
         self._server = make_server('0.0.0.0', 8000, self.iterate)
         log(
             '''
-                Application start via "python manage.py run_app" recommended only for local testing. 
+                Application start via "python manage.py run_app" recommended only for local testing.
                 For production it is recommended to start using "gunicorn --config wsgi_config.py 'wsgi:create_app()'
             ''',
             level="WARNING")

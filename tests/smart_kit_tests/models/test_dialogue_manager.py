@@ -128,9 +128,5 @@ class ModelsTest1(unittest.IsolatedAsyncioTestCase):
         obj = dialogue_manager.DialogueManager({'scenarios': self.test_scenarios,
                                                 'external_actions': {'nothing_found_action': self.TestAction}},
                                                self.app_name)
-        self.assertTrue(
-            await obj.run_scenario(1, self.test_text_preprocessing_result, self.test_user1) == "ResultTestName"
-        )
-        self.assertTrue(
-            await obj.run_scenario(2, self.test_text_preprocessing_result, self.test_user1) == "TestNameResult"
-        )
+        self.assertTrue(await obj.run_scenario(1, self.test_text_preprocessing_result, self.test_user1) == "ResultTestName")
+        self.assertTrue(await obj.run_scenario(2, self.test_text_preprocessing_result, self.test_user1) == "TestNameResult")

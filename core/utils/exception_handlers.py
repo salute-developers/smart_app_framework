@@ -15,16 +15,20 @@ def exc_handler(on_error_obj_method_name=None, handled_exceptions=None):
                     result = await funct(obj, *args, **kwarg)
                 except handled_exceptions:
                     try:
-                        on_error = getattr(obj, on_error_obj_method_name) if \
-                            on_error_obj_method_name else (lambda *x: None)
-                        result = on_error(*args, **kwarg) if not asyncio.iscoroutinefunction(on_error) else \
-                            await on_error(*args, **kwarg)
-                    except:
+                        on_error = (
+                            getattr(obj, on_error_obj_method_name)
+                            if on_error_obj_method_name else (lambda *x, **y: None)
+                        )
+                        result = (
+                            on_error(*args, **kwarg)
+                            if not asyncio.iscoroutinefunction(on_error)
+                            else await on_error(*args, **kwarg)
+                        )
+                    except Exception:
                         print(sys.exc_info())
                 return result
 
             return _wrapper
-
         else:
             @wraps(funct)
             def _wrapper(obj, *args, **kwarg):
@@ -33,10 +37,12 @@ def exc_handler(on_error_obj_method_name=None, handled_exceptions=None):
                     result = funct(obj, *args, **kwarg)
                 except handled_exceptions:
                     try:
-                        on_error = getattr(obj, on_error_obj_method_name) if \
-                            on_error_obj_method_name else (lambda *x: None)
+                        on_error = (
+                            getattr(obj, on_error_obj_method_name)
+                            if on_error_obj_method_name else (lambda *x, **y: None)
+                        )
                         result = on_error(*args, **kwarg)
-                    except:
+                    except Exception:
                         print(sys.exc_info())
                 return result
 

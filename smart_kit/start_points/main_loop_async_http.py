@@ -1,3 +1,4 @@
+import json
 import typing
 import os
 
@@ -44,7 +45,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
                 db_data = self.db_adapter.get(db_uid)
         except (DBAdapterException, ValueError):
             log("Failed to get user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                   log_const.REQUEST_VALUE: str(message.value)}, level="ERROR")
+                                                   log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
             load_error = True
             monitoring.counter_load_error(self.app_name)
         return self.user_cls(
@@ -88,7 +89,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
                         await self.db_adapter.save(db_uid, str_data)
             except (DBAdapterException, ValueError):
                 log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                       log_const.REQUEST_VALUE: str(message.value)}, level="ERROR")
+                                                       log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
                 monitoring.counter_save_error(self.app_name)
             if not no_collisions:
                 monitoring.counter_save_collision(self.app_name)
@@ -167,7 +168,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
     async def iterate(self, request: aiohttp.web.Request):
         headers = self._get_headers(request.headers)
         body = await request.text()
-        message = SmartAppFromMessage(body, headers=headers, headers_required=False,
+        message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
                                       validators=self.from_msg_validators)
 
         status, reason, answer = await self.handle_message(message)
