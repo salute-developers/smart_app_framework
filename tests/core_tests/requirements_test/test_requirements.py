@@ -79,12 +79,22 @@ class EQMockOperator:
 
 
 class RequirementTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        registered_factories[Requirement] = MockRequirement
+        registered_factories[Operator] = MockAmountOperator
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        registered_factories[Requirement] = Requirement
+        registered_factories[Operator] = Operator
+
     def test_base(self):
         requirement = Requirement(None)
         assert requirement.check(None, None)
 
     def test_composite(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = CompositeRequirement({"requirements": [
             {"cond": True},
             {"cond": True}
@@ -93,7 +103,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, None))
 
     def test_and_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = AndRequirement({"requirements": [
             {"cond": True},
             {"cond": True}
@@ -101,7 +110,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, None))
 
     def test_and_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = AndRequirement({"requirements": [
             {"cond": True},
             {"cond": False}
@@ -109,7 +117,6 @@ class RequirementTest(unittest.TestCase):
         self.assertFalse(requirement.check(None, None))
 
     def test_or_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = OrRequirement({"requirements": [
             {"cond": True},
             {"cond": False}
@@ -117,7 +124,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, None))
 
     def test_or_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = OrRequirement({"requirements": [
             {"cond": False},
             {"cond": False}
@@ -125,12 +131,10 @@ class RequirementTest(unittest.TestCase):
         self.assertFalse(requirement.check(None, None))
 
     def test_not_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = NotRequirement({"requirement": {"cond": False}})
         self.assertTrue(requirement.check(None, None))
 
     def test_not_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = NotRequirement({"requirement": {"cond": True}})
         self.assertFalse(requirement.check(None, None))
 
@@ -167,7 +171,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, user))
 
     def test_counter_value_requirement(self):
-        registered_factories[Operator] = MockAmountOperator
         user = PicklableMock()
         counter = PicklableMock()
         counter.__gt__ = Mock(return_value=True)
@@ -176,7 +179,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, user))
 
     def test_counter_time_requirement(self):
-        registered_factories[Operator] = MockAmountOperator
         user = PicklableMock()
         counter = PicklableMock()
         counter.update_time = int(time()) - 10
