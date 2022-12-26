@@ -4,6 +4,7 @@ from unittest.mock import Mock, ANY
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
 from core.basic_models.actions.variable_actions import SetVariableAction, DeleteVariableAction, ClearVariablesAction
+from core.basic_models.requirement.basic_requirements import Requirement
 from core.model.registered import registered_factories
 from scenarios.actions.action import (
     ChoiceScenarioAction,
@@ -24,6 +25,7 @@ from scenarios.scenario_models.history import Event
 from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock, AsyncPicklableMock
+from tests.core_tests.requirements_test.test_requirements import MockRequirement
 
 
 class MockAction:
@@ -403,6 +405,16 @@ class RunLastScenarioActionTest(unittest.IsolatedAsyncioTestCase):
 
 
 class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        registered_factories[Requirement] = MockRequirement
+        registered_factories[Action] = MockAction
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        registered_factories[Requirement] = Requirement
+        registered_factories[Action] = Action
 
     @staticmethod
     async def mock_and_perform_action(test_items: Dict[str, Any], expected_result: Optional[str] = None,

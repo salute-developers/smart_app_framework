@@ -67,7 +67,7 @@ class ClassifierRepository(BaseRepository):
         self._folder_repository.load()
         classifiers_dict = self._folder_repository.data
 
-        gpu_available = tf.test.is_gpu_available()
+        gpu_available = len(tf.config.list_physical_devices("GPU")) > 0
         repository = None
 
         for classifier_key in classifiers_dict:

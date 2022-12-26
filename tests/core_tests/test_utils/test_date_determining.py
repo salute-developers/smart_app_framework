@@ -29,7 +29,6 @@ class TestDateDetermining(unittest.TestCase):
         result = period_determiner(words_to_process)
         self.assertEqual(result, ('01.03.2019', current_date.strftime('%d.%m.%Y')))
 
-
     @freeze_time('2021-11-23')
     def test_period_determiner_2(self):
         # если используется форма "за месяц год по сегодняшний день"
@@ -44,7 +43,7 @@ class TestDateDetermining(unittest.TestCase):
             'день',
         ]
         result = period_determiner(words_to_process)
-        assert result == ('01.03.2019', current_date.strftime('%d.%m.%Y'))
+        self.assertEqual(result, ('01.03.2019', current_date.strftime('%d.%m.%Y')))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_3(self):
