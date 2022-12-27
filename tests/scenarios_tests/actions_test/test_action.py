@@ -416,16 +416,6 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         registered_factories[Requirement] = Requirement
         registered_factories[Action] = Action
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        registered_factories[Requirement] = MockRequirement
-        registered_factories[Action] = MockAction
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        registered_factories[Requirement] = Requirement
-        registered_factories[Action] = Action
-
     @staticmethod
     async def mock_and_perform_action(test_items: Dict[str, Any], expected_result: Optional[str] = None,
                                       expected_scen: Optional[str] = None) -> Union[str, None]:
