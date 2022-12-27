@@ -1,4 +1,3 @@
-import inspect
 import logging
 import hashlib
 from datetime import datetime, timezone
@@ -11,6 +10,7 @@ from croniter import croniter
 import core.logging.logger_constants as log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier, ExternalClassifier
 from core.basic_models.operators.operators import Operator
+from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL, TYPE_CACHE_LEVEL
 from core.logging.logger_utils import log, log_classifier_result
 from core.model.base_user import BaseUser
 from core.model.factory import build_factory, list_factory, factory
@@ -28,6 +28,8 @@ requirement_factory = build_factory(requirements)
 
 
 class Requirement:
+    cache_level = INSTANCE_CACHE_LEVEL  # INSTANCE_CACHE_LEVEL or TYPE_CACHE_LEVEL or None
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
         self._descr = items.get("_description")
@@ -54,10 +56,29 @@ class Requirement:
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
-        try:
-            result = self._check(text_preprocessing_result, user, params)
-        except Exception:
-            return self.on_check_error(text_preprocessing_result, user)
+        if self.cache_level is not None:
+            cached_results = user.message_vars.get("cached_req_results")
+            if not cached_results:
+                cached_results = dict()
+                user.message_vars.set("cached_req_results", cached_results)
+            if self.cache_level == INSTANCE_CACHE_LEVEL:
+                self_hash = str(self.__hash__())
+            else:  # TYPE_CACHE_LEVEL
+                self_hash = str(self.__class__.__name__)
+
+            if self_hash in cached_results:
+                result = cached_results[self_hash]
+            else:
+                try:
+                    result = self._check(text_preprocessing_result, user, params)
+                    cached_results[self_hash] = result
+                except Exception:
+                    return self.on_check_error(text_preprocessing_result, user)
+        else:
+            try:
+                result = self._check(text_preprocessing_result, user, params)
+            except Exception:
+                return self.on_check_error(text_preprocessing_result, user)
         if self.is_logging_debug_mode:
             log_params = self._log_params()
             log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
