@@ -10,7 +10,7 @@ from croniter import croniter
 import core.logging.logger_constants as log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier, ExternalClassifier
 from core.basic_models.operators.operators import Operator
-from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL, TYPE_CACHE_LEVEL
+from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL
 from core.logging.logger_utils import log, log_classifier_result
 from core.model.base_user import BaseUser
 from core.model.factory import build_factory, list_factory, factory
