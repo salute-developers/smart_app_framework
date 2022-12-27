@@ -2,7 +2,9 @@
 import json
 import unittest
 import uuid
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch, AsyncMock
+
+from aiohttp import ClientTimeout
 
 from core.basic_models.actions.basic_actions import (
     Action,
@@ -134,9 +136,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(command.payload, {"answer": "test"})
 
     async def test_requirement_action(self):
-        registered_factories[Requirement] = requirement_factory
         requirements["test"] = MockRequirement
-        registered_factories[Action] = action_factory
         actions["test"] = MockAction
         items = {"requirement": {"type": "test", "result": True}, "action": {"type": "test"}}
         action = RequirementAction(items)
@@ -146,24 +146,24 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
         action = RequirementAction(items)
         result = await action.run(None, None)
-        self.assertIsNone(result)
+        self.assertEqual(result, [])
 
     async def test_requirement_choice(self):
         items = {"requirement_actions": [
-            {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
-            {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": "action2"}}
+            {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action1"]}},
+            {"requirement": {"type": "test", "result": True}, "action": {"type": "test", "result": ["action2"]}}
         ]}
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
         result = await choice_action.run(None, None)
-        self.assertEqual(result, "action2")
+        self.assertEqual(result, ["action2"])
 
     async def test_requirement_choice_else(self):
         items = {
             "requirement_actions": [
-                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action1"}},
-                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": "action2"}},
+                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action1"]}},
+                {"requirement": {"type": "test", "result": False}, "action": {"type": "test", "result": ["action2"]}},
             ],
             "else_action": {"type": "test", "result": ["action3"]},
         }
@@ -359,7 +359,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = PushAuthenticationActionHttp(items)
         self.assertTrue(isinstance(action.http_request_action, HTTPRequestAction))
 
-    def test_get_runtime_permissions(self):
+    async def test_get_runtime_permissions(self):
         params = {
             "day_time": "morning",
             "deep_link_url": "some_url",
@@ -385,7 +385,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
         text_preprocessing_result = BaseTextPreprocessingResult(items)
-        command = action.run(user=user, text_preprocessing_result=text_preprocessing_result)[0]
+        command = (await action.run(user=user, text_preprocessing_result=text_preprocessing_result))[0]
         self.assertEqual(command.raw, expected)
 
     def test_push_action_http_with_apprequest_lite_type_request(self):
@@ -533,22 +533,22 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
     @staticmethod
     def set_request_mock_attribute(request_mock, return_value=None):
         return_value = return_value or {}
-        request_mock.return_value = Mock(
-            __enter__=Mock(return_value=Mock(
-                json=Mock(return_value=return_value),
+        request_mock.return_value = AsyncMock(
+            __aenter__=AsyncMock(return_value=AsyncMock(
+                json=AsyncMock(return_value=return_value),
                 cookies={},
                 headers={},
             ), ),
-            __exit__=Mock()
+            __aexit__=AsyncMock()
         )
 
-    @patch('requests.request')
-    def test_push_authentication_action_http_call(self, request_mock: Mock):
+    @patch('aiohttp.request')
+    async def test_push_authentication_action_http_call(self, request_mock: Mock):
         user = Mock(
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -575,7 +575,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "scope": "SMART_PUSH"
         }
         http_request_action.method_params["json"] = request_body_parameters
-        http_request_action.run(user, None, None)
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/oauth",
             headers={
@@ -583,16 +583,16 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                 'Authorization':
                     'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
             },
-            method='POST', timeout=4, json=request_body_parameters
+            method='POST', timeout=ClientTimeout(total=4), json=request_body_parameters,
         )
 
-    @patch('requests.request')
-    def test_push_action_http_call_with_apprequest_lite_type_request(self, request_mock: Mock):
+    @patch('aiohttp.request')
+    async def test_push_action_http_call_with_apprequest_lite_type_request(self, request_mock: Mock):
         user = Mock(
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -649,7 +649,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         http_request_action.method_params["json"] = request_body_parameters
-        http_request_action.run(user, None, None)
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
             headers={
@@ -657,16 +657,16 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                 'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0',
                 'callbackUrl': 'some_url'
             },
-            method='POST', timeout=4, json=request_body_parameters
+            method='POST', timeout=ClientTimeout(total=4), json=request_body_parameters,
         )
 
-    @patch('requests.request')
-    def test_push_action_http_call_with_apprequest_type_request(self, request_mock: Mock):
+    @patch('aiohttp.request')
+    async def test_push_action_http_call_with_apprequest_type_request(self, request_mock: Mock):
         user = Mock(
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4))
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -833,14 +833,14 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         http_request_action.method_params["json"] = request_body_parameters
-        http_request_action.run(user, None, None)
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
             headers={
                 'RqUID': '37f0b5c0-b114-4943-8752-2990f36b3554',
                 'Authorization': 'Bearer eyJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwiYWxnIjoiUVAtMjU2In0'
             },
-            method='POST', timeout=4, json=request_body_parameters
+            method='POST', timeout=ClientTimeout(total=4), json=request_body_parameters,
         )
 
 

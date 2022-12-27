@@ -166,8 +166,8 @@ class GetRuntimePermissionsAction(PushAction):
         self.behavior = items.get("behavior") or COMMON_BEHAVIOR
         self.command = GET_RUNTIME_PERMISSIONS
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
