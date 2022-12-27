@@ -7,7 +7,7 @@ from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
 
 async def mock_test_action_run(x, y, z):
-    return 10
+    return [10]
 
 
 class HandlerTest4(unittest.IsolatedAsyncioTestCase):
@@ -28,7 +28,7 @@ class HandlerTest4(unittest.IsolatedAsyncioTestCase):
         self.test_user1.behaviors = PicklableMagicMock()
 
         self.test_action = Mock('action')
-        self.test_action.run = lambda x, y, z: [10]  # пусть что то возвращает
+        self.test_action.run = mock_test_action_run
         self.test_user2 = MagicMock('user')
         self.test_user2.id = '123-345-678'  # пусть чему-то равняется
         self.test_user2.descriptions = {'external_actions': {'any action name': self.test_action}}

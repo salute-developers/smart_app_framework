@@ -7,18 +7,18 @@ from smart_kit.utils.picklable_mock import PicklableMock
 
 
 async def mock_dialogue_manager1_run(x, y):
-    return "TestAnswer", True
+    return ["TestAnswer"], True
 
 
 async def mock_dialogue_manager2_run(x, y):
-    return "", False
+    return [], False
 
 
 class HandlerTest5(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.app_name = "TestAppName"
         self.test_dialog_manager1 = Mock('dialog_manager')
-        self.test_dialog_manager1.run = lambda x, y: (["TestAnswer"], True)
+        self.test_dialog_manager1.run = mock_dialogue_manager1_run
         self.test_dialog_manager2 = Mock('dialog_manager')
         self.test_dialog_manager2.run = mock_dialogue_manager2_run
         self.test_text_preprocessing_result = Mock('text_preprocessing_result')
@@ -50,12 +50,12 @@ class HandlerTest5(unittest.IsolatedAsyncioTestCase):
     async def test_handler_text_handle_base(self):
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        self.assertTrue(await obj1._handle_base(self.test_text_preprocessing_result, self.test_user) == ["TestAnswer"])
-        self.assertTrue(await obj2._handle_base(self.test_text_preprocessing_result, self.test_user) == [])
+        self.assertEqual(await obj1._handle_base(self.test_text_preprocessing_result, self.test_user), ["TestAnswer"])
+        self.assertEqual(await obj2._handle_base(self.test_text_preprocessing_result, self.test_user), [])
 
     async def test_handler_text_run(self):
         self.assertIsNotNone(handler_text.log_const.NORMALIZED_TEXT_VALUE)
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        self.assertTrue(await obj1.run(self.test_payload, self.test_user) == ["TestAnswer"])
-        self.assertTrue(await obj2.run(self.test_payload, self.test_user) == [])
+        self.assertEqual(await obj1.run(self.test_payload, self.test_user), ["TestAnswer"])
+        self.assertEqual(await obj2.run(self.test_payload, self.test_user), [])
