@@ -34,7 +34,7 @@ jobs:
         poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
     - name: Build for Sber
       run: |
-        cat pyproject.toml | sed "s/smart-app-framework/sber-nlp-platform-smart-app-framework/" | tee pyproject.toml
+        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
         poetry build --format wheel
     - name: Upload Assets
       uses: softprops/action-gh-release@v1
