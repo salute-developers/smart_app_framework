@@ -447,8 +447,10 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
             ],
             "else_action": {"type": "test", "result": "ELSE ACTION IS DONE"}
         }
-        real_scen_result = await self.mock_and_perform_action(test_items, expected_scen="test_N")
         expected_scen_result = ["test_N_done"]
+        real_scen_result = await self.mock_and_perform_action(test_items,
+                                                              expected_scen="test_N",
+                                                              expected_result=expected_scen_result)
         self.assertEqual(real_scen_result, expected_scen_result)
 
     async def test_choice_scenario_action_no_else_action(self):
