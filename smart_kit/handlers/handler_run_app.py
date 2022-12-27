@@ -21,7 +21,7 @@ class HandlerRunApp(HandlerBase):
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
         commands = await super().run(payload, user)
 
         params = {log_const.KEY_NAME: "handling_run_app"}
