@@ -13,6 +13,6 @@ class SettingsRequirement(Requirement):
         self._key = items["key"]
         self._value = items["value"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-              params: Dict[str, Any] = None) -> bool:
+    async def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+                     params: Dict[str, Any] = None) -> bool:
         return user.settings[self._config][self._key] == self._value

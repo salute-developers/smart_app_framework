@@ -223,4 +223,5 @@ class TestClassifierRepository(unittest.TestCase):
         self.assertIsNone(classifier_repo.data)
 
     def tearDown(self):
+        self.temp_model_file.close()
         self.temp_directory.cleanup()

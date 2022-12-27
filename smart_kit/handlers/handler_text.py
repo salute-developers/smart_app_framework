@@ -1,4 +1,3 @@
-# coding: utf-
 from typing import List, Dict, Any
 
 import scenarios.logging.logger_constants as log_const
@@ -22,8 +21,8 @@ class HandlerText(HandlerBase):
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = await super().run(payload, user)
 
         text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
 
@@ -33,9 +32,9 @@ class HandlerText(HandlerBase):
         }
         log("text preprocessing result: '%(normalized_text)s'", user, params)
 
-        commands.extend(self._handle_base(text_preprocessing_result, user))
+        commands.extend(await self._handle_base(text_preprocessing_result, user))
         return commands
 
-    def _handle_base(self, text_preprocessing_result: TextPreprocessingResult, user: User) -> List[Command]:
-        answer, is_answer_found = self.dialogue_manager.run(text_preprocessing_result, user)
+    async def _handle_base(self, text_preprocessing_result: TextPreprocessingResult, user: User) -> List[Command]:
+        answer, is_answer_found = await self.dialogue_manager.run(text_preprocessing_result, user)
         return answer or []

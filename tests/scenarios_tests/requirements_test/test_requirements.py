@@ -12,7 +12,7 @@ class MockRequirement:
         items = items or {}
         self.cond = items.get("cond") or False
 
-    def check(self, text_preprocessing_result, user):
+    async def check(self, text_preprocessing_result, user):
         return self.cond
 
 
@@ -55,9 +55,9 @@ class EQMockOperator:
         return value == self.amount
 
 
-class RequirementTest(unittest.TestCase):
+class RequirementTest(unittest.IsolatedAsyncioTestCase):
 
-    def test_template_in_array_req_true(self):
+    async def test_template_in_array_req_true(self):
         items = {
             "template": "{{ payload.userInfo.tbcode }}",
             "items": ["32", "33"]
@@ -72,9 +72,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertTrue(requirement.check(None, user))
+        self.assertTrue(await requirement.check(None, user))
 
-    def test_template_in_array_req_true2(self):
+    async def test_template_in_array_req_true2(self):
         items = {
             "template": "{{ payload.message.strip() }}",
             "items": ["AAA", "BBB", "CCC"]
@@ -89,9 +89,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertTrue(requirement.check(None, user))
+        self.assertTrue(await requirement.check(None, user))
 
-    def test_template_in_array_req_false(self):
+    async def test_template_in_array_req_false(self):
         items = {
             "template": "{{ payload.message.strip() }}",
             "items": ["AAA", "CCC"]
@@ -106,9 +106,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertFalse(requirement.check(None, user))
+        self.assertFalse(await requirement.check(None, user))
 
-    def test_array_in_template_req_true(self):
+    async def test_array_in_template_req_true(self):
         items = {
             "template": {
                 "type": "unified_template",
@@ -128,9 +128,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertTrue(requirement.check(None, user))
+        self.assertTrue(await requirement.check(None, user))
 
-    def test_array_in_template_req_true2(self):
+    async def test_array_in_template_req_true2(self):
         items = {
             "template": "{{ payload.message.strip() }}",
             "items": ["AAA", "BBB"]
@@ -146,9 +146,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertTrue(requirement.check(None, user))
+        self.assertTrue(await requirement.check(None, user))
 
-    def test_array_in_template_req_false(self):
+    async def test_array_in_template_req_false(self):
         items = {
             "template": {
                 "type": "unified_template",
@@ -168,9 +168,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertFalse(requirement.check(None, user))
+        self.assertFalse(await requirement.check(None, user))
 
-    def test_regexp_in_template_req_true(self):
+    async def test_regexp_in_template_req_true(self):
         items = {
             "template": "{{ payload.message.strip() }}",
             "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
@@ -185,9 +185,9 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertTrue(requirement.check(None, user))
+        self.assertTrue(await requirement.check(None, user))
 
-    def test_regexp_in_template_req_false(self):
+    async def test_regexp_in_template_req_false(self):
         items = {
             "template": "{{ payload.message.strip() }}",
             "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
@@ -202,4 +202,4 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertFalse(requirement.check(None, user))
+        self.assertFalse(await requirement.check(None, user))

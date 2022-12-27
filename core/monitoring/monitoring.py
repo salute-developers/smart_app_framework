@@ -280,6 +280,18 @@ class Monitoring:
         monitoring_msg = "{}_mq_waiting_time".format(app_name)
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
+    @silence_it
+    def counter_mq_skip_waiting(self, app_name):
+        monitoring_msg = "{}_mq_skip_waiting".format(app_name)
+        c = self._get_or_create_counter(monitoring_msg, "(Now - creation_time) is greater than error threshold")
+        c.inc()
+
+    @silence_it
+    def pod_event(self, app_name, event_type):
+        monitoring_msg = "{}_pod_event".format(app_name)
+        c = self._get_or_create_counter(monitoring_msg, "Count of pod events by type", ['event_type'])
+        c.labels(event_type).inc()
+
 
 class MonitoringProxy:
     def __init__(self, default_cls):
