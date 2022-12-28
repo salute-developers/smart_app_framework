@@ -3,6 +3,7 @@
 from typing import Optional, Dict, Any
 
 from core.basic_models.requirement.basic_requirements import Requirement, ComparisonRequirement
+from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL
 from core.logging.logger_utils import log
 from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
@@ -13,9 +14,10 @@ class AnySubstringInLoweredTextRequirement(Requirement):
     """Условие возвращает True, если хотя бы одна подстрока из списка substrings встречается
     в оригинальном тексте в нижнем регистре, иначе - False.
     """
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(AnySubstringInLoweredTextRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.substrings = self.items["substrings"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -28,7 +30,7 @@ class AnySubstringInLoweredTextRequirement(Requirement):
 class NormalizedInputWordsRequirement(Requirement):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NormalizedInputWordsRequirement, self).__init__(items, id)
+        super().__init__(items, id)
 
         # Получаем используемый нормализатор из конфига аппа
         from smart_kit.configs import get_app_config
@@ -48,6 +50,7 @@ class IntersectionWithTokensSetRequirement(NormalizedInputWordsRequirement):
     в список слов input_words, иначе - False.
     Слова из input_words также проходят нормализацию перед сравнением.
     """
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -70,6 +73,7 @@ class NormalizedTextInSetRequirement(NormalizedInputWordsRequirement):
     """Условие возвращает True, если в нормализованном представлении запрос полностью совпадает с одной из
     нормализованных строк из input_words, иначе - False.
     """
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -90,6 +94,7 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
     """Условие возвращает True, если кол-во номеров телефонов больше/меньше/.. X, иначе - False.
     Строго говоря, считается кол-во токенов, имеющих token_type = "PHONE_NUMBER_TOKEN".
     """
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -108,9 +113,10 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
 
 class NumInRangeRequirement(Requirement):
     """Условие возвращает True, если число находится в заданном диапазоне, иначе - False."""
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NumInRangeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.min_num = float(items["min_num"])
         self.max_num = float(items["max_num"])
 

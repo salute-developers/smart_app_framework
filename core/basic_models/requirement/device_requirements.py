@@ -1,4 +1,5 @@
 # coding: utf-8
+from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL
 from core.model.base_user import BaseUser
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.utils import convert_version_to_list_of_int
@@ -13,7 +14,7 @@ from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 class BaseContainsRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(BaseContainsRequirement, self).__init__(items)
+        super().__init__(items)
 
     @property
     def descr_to_check_in(self):
@@ -29,10 +30,11 @@ class BaseContainsRequirement(Requirement):
 
 class ChannelRequirement(BaseContainsRequirement):
     channels = List[str]
+    cache_level = INSTANCE_CACHE_LEVEL
 
     # should_process_message compatible
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ChannelRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.channels = items["channels"]
 
     @property
@@ -44,9 +46,10 @@ class ChannelRequirement(BaseContainsRequirement):
 
 
 class PlatformTypeRequirement(Requirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(PlatformTypeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.platfrom_type = items["platfrom_type"]
 
@@ -65,6 +68,7 @@ class BasicVersionRequirement(ComparisonRequirement):
 
 
 class PlatformVersionRequirement(BasicVersionRequirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -73,9 +77,10 @@ class PlatformVersionRequirement(BasicVersionRequirement):
 
 
 class SurfaceRequirement(Requirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(SurfaceRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.surface = items["surface"]
 
@@ -85,6 +90,7 @@ class SurfaceRequirement(Requirement):
 
 
 class SurfaceVersionRequirement(BasicVersionRequirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -93,9 +99,10 @@ class SurfaceVersionRequirement(BasicVersionRequirement):
 
 
 class AppTypeRequirement(Requirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(AppTypeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.app_type = items["app_type"]
 
@@ -105,9 +112,10 @@ class AppTypeRequirement(Requirement):
 
 
 class CapabilitiesPropertyAvailableRequirement(Requirement):
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CapabilitiesPropertyAvailableRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.property_type = items["property_type"]
 

@@ -19,7 +19,7 @@ class AskAgainExistRequirement(Requirement):
 
 class TemplateInArrayRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(TemplateInArrayRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
         self._items = set(items["items"])
 
@@ -34,7 +34,7 @@ class TemplateInArrayRequirement(Requirement):
 
 class ArrayItemInTemplateRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ArrayItemInTemplateRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
         self._items = set(items["items"])
 
@@ -52,7 +52,7 @@ class ArrayItemInTemplateRequirement(Requirement):
 
 class RegexpInTemplateRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(RegexpInTemplateRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
         self._regexp = re.compile(items["regexp"], re.S | re.M)
 

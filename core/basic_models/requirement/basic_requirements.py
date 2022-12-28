@@ -28,7 +28,7 @@ requirement_factory = build_factory(requirements)
 
 
 class Requirement:
-    cache_level = INSTANCE_CACHE_LEVEL  # INSTANCE_CACHE_LEVEL or TYPE_CACHE_LEVEL or None
+    cache_level = None  # INSTANCE_CACHE_LEVEL or TYPE_CACHE_LEVEL or None
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
@@ -105,7 +105,7 @@ class CompositeRequirement(Requirement):
     requirements: List[Requirement]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CompositeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirements = items["requirements"]
         self.requirements = self.build_requirements()
 
@@ -134,7 +134,7 @@ class NotRequirement(Requirement):
     requirement: Requirement
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NotRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirement = items["requirement"]
         self.requirement = self.build_requirement()
 
@@ -151,7 +151,7 @@ class ComparisonRequirement(Requirement):
     operator: Operator
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ComparisonRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._operator = items["operator"]
         self.operator = self.build_operator()
 
@@ -164,7 +164,7 @@ class RandomRequirement(Requirement):
     percent: int
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(RandomRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -175,9 +175,10 @@ class RandomRequirement(Requirement):
 
 class TopicRequirement(Requirement):
     topics: List[str]
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(TopicRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.topics = items["topics"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -187,7 +188,7 @@ class TopicRequirement(Requirement):
 
 class TemplateRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(TemplateRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -206,9 +207,10 @@ class TemplateRequirement(Requirement):
 
 class RollingRequirement(Requirement):
     percent: int
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(RollingRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -221,6 +223,8 @@ class RollingRequirement(Requirement):
 
 
 class TimeRequirement(ComparisonRequirement):
+    cache_level = INSTANCE_CACHE_LEVEL
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
 
@@ -245,6 +249,7 @@ class TimeRequirement(ComparisonRequirement):
 
 class DateTimeRequirement(Requirement):
     match_cron: str
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -264,6 +269,7 @@ class DateTimeRequirement(Requirement):
 
 class IntersectionRequirement(Requirement):
     phrases: Optional[List]
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -296,7 +302,7 @@ class ClassifierRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ClassifierRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self._classifier = items["classifier"]
 
     @cached_property
@@ -325,7 +331,7 @@ class FormFieldValueRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(FormFieldValueRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.form_name = items["form_name"]
         self.field_name = items["field_name"]
         self.value = items["value"]
@@ -340,9 +346,10 @@ class EnvironmentRequirement(Requirement):
     Так, например, можно ограничить сценарий для исполнения только на тестовых средах.
     Возможные значения в values: ift, uat, pt, prod (это ИФТ, ПСИ, НТ, ПРОМ).
     """
+    cache_level = INSTANCE_CACHE_LEVEL
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(EnvironmentRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.values = items.get("values", [])
         # Из конфига получаем среду исполнения
         from smart_kit.configs import get_app_config
@@ -362,7 +369,7 @@ class CharacterIdRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CharacterIdRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self.values = items["values"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
@@ -376,7 +383,7 @@ class FeatureToggleRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(FeatureToggleRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self.toggle_name = items["toggle_name"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,

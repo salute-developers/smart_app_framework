@@ -14,7 +14,7 @@ class CounterValueRequirement(ComparisonRequirement):
     key: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CounterValueRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.key = items["key"]
 
@@ -29,7 +29,7 @@ class CounterUpdateTimeRequirement(ComparisonRequirement):
     key: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CounterUpdateTimeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.key = items["key"]
         self.fallback_value = items.get("fallback_value") or False
