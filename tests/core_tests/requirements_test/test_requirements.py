@@ -15,6 +15,7 @@ from core.basic_models.requirement.device_requirements import ChannelRequirement
 from core.basic_models.requirement.user_text_requirements import AnySubstringInLoweredTextRequirement, \
     PhoneNumberNumberRequirement, NumInRangeRequirement, IntersectionWithTokensSetRequirement, \
     NormalizedTextInSetRequirement
+from core.basic_models.variables.variables import Variables
 from core.model.registered import registered_factories
 from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
 from smart_kit.utils.picklable_mock import PicklableMock
@@ -164,6 +165,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_topic_requirement(self):
         requirement = TopicRequirement({"topics": ["test"]})
+        requirement.cache_level = None
         user = PicklableMock()
         message = PicklableMock()
         message.topic_key = "test"
@@ -227,6 +229,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.id = "353454"
         requirement = RollingRequirement({"percent": 100})
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -234,6 +237,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.id = "353454"
         requirement = RollingRequirement({"percent": 0})
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -256,6 +260,7 @@ class RequirementTest(unittest.TestCase):
                 }
             }
         )
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -278,6 +283,7 @@ class RequirementTest(unittest.TestCase):
                 }
             }
         )
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -297,6 +303,7 @@ class RequirementTest(unittest.TestCase):
                 "match_cron": "*/17 14-19 * * mon"
             }
         )
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -316,6 +323,7 @@ class RequirementTest(unittest.TestCase):
                 "match_cron": "* * * * 6,7"
             }
         )
+        requirement.cache_level = None
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -332,6 +340,7 @@ class RequirementTest(unittest.TestCase):
                 ]
             }
         )
+        requirement.cache_level = None
         text_normalization_result = PicklableMock()
         text_normalization_result.tokenized_elements_list_pymorphy = [
             {'lemma': 'я'},
@@ -352,6 +361,7 @@ class RequirementTest(unittest.TestCase):
                 ]
             }
         )
+        requirement.cache_level = None
         text_normalization_result = PicklableMock()
         text_normalization_result.tokenized_elements_list_pymorphy = [
             {'lemma': 'ни'},
@@ -446,6 +456,7 @@ class RequirementTest(unittest.TestCase):
         """Тест кейз проверяет что условие возвращает True, т.к среда исполнения из числа values."""
         patch_get_app_config(mock_get_app_config)
         environment_req = EnvironmentRequirement({"values": ["ift", "uat"]})
+        environment_req.cache_level = None
         self.assertTrue(environment_req.check(PicklableMock(), PicklableMock()))
 
     @patch("smart_kit.configs.get_app_config")
@@ -453,6 +464,7 @@ class RequirementTest(unittest.TestCase):
         """Тест кейз проверяет что условие возвращает False, т.к среда исполнения НЕ из числа values."""
         patch_get_app_config(mock_get_app_config)
         environment_req = EnvironmentRequirement({"values": ["uat", "pt"]})
+        environment_req.cache_level = None
         self.assertFalse(environment_req.check(PicklableMock(), PicklableMock()))
 
     def test_any_substring_in_lowered_text_requirement_true(self):
