@@ -121,7 +121,7 @@ class AvailableInfoFiller(FieldFillerDescription):
             # if path is wrong, it may fail with UndefinedError
             # notion: {key: None} will return "None";
             # not existing key or value "" will return ""; otherwise question in scenario will go in cycles
-            value = self.template.silent_render(params)
+            value = await self.template.silent_render(params)
         except jexcept.UndefinedError:
             value = None
 

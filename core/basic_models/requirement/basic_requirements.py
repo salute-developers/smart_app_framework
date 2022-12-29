@@ -200,7 +200,7 @@ class TemplateRequirement(Requirement):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = self._template.render(params)
+        render_result = await self._template.render(params)
         if render_result == "True":
             return True
         if render_result == "False":

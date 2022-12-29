@@ -216,14 +216,14 @@ class FillFieldAction(Action):
             user.forms[self.form].fields[self.field].set_available()
             user.forms[self.form].fields[self.field].fill(data)
 
-    def _get_data(self, params):
-        return self.template.render(params)
+    async def _get_data(self, params):
+        return await self.template.render(params)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
-        data = self._get_data(params)
+        data = await self._get_data(params)
         self._fill(user, data)
         return commands
 
@@ -258,7 +258,7 @@ class RunScenarioAction(Action):
             params = user.parametrizer.collect(text_preprocessing_result)
         else:
             params.update(user.parametrizer.collect(text_preprocessing_result))
-        scenario_id = self.scenario.render(params)
+        scenario_id = await self.scenario.render(params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
             commands.extend(await scenario.run(text_preprocessing_result, user, params))
@@ -458,9 +458,9 @@ class AddHistoryEventAction(Action):
 
             if self.event_content:
                 for key, template in self.event_content.items():
-                    self.event_content[key] = template.render(params)
-            self.event_type = self.event_type.render(params)
-            self.results = self.results.render(params)
+                    self.event_content[key] = await template.render(params)
+            self.event_type = await self.event_type.render(params)
+            self.results = await self.results.render(params)
 
             event = Event(
                 type=self.event_type,
@@ -548,7 +548,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
             scenario = user.last_scenarios.last_scenario_name
 
         for key, value in self.nodes.items():
-            rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
+            rendered = await self._get_rendered_tree(value, action_params, self.no_empty_nodes)
             if rendered != "" or not self.no_empty_nodes:
                 command_params[key] = rendered
 
@@ -556,7 +556,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         request_data = copy.copy(self.request_data or {})
         request_data.update(self._get_extra_request_data(user, params, callback_id))
 
-        save_params = self._get_save_params(user, action_params, command_params)
+        save_params = await self._get_save_params(user, action_params, command_params)
         self._save_behavior(callback_id, user, scenario, text_preprocessing_result, save_params)
 
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
@@ -577,8 +577,8 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
             save_params,
         )
 
-    def _get_save_params(self, user, action_params, command_action_params):
-        save_params = self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
+    async def _get_save_params(self, user, action_params, command_action_params):
+        save_params = await self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
         keys_to_pop = []
         for key in save_params.keys():
             if key not in SAVED_BEHAVIOR_PARAMS_FIELDS:

@@ -61,10 +61,10 @@ class PushAction(StringAction):
         self.default_request_data_template = self._get_template_tree(self.DEFAULT_REQUEST_DATA)
         self.request_data_template = self._get_template_tree(self.request_data) if self.request_data else None
 
-    def _render_request_data(self, action_params):
-        request_data = self._get_rendered_tree_recursive(self.default_request_data_template, action_params)
+    async def _render_request_data(self, action_params):
+        request_data = await self._get_rendered_tree_recursive(self.default_request_data_template, action_params)
         if self.request_data:
-            request_data_update = self._get_rendered_tree_recursive(self.request_data_template, action_params)
+            request_data_update = await self._get_rendered_tree_recursive(self.request_data_template, action_params)
             request_data = deep_update_dict(request_data, request_data_update)
         return request_data
 
@@ -75,9 +75,9 @@ class PushAction(StringAction):
             "projectId": user.settings["template_settings"]["project_id"],
             "clientId": user.message.sub,
             "surface": self.surface,
-            "content": self._generate_command_context(user, text_preprocessing_result, params),
+            "content": await self._generate_command_context(user, text_preprocessing_result, params),
         }
-        requests_data = self._render_request_data(params)
+        requests_data = await self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
         return commands
@@ -182,7 +182,7 @@ class GetRuntimePermissionsAction(PushAction):
                 }
             }
         }
-        command_params = self._generate_command_context(user, text_preprocessing_result, params)
+        command_params = await self._generate_command_context(user, text_preprocessing_result, params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=self.request_data, need_payload_wrap=False, need_message_name=False)]
         return commands

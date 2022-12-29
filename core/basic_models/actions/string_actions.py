@@ -61,28 +61,28 @@ class NodeAction(CommandAction):
             result = value
         return result
 
-    def _get_rendered_tree(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
+    async def _get_rendered_tree(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
         params = copy(params)
         for support_key, support_template in self.support_templates.items():
-            params[support_key] = support_template.render(params)
-        return self._get_rendered_tree_recursive(value, params, no_empty=no_empty)
+            params[support_key] = await support_template.render(params)
+        return await self._get_rendered_tree_recursive(value, params, no_empty=no_empty)
 
-    def _get_rendered_tree_recursive(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
+    async def _get_rendered_tree_recursive(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
         value_type: Type[T] = type(value)
         if value_type is dict:
             result = {}
             for inner_key, inner_value in value.items():
-                rendered = self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
+                rendered = await self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
                 if rendered != "" or not no_empty:
                     result[inner_key] = rendered
         elif value_type is list:
             result = []
             for inner_value in value:
-                rendered = self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
+                rendered = await self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
                 if rendered != "" or not no_empty:
                     result.append(rendered)
         elif value_type is UnifiedTemplate:
-            result = value.render(params)
+            result = await value.render(params)
         else:
             result = value
         return result
@@ -115,15 +115,15 @@ class StringAction(NodeAction):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(StringAction, self).__init__(items, id)
 
-    def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
+    async def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                                        params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
         command_params = dict()
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
 
         for key, value in self.nodes.items():
-            rendered = self._get_rendered_tree(value, params, self.no_empty_nodes)
+            rendered = await self._get_rendered_tree(value, params, self.no_empty_nodes)
             if rendered != "" or not self.no_empty_nodes:
                 command_params[key] = rendered
         return command_params
@@ -132,7 +132,7 @@ class StringAction(NodeAction):
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         params = params or {}
-        command_params = self._generate_command_context(user, text_preprocessing_result, params)
+        command_params = await self._generate_command_context(user, text_preprocessing_result, params)
 
         if self.command == ANSWER_TO_USER and user.private_vars.get(SAVED_COOKIES):
             command_params["items"].append({
@@ -175,7 +175,7 @@ class AfinaAnswerAction(NodeAction):
         for key, template in nodes:
             if template:
                 choice_index = random.randint(0, len(template) - 1)
-                rendered = self._get_rendered_tree(template[choice_index], params, self.no_empty_nodes)
+                rendered = await self._get_rendered_tree(template[choice_index], params, self.no_empty_nodes)
                 if rendered != "" or not self.no_empty_nodes:
                     answer_params[key] = rendered
 
@@ -276,7 +276,7 @@ class SDKAnswer(NodeAction):
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
-        rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
+        rendered = await self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
         self.do_random(rendered)
         if rendered or not self.no_empty_nodes:
             result = [
@@ -431,10 +431,10 @@ class GatherSDKAnswerToUser(NodeAction):
 
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})
-        rendered = self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
+        rendered = await self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
         if self._nodes[self.RANDOM_CHOICE]:
             random_node = random.choice(self.nodes[self.RANDOM_CHOICE])
-            rendered_random = self._get_rendered_tree(random_node, params, self.no_empty_nodes)
+            rendered_random = await self._get_rendered_tree(random_node, params, self.no_empty_nodes)
             rendered.update(rendered_random)
         out = {}
         check_results = await asyncio.gather(
@@ -445,8 +445,8 @@ class GatherSDKAnswerToUser(NodeAction):
                 out.setdefault(self.ITEMS, []).append(item.render(rendered))
 
         if self._suggests_template is not None:
-            out[self.SUGGESTIONS] = self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], params,
-                                                            self.no_empty_nodes)
+            out[self.SUGGESTIONS] = await self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], params,
+                                                                  self.no_empty_nodes)
         else:
             check_results = await asyncio.gather(
                 suggest.requirement.check(text_preprocessing_result, user, params) for suggest in self.suggests)
@@ -615,10 +615,10 @@ class SDKAnswerToUser(NodeAction):
 
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})
-        rendered = self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
+        rendered = await self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
         if self._nodes[self.RANDOM_CHOICE]:
             random_node = random.choice(self.nodes[self.RANDOM_CHOICE])
-            rendered_random = self._get_rendered_tree(random_node, params, self.no_empty_nodes)
+            rendered_random = await self._get_rendered_tree(random_node, params, self.no_empty_nodes)
             rendered.update(rendered_random)
         out = {}
         for item in self.items:
@@ -626,8 +626,8 @@ class SDKAnswerToUser(NodeAction):
                 out.setdefault(self.ITEMS, []).append(item.render(rendered))
 
         if self._suggests_template is not None:
-            out[self.SUGGESTIONS] = self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], params,
-                                                            self.no_empty_nodes)
+            out[self.SUGGESTIONS] = await self._get_rendered_tree(self.nodes[self.SUGGESTIONS_TEMPLATE], params,
+                                                                  self.no_empty_nodes)
         else:
             for suggest in self.suggests:
                 if await suggest.requirement.check(text_preprocessing_result, user, params):

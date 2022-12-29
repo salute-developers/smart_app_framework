@@ -28,7 +28,7 @@ class TemplateInArrayRequirement(Requirement):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = self._template.render(params)
+        render_result = await self._template.render(params)
         return render_result in self._items
 
 
@@ -43,7 +43,7 @@ class ArrayItemInTemplateRequirement(Requirement):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = self._template.render(params)
+        render_result = await self._template.render(params)
         for item in self._items:
             if item in render_result:
                 return True
@@ -61,5 +61,5 @@ class RegexpInTemplateRequirement(Requirement):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = self._template.render(params)
+        render_result = await self._template.render(params)
         return True if self._regexp.search(render_result) else False

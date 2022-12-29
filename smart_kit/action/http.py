@@ -83,11 +83,12 @@ class HTTPRequestAction(NodeAction):
         except aiohttp.ClientError:
             self.error = self.CONNECTION
 
-    def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                            params: Optional[Dict[str, Union[str, float, int]]] = None):
+    async def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                                  params: Optional[Dict[str, Union[str, float, int]]] = None):
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        request_parameters = self._get_rendered_tree_recursive(self._get_template_tree(self.method_params), params)
+        request_parameters = await self._get_rendered_tree_recursive(self._get_template_tree(self.method_params),
+                                                                     params)
         req_headers = request_parameters.get("headers")
         if req_headers:
             # Заголовки в запросах должны иметь тип str или bytes. Поэтому добавлена проверка и приведение к типу str,
@@ -135,7 +136,7 @@ class HTTPRequestAction(NodeAction):
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self.preprocess(user, text_preprocessing_result, params)
         params = params or {}
-        request_parameters = self._get_request_params(user, text_preprocessing_result, params)
+        request_parameters = await self._get_request_params(user, text_preprocessing_result, params)
         self._log_request(user, request_parameters)
         response = await self._make_response(request_parameters, user)
         if response:
