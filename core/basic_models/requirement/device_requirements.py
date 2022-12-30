@@ -1,5 +1,4 @@
 # coding: utf-8
-from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL
 from core.model.base_user import BaseUser
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.utils import convert_version_to_list_of_int
@@ -30,7 +29,7 @@ class BaseContainsRequirement(Requirement):
 
 class ChannelRequirement(BaseContainsRequirement):
     channels = List[str]
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     # should_process_message compatible
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
@@ -46,7 +45,7 @@ class ChannelRequirement(BaseContainsRequirement):
 
 
 class PlatformTypeRequirement(Requirement):
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -68,7 +67,6 @@ class BasicVersionRequirement(ComparisonRequirement):
 
 
 class PlatformVersionRequirement(BasicVersionRequirement):
-    cache_level = INSTANCE_CACHE_LEVEL
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -77,7 +75,7 @@ class PlatformVersionRequirement(BasicVersionRequirement):
 
 
 class SurfaceRequirement(Requirement):
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -90,7 +88,7 @@ class SurfaceRequirement(Requirement):
 
 
 class SurfaceVersionRequirement(BasicVersionRequirement):
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -99,7 +97,7 @@ class SurfaceVersionRequirement(BasicVersionRequirement):
 
 
 class AppTypeRequirement(Requirement):
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -112,7 +110,7 @@ class AppTypeRequirement(Requirement):
 
 
 class CapabilitiesPropertyAvailableRequirement(Requirement):
-    cache_level = INSTANCE_CACHE_LEVEL
+    cache_check = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
