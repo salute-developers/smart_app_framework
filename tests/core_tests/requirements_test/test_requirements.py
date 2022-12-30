@@ -10,6 +10,7 @@ from core.basic_models.requirement.basic_requirements import Requirement, Compos
     OrRequirement, NotRequirement, RandomRequirement, TopicRequirement, TemplateRequirement, RollingRequirement, \
     TimeRequirement, DateTimeRequirement, IntersectionRequirement, ClassifierRequirement, FormFieldValueRequirement, \
     EnvironmentRequirement, CharacterIdRequirement, FeatureToggleRequirement
+from core.basic_models.requirement.constants import INSTANCE_CACHE_LEVEL, TYPE_CACHE_LEVEL
 from core.basic_models.requirement.counter_requirements import CounterValueRequirement, CounterUpdateTimeRequirement
 from core.basic_models.requirement.device_requirements import ChannelRequirement
 from core.basic_models.requirement.user_text_requirements import AnySubstringInLoweredTextRequirement, \
@@ -38,6 +39,16 @@ class MockRequirement:
 
     def check(self, text_preprocessing_result, user, params):
         return self.cond
+
+
+class TrueFalseRequirement(Requirement):
+    def __init__(self, items=None, id=None):
+        super().__init__(items, id)
+        self.counter = 1
+
+    def _check(self, text_preprocessing_result, user, params=None):
+        self.counter += 1
+        return self.counter % 2 == 0
 
 
 class MockTextNormalizationResult:
@@ -630,3 +641,99 @@ class RequirementTest(unittest.TestCase):
         mock_user = Mock()
         mock_user.settings = {"template_settings": {"test_false_toggle_name": False}}
         self.assertFalse(req.check(Mock(), mock_user))
+
+    def test_none_caching_different(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = None
+        text_normalization_result = None
+        result1 = requirement.check(text_normalization_result, user)
+        result2 = requirement.check(text_normalization_result, user)
+        self.assertNotEqual(result1, result2)
+
+    def test_instance_caching_same(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = INSTANCE_CACHE_LEVEL
+        text_normalization_result = None
+        result1 = requirement.check(text_normalization_result, user)
+        result2 = requirement.check(text_normalization_result, user)
+        self.assertEqual(result1, result2)
+
+    def test_instance_caching_one_call(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = INSTANCE_CACHE_LEVEL
+        requirement._check = Mock()
+        text_normalization_result = None
+        requirement.check(text_normalization_result, user)
+        requirement.check(text_normalization_result, user)
+        self.assertEqual(requirement._check.call_count, 1)
+
+    def test_instance_caching_two_calls_for_two(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = INSTANCE_CACHE_LEVEL
+        requirement._check = Mock()
+        requirement2 = TrueFalseRequirement()
+        requirement2.cache_level = INSTANCE_CACHE_LEVEL
+        requirement2._check = Mock()
+        text_normalization_result = None
+        requirement.check(text_normalization_result, user)
+        requirement2.check(text_normalization_result, user)
+        self.assertEqual(requirement._check.call_count, 1)
+        self.assertEqual(requirement2._check.call_count, 1)
+
+    def test_type_caching_one_call_for_two(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = TYPE_CACHE_LEVEL
+        requirement._check = Mock()
+        requirement2 = TrueFalseRequirement()
+        requirement2.cache_level = TYPE_CACHE_LEVEL
+        requirement2._check = Mock()
+        text_normalization_result = None
+        requirement.check(text_normalization_result, user)
+        requirement2.check(text_normalization_result, user)
+        self.assertEqual(requirement._check.call_count, 1)
+        self.assertEqual(requirement2._check.call_count, 0)
+
+    def test_type_caching_same(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = TYPE_CACHE_LEVEL
+        requirement._check = Mock(return_value=1)
+        requirement2 = TrueFalseRequirement()
+        requirement2.cache_level = TYPE_CACHE_LEVEL
+        requirement2._check = Mock(return_value=2)
+        text_normalization_result = None
+        res1 = requirement.check(text_normalization_result, user)
+        res2 = requirement2.check(text_normalization_result, user)
+        self.assertEqual(res1, res2)
+        self.assertEqual(res2, 1)
+
+    def test_different_caching_different(self):
+        user = PicklableMock()
+        user.message_vars = Variables(None, user, False)
+        requirement = TrueFalseRequirement()
+        requirement.cache_level = INSTANCE_CACHE_LEVEL
+        requirement._check = Mock(return_value=1)
+        requirement2 = TrueFalseRequirement()
+        requirement2.cache_level = TYPE_CACHE_LEVEL
+        requirement2._check = Mock(return_value=2)
+        requirement3 = TrueFalseRequirement()
+        requirement3.cache_level = None
+        requirement3._check = Mock(return_value=3)
+        text_normalization_result = None
+        res1 = requirement.check(text_normalization_result, user)
+        res2 = requirement2.check(text_normalization_result, user)
+        res3 = requirement3.check(text_normalization_result, user)
+        self.assertEqual(res1, 1)
+        self.assertEqual(res2, 2)
+        self.assertEqual(res3, 3)
