@@ -103,7 +103,7 @@ class Behaviors:
     def clear_all(self):
         self._callbacks = {}
 
-    def _log_callback(
+    async def _log_callback(
         self, callback_id: str, log_name: str, metric, behavior_result: str, callback_action_params: Dict
     ):
         callback = self._get_callback(callback_id)
@@ -137,7 +137,7 @@ class Behaviors:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
             callback_action_params = callback.action_params
-            self._log_callback(
+            await self._log_callback(
                 callback_id,
                 "behavior_success",
                 monitoring.counter_behavior_success,
@@ -163,7 +163,7 @@ class Behaviors:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
             callback_action_params = callback.action_params
-            self._log_callback(
+            await self._log_callback(
                 callback_id, "behavior_fail", monitoring.counter_behavior_fail, "fail", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
@@ -183,7 +183,7 @@ class Behaviors:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
             callback_action_params = callback.action_params
-            self._log_callback(
+            await self._log_callback(
                 callback_id, "behavior_timeout", monitoring.counter_behavior_timeout, "timeout", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
@@ -205,7 +205,7 @@ class Behaviors:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
             callback_action_params = callback.action_params
-            self._log_callback(
+            await self._log_callback(
                 callback_id,
                 "behavior_misstate",
                 monitoring.counter_behavior_misstate,

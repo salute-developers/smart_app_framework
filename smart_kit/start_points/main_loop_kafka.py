@@ -480,7 +480,7 @@ class MainLoop(BaseMainLoop):
                         self.save_behavior_timeouts(user, mq_message, kafka_key)
                         for answer in answers:
                             with StatsTimer() as publish_timer:
-                                self._send_request(user, answer, mq_message)
+                                await self._send_request(user, answer, mq_message)
                             stats += "Publishing time: {} msecs".format(publish_timer.msecs)
                             log(stats, user=user)
             else:
@@ -530,7 +530,7 @@ class MainLoop(BaseMainLoop):
 
         return message_key
 
-    def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
+    async def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
         kafka_broker_settings = self.settings["template_settings"].get(
             "route_kafka_broker"
         ) or []
@@ -550,9 +550,9 @@ class MainLoop(BaseMainLoop):
         request_params["payload"] = answer.value
         request_params["masked_value"] = answer.masked_value
         request.run(answer.value, request_params)
-        self._log_request(user, request, answer, mq_message)
+        await self._log_request(user, request, answer, mq_message)
 
-    def _log_request(self, user, request, answer, original_mq_message):
+    async def _log_request(self, user, request, answer, original_mq_message):
         log("OUTGOING TO TOPIC_KEY: %(topic_key)s DATA: %(data)s",
             params={log_const.KEY_NAME: "outgoing_message",
                     "topic_key": request.topic_key,
@@ -662,7 +662,7 @@ class MainLoop(BaseMainLoop):
             if user_save_no_collisions:
                 self.save_behavior_timeouts(user, mq_message, kafka_key)
                 for answer in answers:
-                    self._send_request(user, answer, mq_message)
+                    await self._send_request(user, answer, mq_message)
         except Exception:
             log("%(class_name)s error.", params={log_const.KEY_NAME: "error_handling_timeout",
                                                  "class_name": self.__class__.__name__,

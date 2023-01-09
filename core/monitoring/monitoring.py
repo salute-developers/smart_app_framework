@@ -1,4 +1,4 @@
-# coding: utf-8
+import asyncio
 import re
 
 from core.logging.logger_constants import KEY_NAME
@@ -17,16 +17,29 @@ class MetricDisabled(ValueError):
 
 
 def silence_it(func):
-    def wrap(*args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        except MetricDisabled as error:
-            log(f"Metrics: {error}",
-                params={KEY_NAME: "metrics_disabled"}, level="DEBUG")
-        except Exception:
-            log("Metrics: Failed send. Exception occurred.",
-                params={KEY_NAME: "metrics_fail"}, level="ERROR", exc_info=True)
-    return wrap
+    if asyncio.iscoroutinefunction(func):
+        async def wrap(*args, **kwargs):
+            try:
+                await func(*args, **kwargs)
+            except MetricDisabled as error:
+                log(f"Metrics: {error}",
+                    params={KEY_NAME: "metrics_disabled"}, level="DEBUG")
+            except Exception:
+                log("Metrics: Failed send. Exception occurred.",
+                    params={KEY_NAME: "metrics_fail"}, level="ERROR", exc_info=True)
+
+        return wrap
+    else:
+        def wrap(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except MetricDisabled as error:
+                log(f"Metrics: {error}",
+                    params={KEY_NAME: "metrics_disabled"}, level="DEBUG")
+            except Exception:
+                log("Metrics: Failed send. Exception occurred.",
+                    params={KEY_NAME: "metrics_fail"}, level="ERROR", exc_info=True)
+        return wrap
 
 
 class Monitoring:
