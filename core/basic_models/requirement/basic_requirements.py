@@ -108,10 +108,11 @@ class AndRequirement(CompositeRequirement):
 
     async def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                      params: Dict[str, Any] = None) -> bool:
-        return all(
-            [await requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
-             for requirement in self.requirements]
-        )
+        for requirement in self.requirements:
+            res = await requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
+            if not res:
+                return False
+        return True
 
 
 class GatherOrRequirement(CompositeRequirement):
@@ -128,10 +129,11 @@ class OrRequirement(CompositeRequirement):
 
     async def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                      params: Dict[str, Any] = None) -> bool:
-        return any(
-            [await requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
-             for requirement in self.requirements]
-        )
+        for requirement in self.requirements:
+            res = await requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
+            if res:
+                return True
+        return False
 
 
 class NotRequirement(Requirement):
