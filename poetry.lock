@@ -574,7 +574,7 @@ twitter = ["twython"]
 
 [[package]]
 name = "numpy"
-version = "1.19.3"
+version = "1.21.0"
 description = "NumPy is the fundamental package for array computing with Python."
 category = "main"
 optional = false
