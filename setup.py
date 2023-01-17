@@ -46,7 +46,7 @@ setup(
         "Jinja2==3.0.3",
         "keras==2.6.0",
         "nltk==3.5",
-        "numpy==1.19.3",
+        "numpy>=1.21.0",
         "objgraph==3.4.1",
         "prometheus-client==0.7.1",
         "psutil==5.8.0",
