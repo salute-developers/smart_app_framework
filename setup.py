@@ -61,7 +61,7 @@ setup(
         "scikit-learn==1.1.2",
         "setuptools==62.3.2",
         "tabulate==0.9.0",
-        "tatsu==4.4.0",
+        "tatsu==5.6.1",
         "grpcio==1.49.1",  # library for tensorflow
         "oauthlib==3.2.0",  # library for tensorflow
         "google-auth==2.12.0",  # library for tensorflow
