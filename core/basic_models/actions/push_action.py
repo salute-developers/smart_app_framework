@@ -61,10 +61,10 @@ class PushAction(StringAction):
         self.default_request_data_template = self._get_template_tree(self.DEFAULT_REQUEST_DATA)
         self.request_data_template = self._get_template_tree(self.request_data) if self.request_data else None
 
-    async def _render_request_data(self, action_params):
-        request_data = await self._get_rendered_tree_recursive(self.default_request_data_template, action_params)
+    def _render_request_data(self, action_params):
+        request_data = self._get_rendered_tree_recursive(self.default_request_data_template, action_params)
         if self.request_data:
-            request_data_update = await self._get_rendered_tree_recursive(self.request_data_template, action_params)
+            request_data_update = self._get_rendered_tree_recursive(self.request_data_template, action_params)
             request_data = deep_update_dict(request_data, request_data_update)
         return request_data
 
@@ -75,9 +75,9 @@ class PushAction(StringAction):
             "projectId": user.settings["template_settings"]["project_id"],
             "clientId": user.message.sub,
             "surface": self.surface,
-            "content": await self._generate_command_context(user, text_preprocessing_result, params),
+            "content": self._generate_command_context(user, text_preprocessing_result, params),
         }
-        requests_data = await self._render_request_data(params)
+        requests_data = self._render_request_data(params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
         return commands
@@ -132,12 +132,12 @@ class PushAuthenticationActionHttp(PushAction):
         authorization_token = self.BASIC_METHOD_AUTH + auth_string.decode("ascii")
         return authorization_token
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)
 
 
 class GetRuntimePermissionsAction(PushAction):
@@ -182,7 +182,7 @@ class GetRuntimePermissionsAction(PushAction):
                 }
             }
         }
-        command_params = await self._generate_command_context(user, text_preprocessing_result, params)
+        command_params = self._generate_command_context(user, text_preprocessing_result, params)
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=self.request_data, need_payload_wrap=False, need_message_name=False)]
         return commands
@@ -309,8 +309,8 @@ class PushActionHttp(PushAction):
     def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
         self.http_request_action = HTTPRequestAction(items, id)
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -331,4 +331,4 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)

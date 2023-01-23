@@ -216,14 +216,14 @@ class FillFieldAction(Action):
             user.forms[self.form].fields[self.field].set_available()
             user.forms[self.form].fields[self.field].fill(data)
 
-    async def _get_data(self, params):
-        return await self.template.render(params)
+    def _get_data(self, params):
+        return self.template.render(params)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
-        data = await self._get_data(params)
+        data = self._get_data(params)
         self._fill(user, data)
         return commands
 
@@ -258,7 +258,7 @@ class RunScenarioAction(Action):
             params = user.parametrizer.collect(text_preprocessing_result)
         else:
             params.update(user.parametrizer.collect(text_preprocessing_result))
-        scenario_id = await self.scenario.render(params)
+        scenario_id = self.scenario.render(params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
             commands.extend(await scenario.run(text_preprocessing_result, user, params))
@@ -308,52 +308,7 @@ class ChoiceScenarioAction(Action):
         choice_is_made = False
 
         for scenario, requirement in zip(self._scenarios, self.requirement_items):
-            check_res = await requirement.check(text_preprocessing_result, user, params)
-            if check_res:
-                commands.extend(await RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params))
-                choice_is_made = True
-                break
-
-        if not choice_is_made and self._else_item:
-            commands.extend(await self.else_item.run(user, text_preprocessing_result, params) or [])
-
-        return commands
-
-
-class GatherChoiceScenarioAction(Action):
-    FIELD_SCENARIOS_KEY = "scenarios"
-    FIELD_ELSE_KEY = "else_action"
-    FIELD_REQUIREMENT_KEY = "requirement"
-
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(GatherChoiceScenarioAction, self).__init__(items, id)
-        self._else_item = items.get(self.FIELD_ELSE_KEY)
-        self._scenarios = items[self.FIELD_SCENARIOS_KEY]
-        self._requirements = [scenario.pop(self.FIELD_REQUIREMENT_KEY) for scenario in self._scenarios]
-
-        self.requirement_items = self.build_requirement_items()
-
-        if self._else_item:
-            self.else_item = self.build_else_item()
-        else:
-            self.else_item = None
-
-    @list_factory(Requirement)
-    def build_requirement_items(self):
-        return self._requirements
-
-    @factory(Action)
-    def build_else_item(self):
-        return self._else_item
-
-    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
-        commands = []
-        choice_is_made = False
-
-        check_results = await asyncio.gather(requirement.check(text_preprocessing_result, user, params)
-                                             for requirement in self.requirement_items)
-        for scenario, check_res in zip(self._scenarios, check_results):
+            check_res = requirement.check(text_preprocessing_result, user, params)
             if check_res:
                 commands.extend(await RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params))
                 choice_is_made = True
@@ -458,9 +413,9 @@ class AddHistoryEventAction(Action):
 
             if self.event_content:
                 for key, template in self.event_content.items():
-                    self.event_content[key] = await template.render(params)
-            self.event_type = await self.event_type.render(params)
-            self.results = await self.results.render(params)
+                    self.event_content[key] = template.render(params)
+            self.event_type = self.event_type.render(params)
+            self.results = self.results.render(params)
 
             event = Event(
                 type=self.event_type,
@@ -548,7 +503,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
             scenario = user.last_scenarios.last_scenario_name
 
         for key, value in self.nodes.items():
-            rendered = await self._get_rendered_tree(value, action_params, self.no_empty_nodes)
+            rendered = self._get_rendered_tree(value, action_params, self.no_empty_nodes)
             if rendered != "" or not self.no_empty_nodes:
                 command_params[key] = rendered
 
@@ -556,7 +511,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         request_data = copy.copy(self.request_data or {})
         request_data.update(self._get_extra_request_data(user, params, callback_id))
 
-        save_params = await self._get_save_params(user, action_params, command_params)
+        save_params = self._get_save_params(user, action_params, command_params)
         self._save_behavior(callback_id, user, scenario, text_preprocessing_result, save_params)
 
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
@@ -577,8 +532,8 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
             save_params,
         )
 
-    async def _get_save_params(self, user, action_params, command_action_params):
-        save_params = await self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
+    def _get_save_params(self, user, action_params, command_action_params):
+        save_params = self._get_rendered_tree_recursive(self.save_params_template_data, action_params)
         keys_to_pop = []
         for key in save_params.keys():
             if key not in SAVED_BEHAVIOR_PARAMS_FIELDS:

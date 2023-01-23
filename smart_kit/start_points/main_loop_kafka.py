@@ -530,7 +530,7 @@ class MainLoop(BaseMainLoop):
 
         return message_key
 
-    async def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
+    def _send_request(self, user: BaseUser, answer: SmartAppToMessage, mq_message: KafkaMessage):
         kafka_broker_settings = self.settings["template_settings"].get(
             "route_kafka_broker"
         ) or []
@@ -550,9 +550,9 @@ class MainLoop(BaseMainLoop):
         request_params["payload"] = answer.value
         request_params["masked_value"] = answer.masked_value
         request.run(answer.value, request_params)
-        await self._log_request(user, request, answer, mq_message)
+        self._log_request(user, request, answer, mq_message)
 
-    async def _log_request(self, user, request, answer, original_mq_message):
+    def _log_request(self, user, request, answer, original_mq_message):
         log("OUTGOING TO TOPIC_KEY: %(topic_key)s DATA: %(data)s",
             params={log_const.KEY_NAME: "outgoing_message",
                     "topic_key": request.topic_key,

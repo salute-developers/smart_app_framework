@@ -36,7 +36,7 @@ class BaseSetVariableAction(Action):
             # if path is wrong, it may fail with UndefinedError
             # notion: {key: None} will return "None";
             # not existing key or value "" will return ""; otherwise question in scenario will go in cycles
-            value = await self.template.render(params)
+            value = self.template.render(params)
         except jexcept.UndefinedError:
             value = None
 

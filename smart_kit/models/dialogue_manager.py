@@ -39,10 +39,10 @@ class DialogueManager:
             scenario = self.scenarios[scenario_key]
             is_form_filling = isinstance(scenario, FormFillingScenario)
             if is_form_filling:
-                if not await scenario.text_fits(text_preprocessing_result, user):
+                if not scenario.text_fits(text_preprocessing_result, user):
                     params = user.parametrizer.collect(text_preprocessing_result)
-                    if await scenario.check_ask_again_requests(text_preprocessing_result, user, params):
-                        reply = await scenario.ask_again(text_preprocessing_result, user, params)
+                    if scenario.check_ask_again_requests(text_preprocessing_result, user, params):
+                        reply = scenario.ask_again(text_preprocessing_result, user, params)
                         return reply, True
                     monitoring.counter_nothing_found(self.app_name, scenario_key, user)
                     return await self._nothing_found_action.run(user, text_preprocessing_result), False

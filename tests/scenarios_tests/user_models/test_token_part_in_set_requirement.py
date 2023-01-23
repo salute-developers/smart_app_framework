@@ -4,9 +4,9 @@ import unittest
 from scenarios.scenario_models.field_requirements.field_requirements import TokenPartInSet
 
 
-class RequirementTest(unittest.IsolatedAsyncioTestCase):
+class RequirementTest(unittest.TestCase):
 
-    async def test_token_part_in_set_requirement_equal_false(self):
+    def test_token_part_in_set_requirement_equal_false(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
@@ -25,9 +25,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_true(self):
+    def test_token_part_in_set_requirement_equal_true(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
@@ -46,9 +46,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertTrue(await requirement.check(token_val))
+        self.assertTrue(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False_double_empty(self):
+    def test_token_part_in_set_requirement_equal_False_double_empty(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
@@ -67,9 +67,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'locality_type': [],
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False_empty_val_none(self):
+    def test_token_part_in_set_requirement_equal_False_empty_val_none(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "locality_type",
@@ -88,9 +88,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'locality_type': None,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False_string(self):
+    def test_token_part_in_set_requirement_equal_False_string(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "value",
@@ -108,9 +108,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False(self):
+    def test_token_part_in_set_requirement_equal_False(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": "country_hidden",
@@ -128,9 +128,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False_val_int(self):
+    def test_token_part_in_set_requirement_equal_False_val_int(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'capital',
@@ -148,9 +148,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_True_arr(self):
+    def test_token_part_in_set_requirement_equal_True_arr(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'timezone',
@@ -168,9 +168,9 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertTrue(await requirement.check(token_val))
+        self.assertTrue(requirement.check(token_val))
 
-    async def test_token_part_in_set_requirement_equal_False_arr(self):
+    def test_token_part_in_set_requirement_equal_False_arr(self):
         requirement_items = {
             "type": "token_part_in_set",
             "part": 'timezone',
@@ -188,4 +188,4 @@ class RequirementTest(unittest.IsolatedAsyncioTestCase):
             'country_hidden': False,
         }
         requirement = TokenPartInSet(requirement_items)
-        self.assertFalse(await requirement.check(token_val))
+        self.assertFalse(requirement.check(token_val))

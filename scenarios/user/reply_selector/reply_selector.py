@@ -29,7 +29,7 @@ class ReplySelector:
         ]
         self._user = user
 
-    async def get_text_by_key(self, bundle_name: str, reply_key="") -> str:
+    def get_text_by_key(self, bundle_name: str, reply_key="") -> str:
         result = ""
         bundle = self._bundles[bundle_name]
         if bundle:
@@ -42,7 +42,7 @@ class ReplySelector:
             if reply_list:
                 params = self._user.parametrizer.collect()  # TODO give run-time action parameters to collect call
                 result_str = random.choice(reply_list)
-                result = await UnifiedTemplate(result_str).render(params)
+                result = UnifiedTemplate(result_str).render(params)
             else:
                 raise KeyError("Key not found")
         return result

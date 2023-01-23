@@ -1,6 +1,4 @@
 # coding: utf-8
-import asyncio
-
 from core.logging.logger_utils import log
 from core.model.registered import Registered
 from core.utils.masking_message import masking
@@ -39,10 +37,9 @@ class BasicField:
     def can_be_updated(self):
         return self.value is not None
 
-    async def check_can_be_filled(self, text_preprocessing_result, user):
-        check, run = await asyncio.gather(
-            self.description.requirement.check(text_preprocessing_result, user),
-            self.description.filler.run(user, text_preprocessing_result))
+    def check_can_be_filled(self, text_preprocessing_result, user):
+        check = self.description.requirement.check(text_preprocessing_result, user)
+        run = self.description.filler.run(user, text_preprocessing_result)
         return check and run is not None
 
     @property

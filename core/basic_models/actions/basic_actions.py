@@ -107,54 +107,9 @@ class RequirementAction(Action):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
-        if await self.requirement.check(text_preprocessing_result, user, params):
+        if self.requirement.check(text_preprocessing_result, user, params):
             commands.extend(await self.internal_item.run(user, text_preprocessing_result, params) or [])
         return commands
-
-
-class GatherChoiceAction(Action):
-    version: Optional[int]
-    requirement_actions: RequirementAction
-    else_action: Action
-
-    FIELD_REQUIREMENT_KEY = "requirement_actions"
-    FIELD_ELSE_KEY = "else_action"
-
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(GatherChoiceAction, self).__init__(items, id)
-        self._requirement_items = items[self.FIELD_REQUIREMENT_KEY]
-        self._else_item = items.get(self.FIELD_ELSE_KEY)
-
-        self.items = self.build_items()
-
-        if self._else_item:
-            self.else_item = self.build_else_item()
-        else:
-            self.else_item = None
-
-    @list_factory(RequirementAction)
-    def build_items(self):
-        return self._requirement_items
-
-    @factory(Action)
-    def build_else_item(self):
-        return self._else_item
-
-    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
-        result = None
-        choice_is_made = False
-        check_results = await asyncio.gather(
-            item.requirement.check(text_preprocessing_result, user, params) for item in self.items)
-        for i, checked in enumerate(check_results):
-            if checked:
-                item = self.items[i]
-                result = await item.internal_item.run(user, text_preprocessing_result, params)
-                choice_is_made = True
-                break
-        if not choice_is_made and self._else_item:
-            result = await self.else_item.run(user, text_preprocessing_result, params)
-        return result
 
 
 class ChoiceAction(Action):
@@ -190,7 +145,7 @@ class ChoiceAction(Action):
         commands = []
         choice_is_made = False
         for item in self.items:
-            checked = await item.requirement.check(text_preprocessing_result, user, params)
+            checked = item.requirement.check(text_preprocessing_result, user, params)
             if checked:
                 commands.extend(await item.internal_item.run(user, text_preprocessing_result, params) or [])
                 choice_is_made = True
@@ -237,7 +192,7 @@ class ElseAction(Action):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> List[Command]:
         commands = []
-        if await self.requirement.check(text_preprocessing_result, user, params):
+        if self.requirement.check(text_preprocessing_result, user, params):
             commands.extend(await self.item.run(user, text_preprocessing_result, params) or [])
         elif self._else_item:
             commands.extend(await self.else_item.run(user, text_preprocessing_result, params) or [])

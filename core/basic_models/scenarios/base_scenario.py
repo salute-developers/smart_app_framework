@@ -55,15 +55,15 @@ class BaseScenario:
     def build_available_requirement(self):
         return self._available_requirement
 
-    async def check_available(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser) -> bool:
+    def check_available(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser) -> bool:
         if not self.switched_off:
-            return await self.available_requirement.check(text_preprocessing_result, user)
+            return self.available_requirement.check(text_preprocessing_result, user)
         return False
 
     def _log_params(self) -> Dict[str, str]:
         return {log_const.KEY_NAME: log_const.SCENARIO_VALUE}
 
-    async def text_fits(self, text_preprocessing_result, user):
+    def text_fits(self, text_preprocessing_result, user):
         return False
 
     async def get_no_commands_action(self, user, text_preprocessing_result,

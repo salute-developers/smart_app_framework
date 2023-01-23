@@ -16,6 +16,6 @@ class CustomRequirement(Requirement):
         items = items or {}
         self.test_param = items.get("test_param")
 
-    async def check(self, text_preprocessing_result: TextPreprocessingResult,
+    def check(self, text_preprocessing_result: TextPreprocessingResult,
                     user: User, params: Dict[str, Any] = None) -> bool:
         return False

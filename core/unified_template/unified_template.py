@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 from copy import copy
@@ -28,15 +27,14 @@ class UnifiedTemplate:
     def __init__(self, input):
         self.input = input
         if isinstance(input, str):
-            self.template = jinja2.Template(input, enable_async=True)
+            self.template = jinja2.Template(input)
             self.loader = UnifiedTemplate.loaders["str"]
             self.support_templates = dict()
         elif isinstance(input, dict):
             if input.get("type") != UNIFIED_TEMPLATE_TYPE_NAME:
                 raise Exception("template must be string or dict with type='{}'".format(UNIFIED_TEMPLATE_TYPE_NAME))
             self.template = jinja2.Template(input["template"],
-                                            extensions=input.get("extensions", ()),
-                                            enable_async=True)
+                                            extensions=input.get("extensions", ()))
             self.loader = UnifiedTemplate.loaders[input.get("loader", "str")]
             self.support_templates = {k: UnifiedTemplate(t) for k, t in input.get("support_templates", dict()).items()}
         else:
@@ -45,10 +43,10 @@ class UnifiedTemplate:
             logging.getLevelName("DEBUG")
         )
 
-    async def render(self, *args, **kwargs):
+    def render(self, *args, **kwargs):
         params_dict = dict(*args, **kwargs)
         try:
-            result = await self.silent_render(params_dict)
+            result = self.silent_render(params_dict)
             if self.is_logging_debug_mode:
                 log_params = dict()
                 log_params[log_const.KEY_NAME] = log_const.TEMPLATE_TRACE_VALUE
@@ -69,17 +67,17 @@ class UnifiedTemplate:
             raise
         return result
 
-    async def silent_render(self, params_dict):
+    def silent_render(self, params_dict):
         if self.support_templates:
             changed_params_dict = copy(params_dict)
             for support_key, support_template in self.support_templates.items():
-                changed_params_dict[support_key] = await support_template.render(changed_params_dict)
+                changed_params_dict[support_key] = support_template.render(changed_params_dict)
         else:
             changed_params_dict = params_dict
         if changed_params_dict:
-            result = await self.template.render_async(changed_params_dict)
+            result = self.template.render(changed_params_dict)
         else:
-            result = await self.template.render_async()
+            result = self.template.render()
         if self.loader != str:
             result = self.loader(result)
         return result

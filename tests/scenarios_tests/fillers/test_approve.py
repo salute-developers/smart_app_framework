@@ -1,5 +1,5 @@
 import os
-from unittest import IsolatedAsyncioTestCase
+import unittest
 from unittest.mock import Mock, patch
 
 import smart_kit
@@ -20,10 +20,10 @@ def patch_get_app_config(mock_get_app_config):
     mock_get_app_config.return_value = result
 
 
-class TestApproveFiller(IsolatedAsyncioTestCase):
+class TestApproveFiller(unittest.TestCase):
 
     @patch('smart_kit.configs.get_app_config')
-    async def test_1(self, mock_get_app_config):
+    def test_1(self, mock_get_app_config):
         patch_get_app_config(mock_get_app_config)
         items = {
             'yes_words': [
@@ -49,24 +49,24 @@ class TestApproveFiller(IsolatedAsyncioTestCase):
 
         user_phrase = 'даю'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertTrue(result)
 
         user_phrase = 'да нет'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertFalse(result)
 
         user_phrase = 'даю добро'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertIsNone(result)
 
 
-class TestApproveRawTextFiller(IsolatedAsyncioTestCase):
+class TestApproveRawTextFiller(unittest.TestCase):
 
     @patch('smart_kit.configs.get_app_config')
-    async def test_1(self, mock_get_app_config):
+    def test_1(self, mock_get_app_config):
         patch_get_app_config(mock_get_app_config)
         items = {
             'yes_words': [
@@ -92,15 +92,15 @@ class TestApproveRawTextFiller(IsolatedAsyncioTestCase):
 
         user_phrase = 'конечно'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertTrue(result)
 
         user_phrase = 'да нет'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertFalse(result)
 
         user_phrase = 'даю'
         text_pre_result = TextPreprocessingResult(normalizer(user_phrase))
-        result = await filler.extract(text_pre_result, None)
+        result = filler.extract(text_pre_result, None)
         self.assertIsNone(result)

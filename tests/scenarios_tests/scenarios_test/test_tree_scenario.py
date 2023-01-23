@@ -1,11 +1,11 @@
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import AsyncMock
+from unittest.mock import Mock
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
 from core.basic_models.actions.command import Command
 from core.model.registered import registered_factories
 from scenarios.scenario_descriptions.tree_scenario.tree_scenario import TreeScenario
-from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock, AsyncPicklableMock
+from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
 
 class MockAction:
@@ -51,14 +51,14 @@ class TestTreeScenario(IsolatedAsyncioTestCase):
                  "scenario_nodes": {"node_1": node_mock}}
 
         field_descriptor = PicklableMock(name="field_descriptor_mock")
-        field_descriptor.filler.run = AsyncMock(name="my_field_value_1", return_value=61)
+        field_descriptor.filler.run = Mock(name="my_field_value_1", return_value=61)
         field_descriptor.fill_other = False
         field_descriptor.field_validator.actions = []
-        field_descriptor.field_validator.requirement.check = AsyncMock(return_value=True)
+        field_descriptor.field_validator.requirement.check = Mock(return_value=True)
 
         internal_form = PicklableMock(name="internal_form_mock")
         internal_form.description.fields.items = PicklableMock(return_value=[("age", field_descriptor)])
-        internal_form.field.field_validator.requirement.check = AsyncPicklableMock(return_value=True)
+        internal_form.field.field_validator.requirement.check = PicklableMock(return_value=True)
         internal_form.fields = PicklableMagicMock()
         internal_form.fields.values.items = PicklableMock(return_value={"age": 61})
         internal_form.is_valid = PicklableMock(return_value=True)
@@ -110,16 +110,16 @@ class TestTreeScenario(IsolatedAsyncioTestCase):
                  "scenario_nodes": {"node_1": node_mock}, "actions": [{"type": "success"}]}
 
         field_descriptor = PicklableMock(name="field_descriptor_mock")
-        field_descriptor.filler.run = AsyncMock(name="my_field_value_1", return_value=61)
+        field_descriptor.filler.run = Mock(name="my_field_value_1", return_value=61)
         field_descriptor.fill_other = False
         field_descriptor.field_validator.actions = []
-        field_descriptor.field_validator.requirement.check = AsyncMock(return_value=True)
+        field_descriptor.field_validator.requirement.check = Mock(return_value=True)
         field_descriptor.on_filled_actions = [BreakAction(), MockAction(command_name="break action result")]
         field_descriptor.id = "age"
 
         internal_form = PicklableMock(name="internal_form_mock")
         internal_form.description.fields.items = PicklableMock(return_value=[("age", field_descriptor)])
-        internal_form.field.field_validator.requirement.check = AsyncPicklableMock(return_value=True)
+        internal_form.field.field_validator.requirement.check = PicklableMock(return_value=True)
         field = PicklableMock()
         field.description = field_descriptor
         field.value = 61

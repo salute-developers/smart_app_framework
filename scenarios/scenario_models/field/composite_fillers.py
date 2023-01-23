@@ -28,10 +28,10 @@ class RequirementFiller(RequirementAction):
         return None
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
-    async def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                      user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
-        if await self.requirement.check(text_preprocessing_result, user, params):
-            return await self.internal_item.run(user, text_preprocessing_result, params)
+    def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
+                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+        if self.requirement.check(text_preprocessing_result, user, params):
+            return self.internal_item.run(user, text_preprocessing_result, params)
 
 
 class ChoiceFiller(ChoiceAction):
@@ -61,13 +61,13 @@ class ChoiceFiller(ChoiceAction):
         return None
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
-    async def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                      user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+    def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
+                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
         for item in self.items:
-            if await item.requirement.check(text_preprocessing_result, user, params):
-                return await item.internal_item.run(user, text_preprocessing_result, params)
+            if item.requirement.check(text_preprocessing_result, user, params):
+                return item.internal_item.run(user, text_preprocessing_result, params)
         if self._else_item:
-            return await self.else_item.run(user, text_preprocessing_result, params)
+            return self.else_item.run(user, text_preprocessing_result, params)
 
 
 class ElseFiller(ElseAction):
@@ -97,9 +97,9 @@ class ElseFiller(ElseAction):
         return None
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
-    async def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                      user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
-        if await self.requirement.check(text_preprocessing_result, user, params):
-            return await self.item.run(user, text_preprocessing_result, params)
+    def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
+                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+        if self.requirement.check(text_preprocessing_result, user, params):
+            return self.item.run(user, text_preprocessing_result, params)
         elif self._else_item:
-            return await self.else_item.run(user, text_preprocessing_result, params)
+            return self.else_item.run(user, text_preprocessing_result, params)

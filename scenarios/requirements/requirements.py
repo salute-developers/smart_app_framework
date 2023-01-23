@@ -10,8 +10,8 @@ from typing import Optional, Dict, Any
 
 class AskAgainExistRequirement(Requirement):
 
-    async def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-                    params: Dict[str, Any] = None) -> bool:
+    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+              params: Dict[str, Any] = None) -> bool:
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         return scenario.check_ask_again_requests(text_preprocessing_result, user, params)
@@ -23,12 +23,12 @@ class TemplateInArrayRequirement(Requirement):
         self._template = UnifiedTemplate(items["template"])
         self._items = set(items["items"])
 
-    async def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-                    params: Dict[str, Any] = None) -> bool:
+    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+              params: Dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = await self._template.render(params)
+        render_result = self._template.render(params)
         return render_result in self._items
 
 
@@ -38,12 +38,12 @@ class ArrayItemInTemplateRequirement(Requirement):
         self._template = UnifiedTemplate(items["template"])
         self._items = set(items["items"])
 
-    async def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-                    params: Dict[str, Any] = None) -> bool:
+    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+              params: Dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = await self._template.render(params)
+        render_result = self._template.render(params)
         for item in self._items:
             if item in render_result:
                 return True
@@ -56,10 +56,10 @@ class RegexpInTemplateRequirement(Requirement):
         self._template = UnifiedTemplate(items["template"])
         self._regexp = re.compile(items["regexp"], re.S | re.M)
 
-    async def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-                    params: Dict[str, Any] = None) -> bool:
+    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+              params: Dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        render_result = await self._template.render(params)
+        render_result = self._template.render(params)
         return True if self._regexp.search(render_result) else False

@@ -80,7 +80,7 @@ class MockRequirement:
     def __init__(self, items):
         self.result = items.get("result")
 
-    async def check(self, text_preprocessing_result, user, params):
+    def check(self, text_preprocessing_result, user, params):
         return self.result
 
 

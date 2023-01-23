@@ -1,4 +1,4 @@
-from unittest import IsolatedAsyncioTestCase
+import unittest
 
 from core.model.registered import registered_factories
 from scenarios.scenario_models.field.field_filler_description import FieldFillerDescription, CompositeFiller
@@ -11,18 +11,18 @@ class MockFiller:
         items = items or {}
         self.result = items.get("result")
 
-    async def extract(self, text_preprocessing_result, user, params):
+    def extract(self, text_preprocessing_result, user, params):
         return self.result
 
 
-class TestCompositeFiller(IsolatedAsyncioTestCase):
+class TestCompositeFiller(unittest.TestCase):
 
     def setUp(self):
         registered_factories[FieldFillerDescription] = field_filler_factory
         field_filler_description["mock_filler"] = MockFiller
         TestCompositeFiller.user = PicklableMock()
 
-    async def test_first_filler(self):
+    def test_first_filler(self):
         expected = "first"
         items = {
             "fillers": [
@@ -31,10 +31,10 @@ class TestCompositeFiller(IsolatedAsyncioTestCase):
             ]
         }
         filler = CompositeFiller(items)
-        result = await filler.extract(None, self.user)
+        result = filler.extract(None, self.user)
         self.assertEqual(expected, result)
 
-    async def test_second_filler(self):
+    def test_second_filler(self):
         expected = "second"
         items = {
             "fillers": [
@@ -43,10 +43,10 @@ class TestCompositeFiller(IsolatedAsyncioTestCase):
             ]
         }
         filler = CompositeFiller(items)
-        result = await filler.extract(None, self.user)
+        result = filler.extract(None, self.user)
         self.assertEqual(expected, result)
 
-    async def test_not_fit(self):
+    def test_not_fit(self):
         items = {
             "fillers": [
                 {"type": "mock_filler"},
@@ -54,5 +54,5 @@ class TestCompositeFiller(IsolatedAsyncioTestCase):
             ]
         }
         filler = CompositeFiller(items)
-        result = await filler.extract(None, self.user)
+        result = filler.extract(None, self.user)
         self.assertIsNone(result)

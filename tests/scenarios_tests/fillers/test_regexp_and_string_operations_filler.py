@@ -1,10 +1,10 @@
-from unittest import IsolatedAsyncioTestCase
+import unittest
 
 from scenarios.scenario_models.field.field_filler_description import RegexpAndStringOperationsFieldFiller
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestRegexpStringOperationsFiller(IsolatedAsyncioTestCase):
+class TestRegexpStringOperationsFiller(unittest.TestCase):
     def setUp(self):
         self.items = {"exp": "1-[0-9A-Z]{7}"}
 
@@ -31,37 +31,37 @@ class TestRegexpStringOperationsFiller(IsolatedAsyncioTestCase):
         result = self._test_operation(field_value, type_op, amount)
         self.assertEqual(field_value.lstrip(amount), result)
 
-    async def _test_extract(self, field_value):
+    def _test_extract(self, field_value):
         text_preprocessing_result = PicklableMock()
         text_preprocessing_result.original_text = field_value
 
         filler = RegexpAndStringOperationsFieldFiller(self.items)
-        return await filler.extract(text_preprocessing_result, None)
+        return filler.extract(text_preprocessing_result, None)
 
-    async def test_extract_upper(self):
+    def test_extract_upper(self):
         field_value = "1-rsar09a"
         self.items["operations"] = [{"type": "upper"}]
 
-        result = await self._test_extract(field_value)
+        result = self._test_extract(field_value)
         self.assertEqual(field_value.upper(), result)
 
-    async def test_extract_rstrip(self):
+    def test_extract_rstrip(self):
         field_value = "1-RSAR09A !)"
         self.items["operations"] = [{"type": "rstrip", "amount": "!) "}]
 
-        result = await self._test_extract(field_value)
+        result = self._test_extract(field_value)
         self.assertEqual(field_value.rstrip("!) "), result)
 
-    async def test_extract_upper_rstrip(self):
+    def test_extract_upper_rstrip(self):
         field_value = "1-rsar09a !)"
         self.items["operations"] = [{"type": "upper"}, {"type": "rstrip", "amount": "!) "}]
 
-        result = await self._test_extract(field_value)
+        result = self._test_extract(field_value)
         self.assertEqual(field_value.upper().rstrip("!) "), result)
 
-    async def test_extract_no_operations(self):
+    def test_extract_no_operations(self):
         field_value = "1-rsar09a !)"
         self.items["operations"] = []
 
-        result = await self._test_extract(field_value)
+        result = self._test_extract(field_value)
         self.assertIsNone(result)
