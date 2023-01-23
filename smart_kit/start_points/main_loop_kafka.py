@@ -480,7 +480,7 @@ class MainLoop(BaseMainLoop):
                         self.save_behavior_timeouts(user, mq_message, kafka_key)
                         for answer in answers:
                             with StatsTimer() as publish_timer:
-                                await self._send_request(user, answer, mq_message)
+                                self._send_request(user, answer, mq_message)
                             stats += "Publishing time: {} msecs".format(publish_timer.msecs)
                             log(stats, user=user)
             else:
@@ -662,7 +662,7 @@ class MainLoop(BaseMainLoop):
             if user_save_no_collisions:
                 self.save_behavior_timeouts(user, mq_message, kafka_key)
                 for answer in answers:
-                    await self._send_request(user, answer, mq_message)
+                    self._send_request(user, answer, mq_message)
         except Exception:
             log("%(class_name)s error.", params={log_const.KEY_NAME: "error_handling_timeout",
                                                  "class_name": self.__class__.__name__,
