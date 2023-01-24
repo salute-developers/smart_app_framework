@@ -12,14 +12,14 @@ with open("README.md", "r", encoding="utf-8") as file:
 
 def tf_version():
     if sys.platform == "darwin" and platform.machine() == "arm64":
-        return "tensorflow-macos==2.6.0"
+        return "tensorflow-macos==2.8.0"
     elif sys.platform == "darwin" and platform.machine() == "x86_64":
-        return "tensorflow==2.6.0"
+        return "tensorflow==2.8.0"
     elif sys.platform == "linux" and platform.machine() == "x86_64":
-        return "tensorflow==2.6.0"
+        return "tensorflow==2.8.0"
     elif sys.platform == "linux" and platform.machine() == "aarch64":
-        return "tensorflow-aarch64==2.6.0"
-    return "tensorflow==2.6.0"
+        return "tensorflow-aarch64==2.8.0"
+    return "tensorflow==2.8.0"
 
 
 setup(
@@ -40,13 +40,12 @@ setup(
         "boto==2.49.0",
         "confluent_kafka==1.9.2",
         "croniter==1.3.7",
-        "dawg==0.8.0",
         "dill==0.3.3",
         "ics==0.6",
         "Jinja2==3.0.3",
         "keras==2.6.0",
         "nltk==3.5",
-        "numpy==1.19.3",
+        "numpy>=1.21.0",
         "objgraph==3.4.1",
         "prometheus-client==0.7.1",
         "psutil==5.8.0",
@@ -62,7 +61,7 @@ setup(
         "scikit-learn==1.1.2",
         "setuptools==62.3.2",
         "tabulate==0.9.0",
-        "tatsu==4.4.0",
+        "tatsu==5.6.1",
         "grpcio==1.49.1",  # library for tensorflow
         "oauthlib==3.2.0",  # library for tensorflow
         "google-auth==2.12.0",  # library for tensorflow
@@ -76,6 +75,7 @@ setup(
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9"
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10"
     ]
 )
