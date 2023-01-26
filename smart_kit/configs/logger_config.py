@@ -3,11 +3,16 @@ import os
 
 import yaml
 
+import versioneer
 from core.configs.base_config import BaseConfig
 from core.repositories.file_repository import FileRepository
 from smart_kit.utils.logger_writer.logger_formatter import SmartKitJsonFormatter
 
-SmartKitJsonFormatter.VERSION = os.getenv("VERSION") or 0
+try:
+    SmartKitJsonFormatter.VERSION = os.getenv("VERSION") or versioneer.get_version()
+except:
+    SmartKitJsonFormatter.VERSION = 0
+
 
 LOGGING_CONFIG = "logging_config"
 
