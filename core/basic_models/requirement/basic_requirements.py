@@ -41,7 +41,6 @@ class Requirement:
         if "cache_result" in items:
             self.cache_result = items["cache_result"]
 
-
     def _log_params(self):
         return {
             log_const.KEY_NAME: log_const.REQUIREMENT_CHECK_VALUE,
