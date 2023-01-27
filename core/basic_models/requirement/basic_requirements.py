@@ -40,8 +40,6 @@ class Requirement:
         )
         if "cache_result" in items:
             self.cache_result = items["cache_result"]
-            if self.cache_result:
-                self.hash_for_cache = hashlib.md5(f"{self.__class__.__name__}{self.items}".encode()).hexdigest()
 
 
     def _log_params(self):
@@ -99,6 +97,10 @@ class Requirement:
             user, log_params,
             level="ERROR", exc_info=True)
         return result
+
+    @cached_property
+    def hash_for_cache(self):
+        return hashlib.md5(f"{self.__class__.__name__}{self.items}".encode()).hexdigest()
 
 
 class CompositeRequirement(Requirement):
