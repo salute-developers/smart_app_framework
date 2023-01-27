@@ -11,6 +11,8 @@ class CustomRequirement(Requirement):
     Для использования в сценариях, описанных в формате json, необходимо зарегистрировать новый тип Requirement в
     CustomAppResources. По умолчанию, данный requirement зарегистрирован под типом "custom_requirement".
     """
+    cache_result = False  # использовать ли закешированный результат на уровне класса при полном совпадении item'ов?
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
         items = items or {}
