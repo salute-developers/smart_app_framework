@@ -27,7 +27,7 @@ requirement_factory = build_factory(requirements)
 
 
 class Requirement:
-    cache_check = False
+    cache_result = False
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
@@ -38,8 +38,11 @@ class Requirement:
         self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(
             logging.getLevelName("DEBUG")
         )
-        if "cache_check" in items:
-            self.cache_check = items["cache_check"]
+        if "cache_result" in items:
+            self.cache_result = items["cache_result"]
+            if self.cache_result:
+                self.hash_for_cache = hashlib.md5(f"{self.__class__.__name__}{self.items}".encode()).hexdigest()
+
 
     def _log_params(self):
         return {
@@ -57,19 +60,18 @@ class Requirement:
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
-        if self.cache_check:
+        if self.cache_result:
             cached_results = user.message_vars.get("cached_req_results")
             if not cached_results:
                 cached_results = dict()
                 user.message_vars.set("cached_req_results", cached_results)
-            self_hash = self.__class__.__name__ + str(self.items)
 
-            if self_hash in cached_results:
-                result = cached_results[self_hash]
+            if self.hash_for_cache in cached_results:
+                result = cached_results[self.hash_for_cache]
             else:
                 try:
                     result = self._check(text_preprocessing_result, user, params)
-                    cached_results[self_hash] = result
+                    cached_results[self.hash_for_cache] = result
                 except Exception:
                     return self.on_check_error(text_preprocessing_result, user)
         else:
@@ -173,7 +175,7 @@ class RandomRequirement(Requirement):
 
 class TopicRequirement(Requirement):
     topics: List[str]
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -205,7 +207,7 @@ class TemplateRequirement(Requirement):
 
 class RollingRequirement(Requirement):
     percent: int
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -221,7 +223,7 @@ class RollingRequirement(Requirement):
 
 
 class TimeRequirement(ComparisonRequirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -247,7 +249,7 @@ class TimeRequirement(ComparisonRequirement):
 
 class DateTimeRequirement(Requirement):
     match_cron: str
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -267,7 +269,7 @@ class DateTimeRequirement(Requirement):
 
 class IntersectionRequirement(Requirement):
     phrases: Optional[List]
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -344,7 +346,7 @@ class EnvironmentRequirement(Requirement):
     Так, например, можно ограничить сценарий для исполнения только на тестовых средах.
     Возможные значения в values: ift, uat, pt, prod (это ИФТ, ПСИ, НТ, ПРОМ).
     """
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -365,7 +367,7 @@ class CharacterIdRequirement(Requirement):
     """Условие возвращает True, если идентификатор выбранного персонажа входит
     в список значений, иначе - False.
     """
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items=items, id=id)
@@ -380,7 +382,7 @@ class FeatureToggleRequirement(Requirement):
     """Условие возвращает True, если проверка указанного тогла по названию возвращает True, иначе - False.
     Тоглы задаются в template_config.yml, с помощью значений True и False их можно включить или выключить.
     """
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items=items, id=id)

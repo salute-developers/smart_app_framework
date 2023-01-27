@@ -29,7 +29,7 @@ class BaseContainsRequirement(Requirement):
 
 class ChannelRequirement(BaseContainsRequirement):
     channels = List[str]
-    cache_check = True
+    cache_result = True
 
     # should_process_message compatible
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
@@ -45,7 +45,7 @@ class ChannelRequirement(BaseContainsRequirement):
 
 
 class PlatformTypeRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -75,7 +75,7 @@ class PlatformVersionRequirement(BasicVersionRequirement):
 
 
 class SurfaceRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -88,7 +88,7 @@ class SurfaceRequirement(Requirement):
 
 
 class SurfaceVersionRequirement(BasicVersionRequirement):
-    cache_check = True
+    cache_result = True
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -97,7 +97,7 @@ class SurfaceVersionRequirement(BasicVersionRequirement):
 
 
 class AppTypeRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -110,7 +110,7 @@ class AppTypeRequirement(Requirement):
 
 
 class CapabilitiesPropertyAvailableRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)

@@ -7,7 +7,7 @@ from scenarios.user.user_model import User
 
 
 class SettingsRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)

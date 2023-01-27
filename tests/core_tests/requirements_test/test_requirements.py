@@ -51,7 +51,7 @@ class TrueFalseRequirement(Requirement):
 
 
 class TrueCacheRequirement(Requirement):
-    cache_check = True
+    cache_result = True
 
 
 class MockTextNormalizationResult:
@@ -179,7 +179,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_topic_requirement(self):
         requirement = TopicRequirement({"topics": ["test"]})
-        requirement.cache_check = False
+        requirement.cache_result = False
         user = PicklableMock()
         message = PicklableMock()
         message.topic_key = "test"
@@ -243,7 +243,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.id = "353454"
         requirement = RollingRequirement({"percent": 100})
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -251,7 +251,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.id = "353454"
         requirement = RollingRequirement({"percent": 0})
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -274,7 +274,7 @@ class RequirementTest(unittest.TestCase):
                 }
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -297,7 +297,7 @@ class RequirementTest(unittest.TestCase):
                 }
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -317,7 +317,7 @@ class RequirementTest(unittest.TestCase):
                 "match_cron": "*/17 14-19 * * mon"
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertTrue(requirement.check(text_normalization_result, user))
 
@@ -337,7 +337,7 @@ class RequirementTest(unittest.TestCase):
                 "match_cron": "* * * * 6,7"
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         self.assertFalse(requirement.check(text_normalization_result, user))
 
@@ -354,7 +354,7 @@ class RequirementTest(unittest.TestCase):
                 ]
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = PicklableMock()
         text_normalization_result.tokenized_elements_list_pymorphy = [
             {'lemma': 'я'},
@@ -375,7 +375,7 @@ class RequirementTest(unittest.TestCase):
                 ]
             }
         )
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = PicklableMock()
         text_normalization_result.tokenized_elements_list_pymorphy = [
             {'lemma': 'ни'},
@@ -470,7 +470,7 @@ class RequirementTest(unittest.TestCase):
         """Тест кейз проверяет что условие возвращает True, т.к среда исполнения из числа values."""
         patch_get_app_config(mock_get_app_config)
         environment_req = EnvironmentRequirement({"values": ["ift", "uat"]})
-        environment_req.cache_check = False
+        environment_req.cache_result = False
         self.assertTrue(environment_req.check(PicklableMock(), PicklableMock()))
 
     @patch("smart_kit.configs.get_app_config")
@@ -478,7 +478,7 @@ class RequirementTest(unittest.TestCase):
         """Тест кейз проверяет что условие возвращает False, т.к среда исполнения НЕ из числа values."""
         patch_get_app_config(mock_get_app_config)
         environment_req = EnvironmentRequirement({"values": ["uat", "pt"]})
-        environment_req.cache_check = False
+        environment_req.cache_result = False
         self.assertFalse(environment_req.check(PicklableMock(), PicklableMock()))
 
     def test_any_substring_in_lowered_text_requirement_true(self):
@@ -621,7 +621,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_character_id_requirement_true(self):
         req = CharacterIdRequirement({"values": ["sber", "afina"]})
-        req.cache_check = False
+        req.cache_result = False
         user = Mock()
         user.message = Mock()
         user.message.payload = {"character": {"id": "sber", "name": "Сбер", "gender": "male"}}
@@ -629,7 +629,7 @@ class RequirementTest(unittest.TestCase):
 
     def test_character_id_requirement_false(self):
         req = CharacterIdRequirement({"values": ["afina"]})
-        req.cache_check = False
+        req.cache_result = False
         user = Mock()
         user.message = Mock()
         user.message.payload = {"character": {"id": "sber", "name": "Сбер", "gender": "male"}}
@@ -637,14 +637,14 @@ class RequirementTest(unittest.TestCase):
 
     def test_feature_toggle_check_requirement_true(self):
         req = FeatureToggleRequirement({"toggle_name": "test_true_toggle_name"})
-        req.cache_check = False
+        req.cache_result = False
         mock_user = Mock()
         mock_user.settings = {"template_settings": {"test_true_toggle_name": True}}
         self.assertTrue(req.check(Mock(), mock_user))
 
     def test_feature_toggle_check_requirement_false(self):
         req = FeatureToggleRequirement({"toggle_name": "test_false_toggle_name"})
-        req.cache_check = False
+        req.cache_result = False
         mock_user = Mock()
         mock_user.settings = {"template_settings": {"test_false_toggle_name": False}}
         self.assertFalse(req.check(Mock(), mock_user))
@@ -653,7 +653,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = False
+        requirement.cache_result = False
         text_normalization_result = None
         result1 = requirement.check(text_normalization_result, user)
         result2 = requirement.check(text_normalization_result, user)
@@ -663,7 +663,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = True
+        requirement.cache_result = True
         text_normalization_result = None
         result1 = requirement.check(text_normalization_result, user)
         result2 = requirement.check(text_normalization_result, user)
@@ -673,7 +673,7 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement._check = Mock()
         text_normalization_result = None
         requirement.check(text_normalization_result, user)
@@ -684,10 +684,10 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement._check = Mock(return_value=1)
         requirement2 = TrueFalseRequirement()
-        requirement2.cache_check = True
+        requirement2.cache_result = True
         requirement2._check = Mock(return_value=2)
         text_normalization_result = None
         res1 = requirement.check(text_normalization_result, user)
@@ -702,10 +702,10 @@ class RequirementTest(unittest.TestCase):
         user.message_vars = Variables(None, user, False)
         requirement = MockRequirement({"cond": 1})
         requirement._check = Mock()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement2 = MockRequirement({"cond": 1})
         requirement2._check = Mock()
-        requirement2.cache_check = True
+        requirement2.cache_result = True
         text_normalization_result = None
         requirement.check(text_normalization_result, user)
         requirement2.check(text_normalization_result, user)
@@ -717,10 +717,10 @@ class RequirementTest(unittest.TestCase):
         user.message_vars = Variables(None, user, False)
         requirement = MockRequirement({"cond": 1})
         requirement._check = Mock()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement2 = MockRequirement({"cond": 1, "a": 1})
         requirement2._check = Mock()
-        requirement2.cache_check = True
+        requirement2.cache_result = True
         text_normalization_result = None
         requirement.check(text_normalization_result, user)
         requirement2.check(text_normalization_result, user)
@@ -736,7 +736,7 @@ class RequirementTest(unittest.TestCase):
         requirement.check(text_normalization_result, user)
         requirement.check(text_normalization_result, user)
         self.assertEqual(requirement._check.call_count, 1)
-        requirement = TrueCacheRequirement({"cache_check": False})
+        requirement = TrueCacheRequirement({"cache_result": False})
         requirement._check = Mock()
         requirement.check(text_normalization_result, user)
         requirement.check(text_normalization_result, user)
@@ -746,10 +746,10 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement._check = Mock(return_value=1)
         requirement2 = TrueFalseRequirement()
-        requirement2.cache_check = False
+        requirement2.cache_result = False
         requirement2._check = Mock(return_value=2)
         text_normalization_result = None
         res1 = requirement.check(text_normalization_result, user)
@@ -761,10 +761,10 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.message_vars = Variables(None, user, False)
         requirement2 = TrueFalseRequirement()
-        requirement2.cache_check = False
+        requirement2.cache_result = False
         requirement2._check = Mock(return_value=2)
         requirement = TrueFalseRequirement()
-        requirement.cache_check = True
+        requirement.cache_result = True
         requirement._check = Mock(return_value=1)
         text_normalization_result = None
         res2 = requirement2.check(text_normalization_result, user)
