@@ -1,5 +1,5 @@
 import collections
-import json
+import ujson
 import operator
 import re
 from functools import cached_property
@@ -103,7 +103,7 @@ class CompositeFiller(FieldFillerDescription):
 class AvailableInfoFiller(FieldFillerDescription):
     loader: Optional[str]
     value: Union[str, Dict]
-    loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
+    loaders = collections.defaultdict(str, {"json": ujson.loads, "float": float, "int": int})
 
     def __init__(self, items: Optional[Dict[str, Any]], id: Optional[str] = None) -> None:
         super(AvailableInfoFiller, self).__init__(items, id)

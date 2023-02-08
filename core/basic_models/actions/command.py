@@ -13,7 +13,7 @@ class Command:
         :param action_id:
         :param request_type:
         :param request_data:
-        :param loader: loader name for data before send. Possible loader values: json.dumps / protobuf
+        :param loader: loader name for data before send. Possible loader values: ujson.dumps / protobuf
         """
 
         self.name: str = name
@@ -21,7 +21,7 @@ class Command:
         self.action_id: str = action_id
         self.request_type: str = request_type
         self.request_data: Dict[str, Any] = request_data or {}
-        self.loader: str = loader or "json.dumps"
+        self.loader: str = loader or "ujson.dumps"
         self.need_payload_wrap: bool = need_payload_wrap
         self.need_message_name: bool = need_message_name
 

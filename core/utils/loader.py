@@ -1,15 +1,15 @@
 # coding=utf-8
 from collections import OrderedDict
 
-import json
+import ujson
 
 
 def ordered_json(data):
-    return json.loads(data, object_pairs_hook=OrderedDict)
+    return OrderedDict(ujson.loads(data))
 
 
 def reverse_json_dict(data):
-    data = json.loads(data)
+    data = ujson.loads(data)
     result = dict()
     for key, values in data.items():
         for value in values:

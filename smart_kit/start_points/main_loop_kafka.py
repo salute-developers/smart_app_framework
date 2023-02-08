@@ -3,7 +3,7 @@ import cProfile
 import concurrent.futures
 import gc
 import hashlib
-import json
+import ujson
 import pstats
 import signal
 import time
@@ -364,7 +364,7 @@ class MainLoop(BaseMainLoop):
         message = None
         while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
             save_tries += 1
-            message_value = json.loads(mq_message.value())
+            message_value = ujson.loads(mq_message.value())
             message = SmartAppFromMessage(message_value,
                                           headers=mq_message.headers(),
                                           masking_fields=self.masking_fields,
@@ -609,7 +609,7 @@ class MainLoop(BaseMainLoop):
             timeout_from_message = None
             while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
                 save_tries += 1
-                orig_message_raw = json.loads(mq_message.value())
+                orig_message_raw = ujson.loads(mq_message.value())
                 orig_message_raw[SmartAppFromMessage.MESSAGE_NAME] = message_names.LOCAL_TIMEOUT
                 timeout_from_message = self._get_timeout_from_message(orig_message_raw, callback_id,
                                                                       headers=mq_message.headers())

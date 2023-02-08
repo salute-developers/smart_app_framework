@@ -1,6 +1,6 @@
 import base64
 import codecs
-import json
+import ujson
 import functools
 import jinja2
 import datetime
@@ -157,8 +157,8 @@ jinja2.filters.FILTERS["difference"] = lambda x, y: set(x) - set(y)
 jinja2.filters.FILTERS["co_sort"] = co_sort
 
 # other
-jinja2.filters.FILTERS["tojson"] = lambda x: json.dumps(x, ensure_ascii=False)
-jinja2.filters.FILTERS["fromjson"] = json.loads
+jinja2.filters.FILTERS["tojson"] = lambda x: ujson.dumps(x, ensure_ascii=False)
+jinja2.filters.FILTERS["fromjson"] = ujson.loads
 jinja2.filters.FILTERS["any"] = any
 jinja2.filters.FILTERS["all"] = all
 jinja2.filters.FILTERS["pan2service"] = pan2service

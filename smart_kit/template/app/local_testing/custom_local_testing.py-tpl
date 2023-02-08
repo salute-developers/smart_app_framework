@@ -9,7 +9,7 @@ class CustomLocalTesting(CLInterface):
     Пример:
         def on_back_get_token_request(self, message):
             # BACK_GET_TOKEN_REQUEST - тип сообщения
-            return json.dumps({
+            return ujson.dumps({
                 "messageId": self.environment.message_id,
                 "messageName": "BACK_GET_TOKEN_RESPONSE",
                 "uuid": {

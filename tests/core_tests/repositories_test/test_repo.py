@@ -1,4 +1,4 @@
-import json
+import ujson
 import pickle
 import tempfile
 import unittest
@@ -48,7 +48,7 @@ class MockStream:
     def __init__(self, data):
         self.data = data
         self.stream = PicklableMock()
-        self.stream.read.return_value = json.dumps(self.data).encode()
+        self.stream.read.return_value = ujson.dumps(self.data).encode()
 
     def __enter__(self):
         return self.stream
@@ -107,19 +107,19 @@ class FolderRepositoryTest(unittest.TestCase):
         self.folder_wrong_content = {'1.json': {'content': {'a': 'b'}}, '2.json': {'content': ['c', 'd']}}
 
     def test_right_filling_with_dict(self):
-        test_repository = FolderRepository('', loader=json.loads,
+        test_repository = FolderRepository('', loader=ujson.loads,
                                            source=MockSource(self.folder_content_test_dict))
         test_repository.load()
         self.assertDictEqual(test_repository.data, {'a': 'b', 'c': 'd'})
 
     def test_right_filling_with_list(self):
-        test_repository = FolderRepository('', loader=json.loads,
+        test_repository = FolderRepository('', loader=ujson.loads,
                                            source=MockSource(self.folder_content_test_list))
         test_repository.load()
         self.assertListEqual(test_repository.data, ['a', 'b', 'c', 'd'])
 
     def test_repo_wrong_content(self):
-        test_repository = FolderRepository('', loader=json.loads,
+        test_repository = FolderRepository('', loader=ujson.loads,
                                            source=MockSource(self.folder_wrong_content))
         self.assertRaises(TypeError, test_repository.load)
 
@@ -168,7 +168,7 @@ class TestClassifierRepository(unittest.TestCase):
             with patch("core.repositories.folder_repository.FolderRepository.load"):
                 with patch("core.repositories.classifier_repository.classifiers_initial_launch"):
                     classifier_repo = ClassifierRepository(
-                        self.temp_directory_path, self.temp_directory_path, json.loads, "")
+                        self.temp_directory_path, self.temp_directory_path, ujson.loads, "")
                     classifier_repo.load()
                     expected_result = {
                         "test_classifier": {
@@ -189,7 +189,7 @@ class TestClassifierRepository(unittest.TestCase):
                    return_value=expected_return_obj):
             with patch("core.repositories.folder_repository.FolderRepository.load"):
                 classifier_repo = ClassifierRepository(
-                    self.temp_directory_path, self.temp_directory_path, json.loads, "")
+                    self.temp_directory_path, self.temp_directory_path, ujson.loads, "")
                 classifier_repo.load()
                 self.assertEqual(expected_return_obj, classifier_repo.data)
 
@@ -205,19 +205,19 @@ class TestClassifierRepository(unittest.TestCase):
             with patch("core.repositories.folder_repository.FolderRepository.load"):
                 with patch("core.repositories.classifier_repository.classifiers_initial_launch"):
                     classifier_repo = ClassifierRepository(
-                        self.temp_directory_path, self.temp_directory_path, json.loads, "")
+                        self.temp_directory_path, self.temp_directory_path, ujson.loads, "")
                     classifier_repo.load()
                     self.assertEqual(expected_return_obj, classifier_repo.data)
 
     def test_load_if_not_classifiers_paths(self):
-        classifier_repo = ClassifierRepository("./nonexistent_path", "./another_nonexistent_path", json.loads, "")
+        classifier_repo = ClassifierRepository("./nonexistent_path", "./another_nonexistent_path", ujson.loads, "")
         classifier_repo.load()
         self.assertIsNone(classifier_repo.data)
 
     def test_load_if_classifiers_directories_are_empty(self):
         new_empty_temp_directory = tempfile.TemporaryDirectory()
         empty_temp_directory_name = new_empty_temp_directory.name
-        classifier_repo = ClassifierRepository(empty_temp_directory_name, empty_temp_directory_name, json.loads, "")
+        classifier_repo = ClassifierRepository(empty_temp_directory_name, empty_temp_directory_name, ujson.loads, "")
         classifier_repo.load()
         new_empty_temp_directory.cleanup()
         self.assertIsNone(classifier_repo.data)

@@ -3,7 +3,7 @@ import os
 
 from core.repositories.file_repository import FileRepository
 
-import json
+import ujson
 
 
 class CreateCacheCommand(AppCommand):
@@ -45,7 +45,7 @@ class CreateCacheCommand(AppCommand):
             for file in f:
                 if self._ext in file:
                     filename = os.path.join(r, file)
-                    rep = FileRepository(filename=filename, loader=json.loads)
+                    rep = FileRepository(filename=filename, loader=ujson.loads)
                     rep.load()
                     data = rep.data
                     item = self._split_items(self._collect_items_for_normalized(data))

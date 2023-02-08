@@ -60,6 +60,7 @@ incremental = "21.3.0"
 Twisted = "22.8.0"
 freezegun = "1.1.0"
 protobuf = "3.19.6"
+ujson = "5.7.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.0.0"

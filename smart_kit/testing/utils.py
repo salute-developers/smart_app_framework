@@ -1,4 +1,4 @@
-import json
+import ujson
 import logging
 import types
 
@@ -191,7 +191,7 @@ class Environment(TypeCastByAnnotation):
 
         try:
             recognizer = config.NORMALIZER
-            norm = json.loads(json.dumps(recognizer(value)))
+            norm = ujson.loads(ujson.dumps(recognizer(value)))
             tpr = {'original_text': norm['original_text'],
                    'normalized_text': norm['normalized_text'],
                    'tokenized_elements_list': norm['tokenized_elements_list']}
@@ -207,7 +207,7 @@ class Environment(TypeCastByAnnotation):
         self.__message = tpr
 
     def __str__(self):
-        return json.dumps(self.as_dict)
+        return ujson.dumps(self.as_dict)
 
 
 class Settings(TypeCastByAnnotation):

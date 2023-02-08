@@ -1,5 +1,5 @@
 # coding: utf-8
-import json
+import ujson
 import unittest
 import uuid
 from unittest.mock import Mock, MagicMock, patch, AsyncMock
@@ -1040,7 +1040,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 },
             },
         }
-        exp1 = json.dumps(
+        exp1 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1068,7 +1068,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             },
             sort_keys=True,
         )
-        exp2 = json.dumps(
+        exp2 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1098,7 +1098,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         )
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps(
+        nexp1 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1126,7 +1126,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             },
             sort_keys=True,
         )
-        nexp2 = json.dumps(
+        nexp2 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1160,8 +1160,8 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in expect_arr)
-            self.assertFalse(json.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
+            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in expect_arr)
+            self.assertFalse(ujson.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
 
     async def test_typical_answer_without_items(self):
         user = PicklableMock()
@@ -1174,10 +1174,10 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 "pronounceText": ["pronounceText1", "pronounceText2"],
             },
         }
-        exp1 = json.dumps(
+        exp1 = ujson.dumps(
             {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText1"}}, sort_keys=True
         )
-        exp2 = json.dumps(
+        exp2 = ujson.dumps(
             {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText2"}}, sort_keys=True
         )
         exp_list = [exp1, exp2]
@@ -1185,7 +1185,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in exp_list)
+            self.assertTrue(ujson.dumps((result[0].raw), sort_keys=True) in exp_list)
 
     async def test_typical_answer_without_nodes(self):
         user = PicklableMock()
@@ -1205,7 +1205,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 ]
             },
         }
-        exp1 = json.dumps(
+        exp1 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1220,7 +1220,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             },
             sort_keys=True,
         )
-        exp2 = json.dumps(
+        exp2 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1237,7 +1237,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         )
         expect_arr = [exp1, exp2]
 
-        nexp1 = json.dumps(
+        nexp1 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1252,7 +1252,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             },
             sort_keys=True,
         )
-        nexp2 = json.dumps(
+        nexp2 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1272,8 +1272,8 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in expect_arr)
-            self.assertFalse(json.dumps((result[0].raw), sort_keys=True) in not_expect_arr)
+            self.assertTrue(ujson.dumps((result[0].raw), sort_keys=True) in expect_arr)
+            self.assertFalse(ujson.dumps((result[0].raw), sort_keys=True) in not_expect_arr)
 
 
 class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
@@ -1327,7 +1327,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                 {"type": "suggest_deeplink", "title": "pron", "deep_link": "dl"},
             ],
         }
-        exp1 = json.dumps(
+        exp1 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1347,7 +1347,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
             },
             sort_keys=True,
         )
-        exp2 = json.dumps(
+        exp2 = ujson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1371,7 +1371,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
+            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_root(self):
 
@@ -1400,13 +1400,13 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                 },
             ],
         }
-        exp1 = json.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p1"}}, sort_keys=True)
-        exp2 = json.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p2"}}, sort_keys=True)
+        exp1 = ujson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p1"}}, sort_keys=True)
+        exp2 = ujson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p2"}}, sort_keys=True)
 
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
+            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_simple(self):
 

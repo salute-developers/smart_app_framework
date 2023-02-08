@@ -1,5 +1,5 @@
 import time
-import json
+import ujson
 
 
 class ItemExpired(Exception):
@@ -40,7 +40,7 @@ class Cache:
 class JSONCache(Cache):  # Pathetic Non OOP Design, Sorry
     def load(self, path):
         with open(path) as file:
-            self.storage = json.load(file)
+            self.storage = ujson.load(file)
 
     def save(self, path, update=False):
         if update:
@@ -50,4 +50,4 @@ class JSONCache(Cache):  # Pathetic Non OOP Design, Sorry
             self.storage = tmp.storage
         self.invalidate()
         with open(path, "w+", encoding='utf-8') as file:
-            json.dump(self.storage, file, ensure_ascii=False)
+            ujson.dump(self.storage, file, ensure_ascii=False)

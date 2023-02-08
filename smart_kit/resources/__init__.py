@@ -1,4 +1,4 @@
-import json
+import ujson
 
 import core.basic_models.operators.comparators as cmp
 import core.basic_models.operators.operators as op
@@ -135,7 +135,7 @@ class SmartAppResources(BaseConfig):
             ClassifierRepository(
                 description_path=self.subfolder_path("classifiers"),
                 data_path=self.subfolder_path("classifiers_data"),
-                loader=json.loads,
+                loader=ujson.loads,
                 source=source,
                 key="external_classifiers"
             )

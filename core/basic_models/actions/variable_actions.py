@@ -1,5 +1,5 @@
 import collections
-import json
+import ujson
 from typing import Optional, Dict, Any, Union, List
 
 from jinja2 import exceptions as jexcept
@@ -15,7 +15,7 @@ from core.unified_template.unified_template import UnifiedTemplate
 class BaseSetVariableAction(Action):
     key: str
     loader: Optional[str]
-    loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
+    loaders = collections.defaultdict(str, {"json": ujson.loads, "float": float, "int": int})
     value: Union[str, Dict]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
@@ -56,7 +56,7 @@ class SetVariableAction(BaseSetVariableAction):
     parametrizer: BasicParametrizer
     loader: Optional[str]
     key: str
-    loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
+    loaders = collections.defaultdict(str, {"json": ujson.loads, "float": float, "int": int})
     ttl: int
     value: Union[str, Dict]
 

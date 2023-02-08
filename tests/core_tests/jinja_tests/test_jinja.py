@@ -57,7 +57,7 @@ class TestJinjaTemplates(TestCase):
 
     def test_tojson(self):
         template = jinja2.Template("{{t|tojson}}")
-        self.assertEqual('{"word": 1, "n": null}', template.render({"t": {"word": 1, "n": None}}))
+        self.assertEqual('{"word":1,"n":null}', template.render({"t": {"word": 1, "n": None}}))
 
     def test_fromjson(self):
         template = jinja2.Template("{{t|fromjson}}")

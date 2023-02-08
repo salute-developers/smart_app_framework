@@ -13,14 +13,14 @@ class TestSmartAppToMessage(unittest.TestCase):
         self.message_ = PicklableMock()
         self.command_.payload = {"z": 1}
         self.command_.name = "AnyName"
-        self.command_.loader = "json.dumps"
+        self.command_.loader = "ujson.dumps"
         self.request_.header = "json"
         self.message_.payload = {"q": 0}
         self.message_.incremental_id = 111
         self.message_.session_id = 11
         self.message_.uuid = '1234-5678-9012'
-        self.output_json = '{"messageId": 111, "sessionId": 11, "messageName": "AnyName", "payload": {"z": 1}, ' \
-                           '"uuid": "1234-5678-9012"}'
+        self.output_json = '{"messageId":111,"sessionId":11,"messageName":"AnyName","payload":{"z":1},' \
+                           '"uuid":"1234-5678-9012"}'
 
     def test_smart_app_to_message_1(self):
         obj = SmartAppToMessage(self.command_, self.message_, self.request_)
@@ -36,7 +36,7 @@ class TestSmartAppToMessage(unittest.TestCase):
             "payload": {"z": 1},
             "uuid": '1234-5678-9012'
         })
-        self.assertTrue(obj.value == self.output_json)
+        self.assertEqual(obj.value, self.output_json)
 
     def test_smart_app_to_message_2(self):
         obj = SmartAppToMessage(self.command_, self.message_, self.request_, ["t"])
