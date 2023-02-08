@@ -117,7 +117,7 @@ class HashableDict(dict):
 
 
 def ordered_loader(coded):
-    return OrderedDict(ujson.loads(coded))
+    return ujson.loads(coded)
 
 
 def current_time_ms():

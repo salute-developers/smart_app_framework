@@ -1,11 +1,8 @@
-# coding=utf-8
-from collections import OrderedDict
-
 import ujson
 
 
 def ordered_json(data):
-    return OrderedDict(ujson.loads(data))
+    return ujson.loads(data)
 
 
 def reverse_json_dict(data):
