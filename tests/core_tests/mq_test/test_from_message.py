@@ -1,4 +1,4 @@
-import ujson
+import orjson
 from unittest import TestCase
 
 from core.message.from_message import SmartAppFromMessage
@@ -47,7 +47,7 @@ class TestFromMessage(TestCase):
         self.assertEqual(input_msg["uuid"]["userChannel"], message.channel)
         self.assertEqual(input_msg["messageName"], message.type)
         self.assertEqual(input_msg["uuid"]["userId"], message.uid)
-        self.assertEqual(ujson.dumps(input_msg, ensure_ascii=False), message.as_str)
+        self.assertEqual(orjson.dumps(input_msg).decode(), message.as_str)
         self.assertEqual("userId_B2C", message.db_uid)
         self.assertDictEqual(input_msg["uuid"], message.uuid)
         self.assertDictEqual(input_msg["payload"], message.payload)

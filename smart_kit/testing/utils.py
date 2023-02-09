@@ -1,4 +1,4 @@
-import ujson
+import orjson
 import logging
 import types
 
@@ -191,7 +191,7 @@ class Environment(TypeCastByAnnotation):
 
         try:
             recognizer = config.NORMALIZER
-            norm = ujson.loads(ujson.dumps(recognizer(value)))
+            norm = orjson.loads(orjson.dumps(recognizer(value)))
             tpr = {'original_text': norm['original_text'],
                    'normalized_text': norm['normalized_text'],
                    'tokenized_elements_list': norm['tokenized_elements_list']}
@@ -207,7 +207,7 @@ class Environment(TypeCastByAnnotation):
         self.__message = tpr
 
     def __str__(self):
-        return ujson.dumps(self.as_dict)
+        return orjson.dumps(self.as_dict).decode()
 
 
 class Settings(TypeCastByAnnotation):

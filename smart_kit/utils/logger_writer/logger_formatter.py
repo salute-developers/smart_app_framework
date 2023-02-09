@@ -1,6 +1,7 @@
 # coding: utf-8
 from datetime import datetime
 
+import orjson
 from pythonjsonlogger import jsonlogger
 import logging
 from core.model.factory import build_factory
@@ -15,6 +16,11 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
     VERSION = 0
     DEV_TEAM = "NA"
     APPLICATION_NAME = "NA"
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("json_serializer",
+                          lambda log_record, *args_, **kwargs_: orjson.dumps(log_record).decode())
+        super().__init__(*args, **kwargs)
 
     def add_fields(self, log_record, record, message_dict):
         super(SmartKitJsonFormatter, self).add_fields(log_record, record, message_dict)

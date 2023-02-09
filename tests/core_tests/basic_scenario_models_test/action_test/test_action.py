@@ -1,5 +1,5 @@
 # coding: utf-8
-import ujson
+import orjson
 import unittest
 import uuid
 from unittest.mock import Mock, MagicMock, patch, AsyncMock
@@ -1040,7 +1040,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 },
             },
         }
-        exp1 = ujson.dumps(
+        exp1 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1066,9 +1066,9 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
-        exp2 = ujson.dumps(
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        exp2 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1094,11 +1094,11 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
         expect_arr = [exp1, exp2]
 
-        nexp1 = ujson.dumps(
+        nexp1 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1124,9 +1124,9 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
-        nexp2 = ujson.dumps(
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        nexp2 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1152,16 +1152,16 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
         not_expect_arr = [nexp1, nexp2]
 
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in expect_arr)
-            self.assertFalse(ujson.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
+            self.assertTrue(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in expect_arr)
+            self.assertFalse(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in not_expect_arr)
 
     async def test_typical_answer_without_items(self):
         user = PicklableMock()
@@ -1174,18 +1174,20 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 "pronounceText": ["pronounceText1", "pronounceText2"],
             },
         }
-        exp1 = ujson.dumps(
-            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText1"}}, sort_keys=True
-        )
-        exp2 = ujson.dumps(
-            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText2"}}, sort_keys=True
-        )
+        exp1 = orjson.dumps(
+            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText1"}},
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        exp2 = orjson.dumps(
+            {"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "pronounceText2"}},
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
         exp_list = [exp1, exp2]
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(ujson.dumps((result[0].raw), sort_keys=True) in exp_list)
+            self.assertTrue(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in exp_list)
 
     async def test_typical_answer_without_nodes(self):
         user = PicklableMock()
@@ -1205,7 +1207,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                 ]
             },
         }
-        exp1 = ujson.dumps(
+        exp1 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1218,9 +1220,9 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
-        exp2 = ujson.dumps(
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        exp2 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1233,11 +1235,11 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
         expect_arr = [exp1, exp2]
 
-        nexp1 = ujson.dumps(
+        nexp1 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1250,9 +1252,9 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
-        nexp2 = ujson.dumps(
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        nexp2 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1265,15 +1267,15 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
                     },
                 },
             },
-            sort_keys=True,
-        )
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
         not_expect_arr = [nexp1, nexp2]
         for i in range(10):
             action = SDKAnswer(items)
             result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
-            self.assertTrue(ujson.dumps((result[0].raw), sort_keys=True) in expect_arr)
-            self.assertFalse(ujson.dumps((result[0].raw), sort_keys=True) in not_expect_arr)
+            self.assertTrue(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in expect_arr)
+            self.assertFalse(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in not_expect_arr)
 
 
 class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
@@ -1327,7 +1329,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                 {"type": "suggest_deeplink", "title": "pron", "deep_link": "dl"},
             ],
         }
-        exp1 = ujson.dumps(
+        exp1 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1345,9 +1347,9 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                     "pronounceText": "p2",
                 },
             },
-            sort_keys=True,
-        )
-        exp2 = ujson.dumps(
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
+        exp2 = orjson.dumps(
             {
                 "messageName": "ANSWER_TO_USER",
                 "payload": {
@@ -1365,13 +1367,13 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                     "pronounceText": "p1",
                 },
             },
-            sort_keys=True,
-        )
+            option=orjson.OPT_SORT_KEYS,
+        ).decode()
 
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
+            self.assertTrue(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in [exp1, exp2])
 
     async def test_SDKItemAnswer_root(self):
 
@@ -1400,13 +1402,15 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
                 },
             ],
         }
-        exp1 = ujson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p1"}}, sort_keys=True)
-        exp2 = ujson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p2"}}, sort_keys=True)
+        exp1 = orjson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p1"}},
+                            option=orjson.OPT_SORT_KEYS).decode()
+        exp2 = orjson.dumps({"messageName": "ANSWER_TO_USER", "payload": {"pronounceText": "p2"}},
+                            option=orjson.OPT_SORT_KEYS).decode()
 
         action = SDKAnswerToUser(items)
         for i in range(3):
             result = await action.run(user, None)
-            self.assertTrue(ujson.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
+            self.assertTrue(orjson.dumps(result[0].raw, option=orjson.OPT_SORT_KEYS).decode() in [exp1, exp2])
 
     async def test_SDKItemAnswer_simple(self):
 

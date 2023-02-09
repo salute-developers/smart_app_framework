@@ -13,7 +13,7 @@ class TestSmartAppToMessage(unittest.TestCase):
         self.message_ = PicklableMock()
         self.command_.payload = {"z": 1}
         self.command_.name = "AnyName"
-        self.command_.loader = "ujson.dumps"
+        self.command_.loader = "orjson.dumps"
         self.request_.header = "json"
         self.message_.payload = {"q": 0}
         self.message_.incremental_id = 111

@@ -1,6 +1,6 @@
 # coding=utf-8
 import datetime
-import ujson
+import orjson
 import os
 import re
 
@@ -117,7 +117,7 @@ class HashableDict(dict):
 
 
 def ordered_loader(coded):
-    return ujson.loads(coded)
+    return orjson.loads(coded)
 
 
 def current_time_ms():

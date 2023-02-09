@@ -1,5 +1,5 @@
 import re
-import ujson
+import orjson
 import time
 import string
 from typing import Dict
@@ -23,7 +23,7 @@ def flatten(lst: list) -> list:
 
 
 def reverse_json_dict(data):
-    data = ujson.loads(data)
+    data = orjson.loads(data)
     result = dict()
     for key, values in data.items():
         for value in values:

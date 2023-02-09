@@ -1,4 +1,4 @@
-import ujson
+import orjson
 import logging
 from copy import copy
 import jinja2
@@ -21,7 +21,7 @@ class UnifiedTemplate:
         "int": int,
         "float": float,
         "bool": bool_loader,
-        "json": ujson.loads,
+        "json": orjson.loads,
     }
 
     def __init__(self, input):

@@ -2,7 +2,7 @@ import functools
 import re
 import typing
 import tabulate
-import ujson
+import orjson
 
 DoesNotExpected = object()
 
@@ -39,10 +39,10 @@ class Diff:
         return "\n".join((missed, does_not_expected, different))
 
     def serialize(self):
-        return ujson.dumps({
+        return orjson.dumps({
             'missed': self.missed.copy(),
             'different': self.different.copy()
-        })
+        }).decode()
 
 
 @functools.singledispatch

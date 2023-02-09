@@ -1,5 +1,5 @@
 import requests
-import ujson
+import orjson
 
 
 class BaseTextNormalizer:
@@ -21,7 +21,7 @@ class HTTPTextNormalizer(BaseTextNormalizer):
 
     def get_result(self, address):
         response = self._get_response(address)
-        return ujson.loads(response.text)
+        return orjson.loads(response.text)
 
     def _get_response(self, address):
         response = requests.get(address, params={"original_text": self.text})
