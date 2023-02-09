@@ -18,8 +18,10 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
     APPLICATION_NAME = "NA"
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("json_serializer",
-                          lambda obj, log_record, *args_, **kwargs_: orjson.dumps(log_record).decode())
+        kwargs.setdefault(
+            "json_serializer",
+            lambda log_record, *args_, **kwargs_: orjson.dumps(log_record, option=orjson.OPT_NON_STR_KEYS).decode()
+        )
         super().__init__(*args, **kwargs)
 
     def add_fields(self, log_record, record, message_dict):
