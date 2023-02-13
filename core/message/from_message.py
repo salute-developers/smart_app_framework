@@ -1,6 +1,6 @@
 # coding=utf-8
 from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple
-import orjson
+import json
 import uuid
 
 from core.configs.global_constants import CALLBACK_ID_HEADER
@@ -99,7 +99,7 @@ class SmartAppFromMessage:
                     )
                     return False
 
-        except (orjson.JSONDecodeError, TypeError):
+        except (json.JSONDecodeError, TypeError):
             log(
                 "Message validation error: json decode error",
                 exc_info=True,
@@ -251,7 +251,7 @@ class SmartAppFromMessage:
     @property
     def masked_value(self) -> str:
         masked_data = masking(self.as_dict, self.masking_fields)
-        return orjson.dumps(masked_data).decode()
+        return json.dumps(masked_data, ensure_ascii=False)
 
     @property
     def message_name(self) -> str:
@@ -272,7 +272,7 @@ class SmartAppFromMessage:
 
     @property
     def as_str(self) -> str:
-        return orjson.dumps(self._value).decode()
+        return json.dumps(self._value, ensure_ascii=False)
 
 
 basic_error_message = SmartAppFromMessage(

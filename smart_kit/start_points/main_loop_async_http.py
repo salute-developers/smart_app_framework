@@ -1,5 +1,6 @@
-import orjson
+import json
 import typing
+import os
 
 import asyncio
 import aiohttp
@@ -168,7 +169,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
     async def iterate(self, request: aiohttp.web.Request):
         headers = self._get_headers(request.headers)
         body = await request.text()
-        message = SmartAppFromMessage(orjson.loads(body), headers=headers, headers_required=False,
+        message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
                                       validators=self.from_msg_validators)
 
         status, reason, answer = await self.handle_message(message)

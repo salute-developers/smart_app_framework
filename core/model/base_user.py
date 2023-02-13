@@ -1,5 +1,5 @@
 # coding: utf-8
-import orjson
+import json
 from functools import cached_property
 from typing import List
 
@@ -56,7 +56,7 @@ class BaseUser(Model):
     @property
     def raw_str(self):
         # Attention: non-serializable objects will become str with error message
-        raw = orjson.dumps(self.raw, default=lambda o: f"<non-serializable: {type(o).__qualname__}>").decode()
+        raw = json.dumps(self.raw, default=lambda o: f"<non-serializable: {type(o).__qualname__}>")
         log("%(class_name)s.raw USER %(uid)s SAVE db_version = %(db_version)s. "
             "Saving User %(uid)s. Serialized utf8 json length is %(user_length)s symbols.", self,
             {"db_version": str(self.private_vars.get(self.USER_DB_VERSION)),

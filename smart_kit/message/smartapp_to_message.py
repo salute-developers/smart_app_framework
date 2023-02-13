@@ -1,6 +1,6 @@
 from functools import cached_property
 from typing import Iterable
-import orjson
+import json
 from copy import copy
 
 from core.utils.masking_message import masking
@@ -62,16 +62,16 @@ class SmartAppToMessage:
     @cached_property
     def masked_value(self):
         masked_data = masking(self.as_dict, self.masking_fields)
-        if self.command.loader == "orjson.dumps":
-            return orjson.dumps(masked_data).decode()
+        if self.command.loader == "json.dumps":
+            return json.dumps(masked_data, ensure_ascii=False)
         elif self.command.loader == "protobuf":
             protobuf_message = self.as_protobuf_message(masked_data)
             return protobuf_message.SerializeToString()
 
     @cached_property
     def value(self):
-        if self.command.loader == "orjson.dumps":
-            return orjson.dumps(self.as_dict).decode()
+        if self.command.loader == "json.dumps":
+            return json.dumps(self.as_dict, ensure_ascii=False)
         elif self.command.loader == "protobuf":
             protobuf_message = self.as_protobuf_message(self.as_dict)
             return protobuf_message.SerializeToString()

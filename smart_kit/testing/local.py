@@ -1,6 +1,6 @@
 import asyncio
 import cmd
-import orjson
+import json
 import os
 import pprint
 from typing import Dict, Optional, Tuple, Any
@@ -45,7 +45,7 @@ class CLInterface(cmd.Cmd):
         predefined_fields_storage_path = os.path.join(self.references_path, "./predefined_fields_storage.json")
         if os.path.exists(predefined_fields_storage_path):
             with open(str(predefined_fields_storage_path), "r") as f:
-                self.storaged_predefined_fields = orjson.loads(f.read())
+                self.storaged_predefined_fields = json.load(f)
         else:
             self.storaged_predefined_fields = {}
 
@@ -83,7 +83,7 @@ class CLInterface(cmd.Cmd):
                 else:
                     resp += "Other node {}:\t{}\n".format(key, params[key])
         else:
-            resp += orjson.dumps(ans).decode()
+            resp += json.dumps(ans)
         return resp.strip()
 
     def do_show_envs(self, _input: str):
@@ -166,7 +166,7 @@ class CLInterface(cmd.Cmd):
             respond = self.after_process_message(answer)
             if respond:
                 _, new_answers = self.process_message(
-                    orjson.loads(respond),
+                    json.loads(respond),
                     (('app_callback_id', answer.request_data['app_callback_id'].encode()),),
                 )
                 answers.extend(new_answers or [])

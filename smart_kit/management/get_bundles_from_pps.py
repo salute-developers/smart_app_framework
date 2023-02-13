@@ -1,6 +1,6 @@
 import os
 import requests
-import orjson
+import json
 
 '''
 пример bundles.json
@@ -52,7 +52,7 @@ class GetBundleCommand:
 
     @staticmethod
     def get_data(text, key, bundle_name):
-        return orjson.dumps(
+        return json.dumps(
             {
                 "payload": {
                     "items_to_pps": {
@@ -65,7 +65,7 @@ class GetBundleCommand:
                     }
                 }
             }
-        ).decode()
+        )
 
     def execute(self):
         print("insert text")
@@ -79,7 +79,7 @@ class GetBundleCommand:
             try:
                 r = requests.post(url=self.url, data=data)
                 if r.status_code == 200:
-                    data = orjson.loads(r.content)
+                    data = json.loads(r.content)
                     payload = data.get("payload")
                     items_from_pps = payload.get("items_from_pps")
                 else:
@@ -91,10 +91,10 @@ class GetBundleCommand:
                     os.makedirs(self.bundle_path)
                 if os.path.exists(self.file_path):
                     with open(self.file_path, "r") as json_file:
-                        file_data = orjson.loads(json_file.read())
+                        file_data = json.load(json_file)
                         file_data.update(items_from_pps)
                 else:
                     file_data = items_from_pps
 
                 with open(self.file_path, "w") as json_file:
-                    json_file.write(orjson.dumps(file_data).decode())
+                    json.dump(file_data, json_file, ensure_ascii=False)

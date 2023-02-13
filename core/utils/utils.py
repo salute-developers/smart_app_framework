@@ -1,13 +1,17 @@
 # coding=utf-8
 import datetime
-import orjson
+import gc
+import json
 import os
 import re
+import weakref
 
 from collections import OrderedDict
 from math import isnan, isinf
 from typing import Optional
 from time import time
+
+from scenarios.user.user_model import User
 
 
 def convert_version_to_list_of_int(version):
@@ -117,7 +121,7 @@ class HashableDict(dict):
 
 
 def ordered_loader(coded):
-    return orjson.loads(coded)
+    return json.loads(coded, object_pairs_hook=OrderedDict)
 
 
 def current_time_ms():

@@ -10,7 +10,7 @@ class TestAsIsTooMessage(unittest.TestCase):
         self.command_ = Mock()
         self.request_ = Mock()
         self.message_ = Mock()
-        self.command_.loader = "orjson.dumps"
+        self.command_.loader = "json.dumps"
         self.request_.header = "json"
         self.command_.payload = {}
         self.command_.root_nodes = {}

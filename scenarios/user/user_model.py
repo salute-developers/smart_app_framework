@@ -1,4 +1,4 @@
-import orjson
+import json
 from functools import cached_property
 
 from core.logging.logger_utils import log
@@ -30,7 +30,7 @@ class User(BaseUser):
     def __init__(self, id, message, db_data, settings, descriptions, parametrizer_cls, load_error=False):
         self.settings = settings
         try:
-            user_values = orjson.loads(db_data) if db_data else None
+            user_values = json.loads(db_data) if db_data else None
         except ValueError:
             user_values = None
             monitoring.counter_load_error(settings.app_name)

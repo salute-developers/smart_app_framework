@@ -1,5 +1,5 @@
 import asyncio
-import orjson
+import json
 import os
 from csv import DictWriter, QUOTE_MINIMAL
 from functools import cached_property
@@ -32,7 +32,7 @@ def run_testfile(
     if not os.path.isfile(test_file_path) or not test_file_path.endswith('.json'):
         raise FileNotFoundError
     with open(test_file_path, "r") as test_file:
-        json_obj = orjson.loads(test_file.read())
+        json_obj = json.load(test_file)
     success = 0
     for test_case in json_obj:
         test_params = json_obj[test_case]
@@ -87,7 +87,7 @@ class TestSuite:
             self.csv_callback = __csv_file_callback
 
         with open(predefined_fields_storage, "r") as f:
-            self.storaged_predefined_fields = orjson.loads(f.read())
+            self.storaged_predefined_fields = json.load(f)
 
     @cached_property
     def app_model(self):
@@ -143,7 +143,7 @@ class TestCase:
                  from_msg_cls: type, messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
                  csv_case_callback: Optional[Callable[[Any], None]] = None, user: Optional[dict] = None):
         self.messages = messages
-        self.user_state = orjson.dumps(user).decode()
+        self.user_state = json.dumps(user)
         self.interactive = interactive
 
         self.app_model = app_model

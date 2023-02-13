@@ -1,5 +1,5 @@
 import asyncio
-import orjson
+import json
 import typing
 from collections import defaultdict
 from wsgiref.simple_server import make_server
@@ -37,7 +37,7 @@ class BaseHttpMainLoop(BaseMainLoop):
             )
             try:
                 result[2].as_dict
-            except (orjson.JSONDecodeError, KeyError):
+            except (json.JSONDecodeError, KeyError):
                 result = 400, "BAD REQUEST", SmartAppToMessage(
                     self.BAD_REQUEST_COMMAND,
                     message=basic_error_message,
@@ -140,7 +140,7 @@ class HttpMainLoop(BaseHttpMainLoop):
             log("Error in request data", level="ERROR")
             raise Exception("Error in request data")
 
-        message = SmartAppFromMessage(orjson.loads(body), headers=headers, headers_required=False,
+        message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
                                       validators=self.from_msg_validators)
 
         status, reason, answer = self.handle_message(message)
