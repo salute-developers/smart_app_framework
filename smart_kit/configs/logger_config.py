@@ -19,14 +19,13 @@ def _get_distribution_safe(name: str) -> Optional[pkg_resources.DistInfoDistribu
 
 
 def setup_version():
-    version = os.getenv("VERSION")
-    if version is None:
-        distribution = _get_distribution_safe("sber-nlp-platform-smart-app-framework")
-        if distribution is None:
-            distribution = _get_distribution_safe("smart-app-framework")
-        version = distribution.version if distribution is not None else 0
+    distribution = _get_distribution_safe("sber-nlp-platform-smart-app-framework")
+    if distribution is None:
+        distribution = _get_distribution_safe("smart-app-framework")
+    nlpf_version = distribution.version if distribution is not None else 0
 
-    SmartKitJsonFormatter.VERSION = version
+    SmartKitJsonFormatter.NLPF_VERSION = nlpf_version
+    SmartKitJsonFormatter.VERSION = os.getenv("VERSION") or 0
 
 
 setup_version()
