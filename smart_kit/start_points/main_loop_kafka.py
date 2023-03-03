@@ -481,7 +481,7 @@ class MainLoop(BaseMainLoop):
                         for answer in answers:
                             with StatsTimer() as publish_timer:
                                 self._send_request(user, answer, mq_message)
-                            stats += "Publishing time: {} msecs".format(publish_timer.msecs)
+                            stats += "Publishing time: {} msecs\n".format(publish_timer.msecs)
                             log(stats, user=user)
             else:
                 try:
