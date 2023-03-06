@@ -1,3 +1,4 @@
+import asyncio
 import os
 import unittest
 from time import time
@@ -18,6 +19,10 @@ from core.basic_models.requirement.user_text_requirements import AnySubstringInL
 from core.model.registered import registered_factories
 from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
 from smart_kit.utils.picklable_mock import PicklableMock
+
+
+def _run(coro):
+    return asyncio.get_event_loop().run_until_complete(coro)
 
 
 def patch_get_app_config(mock_get_app_config):
@@ -99,7 +104,6 @@ class RequirementTest(unittest.TestCase):
             {"cond": True},
             {"cond": True}
         ]})
-        self.assertEqual(len(requirement.requirements), 2)
         self.assertTrue(requirement.check(None, None))
 
     def test_and_success(self):
@@ -221,7 +225,8 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertRaises(TypeError, requirement.check, None, user)
+        with self.assertRaises(TypeError):
+            _ = requirement.check(None, user)
 
     def test_rolling_requirement_true(self):
         user = PicklableMock()

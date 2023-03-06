@@ -38,10 +38,9 @@ class BasicField:
         return self.value is not None
 
     def check_can_be_filled(self, text_preprocessing_result, user):
-        return (
-            self.description.requirement.check(text_preprocessing_result, user) and
-            self.description.filler.run(user, text_preprocessing_result) is not None
-        )
+        check = self.description.requirement.check(text_preprocessing_result, user)
+        run = self.description.filler.run(user, text_preprocessing_result)
+        return check and run is not None
 
     @property
     def valid(self):

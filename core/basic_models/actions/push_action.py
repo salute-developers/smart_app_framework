@@ -68,8 +68,8 @@ class PushAction(StringAction):
             request_data = deep_update_dict(request_data, request_data_update)
         return request_data
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
@@ -132,12 +132,12 @@ class PushAuthenticationActionHttp(PushAction):
         authorization_token = self.BASIC_METHOD_AUTH + auth_string.decode("ascii")
         return authorization_token
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)
 
 
 class GetRuntimePermissionsAction(PushAction):
@@ -166,8 +166,8 @@ class GetRuntimePermissionsAction(PushAction):
         self.behavior = items.get("behavior") or COMMON_BEHAVIOR
         self.command = GET_RUNTIME_PERMISSIONS
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
@@ -309,8 +309,8 @@ class PushActionHttp(PushAction):
     def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
         self.http_request_action = HTTPRequestAction(items, id)
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -331,4 +331,4 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)

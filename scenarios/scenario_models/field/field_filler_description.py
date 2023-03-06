@@ -241,7 +241,8 @@ class RegexpAndStringOperationsFieldFiller(RegexpFieldFiller):
                 original_text = self._operation(original_text, op["type"], op.get("amount"))
         text_preprocessing_result_copy = pickle_deepcopy(text_preprocessing_result)
         text_preprocessing_result_copy.original_text = original_text
-        return super(RegexpAndStringOperationsFieldFiller, self).extract(text_preprocessing_result_copy, user, params)
+        return super(RegexpAndStringOperationsFieldFiller, self).extract(text_preprocessing_result_copy,
+                                                                         user, params)
 
 
 class AllRegexpsFieldFiller(FieldFillerDescription):
@@ -398,14 +399,14 @@ class DatePeriodFiller(FieldFillerDescription):
 
     def extract(self, text_preprocessing_result: TextPreprocessingResult, user: User,
                 params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict[str, str]:
-        if text_preprocessing_result\
-            .words_tokenized_set\
-            .intersection(
-                [
-                    'TIME_DATE_TOKEN',
-                    'TIME_DATE_INTERVAL_TOKEN',
-                    'PERIOD_TOKEN'
-                ]):
+        if text_preprocessing_result \
+            .words_tokenized_set \
+                .intersection(
+                    [
+                        'TIME_DATE_TOKEN',
+                        'TIME_DATE_INTERVAL_TOKEN',
+                        'PERIOD_TOKEN'
+                    ]):
             words_from_intent: List[Optional[str]] = text_preprocessing_result.human_normalized_text.lower().split()
         else:
             words_from_intent: List[Optional[str]] = text_preprocessing_result.original_text.lower().split()
@@ -508,9 +509,8 @@ class ApproveFiller(FieldFillerDescription):
 
 class ApproveRawTextFiller(ApproveFiller):
     @exc_handler(on_error_obj_method_name="on_extract_error")
-    def extract(
-            self, text_preprocessing_result: TextPreprocessingResult, user: User, params: Dict[str, Any] = None
-    ) -> Optional[bool]:
+    def extract(self, text_preprocessing_result: TextPreprocessingResult,
+                user: User, params: Dict[str, Any] = None) -> Optional[bool]:
         original_text = ' '.join(text_preprocessing_result.original_text.split()).lower().rstrip('!.)')
         if original_text in self.set_yes_words:
             params = self._log_params()

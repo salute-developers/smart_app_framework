@@ -61,9 +61,7 @@ class FormFillingScenario(BaseScenario):
         for field_name in form.fields.descriptions:
             field = form.fields[field_name]
             if not field.valid and field.description.has_requests and \
-                    field.description.requirement.check(
-                    text_preprocessing_result, user, params
-                    ):
+                    field.description.requirement.check(text_preprocessing_result, user, params):
                 return field
 
     def get_fields_data(self, form, form_key):
@@ -80,7 +78,7 @@ class FormFillingScenario(BaseScenario):
         result = {}
         check = field_descr.requirement.check(text_normalization_result, user, params)
         log_params = self._log_params()
-        log_params["requirement"] = field_descr.requirement.__class__.__name__,
+        log_params["requirement"] = field_descr.requirement.__class__.__name__
         log_params["check"] = check
         log_params["field_key"] = field_key
         message = "FormFillingScenario.extract: field %(field_key)s requirement %(requirement)s return value: %(check)s"
@@ -104,7 +102,8 @@ class FormFillingScenario(BaseScenario):
             field = form.fields[request_field["id"]]
             field_descr = form.description.fields[request_field["id"]]
             if field.available:
-                result.update(self._extract_by_field_filler(request_field["id"], field_descr, text_normalization_result,
+                result.update(self._extract_by_field_filler(request_field["id"], field_descr,
+                                                            text_normalization_result,
                                                             user, params))
         else:
             for field_key, field_descr in form.description.fields.items():
@@ -114,12 +113,18 @@ class FormFillingScenario(BaseScenario):
                                                                 text_normalization_result, user, params))
         return result
 
-    def _validate_extracted_data(self, user, text_preprocessing_result, form, data_extracted, params) -> List[Command]:
+    def _validate_extracted_data(self,
+                                 user,
+                                 text_preprocessing_result,
+                                 form,
+                                 data_extracted,
+                                 params) -> List[Command]:
         error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)
             # is not None is necessary, because 0 and False should be checked, None - shouldn't fill
-            if value is not None and not field.field_validator.requirement.check(value, params):
+            if value is not None and \
+                    not field.field_validator.requirement.check(value, params):
                 log_params = {
                     log_const.KEY_NAME: log_const.SCENARIO_RESULT_VALUE,
                     "field_key": field_key
@@ -131,7 +136,7 @@ class FormFillingScenario(BaseScenario):
                 break
         return error_msgs
 
-    def _fill_form(self, user, text_preprocessing_result, form, data_extracted) -> Tuple[List[Command], bool]:
+    async def _fill_form(self, user, text_preprocessing_result, form, data_extracted) -> Tuple[List[Command], bool]:
         on_filled_actions = []
         fields = form.fields
         scenario_model = user.scenario_models[self.id]
@@ -141,15 +146,15 @@ class FormFillingScenario(BaseScenario):
             value = data_extracted.get(key)
             field = fields[key]
             if field.fill(value):
-                _action = self.get_action_results(user=user, text_preprocessing_result=text_preprocessing_result,
-                                                  actions=field.description.on_filled_actions)
+                _action = await self.get_action_results(user=user, text_preprocessing_result=text_preprocessing_result,
+                                                        actions=field.description.on_filled_actions)
                 on_filled_actions.extend(_action)
                 if scenario_model.break_scenario:
                     is_break = True
                     return _action, is_break
         return on_filled_actions, is_break
 
-    def get_reply(self, user, text_preprocessing_result, reply_actions, field, form) -> List[Command]:
+    async def get_reply(self, user, text_preprocessing_result, reply_actions, field, form) -> List[Command]:
         action_params = {}
         if field:
             field.set_available()
@@ -161,7 +166,7 @@ class FormFillingScenario(BaseScenario):
             message = "Ask question on field: %(field)s"
             log(message, user, params)
             action_params[REQUEST_FIELD] = {"type": field.description.type, "id": field.description.id}
-            action_messages = self.get_action_results(user, text_preprocessing_result, actions, action_params)
+            action_messages = await self.get_action_results(user, text_preprocessing_result, actions, action_params)
         else:
             actions = reply_actions
             params = {
@@ -171,12 +176,12 @@ class FormFillingScenario(BaseScenario):
             message = "Finished scenario: %(id)s"
             log(message, user, params)
             user.preprocessing_messages_for_scenarios.clear()
-            action_messages = self.get_action_results(user, text_preprocessing_result, actions, action_params)
+            action_messages = await self.get_action_results(user, text_preprocessing_result, actions, action_params)
             user.last_scenarios.delete(self.id)
         return action_messages
 
     @monitoring.got_histogram("scenario_time")
-    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)
@@ -186,12 +191,12 @@ class FormFillingScenario(BaseScenario):
         logging_params.update(self._log_params())
         log("Extracted data=%(data_extracted_str)s", user, logging_params)
 
-        validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result, form, data_extracted,
-                                                             params)
+        validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
+                                                             form, data_extracted, params)
         if validation_error_msg:
             reply_messages = validation_error_msg
         else:
-            reply_messages, is_break = self._fill_form(user, text_preprocessing_result, form, data_extracted)
+            reply_messages, is_break = await self._fill_form(user, text_preprocessing_result, form, data_extracted)
             if not is_break:
                 field = self._field(form, text_preprocessing_result, user, params)
                 if field:
@@ -199,11 +204,12 @@ class FormFillingScenario(BaseScenario):
                         Event(type=HistoryConstants.types.FIELD_EVENT,
                               scenario=self.root_id,
                               content={HistoryConstants.content_fields.FIELD: field.description.id},
-                              result=HistoryConstants.event_results.ASK_QUESTION))
-                reply = self.get_reply(user, text_preprocessing_result, self.actions, field, form)
+                              result=HistoryConstants.event_results.ASK_QUESTION)
+                    )
+                reply = await self.get_reply(user, text_preprocessing_result, self.actions, field, form)
                 reply_messages.extend(reply)
 
         if not reply_messages:
-            reply_messages = self.get_no_commands_action(user, text_preprocessing_result)
+            reply_messages = await self.get_no_commands_action(user, text_preprocessing_result)
 
         return reply_messages

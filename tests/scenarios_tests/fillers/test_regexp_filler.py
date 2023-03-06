@@ -1,10 +1,9 @@
-from unittest import TestCase
-
+import unittest
 from scenarios.scenario_models.field.field_filler_description import RegexpFieldFiller
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestRegexpFiller(TestCase):
+class TestRegexpFiller(unittest.TestCase):
     def setUp(self):
         self.items = {"exp": "1-[0-9A-Z]{7}"}
         self.user = PicklableMock()

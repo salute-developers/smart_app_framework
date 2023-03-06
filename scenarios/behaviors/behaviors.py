@@ -47,8 +47,8 @@ class Behaviors:
             for key, value in callback_action_params.get(LOCAL_VARS, {}).items():
                 self._user.local_vars.set(key, value)
 
-    def _add_behavior_timeout(self, expire_time_us, callback_id):
-        self._behavior_timeouts.append((expire_time_us, callback_id))
+    def _add_behavior_timeout(self, time_left, callback_id):
+        self._behavior_timeouts.append((time_left, callback_id))
 
     def get_behavior_timeouts(self):
         return self._behavior_timeouts
@@ -78,8 +78,7 @@ class Behaviors:
             hostname=host,
         )
         self._callbacks[callback_id] = callback
-        log(
-            f"behavior.add: adding behavior %({log_const.BEHAVIOR_ID_VALUE})s with scenario_id"
+        log(f"behavior.add: adding behavior %({log_const.BEHAVIOR_ID_VALUE})s with scenario_id"
             f" %({log_const.CHOSEN_SCENARIO_VALUE})s for callback %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s"
             f" expiration_time: %(expiration_time)s.",
             user=self._user,
@@ -90,10 +89,9 @@ class Behaviors:
                 log_const.CHOSEN_SCENARIO_VALUE: scenario_id,
                 "expiration_time": int(expiration_time),
             },
-        )
+            )
 
         behavior_description = self.descriptions[behavior_id]
-
         # add timer with now + behavior.timeout eval time
         expire_time_us = behavior_description.get_expire_time_from_now(self._user)
         self._add_behavior_timeout(expire_time_us, callback_id)
@@ -131,7 +129,7 @@ class Behaviors:
             params=log_params,
         )
 
-    def success(self, callback_id: str) -> List[Command]:
+    async def success(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -147,7 +145,8 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.success not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
@@ -156,7 +155,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def fail(self, callback_id: str) -> List[Command]:
+    async def fail(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -168,7 +167,7 @@ class Behaviors:
                 callback_id, "behavior_fail", monitoring.counter_behavior_fail, "fail", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params) or []
         else:
             log(f"behavior.fail not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
@@ -177,7 +176,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def timeout(self, callback_id: str) -> List[Command]:
+    async def timeout(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -188,7 +187,8 @@ class Behaviors:
                 callback_id, "behavior_timeout", monitoring.counter_behavior_timeout, "timeout", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params) or []
+            result = await behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.timeout not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
@@ -197,7 +197,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    def misstate(self, callback_id: str) -> List[Command]:
+    async def misstate(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -213,7 +213,8 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            result = behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = await behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log("behavior.misstate not found valid callback"
                 f" for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",

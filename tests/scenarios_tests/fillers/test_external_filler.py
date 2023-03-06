@@ -1,11 +1,12 @@
-from unittest import TestCase
+import unittest
+
 from unittest.mock import Mock
 
 from scenarios.scenario_models.field.field_filler_description import ExternalFieldFillerDescription
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestExternalFieldFillerDescription(TestCase):
+class TestExternalFieldFillerDescription(unittest.TestCase):
 
     def test_1(self):
         expected = 5

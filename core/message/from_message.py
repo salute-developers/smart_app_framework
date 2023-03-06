@@ -237,6 +237,10 @@ class SmartAppFromMessage:
     def callback_id(self, value: str):
         self._callback_id = value
 
+    @property
+    def has_callback_id(self):
+        return self._callback_id is not None or self.headers.get(self._callback_id_header_name) is not None
+
     # noinspection PyMethodMayBeStatic
     def generate_new_callback_id(self) -> str:
         from smart_kit.start_points.main_loop_http import HttpMainLoop
