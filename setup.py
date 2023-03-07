@@ -38,7 +38,7 @@ setup(
         "aiohttp==3.7.4",
         "aioredis==2.0.0",
         "boto==2.49.0",
-        "confluent_kafka==1.9.2",
+        "confluent_kafka==2.0.2",
         "croniter==1.3.7",
         "dill==0.3.3",
         "ics==0.6",
