@@ -1,30 +1,16 @@
 # coding: utf-8
 import os
-from typing import Optional
 
-import pkg_resources
 import yaml
 
 from core.configs.base_config import BaseConfig
 from core.repositories.file_repository import FileRepository
+from smart_kit.management.version import get_nlpf_version
 from smart_kit.utils.logger_writer.logger_formatter import SmartKitJsonFormatter
 
 
-def _get_distribution_safe(name: str) -> Optional[pkg_resources.DistInfoDistribution]:
-    try:
-        distribution = pkg_resources.get_distribution(name)
-        return distribution
-    except pkg_resources.DistributionNotFound:
-        return None
-
-
 def setup_version():
-    distribution = _get_distribution_safe("sber-nlp-platform-smart-app-framework")
-    if distribution is None:
-        distribution = _get_distribution_safe("smart-app-framework")
-    nlpf_version = distribution.version if distribution is not None else 0
-
-    SmartKitJsonFormatter.NLPF_VERSION = nlpf_version
+    SmartKitJsonFormatter.NLPF_VERSION = get_nlpf_version() or 0
     SmartKitJsonFormatter.VERSION = os.getenv("VERSION") or 0
 
 

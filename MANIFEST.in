@@ -1,3 +1,0 @@
-recursive-include smart_kit/template *
-include versioneer.py
-include smart_kit/_version.py
