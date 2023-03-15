@@ -1,5 +1,5 @@
 import os
-from unittest import TestCase
+import unittest
 from unittest.mock import patch
 
 import smart_kit
@@ -20,7 +20,7 @@ def patch_get_app_config(mock_get_app_config):
     mock_get_app_config.return_value = result
 
 
-class TestIntersectionFieldFiller(TestCase):
+class TestIntersectionFieldFiller(unittest.TestCase):
 
     @patch('smart_kit.configs.get_app_config')
     def test_1(self, mock_get_app_config):
@@ -148,7 +148,7 @@ class TestIntersectionFieldFiller(TestCase):
         self.assertEqual(expected, result)
 
 
-class TestIntersectionOriginalTextFiller(TestCase):
+class TestIntersectionOriginalTextFiller(unittest.TestCase):
     @patch('smart_kit.configs.get_app_config')
     def test_1(self, mock_get_app_config):
         patch_get_app_config(mock_get_app_config)

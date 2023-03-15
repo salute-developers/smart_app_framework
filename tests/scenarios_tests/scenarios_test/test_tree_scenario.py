@@ -1,4 +1,5 @@
-from unittest import TestCase
+from unittest import IsolatedAsyncioTestCase
+from unittest.mock import Mock
 
 from core.basic_models.actions.basic_actions import Action, action_factory, actions
 from core.basic_models.actions.command import Command
@@ -12,7 +13,7 @@ class MockAction:
         self.called = False
         self.command_name = command_name
 
-    def run(self, user, text_preprocessing_result, params):
+    async def run(self, user, text_preprocessing_result, params):
         self.called = True
         if self.command_name:
             return [Command(self.command_name)]
@@ -22,14 +23,14 @@ class BreakAction:
     def __init__(self, items=None):
         pass
 
-    def run(self, user, text_preprocessing_result, params):
+    async def run(self, user, text_preprocessing_result, params):
         user.scenario_models["some_id"].break_scenario = True
         return []
 
 
-class TestTreeScenario(TestCase):
+class TestTreeScenario(IsolatedAsyncioTestCase):
 
-    def test_1(self):
+    async def test_1(self):
         """
         Тест проверяет сценарий из одного узла. Предполагается идеальный случай, когда одно поле
         и мы смогли его заполнить.
@@ -50,9 +51,10 @@ class TestTreeScenario(TestCase):
                  "scenario_nodes": {"node_1": node_mock}}
 
         field_descriptor = PicklableMock(name="field_descriptor_mock")
-        field_descriptor.filler.extract = PicklableMock(name="my_field_value_1", return_value=61)
+        field_descriptor.filler.run = Mock(name="my_field_value_1", return_value=61)
         field_descriptor.fill_other = False
         field_descriptor.field_validator.actions = []
+        field_descriptor.field_validator.requirement.check = Mock(return_value=True)
 
         internal_form = PicklableMock(name="internal_form_mock")
         internal_form.description.fields.items = PicklableMock(return_value=[("age", field_descriptor)])
@@ -84,11 +86,11 @@ class TestTreeScenario(TestCase):
 
         scenario = TreeScenario(items, 1)
 
-        _ = scenario.run(text_preprocessing_result, user)
+        _ = await scenario.run(text_preprocessing_result, user)
         self.assertIsNone(current_node_mock.current_node)
         context_forms.new.assert_called_once_with(form_type)
 
-    def test_breake(self):
+    async def test_break(self):
         """
         Тест проверяет выход из сценария если сработает флаг break_scenario
         """
@@ -97,6 +99,7 @@ class TestTreeScenario(TestCase):
         actions["test"] = MockAction
         actions["break"] = MockAction
         actions["success"] = MockAction
+        actions["external"] = MockAction
 
         form_type = "form for doing smth"
         internal_form_key = "my form key"
@@ -107,9 +110,10 @@ class TestTreeScenario(TestCase):
                  "scenario_nodes": {"node_1": node_mock}, "actions": [{"type": "success"}]}
 
         field_descriptor = PicklableMock(name="field_descriptor_mock")
-        field_descriptor.filler.extract = PicklableMock(name="my_field_value_1", return_value=61)
+        field_descriptor.filler.run = Mock(name="my_field_value_1", return_value=61)
         field_descriptor.fill_other = False
         field_descriptor.field_validator.actions = []
+        field_descriptor.field_validator.requirement.check = Mock(return_value=True)
         field_descriptor.on_filled_actions = [BreakAction(), MockAction(command_name="break action result")]
         field_descriptor.id = "age"
 
@@ -145,7 +149,7 @@ class TestTreeScenario(TestCase):
 
         scenario = TreeScenario(items, 1)
 
-        result = scenario.run(text_preprocessing_result, user)
+        result = await scenario.run(text_preprocessing_result, user)
 
         self.assertFalse(scenario.actions[0].called)
         self.assertEqual(result[0].name, "break action result")

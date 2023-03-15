@@ -1,5 +1,5 @@
 import os
-from unittest import TestCase
+import unittest
 from unittest.mock import Mock, patch
 
 import smart_kit
@@ -20,7 +20,7 @@ def patch_get_app_config(mock_get_app_config):
     mock_get_app_config.return_value = result
 
 
-class TestApproveFiller(TestCase):
+class TestApproveFiller(unittest.TestCase):
 
     @patch('smart_kit.configs.get_app_config')
     def test_1(self, mock_get_app_config):
@@ -63,7 +63,7 @@ class TestApproveFiller(TestCase):
         self.assertIsNone(result)
 
 
-class TestApproveRawTextFiller(TestCase):
+class TestApproveRawTextFiller(unittest.TestCase):
 
     @patch('smart_kit.configs.get_app_config')
     def test_1(self, mock_get_app_config):

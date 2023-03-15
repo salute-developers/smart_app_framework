@@ -28,8 +28,8 @@ class BaseSetVariableAction(Action):
     def _set(self, user, value):
         raise NotImplementedError
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
@@ -76,8 +76,8 @@ class DeleteVariableAction(Action):
         super().__init__(items, id)
         self.key: str = items["key"]
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         user.variables.delete(self.key)
         return commands
@@ -89,8 +89,8 @@ class ClearVariablesAction(Action):
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
         super().__init__(items, id)
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         user.variables.clear()
         return commands

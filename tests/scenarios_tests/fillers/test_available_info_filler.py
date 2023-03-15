@@ -1,4 +1,5 @@
-from unittest import TestCase
+import unittest
+from unittest import IsolatedAsyncioTestCase
 from unittest.mock import Mock
 
 from scenarios.scenario_models.field.field_filler_description import AvailableInfoFiller
@@ -23,7 +24,7 @@ class MockParametrizer:
         return data
 
 
-class TestAvailableInfoFiller(TestCase):
+class TestAvailableInfoFiller(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.address = "Address!"

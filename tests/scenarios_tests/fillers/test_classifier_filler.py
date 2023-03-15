@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 from unittest.mock import patch
 
 from core.basic_models.classifiers.basic_classifiers import ExternalClassifier
@@ -6,7 +6,7 @@ from scenarios.scenario_models.field.field_filler_description import ClassifierF
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestClassifierFiller(TestCase):
+class TestClassifierFiller(unittest.TestCase):
 
     def setUp(self):
         test_items = {
@@ -39,7 +39,7 @@ class TestClassifierFiller(TestCase):
         self.assertIsNone(actual_res)
 
 
-class TestClassifierFillerMeta(TestCase):
+class TestClassifierFillerMeta(unittest.TestCase):
 
     def setUp(self):
         test_items = {

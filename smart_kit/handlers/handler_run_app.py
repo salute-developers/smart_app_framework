@@ -1,4 +1,3 @@
-# coding: utf-
 from typing import Dict, Any, List
 
 import scenarios.logging.logger_constants as log_const
@@ -22,15 +21,15 @@ class HandlerRunApp(HandlerBase):
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = await super().run(payload, user)
 
         params = {log_const.KEY_NAME: "handling_run_app"}
         log(f"{self.__class__.__name__}.run started", user, params)
 
-        commands.extend(self._handle_base(user))
+        commands.extend(await self._handle_base(user))
         return commands
 
-    def _handle_base(self, user: User) -> List[Command]:
-        answer, is_answer_found = self.dialogue_manager.run(TextPreprocessingResult({}), user)
+    async def _handle_base(self, user: User) -> List[Command]:
+        answer, is_answer_found = await self.dialogue_manager.run(TextPreprocessingResult({}), user)
         return answer or []

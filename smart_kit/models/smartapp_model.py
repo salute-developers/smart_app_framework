@@ -73,20 +73,20 @@ class SmartAppModel:
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
-    def answer(self, message: SmartAppFromMessage, user: User) -> Optional[List[Command]]:
+    async def answer(self, message: SmartAppFromMessage, user: User) -> Optional[List[Command]]:
         user.expire()
         user.message_vars.clear()
         handler = self.get_handler(message.type)
 
         if not user.load_error:
-            commands = handler.run(message.payload, user)
+            commands = await handler.run(message.payload, user)
         else:
             log("Error in loading user data", user, level="ERROR", exc_info=True)
             raise Exception("Error in loading user data")
 
         return commands
 
-    def on_answer_error(self, message, user):
+    async def on_answer_error(self, message, user):
         user.do_not_save = True
         monitoring.counter_exception(self.app_name)
         params = {log_const.KEY_NAME: log_const.DIALOG_ERROR_VALUE,
@@ -102,6 +102,6 @@ class SmartAppModel:
         if user.settings["template_settings"].get("debug_info"):
             set_debug_info(self.app_name, callback_action_params, error)
         exception_action = user.descriptions["external_actions"]["exception_action"]
-        commands = exception_action.run(user=user, text_preprocessing_result=None,
-                                        params=callback_action_params)
+        commands = await exception_action.run(user=user, text_preprocessing_result=None,
+                                              params=callback_action_params)
         return commands

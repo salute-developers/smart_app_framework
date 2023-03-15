@@ -1,4 +1,5 @@
 # coding: utf-8
+import asyncio
 import random
 from typing import Union, Dict, List, Any, Optional
 
@@ -31,8 +32,8 @@ class Action:
         self.id = id
         self.version = items.get("version", -1)
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         raise NotImplementedError
 
     def on_run_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
@@ -70,8 +71,8 @@ class DoingNothingAction(CommandAction):
         super().__init__(items, id)
         self.nodes = items.get("nodes") or {}
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         commands.append(Command(self.command, self.nodes, self.id, request_type=self.request_type,
                                 request_data=self.request_data))
@@ -103,11 +104,11 @@ class RequirementAction(Action):
     def build_internal_item(self) -> str:
         return self._item
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         if self.requirement.check(text_preprocessing_result, user, params):
-            commands.extend(self.internal_item.run(user, text_preprocessing_result, params) or [])
+            commands.extend(await self.internal_item.run(user, text_preprocessing_result, params) or [])
         return commands
 
 
@@ -139,18 +140,18 @@ class ChoiceAction(Action):
     def build_else_item(self) -> Optional[str]:
         return self._else_item
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         choice_is_made = False
         for item in self.items:
             checked = item.requirement.check(text_preprocessing_result, user, params)
             if checked:
-                commands.extend(item.internal_item.run(user, text_preprocessing_result, params) or [])
+                commands.extend(await item.internal_item.run(user, text_preprocessing_result, params) or [])
                 choice_is_made = True
                 break
         if not choice_is_made and self._else_item:
-            commands.extend(self.else_item.run(user, text_preprocessing_result, params) or [])
+            commands.extend(await self.else_item.run(user, text_preprocessing_result, params) or [])
         return commands
 
 
@@ -188,13 +189,13 @@ class ElseAction(Action):
     def build_else_item(self) -> Optional[str]:
         return self._else_item
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Optional[Dict[str, Union[str, float, int]]]] = None) -> List[Command]:
         commands = []
         if self.requirement.check(text_preprocessing_result, user, params):
-            commands.extend(self.item.run(user, text_preprocessing_result, params) or [])
+            commands.extend(await self.item.run(user, text_preprocessing_result, params) or [])
         elif self._else_item:
-            commands.extend(self.else_item.run(user, text_preprocessing_result, params) or [])
+            commands.extend(await self.else_item.run(user, text_preprocessing_result, params) or [])
         return commands
 
 
@@ -213,11 +214,11 @@ class ActionOfActions(Action):
 
 
 class CompositeAction(ActionOfActions):
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         for action in self.actions:
-            commands.extend(action.run(user, text_preprocessing_result, params) or [])
+            commands.extend(await action.run(user, text_preprocessing_result, params) or [])
         return commands
 
 
@@ -229,8 +230,8 @@ class NonRepeatingAction(ActionOfActions):
         self._actions_count = len(items["actions"])
         self._last_action_ids_storage = items["last_action_ids_storage"]
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         last_ids = user.last_action_ids[self._last_action_ids_storage]
         all_indexes = list(range(self._actions_count))
@@ -241,7 +242,7 @@ class NonRepeatingAction(ActionOfActions):
         action_index = random.choice(available_indexes)
         action = self.actions[action_index]
         last_ids.add(action_index)
-        commands.extend(action.run(user, text_preprocessing_result, params) or [])
+        commands.extend(await action.run(user, text_preprocessing_result, params) or [])
         return commands
 
 
@@ -257,10 +258,10 @@ class RandomAction(Action):
     def build_actions(self) -> List[Action]:
         return self._raw_actions
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         pos = random.randint(0, len(self._raw_actions) - 1)
         action = self.actions[pos]
-        commands.extend(action.run(user, text_preprocessing_result, params=params) or [])
+        commands.extend(await action.run(user, text_preprocessing_result, params=params) or [])
         return commands

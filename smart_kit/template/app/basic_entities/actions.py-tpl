@@ -17,8 +17,8 @@ class CustomAction(Action):
         items = items or {}  # поля в вызове действия из json-описания приходят сюда
         self.test_param = items.get("test_param")
 
-    def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         commands = []
         # тело действия
         return commands

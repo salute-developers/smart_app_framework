@@ -11,6 +11,6 @@ class CustomHandler(HandlerBase):
     Для сопоставления типа сообщения обработчику, добавьте такую пару в CustomModel.additional_handlers. По умолчанию,
     данный обработчик сопоставлен типу сообщения "CUSTOM_MESSAGE_NAME".
     """
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = await super().run(payload, user)
         return commands

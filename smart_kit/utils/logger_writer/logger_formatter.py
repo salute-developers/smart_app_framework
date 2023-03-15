@@ -13,6 +13,7 @@ loggers_formatter_factory = build_factory(loggers_formatter)
 
 class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
     VERSION = 0
+    NLPF_VERSION = 0
     DEV_TEAM = "NA"
     APPLICATION_NAME = "NA"
 
@@ -22,6 +23,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         st = dt.strftime("%Y-%m-%dT%H:%M:%S")
         log_record['timestamp'] = "%s.%06d" % (st, record.msecs * 1000)
         log_record['version'] = self.VERSION
+        log_record['nlpf_version'] = self.NLPF_VERSION
         log_record['team'] = self.DEV_TEAM
         log_record['application'] = self.APPLICATION_NAME
         if isinstance(record.args, dict):

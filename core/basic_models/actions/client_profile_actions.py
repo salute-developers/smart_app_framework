@@ -51,7 +51,7 @@ class GiveMeMemoryAction(StringAction):
         self.behavior: Optional[str] = items.get("behavior")
         self._nodes.update({
             "root_nodes": {
-                "protocolVersion": items.get("protocolVersion") or 1
+                "protocolVersion": items.get("protocolVersion", 1)
             },
             "memory": [
                 {"memoryPartition": key, "tags": val} for key, val in self._nodes["memory"].items()
@@ -69,15 +69,15 @@ class GiveMeMemoryAction(StringAction):
                 config["template_settings"]["consumer_topic"]
         }
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> [List[Command]]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
             user.behaviors.add(callback_id, self.behavior, scenario_id,
                                text_preprocessing_result.raw, pickle_deepcopy(params))
 
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = await super().run(user, text_preprocessing_result, params)
         return commands
 
 
@@ -153,8 +153,8 @@ class RememberThisAction(StringAction):
             }
         })
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self._nodes.update({
             "consumer": {
                 "projectId": user.settings["template_settings"]["project_id"]
@@ -169,5 +169,5 @@ class RememberThisAction(StringAction):
                 user.settings["template_settings"]["consumer_topic"]
         }
 
-        commands = super().run(user, text_preprocessing_result, params)
+        commands = await super().run(user, text_preprocessing_result, params)
         return commands

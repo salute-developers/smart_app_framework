@@ -90,8 +90,8 @@ class Requirement:
     def on_check_error(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser):
         result = self._on_check_error_result(text_preprocessing_result, user)
         log_params = self._log_params()
-        log_params["masked_message"]: str(user.message.masked_value)
-        log_params["result"]: result
+        log_params["masked_message"] = str(user.message.masked_value)
+        log_params["result"] = result
         log("exc_handler: Requirement FAILED to check. Return %(result)s. MESSAGE: %(masked_message)s.",
             user, log_params,
             level="ERROR", exc_info=True)
@@ -119,16 +119,20 @@ class AndRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                params: Dict[str, Any] = None) -> bool:
-        return all(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
-                   for requirement in self.requirements)
+        return all(
+            requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
+            for requirement in self.requirements
+        )
 
 
 class OrRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                params: Dict[str, Any] = None) -> bool:
-        return any(requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
-                   for requirement in self.requirements)
+        return any(
+            requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
+            for requirement in self.requirements
+        )
 
 
 class NotRequirement(Requirement):
@@ -145,7 +149,8 @@ class NotRequirement(Requirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                params: Dict[str, Any] = None) -> bool:
-        return not self.requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
+        return not self.requirement.check(text_preprocessing_result=text_preprocessing_result, user=user,
+                                          params=params)
 
 
 class ComparisonRequirement(Requirement):
@@ -290,9 +295,7 @@ class IntersectionRequirement(Requirement):
             user: User,
             params: Dict[str, Any] = None
     ) -> bool:
-        result = bool(
-            self.filler.extract(text_preprocessing_result, user, params),
-        )
+        result = bool(self.filler.extract(text_preprocessing_result, user, params))
         return result
 
 

@@ -1,11 +1,11 @@
-from unittest import TestCase
+import unittest
 
 from scenarios.scenario_models.field.field_filler_description import FirstNumberFiller, \
     FirstCurrencyFiller
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestFirstNumberFiller(TestCase):
+class TestFirstNumberFiller(unittest.TestCase):
     def test_1(self):
         expected = "5"
         items = {}
@@ -28,7 +28,7 @@ class TestFirstNumberFiller(TestCase):
         self.assertIsNone(result)
 
 
-class TestFirstCurrencyFiller(TestCase):
+class TestFirstCurrencyFiller(unittest.TestCase):
     def test_1(self):
         expected = "ru"
         items = {}
