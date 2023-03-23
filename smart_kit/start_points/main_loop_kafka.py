@@ -27,6 +27,8 @@ from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
 from core.utils.stats_timer import StatsTimer
+from core.utils.utils import current_time_ms
+from scenarios.user.user_model import User
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -354,11 +356,43 @@ class MainLoop(BaseMainLoop):
         topic_names_2_key = self._topic_names_2_key(kafka_key)
         return self.default_topic_key(kafka_key) or topic_names_2_key[mq_message.topic()]
 
+    def _is_message_timeout_to_skip(self, message: SmartAppFromMessage, waiting_message_time: int):
+        # Returns True if timeout is found
+        waiting_message_timeout = self.template_settings.get("waiting_message_timeout", {})
+        warning_delay = waiting_message_timeout.get('warning', 200)
+        skip_delay = waiting_message_timeout.get('skip', 6000)
+        log_level = None
+        make_break = False
+
+        if waiting_message_time >= skip_delay:
+            # Too old message
+            log_level = "ERROR"
+            monitoring.counter_mq_skip_waiting(self.app_name)
+            make_break = True
+
+        elif waiting_message_time >= warning_delay:
+            # Warn, but continue message processing
+            log_level = "WARNING"
+            monitoring.counter_mq_long_waiting(self.app_name)
+
+        if log_level is not None:
+            log(f"Out of time message %(waiting_message_time)s msecs, "
+                f"mid: %(mid)s ",
+                params={
+                    log_const.KEY_NAME: "waiting_message_timeout",
+                    "waiting_message_time": waiting_message_time,
+                    "mid": message.incremental_id,
+                    log_const.REQUEST_VALUE: message.as_str,
+                },
+                level=log_level)
+        return make_break
+
     async def process_message(self, mq_message: KafkaMessage, consumer, kafka_key, stats):
         topic_key = self._get_topic_key(mq_message, kafka_key)
 
         save_tries = 0
         user_save_no_collisions = False
+        skip_message = False
         user = None
         db_uid = None
         message = None
@@ -379,6 +413,16 @@ class MainLoop(BaseMainLoop):
                 stats += "Mid: {}\n".format(message.incremental_id)
                 monitoring.sampling_mq_waiting_time(self.app_name, waiting_message_time / 1000)
 
+                if self._is_message_timeout_to_skip(message, waiting_message_time):
+                    skip_message = True
+                    break
+
+                db_uid = message.db_uid
+                with StatsTimer() as load_timer:
+                    user = await self.load_user(db_uid, message)
+                monitoring.sampling_load_time(self.app_name, load_timer.secs)
+                stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+
                 # check_message_key
                 message_key = self._get_str_message_key(mq_message.key(), incremental_id=message.incremental_id,
                                                         uid=message.uid, user=user)
@@ -398,6 +442,7 @@ class MainLoop(BaseMainLoop):
                         dest_topic = mq_message.topic()
                         self.publishers[kafka_key].send_to_topic(mq_message.value(), valid_key, dest_topic,
                                                                  mq_message.headers())
+                        skip_message = True
                         log("Kafka message %(message_name)s with invalid Kafka message key %(message_key)s "
                             f"resend again with a valid key: '{valid_key}' to '{dest_topic}'",
                             params={
@@ -427,12 +472,6 @@ class MainLoop(BaseMainLoop):
                                 "surface": message.device.surface,
                                 MESSAGE_ID_STR: message.incremental_id},
                         user=user)
-
-                    db_uid = message.db_uid
-                    with StatsTimer() as load_timer:
-                        user = await self.load_user(db_uid, message)
-                    monitoring.sampling_load_time(self.app_name, load_timer.secs)
-                    stats += "Loading time: {} msecs\n".format(load_timer.msecs)
 
                     if KAFKA_REPLY_TOPIC in message.headers and \
                             message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
@@ -495,7 +534,7 @@ class MainLoop(BaseMainLoop):
                     level="ERROR")
                 monitoring.counter_invalid_message(self.app_name)
                 break
-        if user and not user_save_no_collisions:
+        if user and not user_save_no_collisions and not skip_message:
             log("MainLoop.iterate: db_save collision all tries left on uid %(uid)s db_version %(db_version)s.",
                 user=user,
                 params={log_const.KEY_NAME: "ignite_collision",
