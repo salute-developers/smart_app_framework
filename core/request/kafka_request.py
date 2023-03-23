@@ -35,10 +35,10 @@ class KafkaRequest(BaseRequest):
 
     def send(self, data, publisher: KafkaPublisher, source_mq_message):
         headers = self._get_new_headers(source_mq_message)
-        if self.topic_key is not None:
-            publisher.send(data, source_mq_message.key(), self.topic_key, headers=headers)
-        elif self.topic is not None:
+        if self.topic is not None:
             publisher.send_to_topic(data, source_mq_message.key(), self.topic, headers=headers)
+        elif self.topic_key is not None:
+            publisher.send(data, source_mq_message.key(), self.topic_key, headers=headers)
         else:
             log_params = {
                 "data": str(data),
