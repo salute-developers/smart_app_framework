@@ -327,7 +327,7 @@ class MainLoop(BaseMainLoop):
             request.update_empty_items({
                 "kafka_key": kafka_key,
                 "topic_key": topic_key,
-                "topic": user.private_vars.get(KAFKA_REPLY_TOPIC) if command.name == ANSWER_TO_USER else None
+                "topic": user.local_vars.get(KAFKA_REPLY_TOPIC) if command.name == ANSWER_TO_USER else None
             })
 
             to_message = get_to_message(command.name)
@@ -436,18 +436,18 @@ class MainLoop(BaseMainLoop):
 
                     if KAFKA_REPLY_TOPIC in message.headers and \
                             message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
-                        if user.private_vars.get(KAFKA_REPLY_TOPIC):
-                            log("MainLoop.iterate: kafka_replyTopic collision",
+                        if user.local_vars.get(KAFKA_REPLY_TOPIC):
+                            log("MainLoop.iterate: kafka_replyTopic collision(got saved in local_vars)",
                                 params={log_const.KEY_NAME: "ignite_collision",
                                         "db_uid": db_uid,
                                         "message_key": mq_message.key(),
                                         "message_partition": mq_message.partition(),
                                         "kafka_key": kafka_key,
                                         "uid": user.id,
-                                        "saved_topic": user.private_vars.get(KAFKA_REPLY_TOPIC),
+                                        "saved_topic": user.local_vars.get(KAFKA_REPLY_TOPIC),
                                         "current_topic": message.headers[KAFKA_REPLY_TOPIC]},
                                 user=user, level="WARNING")
-                        user.private_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
+                        user.local_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
 
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
