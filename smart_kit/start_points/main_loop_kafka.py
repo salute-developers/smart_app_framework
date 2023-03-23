@@ -358,7 +358,7 @@ class MainLoop(BaseMainLoop):
         # Returns True if timeout is found
         waiting_message_timeout = self.template_settings.get("waiting_message_timeout", {})
         warning_delay = waiting_message_timeout.get('warning', 200)
-        skip_delay = waiting_message_timeout.get('skip', 6000)
+        skip_delay = waiting_message_timeout.get('skip', 8000)
         log_level = None
         make_break = False
 
