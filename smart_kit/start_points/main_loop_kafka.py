@@ -357,8 +357,8 @@ class MainLoop(BaseMainLoop):
     def _is_message_timeout_to_skip(self, message: SmartAppFromMessage, waiting_message_time: int):
         # Returns True if timeout is found
         waiting_message_timeout = self.template_settings.get("waiting_message_timeout", {})
-        warning_delay = waiting_message_timeout.get('warning', 200)
-        skip_delay = waiting_message_timeout.get('skip', 8000)
+        warning_delay = waiting_message_timeout.get("warning", 200)
+        skip_delay = waiting_message_timeout.get("skip", 8000)
         log_level = None
         make_break = False
 
@@ -374,8 +374,8 @@ class MainLoop(BaseMainLoop):
             monitoring.counter_mq_long_waiting(self.app_name)
 
         if log_level is not None:
-            log(f"Out of time message %(waiting_message_time)s msecs, "
-                f"mid: %(mid)s ",
+            log("Out of time message %(waiting_message_time)s msecs, "
+                "mid: %(mid)s ",
                 params={
                     log_const.KEY_NAME: "waiting_message_timeout",
                     "waiting_message_time": waiting_message_time,
