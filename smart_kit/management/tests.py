@@ -51,7 +51,9 @@ class TestsCommand(AppCommand):
         if namespace.gen:
             self.generate_tests_folder(namespace.path, namespace.update)
         elif namespace.run:
-            self.run_tests(namespace.path, namespace.predefined_fields_storage, namespace.make_csv)
+            tests_ok = self.run_tests(namespace.path, namespace.predefined_fields_storage, namespace.make_csv)
+            if not tests_ok:
+                sys.exit(1)
         else:
             raise Exception("Something going wrong due parsing the args")
 
@@ -84,17 +86,17 @@ class TestsCommand(AppCommand):
                     if not update:
                         raise
 
-    def run_tests(self, path, predefined_fields_storage, make_csv):
+    def run_tests(self, path, predefined_fields_storage, make_csv) -> bool:
         path = define_path(path)
         predefined_fields_storage = define_path(predefined_fields_storage)
         if not os.path.exists(path):
             print(f"[!] Tests folder does not found at {path}")
-            return
+            return False
         elif not os.path.exists(predefined_fields_storage):
             print(f"[!] Predefined fields storage file does not found, check file path: {predefined_fields_storage}")
-            return
+            return False
         else:
-            TestSuite(path, self.app_config, predefined_fields_storage, make_csv).run()
+            return TestSuite(path, self.app_config, predefined_fields_storage, make_csv).run()
 
     def get_test_template_path(self):
         path = os.path.join(self.app_config.REFERENCES_PATH, self.TEST_TEMPLATE_PATH)
