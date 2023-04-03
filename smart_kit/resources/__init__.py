@@ -13,11 +13,17 @@ from core.basic_models.actions.counter_actions import CounterIncrementAction, Co
     CounterClearAction, CounterSetAction, CounterCopyAction
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.external_actions import ExternalActions
-from core.basic_models.actions.push_action import PushAction, PUSH_NOTIFY
+from core.basic_models.actions.push_action import (PushAction,
+                                                   PushActionHttp,
+                                                   PushAuthenticationActionHttp,
+                                                   PUSH_NOTIFY,
+                                                   GetRuntimePermissionsAction)
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser
+from core.basic_models.actions.variable_actions import ClearVariablesAction, DeleteVariableAction, \
+    SetLocalVariableAction, SetVariableAction
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink, RawItem
 from core.basic_models.classifiers.basic_classifiers import classifiers, classifier_factory, Classifier, \
@@ -42,9 +48,7 @@ from core.configs.base_config import BaseConfig
 from core.db_adapter.aioredis_adapter import AIORedisAdapter
 from core.db_adapter.db_adapter import db_adapters
 from core.db_adapter.ignite_adapter import IgniteAdapter
-from core.db_adapter.ignite_thread_adapter import IgniteThreadAdapter
 from core.db_adapter.memory_adapter import MemoryAdapter
-from core.db_adapter.redis_adapter import RedisAdapter
 from core.descriptions.descriptions import registered_description_factories
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
     LimitedQueuedHashableObjectsDescriptionsItems
@@ -56,12 +60,10 @@ from core.request.base_request import requests_registered
 from core.request.rest_request import RestRequest
 from core.utils.loader import ordered_json
 from scenarios.actions.action import (
-    BreakScenarioAction, ChoiceScenarioAction, ClearCurrentScenarioAction,
-    ClearCurrentScenarioFormAction, ClearFormAction, ClearInnerFormAction, ClearScenarioByIdAction,
-    ClearVariablesAction, CompositeFillFieldAction, DeleteVariableAction, FillFieldAction,
-    RemoveCompositeFormFieldAction, RemoveFormFieldAction, SaveBehaviorAction, SetVariableAction,
-    ResetCurrentNodeAction, RunScenarioAction, RunLastScenarioAction, AddHistoryEventAction, SetLocalVariableAction,
-    ClearAllScenariosAction
+    BreakScenarioAction, ChoiceScenarioAction, ClearCurrentScenarioAction, ClearCurrentScenarioFormAction,
+    ClearFormAction, ClearInnerFormAction, ClearScenarioByIdAction, CompositeFillFieldAction, FillFieldAction,
+    RemoveCompositeFormFieldAction, RemoveFormFieldAction, SaveBehaviorAction, ResetCurrentNodeAction,
+    RunScenarioAction, RunLastScenarioAction, AddHistoryEventAction, ClearAllScenariosAction
 )
 from scenarios.actions.action import ProcessBehaviorAction, SelfServiceActionWithState, EmptyAction
 from scenarios.behaviors.behavior_descriptions import BehaviorDescriptions
@@ -92,6 +94,7 @@ from scenarios.user.last_scenarios.last_scenarios_descriptions import LastScenar
 from scenarios.user.preprocessing_messages.preprocessing_messages_description import \
     PreprocessingMessagesDescription
 from smart_kit.action.http import HTTPRequestAction
+from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.get_to_message import to_messages
 from smart_kit.message.as_is_to_message import AsIsToMessage
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
@@ -314,8 +317,12 @@ class SmartAppResources(BaseConfig):
         actions["set_variable"] = SetVariableAction
         actions["string"] = StringAction
         actions["push"] = PushAction
+        actions["push_authentication"] = PushAuthenticationActionHttp
+        actions["push_http"] = PushActionHttp
+        actions["get_runtime_permissions"] = GetRuntimePermissionsAction
         actions["give_me_memory"] = GiveMeMemoryAction
         actions["remember_this"] = RememberThisAction
+        actions["smart_geo"] = SmartGeoAction
         actions["smartpay_create"] = SmartPayCreateAction
         actions["smartpay_perform"] = SmartPayPerformAction
         actions["smartpay_get_status"] = SmartPayGetStatusAction
@@ -401,9 +408,7 @@ class SmartAppResources(BaseConfig):
     def init_db_adapters(self):
         db_adapters[None] = MemoryAdapter
         db_adapters["ignite"] = IgniteAdapter
-        db_adapters["ignite_thread"] = IgniteThreadAdapter
         db_adapters["memory"] = MemoryAdapter
-        db_adapters["redis"] = RedisAdapter
         db_adapters["aioredis"] = AIORedisAdapter
         db_adapters["aioredis_sentinel"] = AIORedisSentinelAdapter
 

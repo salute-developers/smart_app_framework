@@ -1,6 +1,5 @@
 import random
 from typing import Dict, Any
-from lazy import lazy
 
 from core.model.base_user import BaseUser as User
 from core.unified_template.unified_template import UnifiedTemplate

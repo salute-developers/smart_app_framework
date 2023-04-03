@@ -54,7 +54,6 @@ class Forms(LazyItems):
         descr_keys = self.descriptions.keys()
         for description_id in self.raw:
             if description_id in descr_keys:
-                
                 item = self[description_id]
                 if item and item.check_expired():
                     to_remove.append(description_id)

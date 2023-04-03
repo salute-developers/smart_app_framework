@@ -2,10 +2,10 @@ import inspect
 import pickle
 import sys
 from abc import ABC, abstractmethod
+from functools import cached_property
 from typing import Any, Dict, Optional, Union, List
 
 import numpy as np
-from lazy import lazy
 from timeout_decorator import timeout_decorator
 
 import core.basic_models.classifiers.classifiers_constants as cls_const
@@ -147,7 +147,7 @@ class ExtendedClassifier(Classifier):
     def set_classifier(self, clsf: Classifier) -> None:
         self._classifier = clsf
 
-    @lazy
+    @cached_property
     def classifier(self) -> Classifier:
         return self._classifier
 
@@ -157,7 +157,11 @@ class ExtendedClassifier(Classifier):
             mask: Optional[Dict[str, bool]] = None,
             scenario_classifiers: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Union[str, float, bool]]]:
-        vector = vectorizers[self._vectorizer].vectorize(text_preprocessing_result) if self._vectorizer else np.array([])
+        vector = (
+            vectorizers[self._vectorizer].vectorize(text_preprocessing_result)
+            if self._vectorizer
+            else np.array([])
+        )
         weights = sorted(self._get_weights(text_preprocessing_result, vector).items(), key=lambda x: x[1], reverse=True)
         answers = []
         for weight in weights:

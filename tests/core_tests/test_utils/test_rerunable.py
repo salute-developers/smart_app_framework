@@ -51,13 +51,13 @@ class TestRerunable(TestCase):
 
     def test_wrong_exception(self):
         self.action = Mock(side_effect=CustomException())
-        with self.assertRaises(CustomException) as context:
+        with self.assertRaises(CustomException):
             self.rerunable.run(self.action, self.param, **self.param1)
         self.action.assert_called_once_with(self.param, **self.param1)
 
     def test_all_retry_failed(self):
         self.action = Mock(side_effect=HandledException())
-        with self.assertRaises(AllFailedException) as context:
+        with self.assertRaises(AllFailedException):
             self.rerunable.run(self.action, self.param, **self.param1)
         self.action.assert_called_with(self.param, **self.param1)
         self.assertEqual(self.action.call_count, self.try_count)

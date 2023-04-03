@@ -1,3 +1,4 @@
+# Скрипт запуска навыка утилитой gunicorn в режиме run_app для работы по HTTP
 import os
 
 import scenarios.logging.logger_constants as log_const

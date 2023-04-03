@@ -191,7 +191,7 @@ class Environment(TypeCastByAnnotation):
 
         try:
             recognizer = config.NORMALIZER
-            norm = recognizer(value)
+            norm = json.loads(json.dumps(recognizer(value)))
             tpr = {'original_text': norm['original_text'],
                    'normalized_text': norm['normalized_text'],
                    'tokenized_elements_list': norm['tokenized_elements_list']}
@@ -212,4 +212,3 @@ class Environment(TypeCastByAnnotation):
 
 class Settings(TypeCastByAnnotation):
     DISPLAY_RAW: bool = False
-

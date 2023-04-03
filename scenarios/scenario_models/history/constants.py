@@ -7,6 +7,7 @@ class HistoryEventTypes:
     FIELD_EVENT = "field_event"
     END_SCENARIO = "end_scenario"
 
+
 class HistoryContentFields:
     FIELD = "field"
 

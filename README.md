@@ -42,7 +42,7 @@ ____
 
 * Linux, Mac OS или Windows (необходима установка [Conda](https://docs.conda.io/en/latest/)).
 * 512 МБ свободной памяти.
-* Python 3.6.8 - 3.9.6.
+* Python 3.8.0 - 3.9.6.
 
 ____
 
@@ -60,6 +60,10 @@ python3 -m pip install git+https://github.com/salute-developers/smart_app_framew
 ```
 
 При переходе на версию фреймворка >=1.0.7.rc4 со старым смартапом необходимо в директории смартапа из файла ```static/.text_normalizer_resources/static_workdata.json``` удалить строки 'Ё на Е'.
+
+При переходе на версию фреймворка >=1.0.8rc15 со старым смартапом необходимо проверить соблюдение асинхронных
+интерфейсов методами классов-наследников классов Action, Requirement, FieldFillerDescription, Scenario, HandlerBase, 
+SmartAppModel, BaseMainLoop.
 
 ## Установка фреймворка
 
@@ -111,6 +115,14 @@ pronounceText: Как тебя зовут?
 ```
 
 
+## Тестирование сценариев
+
+Для тестирования обработки вашим навыком приходящих сообщений воспользуйтесь 
+```console
+python3 manage.py tests --run static/references/tests
+```
+
+
 ____
 
 
@@ -119,7 +131,16 @@ ____
 
 Вы можете ознакомиться с подробной документацией по работе со SmartApp Framework в [справочнике разработчика](#TODO: вставить ссылку).
 
+# Разработка
 
+## Запуск тестов
+
+Для тестов используется `unittests`.
+Тесты находятся в директории `tests`
+
+```shell
+python -m unittest discover -s tests -v
+```
 
 # Обратная связь
 

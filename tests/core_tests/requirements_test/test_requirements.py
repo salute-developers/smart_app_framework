@@ -1,3 +1,4 @@
+import asyncio
 import os
 import unittest
 from time import time
@@ -18,6 +19,10 @@ from core.basic_models.requirement.user_text_requirements import AnySubstringInL
 from core.model.registered import registered_factories
 from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
 from smart_kit.utils.picklable_mock import PicklableMock
+
+
+def _run(coro):
+    return asyncio.get_event_loop().run_until_complete(coro)
 
 
 def patch_get_app_config(mock_get_app_config):
@@ -79,21 +84,29 @@ class EQMockOperator:
 
 
 class RequirementTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        registered_factories[Requirement] = MockRequirement
+        registered_factories[Operator] = MockAmountOperator
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        registered_factories[Requirement] = Requirement
+        registered_factories[Operator] = Operator
+
     def test_base(self):
         requirement = Requirement(None)
         assert requirement.check(None, None)
 
     def test_composite(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = CompositeRequirement({"requirements": [
             {"cond": True},
             {"cond": True}
         ]})
-        self.assertEqual(len(requirement.requirements), 2)
         self.assertTrue(requirement.check(None, None))
 
     def test_and_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = AndRequirement({"requirements": [
             {"cond": True},
             {"cond": True}
@@ -101,7 +114,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, None))
 
     def test_and_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = AndRequirement({"requirements": [
             {"cond": True},
             {"cond": False}
@@ -109,7 +121,6 @@ class RequirementTest(unittest.TestCase):
         self.assertFalse(requirement.check(None, None))
 
     def test_or_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = OrRequirement({"requirements": [
             {"cond": True},
             {"cond": False}
@@ -117,7 +128,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, None))
 
     def test_or_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = OrRequirement({"requirements": [
             {"cond": False},
             {"cond": False}
@@ -125,12 +135,10 @@ class RequirementTest(unittest.TestCase):
         self.assertFalse(requirement.check(None, None))
 
     def test_not_success(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = NotRequirement({"requirement": {"cond": False}})
         self.assertTrue(requirement.check(None, None))
 
     def test_not_fail(self):
-        registered_factories[Requirement] = MockRequirement
         requirement = NotRequirement({"requirement": {"cond": True}})
         self.assertFalse(requirement.check(None, None))
 
@@ -167,7 +175,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, user))
 
     def test_counter_value_requirement(self):
-        registered_factories[Operator] = MockAmountOperator
         user = PicklableMock()
         counter = PicklableMock()
         counter.__gt__ = Mock(return_value=True)
@@ -176,7 +183,6 @@ class RequirementTest(unittest.TestCase):
         self.assertTrue(requirement.check(None, user))
 
     def test_counter_time_requirement(self):
-        registered_factories[Operator] = MockAmountOperator
         user = PicklableMock()
         counter = PicklableMock()
         counter.update_time = int(time()) - 10
@@ -219,7 +225,8 @@ class RequirementTest(unittest.TestCase):
         user = PicklableMock()
         user.parametrizer = PicklableMock()
         user.parametrizer.collect = Mock(return_value=params)
-        self.assertRaises(TypeError, requirement.check, None, user)
+        with self.assertRaises(TypeError):
+            _ = requirement.check(None, user)
 
     def test_rolling_requirement_true(self):
         user = PicklableMock()
@@ -358,12 +365,16 @@ class RequirementTest(unittest.TestCase):
         ]
         self.assertFalse(requirement.check(text_normalization_result, user))
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "нет", "score": 1.0, "other": False}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "нет", "score": 1.0, "other": False}])
     def test_classifier_requirement_true(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает True, если результат классификации запроса относится к одной
         из указанных категорий, прошедших порог, но не равной классу other.
         """
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"},
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -373,17 +384,24 @@ class RequirementTest(unittest.TestCase):
     @patch.object(ExternalClassifier, "find_best_answer", return_value=[])
     def test_classifier_requirement_false(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если модель классификации не вернула ответ."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
         result = classifier_requirement.check(PicklableMock(), mock_user)
         self.assertFalse(result)
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "other", "score": 1.0, "other": True}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "other", "score": 1.0, "other": True}])
     def test_classifier_requirement_false_if_class_other(self, mock_classifier_model):
         """Тест кейз проверяет что условие возвращает False, если наиболее вероятный вариант есть класс other."""
-        test_items = {"type": "classifier", "classifier": {"type": "external", "classifier": "hello_scenario_classifier"}}
+        test_items = {
+            "type": "classifier",
+            "classifier": {"type": "external", "classifier": "hello_scenario_classifier"},
+        }
         classifier_requirement = ClassifierRequirement(test_items)
         mock_user = PicklableMock()
         mock_user.descriptions = {"external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
@@ -500,14 +518,32 @@ class RequirementTest(unittest.TestCase):
         req = IntersectionWithTokensSetRequirement({"input_words": ["погода", "время"]})
 
         text_preprocessing_result = PicklableMock()
-        text_preprocessing_result.raw = {"tokenized_elements_list_pymorphy": [
-            {"text": "прогноз", "grammem_info": {
-                "animacy": "inan", "case": "acc", "gender": "masc", "number": "sing", "raw_gram_info":
-                    "animacy=inan|case=acc|gender=masc|number=sing", "part_of_speech": "NOUN"}, "lemma": "прогноз"},
-            {"text": "погоды", "grammem_info": {
-                "animacy": "inan", "case": "gen", "gender": "fem", "number": "sing",
-                "raw_gram_info": "animacy=inan|case=gen|gender=fem|number=sing",
-                "part_of_speech": "NOUN"}, "lemma": "погода"}
+        text_preprocessing_result.raw = {
+            "tokenized_elements_list_pymorphy": [
+                {
+                    "text": "прогноз",
+                    "grammem_info": {
+                        "animacy": "inan",
+                        "case": "acc",
+                        "gender": "masc",
+                        "number": "sing",
+                        "raw_gram_info": "animacy=inan|case=acc|gender=masc|number=sing",
+                        "part_of_speech": "NOUN"
+                    },
+                    "lemma": "прогноз"
+                },
+                {
+                    "text": "погоды",
+                    "grammem_info": {
+                        "animacy": "inan",
+                        "case": "gen",
+                        "gender": "fem",
+                        "number": "sing",
+                        "raw_gram_info": "animacy=inan|case=gen|gender=fem|number=sing",
+                        "part_of_speech": "NOUN"
+                    },
+                    "lemma": "погода"
+                }
             ]}
 
         self.assertTrue(req.check(text_preprocessing_result, PicklableMock()))

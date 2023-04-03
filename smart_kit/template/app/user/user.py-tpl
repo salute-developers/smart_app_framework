@@ -1,28 +1,28 @@
-from lazy import lazy
+from typing import List
+from functools import cached_property
 
+from core.model.field import Field
 from scenarios.user.user_model import User
 
-from .parametrizer import CustomParametrizer
+from app.user.parametrizer import CustomParametrizer
 
 
-class CustomeUser(User):
+class CustomUser(User):
+    """Модель для хранения данных конкретного пользователя
 
+    Для использования данного пользователя присвойте переменной USER в app_config этот класс как значение.
     """
-        Класс User - модель для хранения данных конкретного пользователя
-        в метод fields можно добавляются собственные поля, для использования внутри базовых сущностей
-    """
-
     def __init__(self, id, message, db_data, settings, descriptions, parametrizer_cls, load_error=False):
-        super(CustomeUser, self).__init__(id, message, db_data, settings,
-                                         descriptions, parametrizer_cls, load_error)
+        super().__init__(id, message, db_data, settings, descriptions, parametrizer_cls, load_error)
 
     @property
-    def fields(self):
-        return super(CustomeUser, self).fields + []
+    def fields(self) -> List[Field]:
+        """Возвращает список полей с данными пользователя"""
+        return super().fields + []
 
-    @lazy
+    @cached_property
     def parametrizer(self):
         return CustomParametrizer(self, {})
 
     def expire(self):
-        super(CustomeUser, self).expire()
+        super().expire()

@@ -1,7 +1,7 @@
 from typing import Optional
 
-def pan2service(pan: str) -> Optional[str]:
 
+def pan2service(pan: str) -> Optional[str]:
     if len(pan) < 4:
         return None
 

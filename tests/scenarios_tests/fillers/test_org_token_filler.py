@@ -1,10 +1,10 @@
-from unittest import TestCase
+import unittest
 
 from scenarios.scenario_models.field.field_filler_description import FirstOrgFiller
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestFirstOrgFiller(TestCase):
+class TestFirstOrgFiller(unittest.TestCase):
     def setUp(self):
         items = {}
         self.filler = FirstOrgFiller(items)

@@ -1,10 +1,9 @@
 from typing import Dict, Any, Optional
 
-from core.model.base_user import BaseUser
-
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 from core.basic_models.requirement.basic_requirements import Requirement
+from scenarios.user.user_model import User
 
 
 class SettingsRequirement(Requirement):
@@ -14,6 +13,6 @@ class SettingsRequirement(Requirement):
         self._key = items["key"]
         self._value = items["value"]
 
-    def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+    def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
+               params: Dict[str, Any] = None) -> bool:
         return user.settings[self._config][self._key] == self._value

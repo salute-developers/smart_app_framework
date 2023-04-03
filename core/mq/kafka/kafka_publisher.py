@@ -2,6 +2,7 @@
 import logging
 import os
 import time
+from typing import Union
 
 from confluent_kafka import Producer
 
@@ -21,11 +22,13 @@ class KafkaPublisher(BaseKafkaPublisher):
         if internal_log_path:
             debug_logger = logging.getLogger("debug_publisher")
             timestamp = time.strftime("_%d%m%Y_")
-            debug_logger.addHandler(logging.FileHandler("{}/kafka_publisher_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())))
+            debug_logger.addHandler(logging.FileHandler(
+                "{}/kafka_publisher_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())
+            ))
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def send(self, value, key=None, topic_key=None, headers=None):
+    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers=None):
         try:
             topic = self._config["topic"]
             if topic_key is not None:
@@ -34,13 +37,13 @@ class KafkaPublisher(BaseKafkaPublisher):
             if key is not None:
                 producer_params["key"] = key
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
-        except BufferError as e:
+        except BufferError:
             params = {
                 "queue_amount": len(self._producer),
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE
             }
             log("KafkaProducer: Local producer queue is full (%(queue_amount)s messages awaiting delivery):"
-                       " try again\n", params=params, level="ERROR")
+                " try again\n", params=params, level="ERROR")
             monitoring.got_counter("kafka_producer_exception")
         self._poll()
 
@@ -52,18 +55,18 @@ class KafkaPublisher(BaseKafkaPublisher):
                     log_const.KEY_NAME: log_const.EXCEPTION_VALUE
                 }
                 log("KafkaProducer: Failed sending message %{message}s. Topic is not defined", params=params,
-                              level="ERROR")
+                    level="ERROR")
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
-        except BufferError as e:
+        except BufferError:
             params = {
                 "queue_amount": len(self._producer),
                 log_const.KEY_NAME: log_const.EXCEPTION_VALUE
             }
             log("KafkaProducer: Local producer queue is full (%(queue_amount)s messages awaiting delivery):"
-                       " try again\n", params=params, level="ERROR")
+                " try again\n", params=params, level="ERROR")
             monitoring.got_counter("kafka_producer_exception")
         self._poll()
 
@@ -89,18 +92,18 @@ class KafkaPublisher(BaseKafkaPublisher):
             try:
                 message_text = message_text.decode("utf-8")
                 log("KafkaProducer: Message %(message)s send failed: %(error)s",
-                              params={
-                                  "message": str(message_text),
-                                  "error": str(err),
-                                  log_const.KEY_NAME: log_const.EXCEPTION_VALUE},
-                              level="ERROR")
+                    params={
+                        "message": str(message_text),
+                        "error": str(err),
+                        log_const.KEY_NAME: log_const.EXCEPTION_VALUE},
+                    level="ERROR")
             except UnicodeDecodeError:
                 log("KafkaProducer: %(text)s: %(error)s",
-                              params={"text": f"Can't decode: {str(message_text)}",
-                                      "error": err,
-                                      log_const.KEY_NAME: log_const.EXCEPTION_VALUE},
-                              level="ERROR",
-                              exc_info=True)
+                    params={"text": f"Can't decode: {str(message_text)}",
+                            "error": err,
+                            log_const.KEY_NAME: log_const.EXCEPTION_VALUE},
+                    level="ERROR",
+                    exc_info=True)
             monitoring.got_counter("kafka_producer_exception")
 
     def close(self):

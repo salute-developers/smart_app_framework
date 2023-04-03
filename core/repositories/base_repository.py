@@ -23,21 +23,26 @@ class BaseRepository:
         params = {
             "repository_class_name": self.__class__.__name__,
             "repository_key": self.key,
-            log_const.KEY_NAME: log_const.REPOSITORY_LOAD_VALUE
+            log_const.KEY_NAME: log_const.REPOSITORY_LOAD_VALUE,
         }
-        log("%(repository_class_name)s.load  %(repository_key)s repo loading completed.", params=params,
-                   level="WARNING")
+        log(
+            "%(repository_class_name)s.load  %(repository_key)s repo loading completed.", params=params, level="WARNING"
+        )
 
     def fill(self, data):
         self.data = data
 
     def clear(self):
         self.data.clear()
-        log("%(repository_class_name)s.clear %(repository_key)s cleared.",
-                      params={"repository_class_name": self.__class__.__name__,
-                              "repository_key": self.key,
-                              log_const.KEY_NAME: log_const.REPOSITORY_CLEAR_VALUE},
-                      level="WARNING")
+        log(
+            "%(repository_class_name)s.clear %(repository_key)s cleared.",
+            params={
+                "repository_class_name": self.__class__.__name__,
+                "repository_key": self.key,
+                log_const.KEY_NAME: log_const.REPOSITORY_CLEAR_VALUE,
+            },
+            level="WARNING",
+        )
 
     def save(self, save_parameters):
         raise NotImplementedError

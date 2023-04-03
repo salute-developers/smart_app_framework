@@ -12,16 +12,17 @@ import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier
 from core.utils.masking_message import masking
 from core.utils.stats_timer import StatsTimer
-from core.utils.pickle_copy import pickle_deepcopy
 
 MESSAGE_ID_STR = "message_id"
 UID_STR = "uid"
 LOGGING_UUID = "logging_uuid"
 CLASS_NAME = "class_name"
 LOG_STORE_FOR = "log_store_for"
+HEADERS = "headers"
 
 
 class LoggerMessageCreator:
+    LOGGER_HEADERS = ["kafka_replyTopic", "app_callback_id"]
     ART_NAMES = [
         "channel", "type", "device_channel", "device_channel_version", "device_platform", "group",
         "device_platform_version", "device_platform_client_type", "csa_profile_id", "test_deploy"
@@ -36,7 +37,7 @@ class LoggerMessageCreator:
                 params[name] = param
 
     @classmethod
-    def update_other_params(cls, user, params, cls_name='', log_store_for=0):
+    def update_other_params(cls, user, params, cls_name='', log_store_for=1):
         message_id, uuid, logging_uuid = None, None, None
         if user:
             message = user.message
@@ -54,20 +55,28 @@ class LoggerMessageCreator:
         return re.sub(r"(%[^\(])", r"%\1", string)
 
     @classmethod
-    def make_message(cls, user=None, params=None, cls_name='', log_store_for=0):
+    def make_message(cls, user=None, params=None, cls_name='', log_store_for=1):
         params = params or {}
+        cls.filter_headers(params)
+        if HEADERS in params:
+            params[HEADERS] = str(params[HEADERS])
         if user:
             cls.update_user_params(user, params)
-        params = pickle_deepcopy(params)
-        masking(params)
-        cls.update_other_params(user, params, cls_name, log_store_for)
-        return params
+        masked_params = masking(params)
+        cls.update_other_params(user, masked_params, cls_name, log_store_for)
+        return masked_params
+
+    @classmethod
+    def filter_headers(cls, params: dict):
+        if HEADERS in params:
+            if isinstance(params[HEADERS], list):
+                params[HEADERS] = [(key, value) for key, value in params[HEADERS] if key in cls.LOGGER_HEADERS]
 
 
 default_logger = logging.getLogger()
 
 
-def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=0):
+def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_for=1):
     try:
         level_name = logging.getLevelName(level)
         current_frame = inspect.currentframe()
@@ -76,6 +85,7 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         logger = logging.getLogger(module_name)
         if not logger.isEnabledFor(level_name):
             return
+
         instance = previous_frame.f_locals.get('self', None)
 
         from smart_kit.configs import get_app_config
@@ -86,7 +96,12 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         except AttributeError:
             message_maker = LoggerMessageCreator
 
-        log_store_for_map = getattr(logging,"log_store_for_map", None)
+        # cast log_params["params"] to str
+        # TODO: think how to make it more general
+        if params and "params" in params:
+            params["params"] = str(params["params"])
+
+        log_store_for_map = getattr(logging, "log_store_for_map", None)
         if log_store_for_map is not None and params is not None:
             log_store_for = log_store_for_map.get(params.get(log_const.KEY_NAME), log_store_for)
 
@@ -99,10 +114,10 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         # см. tests.core_tests.test_utils.test_logger.TestLogger.test_escaping
         message = message_maker.escape(message)
 
-        logger.log(level_name, message, params, exc_info=exc_info)
+        logger.log(level_name, message, params, exc_info=exc_info, stacklevel=2)
     except timeout_decorator.TimeoutError:
         raise
-    except:
+    except Exception:
         default_logger.log(logging.getLevelName("ERROR"), "Failed to write a log. Exception occurred",
                            params, exc_info=True, stack_info=True)
 

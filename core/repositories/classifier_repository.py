@@ -48,8 +48,8 @@ class ClassifierRepository(BaseRepository):
         res = False
         # Проверяем что существуют обе директории: с конфигами классификаторов и чекпоинтами моделей,
         # также проверяем что эти обе директории не пустые
-        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path))
-                and os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
+        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path)) and
+                os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
             res = True
         return res
 
@@ -67,7 +67,7 @@ class ClassifierRepository(BaseRepository):
         self._folder_repository.load()
         classifiers_dict = self._folder_repository.data
 
-        gpu_available = tf.test.is_gpu_available()
+        gpu_available = len(tf.config.list_physical_devices("GPU")) > 0
         repository = None
 
         for classifier_key in classifiers_dict:

@@ -40,7 +40,7 @@ class DescriptionsTest(unittest.TestCase):
 
     def test_has_key(self):
         assert "id1" in self.descr
-        assert not "invalid" in self.descr
+        assert "invalid" not in self.descr
 
     def test_update_data(self):
         items = dict(id1=["raw_data_value11"], id3=["raw_data_value3"])

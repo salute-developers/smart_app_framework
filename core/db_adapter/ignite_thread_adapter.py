@@ -48,7 +48,6 @@ class IgniteThreadAdapter(DBAdapter):
             self._caches[thread_id] = cache
             logger_args = {
                 log_const.KEY_NAME: log_const.IGNITE_VALUE,
-                "pyignite_args": str(self._init_params),
                 "pyignite_addresses": str(self._url)
             }
             log("IgniteAdapter to servers %(pyignite_addresses)s created", params=logger_args, level="WARNING")

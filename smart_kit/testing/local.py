@@ -1,10 +1,10 @@
+import asyncio
 import cmd
 import json
 import os
 import pprint
-import typing
-
-from lazy import lazy
+from typing import Dict, Optional, Tuple, Any
+from functools import cached_property
 
 from core.descriptions.descriptions import Descriptions
 from core.message.from_message import SmartAppFromMessage
@@ -49,21 +49,21 @@ class CLInterface(cmd.Cmd):
         else:
             self.storaged_predefined_fields = {}
 
-    def after_process_message(self, message) -> typing.Optional[str]:
+    def after_process_message(self, message) -> Optional[str]:
         callback = getattr(self, f"on_{message.name.lower()}", lambda *args, **kwargs: None)
         return callback(message)
 
-    @lazy
+    @cached_property
     def app_model(self):
         return self.__model_cls(self.resources, self.__dialogue_manager_cls, custom_settings=self.settings)
 
-    @lazy
+    @cached_property
     def resources(self):
         source = self.settings.get_source()
 
         return self.__resources_cls(source, self.references_path, self.settings)
 
-    @lazy
+    @cached_property
     def available_scenarios(self):
         return list(Descriptions(self.resources.registered_repositories)["scenarios"].keys())
 
@@ -140,7 +140,7 @@ class CLInterface(cmd.Cmd):
         self.environment.intent = self.available_scenarios[0]
         print("Текущий сценарий: ", self.environment.intent)
 
-    def process_message(self, raw_message: str, headers: tuple = ()) -> typing.Tuple[typing.Any, list]:
+    def process_message(self, raw_message: Dict, headers: tuple = ()) -> Tuple[Any, list]:
         from smart_kit.configs import get_app_config
         masking_fields = self.settings["template_settings"].get("masking_fields")
         message = SmartAppFromMessage(raw_message, headers=headers, masking_fields=masking_fields,
@@ -148,7 +148,7 @@ class CLInterface(cmd.Cmd):
         user = self.__user_cls(self.environment.user_id, message, self.user_data, self.settings,
                                self.app_model.scenario_descriptions,
                                self.__parametrizer_cls, load_error=False)
-        answers = self.app_model.answer(message, user)
+        answers = asyncio.get_event_loop().run_until_complete(self.app_model.answer(message, user))
         return user, answers or []
 
     def default(self, _input: str):
@@ -158,7 +158,7 @@ class CLInterface(cmd.Cmd):
         if self.lt_settings.DISPLAY_RAW:
             pprint.pprint(self.environment.as_dict)
 
-        user, answers = self.process_message(str(self.environment))
+        user, answers = self.process_message(self.environment.as_dict)
         self.user_data = user.raw_str
 
         answers = combine_commands(answers, user)
@@ -166,7 +166,7 @@ class CLInterface(cmd.Cmd):
             respond = self.after_process_message(answer)
             if respond:
                 _, new_answers = self.process_message(
-                    respond,
+                    json.loads(respond),
                     (('app_callback_id', answer.request_data['app_callback_id'].encode()),),
                 )
                 answers.extend(new_answers or [])

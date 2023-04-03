@@ -1,5 +1,6 @@
 import importlib
 import os
+from functools import lru_cache
 
 ENVIRONMENT_VARIABLE = "SMART_KIT_APP_CONFIG"
 
@@ -17,6 +18,7 @@ def get_static_path(app_config_path):
     return static_path
 
 
+@lru_cache
 def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     app_config = os.getenv(environment_variable)
     app_config = importlib.import_module(app_config)
