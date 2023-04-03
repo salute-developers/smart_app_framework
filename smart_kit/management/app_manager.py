@@ -75,7 +75,6 @@ class SsmlTestCommand(AppCommand):
     def execute(self, *args, **kwargs):
         init_logger(self.app_config)
         namespace = self.parser.parse_args(args)
-        print(namespace.string)
         if namespace.statics:
             self.test_statics()
         elif namespace.string is not None:
