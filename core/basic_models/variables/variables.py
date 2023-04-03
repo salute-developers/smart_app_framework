@@ -30,6 +30,7 @@ class Variables:
 
     def update(self, key, value, ttl=None) -> None:
         _, old_ttl = self._storage[key]
+        old_ttl -= time.time()
         ttl = ttl or old_ttl
         self.set(key, value, ttl)
 
