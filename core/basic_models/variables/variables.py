@@ -29,10 +29,9 @@ class Variables:
         self._storage[key] = value, time.time() + ttl
 
     def update(self, key, value, ttl=None) -> None:
-        _, old_ttl = self._storage[key]
-        old_ttl -= time.time()
-        ttl = ttl or old_ttl
-        self.set(key, value, ttl)
+        _, old_expire_time = self._storage[key]
+        expire_time = ttl + time.time() if ttl else old_expire_time
+        self._storage[key] = value, expire_time
 
     def get(self, key, default=None):
         value, expire_time = self._storage.get(key, (default, time.time() + self.DEFAULT_TTL))
