@@ -66,7 +66,8 @@ class SsmlTestCommand(AppCommand):
         self.app_config = app_config
         self.parser = argparse.ArgumentParser(description="SSML strings testing.")
         self.commands = self.parser.add_mutually_exclusive_group(required=True)
-        self.commands.add_argument("--statics", dest="statics", help="Test ssml strings in statics", action="store_true")
+        self.commands.add_argument("--statics", dest="statics", help="Test ssml strings in statics",
+                                   action="store_true")  # TODO statistics by default insted of string
         self.commands.add_argument(
             "--string", dest="string", type=str, help="Test given ssml strings", action="store"
         )

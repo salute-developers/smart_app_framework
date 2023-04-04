@@ -1,7 +1,6 @@
-
 from typing import Tuple, Dict, Callable, Any, List
 
-import requests
+from lxml import etree
 
 from core.logging.logger_utils import log
 from smart_kit.resources import SmartAppResources
@@ -23,7 +22,7 @@ class SsmlTestSuite:
         ssml_strings = self.collect_ssml_strings(resources, resource_to_ssml_string_parser)
         success_num = 0
         for ssml_string, location in ssml_strings:
-            print(f"[+] Testing SSML string {ssml_string} from {location}")
+            print(f"[+] Testing SSML string \"{ssml_string}\" from {location}")
             success_num += self._check_and_print(ssml_string)
         print(f"[+] Total: {success_num}/{len(ssml_strings)}")
 
@@ -46,29 +45,34 @@ class SsmlTestSuite:
     def _check_and_print(self, string_to_test: str) -> bool:
         is_valid, message = self.ssml_checker(string_to_test)
         if is_valid:
-            print(f"[+] OK")
+            print("[+] OK")
         else:
             print(f"[!] SSML markup of the string is invalid. Message: \"{message}\"")
         return is_valid
 
 
 class SsmlChecker:
+    parser = etree.XMLParser(schema=etree.XMLSchema(etree.XML(
+        '<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"><xsd:element name="speak"/></xsd:schema>'
+    )))
+
     def __init__(self, ssml_checker_url: str):
         self.ssml_checker_url = ssml_checker_url
 
     def __call__(self, string_to_test: str) -> Tuple[bool, str]:
         """Returns whether ssml_string is valid and message describing invalidity"""
-        for checker in (self._check_xml_format, self._check_root_speak, self._check_with_api):
+        for checker in (self._check_format, self._check_with_api):
             is_valid, err_msg = checker(string_to_test)
             if not is_valid:
                 return is_valid, err_msg
         return True, ""
 
-    def _check_xml_format(self, string_to_test: str) -> Tuple[bool, str]:
-        return True, ""  # TODO
-
-    def _check_root_speak(self, string_to_test: str) -> Tuple[bool, str]:
-        return True, ""  # TODO
+    def _check_format(self, string_to_test: str) -> Tuple[bool, str]:
+        try:
+            etree.fromstring(string_to_test, self.parser)
+            return True, ""
+        except etree.XMLSyntaxError as e:
+            return False, str(e)
 
     def _check_with_api(self, string_to_test: str) -> Tuple[bool, str]:
         # TODO: update according to contract

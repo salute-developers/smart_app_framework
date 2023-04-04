@@ -10,7 +10,7 @@ def ssml_string_parser(obj: Any, location: ObjectLocation) -> List[Tuple[str, Ob
         # For pattern (dict contain ["command": "ANSWER_TO_USER"; nodes.pronounceTextType = "application/ssml"])
         # get nodes.pronounceText
         if obj.get("command") == "ANSWER_TO_USER" and \
-           obj.get("nodes", {}).get("pronounceTextType") == "application/ssml":  # TODO решить должна ли быть на это проверка в соответствии с аналитикой Оли
+           obj.get("nodes", {}).get("pronounceTextType") == "application/ssml":
             if "pronounceText" not in obj["nodes"]:
                 log("Missing nodes.pronounceText in action", level="WARNING")
             else:
