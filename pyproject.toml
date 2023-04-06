@@ -51,14 +51,13 @@ tensorflow = [
     { version = "2.8.0", markers = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
 ]
 tensorflow-macos = {version = "2.8.0", markers = "sys_platform == 'darwin' and platform_machine == 'arm64'"}
-tensorflow-aarch64 = {version = "2.8.0", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'"}
+tensorflow-aarch64 = {version = "2.8.4", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'"}
 timeout-decorator = "0.4.1"
 tqdm = "4.64.1"
 incremental = "21.3.0"
 Twisted = "22.8.0"
 freezegun = "1.1.0"
 protobuf = "3.19.6"
-lxml = "4.9.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.0.0"

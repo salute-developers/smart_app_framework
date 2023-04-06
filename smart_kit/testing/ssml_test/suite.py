@@ -12,6 +12,7 @@ class SsmlTestSuite:
         self.ssml_checker = SsmlChecker(ssml_test_url)
 
     def test_single_string(self, string_to_test: str) -> None:
+        print(f"[+] Testing SSML string \"{string_to_test}\"")
         self._check_and_print(string_to_test)
 
     def test_statics(

@@ -65,12 +65,10 @@ class SsmlTestCommand(AppCommand):
     def __init__(self, app_config):
         self.app_config = app_config
         self.parser = argparse.ArgumentParser(description="SSML strings testing.")
-        self.commands = self.parser.add_mutually_exclusive_group(required=True)
+        self.commands = self.parser.add_mutually_exclusive_group()
         self.commands.add_argument("--statics", dest="statics", help="Test ssml strings in statics",
-                                   action="store_true")  # TODO statistics by default insted of string
-        self.commands.add_argument(
-            "--string", dest="string", type=str, help="Test given ssml strings", action="store"
-        )
+                                   action="store_true")
+        self.commands.add_argument("--string", dest="string", type=str, help="Test given ssml strings", action="store")
         self.test_suite: SsmlTestSuite = app_config.SSML_TEST_SUITE(app_config.SSML_TEST_ADDRESS)
 
     def execute(self, *args, **kwargs):
@@ -80,6 +78,9 @@ class SsmlTestCommand(AppCommand):
             self.test_statics()
         elif namespace.string is not None:
             self.test_single_string(namespace.string)
+        else:
+            print("Test mode was not specified. Checking statics...")
+            self.test_statics()
 
     def test_statics(self):
         settings = self.app_config.SETTINGS(
