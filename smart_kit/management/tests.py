@@ -26,7 +26,7 @@ class TestsCommand(AppCommand):
 
     def __init__(self, app_config):
         self.app_config = app_config
-        self.parser = argparse.ArgumentParser(description="Tests creating and running.")
+        self.parser = argparse.ArgumentParser(description="Scenario tests creating and running.")
         self.parser.add_argument("path", metavar="PATH", type=str, help="Path to directory with tests", action="store")
         self.parser.add_argument("predefined_fields_storage", metavar="PREDEFINED_FIELDS_STORAGE", type=str,
                                  help="Path to json file with stored predefined fields", action="store", nargs="?",
