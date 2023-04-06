@@ -1,4 +1,5 @@
-from typing import Tuple, Dict, Callable, Any, List
+import re
+from typing import Tuple, Dict, Callable, Any, List, Optional
 
 from lxml import etree
 
@@ -44,12 +45,22 @@ class SsmlTestSuite:
         return ssml_strings
 
     def _check_and_print(self, string_to_test: str) -> bool:
+        template_span = self._get_template_span(string_to_test)
+        if template_span:
+            print(f"Warning: the strings seems to have template part in span {template_span}. In runtime the string "
+                  "validity may change.")
         is_valid, message = self.ssml_checker(string_to_test)
         if is_valid:
             print("[+] OK")
         else:
             print(f"[!] SSML markup of the string is invalid. Message: \"{message}\"")
         return is_valid
+
+    def _get_template_span(self, string) -> Optional[Tuple[int, int]]:
+        match = re.search("{{.*}}", string)
+        if match:
+            return match.span()
+        return None
 
 
 class SsmlChecker:
