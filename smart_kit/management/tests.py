@@ -29,7 +29,7 @@ class TestsCommand(AppCommand):
 
     def __init__(self, app_config):
         self.app_config = app_config
-        self.ssml_suite = SsmlTestSuite(app_config.SSML_TEST_ADDRESS)
+        self.ssml_suite = SsmlTestSuite(self.app_config.SSML_TEST_ADDRESS)
         self.parser = argparse.ArgumentParser(description="Scenario tests creating and running.")
         self.parser.add_argument("path", metavar="PATH", type=str, help="Path to directory with tests", action="store",
                                  nargs="?", default="")
