@@ -39,7 +39,6 @@ class TestsCommand(AppCommand):
         self.commands = self.parser.add_mutually_exclusive_group(required=True)
         self.commands.add_argument("--run", dest="run", help="Runs Tests", action="store_true")
         run_command = self.parser.add_argument_group("Running")
-        self.commands = run_command.add_mutually_exclusive_group(required=False)
         run_command.add_argument("--make-csv", dest="make_csv", help="Create csv file for tests results",
                                  action="store_true")
         run_command.add_argument("--ssml-off", dest="ssml_off", help="Do not run SSML tests", action="store_true")
@@ -64,6 +63,9 @@ class TestsCommand(AppCommand):
             self.generate_tests_folder(namespace.path, namespace.update)
         elif namespace.run:
             if namespace.ssml_interactive:
+                if namespace.scenarios_off or namespace.ssml_off or namespace.make_csv:
+                    self.parser.error("--ssml-interactive and --scenarios-off|--ssml-off|--make-csv are mutually "
+                                      "exclusive")
                 self.run_interactive_ssml_tests()
             else:
                 tests_ok = True

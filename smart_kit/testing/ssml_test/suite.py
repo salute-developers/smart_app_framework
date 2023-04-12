@@ -35,7 +35,7 @@ class SsmlTestSuite:
             resources: SmartAppResources,
             resource_ssml_string_parsers: Dict[str, Callable[[Any, ObjectLocation], List[Tuple[str, ObjectLocation]]]]
     ) -> List[Tuple[str, ObjectLocation]]:
-        """Returns list of tuples of parsed ssml-string and its location"""
+        """Returns list of tuples of parsed ssml-string and their locations"""
         ssml_strings = []
         for resource_name, ssml_extractor in resource_ssml_string_parsers.items():
             resource = resources.get(resource_name)
@@ -49,7 +49,7 @@ class SsmlTestSuite:
     def _check_and_print(self, string_to_test: str) -> bool:
         template_span = self._get_template_span(string_to_test)
         if template_span:
-            print(f"Warning: the strings seems to have template part in span {template_span}. In runtime the string "
+            print(f"Warning: the string seems to have a template part in span {template_span}. In runtime the string's "
                   "validity may change.")
         is_valid, message = self.ssml_checker(string_to_test)
         if is_valid:
@@ -93,7 +93,7 @@ class SsmlChecker:
             response_json = requests.post(self.ssml_checker_url,
                                           data=string_to_test.encode("utf-8"),
                                           headers={"Content-Type": "application/ssml"}).json()
+            return response_json["is_valid"], response_json.get("error", "")
         except requests.exceptions.ConnectionError:
             print("Cannot connect to ssml check server. Skipping online test.")
             return True, ""
-        return response_json["is_valid"], response_json.get("error", "")

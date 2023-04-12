@@ -1,4 +1,3 @@
-import argparse
 import logging.config
 from collections import namedtuple
 
@@ -10,7 +9,6 @@ from smart_kit.management.tests import TestsCommand
 from smart_kit.management.plugins import activate_plugins
 from smart_kit.start_points.app import run as app_runner
 from smart_kit.management.get_bundles_from_pps import GetBundleCommand
-from smart_kit.testing.ssml_test.suite import SsmlTestSuite
 
 
 def init_logger(app_config):
