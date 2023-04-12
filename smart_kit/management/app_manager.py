@@ -60,41 +60,6 @@ class RunAppCommand(AppCommand):
         return self._runner(self.app_config)
 
 
-class SsmlTestCommand(AppCommand):
-    """Command for testing ssml strings"""
-    def __init__(self, app_config):
-        self.app_config = app_config
-        self.parser = argparse.ArgumentParser(description="SSML strings testing.")
-        self.commands = self.parser.add_mutually_exclusive_group()
-        self.commands.add_argument("--statics", dest="statics", help="Test ssml strings in statics",
-                                   action="store_true")
-        self.commands.add_argument("--string", dest="string", type=str, help="Test given ssml strings", action="store")
-        self.test_suite: SsmlTestSuite = app_config.SSML_TEST_SUITE(app_config.SSML_TEST_ADDRESS)
-
-    def execute(self, *args, **kwargs):
-        init_logger(self.app_config)
-        namespace = self.parser.parse_args(args)
-        if namespace.statics:
-            self.test_statics()
-        elif namespace.string is not None:
-            self.test_single_string(namespace.string)
-        else:
-            print("Test mode was not specified. Checking statics...")
-            self.test_statics()
-
-    def test_statics(self):
-        settings = self.app_config.SETTINGS(
-            config_path=self.app_config.CONFIGS_PATH, secret_path=self.app_config.SECRET_PATH,
-            references_path=self.app_config.REFERENCES_PATH, app_name=self.app_config.APP_NAME)
-        source = settings.get_source()
-        resources = self.app_config.RESOURCES(source, self.app_config.REFERENCES_PATH, settings)
-        resource_to_ssml_string_parser = self.app_config.RESOURCE_TO_SSML_STRING_PARSER
-        self.test_suite.test_statics(resources, resource_to_ssml_string_parser)
-
-    def test_single_string(self, string_to_test: str):
-        self.test_suite.test_single_string(string_to_test)
-
-
 class AppManager:
     def __init__(self):
         self.commands = {}
@@ -127,7 +92,6 @@ def execute_from_command_line(argv):
     manager.register_command("cache", CreateCacheCommand, app_config)
     manager.register_command("help", HelpCommand, manager.commands)
     manager.register_command("get_bundles", GetBundleCommand, app_config)
-    manager.register_command("ssml_test", SsmlTestCommand, app_config)
 
     activate_plugins(app_config, manager)
 

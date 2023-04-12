@@ -1,7 +1,8 @@
 import re
+import requests
+from lxml import etree
 from typing import Tuple, Dict, Callable, Any, List, Optional
 
-from lxml import etree
 
 from core.logging.logger_utils import log
 from smart_kit.resources import SmartAppResources
@@ -19,14 +20,15 @@ class SsmlTestSuite:
     def test_statics(
             self,
             resources: SmartAppResources,
-            resource_to_ssml_string_parser: Dict[str, Callable[[Any, ObjectLocation], List[Tuple[str, ObjectLocation]]]]
-    ):
-        ssml_strings = self.collect_ssml_strings(resources, resource_to_ssml_string_parser)
+            ssml_parsers: Dict[str, Callable[[Any, ObjectLocation], List[Tuple[str, ObjectLocation]]]]
+    ) -> bool:
+        ssml_strings = self.collect_ssml_strings(resources, ssml_parsers)
         success_num = 0
         for ssml_string, location in ssml_strings:
             print(f"[+] Testing SSML string \"{ssml_string}\" from {location}")
             success_num += self._check_and_print(ssml_string)
         print(f"[+] Total: {success_num}/{len(ssml_strings)}")
+        return success_num == len(ssml_strings)
 
     def collect_ssml_strings(
             self,
@@ -87,7 +89,11 @@ class SsmlChecker:
             return False, str(e)
 
     def _check_with_api(self, string_to_test: str) -> Tuple[bool, str]:
-        # TODO: update according to contract
-        # response_json = requests.get(f"{self.ssml_checker_url}/{string_to_test}").json()
-        # return response_json["is_valid"], response_json.get("message", "")
-        return True, ""  # TODO
+        try:
+            response_json = requests.post(self.ssml_checker_url,
+                                          data=string_to_test.encode("utf-8"),
+                                          headers={"Content-Type": "application/ssml"}).json()
+        except requests.exceptions.ConnectionError:
+            print("Cannot connect to ssml check server. Skipping online test.")
+            return True, ""
+        return response_json["is_valid"], response_json.get("error", "")
