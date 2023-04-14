@@ -5,30 +5,17 @@ from unittest.mock import Mock, patch
 from smart_kit.management.tests import TestsCommand
 
 
-class SystemAnswersTest1(unittest.IsolatedAsyncioTestCase):  # TODO тесты на manage.py tests
-    def setUp(self):
-        pass
+class TestsCommandTest1(unittest.IsolatedAsyncioTestCase):  # TODO тесты на manage.py tests
+    """Проверки на реакцию на флажки в аргументах команды"""
 
     async def test_run(self):
         app_config = Mock(SSML_TEST_ADDRESS="")
         tests_command = TestsCommand(app_config)
+        # error - no path provided
         self.assertRaises(SystemExit, tests_command.execute, "--run")
 
     async def test_run_path(self):
-        app_config = Mock(SSML_TEST_ADDRESS="")
-        tests_command = TestsCommand(app_config)
-        tests_command.run_scenario_tests = Mock(return_value=True)
-        tests_command.run_ssml_tests = Mock(return_value=True)
-        tests_command.execute("--run", "some_path")
-        expected_path = "some_path"
-        expected_pred_fields_storage = str(tests_command.DEFAULT_PREDEFINED_FIELDS_STORAGE)
-        expected_make_csv = False
-        tests_command.run_scenario_tests.assert_called_once_with(expected_path, expected_pred_fields_storage,
-                                                                 expected_make_csv)
-        tests_command.run_ssml_tests.assert_called_once_with()
-
-    async def test_run_path(self):
-        app_config = Mock(SSML_TEST_ADDRESS="")
+        app_config = Mock(SSML_TEST_ADDRESS="example.com")
         tests_command = TestsCommand(app_config)
         tests_command.run_scenario_tests = Mock(return_value=True)
         tests_command.run_ssml_tests = Mock(return_value=True)
@@ -81,7 +68,7 @@ class SystemAnswersTest1(unittest.IsolatedAsyncioTestCase):  # TODO тесты �
         tests_command.run_scenario_tests = Mock(return_value=True)
         tests_command.run_ssml_tests = Mock(return_value=True)
         tests_command.ssml_suite.test_single_string = Mock()
-        with unittest.mock.patch('builtins.input') as inp:
+        with unittest.mock.patch("builtins.input") as inp:
             inputs = iter(["<speak>a</speak>", "a", ""])
             is_none = Mock()
             is_none.__bool__ = lambda *args: next(inputs) != ""
