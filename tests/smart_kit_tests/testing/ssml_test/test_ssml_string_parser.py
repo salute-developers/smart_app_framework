@@ -8,8 +8,8 @@ from smart_kit.utils.object_location import ObjectLocation
 class SsmlStringParserTest1(unittest.IsolatedAsyncioTestCase):
     async def test_parse(self):
         expected_ssml = "<speak>С помощью <say-as interpret-as=\"spell-out\">SSML</say-as> разметки я умею делать " \
-                          "<break time=\"2s\" /> паузы, <break /> произносить слова по <say-as " \
-                          "interpret-as=\"characters\">буквам</say-as> и многое другое.</speak>"
+                        "<break time=\"2s\" /> паузы, <break /> произносить слова по <say-as " \
+                        "interpret-as=\"characters\">буквам</say-as> и многое другое.</speak>"
         expected_location = ObjectLocation(["scenarios", "tell_me_more_scenario", "actions", "[1]", "nodes",
                                             "pronounceText"])
         obj = {
