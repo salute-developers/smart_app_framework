@@ -58,6 +58,7 @@ incremental = "21.3.0"
 Twisted = "22.8.0"
 freezegun = "1.1.0"
 protobuf = "3.19.6"
+lxml = "4.9.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.0.0"
