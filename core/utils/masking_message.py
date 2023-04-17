@@ -2,7 +2,9 @@ from typing import Optional, Union, Match, Dict, List
 import re
 
 MASK = "***"
-DEFAULT_MASKING_FIELDS = {"token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "profileId": 0}
+DEFAULT_MASKING_FIELDS = {
+    "token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "profileId": 0, "searchResult": 0,
+}
 CARD_MASKING_FIELDS = ["message", "debug_info", "normalizedMessage", "incoming_text", "annotations", "inner_entities",
                        "preprocess_result", "original_message", "original_tokenized_elements"]
 
