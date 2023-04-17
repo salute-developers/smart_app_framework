@@ -6,6 +6,7 @@ from typing import Tuple, Dict, Callable, Any, List, Optional
 
 from core.logging.logger_utils import log
 from smart_kit.resources import SmartAppResources
+from smart_kit.testing.ssml_test.ssml_string_parser import ssml_string_parser
 from smart_kit.utils.object_location import ObjectLocation
 
 
@@ -20,9 +21,9 @@ class SsmlTestSuite:
     def test_statics(
             self,
             resources: SmartAppResources,
-            ssml_parsers: Dict[str, Callable[[Any, ObjectLocation], List[Tuple[str, ObjectLocation]]]]
+            ssml_resources: List[str]
     ) -> bool:
-        ssml_strings = self.collect_ssml_strings(resources, ssml_parsers)
+        ssml_strings = self.collect_ssml_strings(resources, ssml_resources)
         success_num = 0
         for ssml_string, location in ssml_strings:
             print(f"[+] Testing SSML string \"{ssml_string}\" from {location}")
@@ -33,14 +34,14 @@ class SsmlTestSuite:
     def collect_ssml_strings(
             self,
             resources: SmartAppResources,
-            resource_ssml_string_parsers: Dict[str, Callable[[Any, ObjectLocation], List[Tuple[str, ObjectLocation]]]]
+            ssml_resources: List[str]
     ) -> List[Tuple[str, ObjectLocation]]:
         """Returns list of tuples of parsed ssml-string and their locations"""
         ssml_strings = []
-        for resource_name, ssml_extractor in resource_ssml_string_parsers.items():
+        for resource_name in ssml_resources:
             resource = resources.get(resource_name)
             if resource:
-                extracted_strings = ssml_extractor(resource, ObjectLocation([resource_name]))
+                extracted_strings = ssml_string_parser(resource, ObjectLocation([resource_name]))
                 ssml_strings.extend(extracted_strings)
             else:
                 log(f"{resource_name} do not exist in resources", level="WARNING")

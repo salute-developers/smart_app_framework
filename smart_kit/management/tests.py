@@ -136,8 +136,8 @@ class TestsCommand(AppCommand):
             references_path=self.app_config.REFERENCES_PATH, app_name=self.app_config.APP_NAME)
         source = settings.get_source()
         resources = self.app_config.RESOURCES(source, self.app_config.REFERENCES_PATH, settings)
-        ssml_parsers = self.app_config.SSML_PARSERS
-        return self.ssml_suite.test_statics(resources, ssml_parsers)
+        ssml_resources = self.app_config.SSML_RESOURCES
+        return self.ssml_suite.test_statics(resources, ssml_resources)
 
     def run_interactive_ssml_tests(self) -> None:
         prompt = input("Enter ssml string to check (leave empty to exit):\n> ")

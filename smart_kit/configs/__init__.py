@@ -50,7 +50,6 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     from smart_kit.utils.cache import JSONCache
     from smart_kit.testing.suite import TestCase
     from smart_kit.testing.ssml_test.suite import SsmlTestSuite
-    from smart_kit.testing.ssml_test.ssml_string_parser import ssml_string_parser
 
     set_default(app_config, "LOCAL_TESTING", CLInterface)
     set_default(app_config, "TEST_CASE", TestCase)
@@ -69,8 +68,7 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     set_default(app_config, "FROM_MSG", SmartAppFromMessage)
     set_default(app_config, "SSML_TEST_SUITE", SsmlTestSuite)
     set_default(app_config, "SSML_TEST_ADDRESS", "http://tkle-mvp1466.vm.esrt.cloud.sbrf.ru:7100/validate_ssml")
-    set_default(app_config, "SSML_PARSERS", {"scenarios": ssml_string_parser, "forms": ssml_string_parser,
-                                             "external_actions": ssml_string_parser, "behaviors": ssml_string_parser})
+    set_default(app_config, "SSML_RESOURCES", ["scenarios", "forms", "external_actions", "behaviors"])
 
     set_default(app_config, "NORMALIZATION_CACHE_TTL", 0)
     set_default(app_config, "NORMALIZATION_CACHE", JSONCache)
