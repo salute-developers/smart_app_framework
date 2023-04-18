@@ -8,16 +8,31 @@ import logging
 from core.model.factory import build_factory
 from core.model.registered import Registered
 
-loggers_formatter = Registered()
 
-loggers_formatter_factory = build_factory(loggers_formatter)
+def to_num(s: str):
+    try:
+        return int(s)
+    except ValueError:
+        return float(s)
+
 
 TYPES = {
     'str': str,
     'dict': dict,
-    'int': int,
+    'int': Number,
     'bool': bool,
 }
+
+TYPE_CASTS = {
+    'str': str,
+    'dict': dict,
+    'int': to_num,
+    'bool': bool,
+}
+
+
+loggers_formatter = Registered()
+loggers_formatter_factory = build_factory(loggers_formatter)
 
 
 class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
@@ -62,7 +77,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
 
             # пытаемся кастануть тип
             try:
-                record_args[k] = TYPES[types[k]['type']](v)
+                record_args[k] = TYPE_CASTS[types[k]['type']](v)
             except ValueError:
                 record_args[k] = '__del__'
                 record_args[f'{k}__str'] = str(v)
