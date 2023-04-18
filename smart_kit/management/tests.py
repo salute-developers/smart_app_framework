@@ -6,6 +6,7 @@ import sys
 import smart_kit
 from core.descriptions.descriptions import Descriptions
 from smart_kit.management.base import AppCommand
+from smart_kit.testing.ssml_test.suite import SsmlTestSuite
 from smart_kit.testing.suite import TestSuite
 
 
@@ -17,6 +18,8 @@ def define_path(path):
 
 
 class TestsCommand(AppCommand):
+    """Command for testing scenarios and ssml strings in app"""
+
     TEST_TEMPLATE_PATH = "test_template.json"
     smart_kit_path = smart_kit.__path__[0]
     DEFAULT_TEMPLATE_PATH = os.path.join(smart_kit_path, "template/static/references/test_template.json")
@@ -26,17 +29,23 @@ class TestsCommand(AppCommand):
 
     def __init__(self, app_config):
         self.app_config = app_config
-        self.parser = argparse.ArgumentParser(description="Tests creating and running.")
-        self.parser.add_argument("path", metavar="PATH", type=str, help="Path to directory with tests", action="store")
+        self.ssml_suite = SsmlTestSuite(self.app_config.SSML_TEST_ADDRESS)
+        self.parser = argparse.ArgumentParser(description="Scenario tests creating and running.")
+        self.parser.add_argument("path", metavar="PATH", type=str, help="Path to directory with tests", action="store",
+                                 nargs="?", default="")
         self.parser.add_argument("predefined_fields_storage", metavar="PREDEFINED_FIELDS_STORAGE", type=str,
                                  help="Path to json file with stored predefined fields", action="store", nargs="?",
                                  default=str(self.DEFAULT_PREDEFINED_FIELDS_STORAGE))
         self.commands = self.parser.add_mutually_exclusive_group(required=True)
         self.commands.add_argument("--run", dest="run", help="Runs Tests", action="store_true")
         run_command = self.parser.add_argument_group("Running")
-        run_command.add_argument(
-            "--make-csv", dest="make_csv", help="Create csv file for tests results", action="store_true"
-        )
+        run_command.add_argument("--make-csv", dest="make_csv", help="Create csv file for tests results",
+                                 action="store_true")
+        run_command.add_argument("--ssml-off", dest="ssml_off", help="Do not run SSML tests", action="store_true")
+        run_command.add_argument("--scenarios-off", dest="scenarios_off", help="Do not run scenarios tests",
+                                 action="store_true")
+        run_command.add_argument("--ssml-interactive", dest="ssml_interactive",
+                                 help="Interactive mode of checking SSML strings", action="store_true")
 
         self.commands.add_argument(
             "--gen", dest="gen", help="Create test directory at provided path", action="store_true"
@@ -46,18 +55,41 @@ class TestsCommand(AppCommand):
             "--update", dest="update", help="Create missing template for scenarios", action="store_true",
         )
 
-    def execute(self, *args, **kwargs):
+    def execute(self, *args, **kwargs) -> None:
         namespace = self.parser.parse_args(args)
         if namespace.gen:
+            if not namespace.path:
+                self.parser.error("Tests generation utility require path")
             self.generate_tests_folder(namespace.path, namespace.update)
         elif namespace.run:
-            tests_ok = self.run_tests(namespace.path, namespace.predefined_fields_storage, namespace.make_csv)
-            if not tests_ok:
-                sys.exit(1)
+            if namespace.ssml_interactive:
+                if namespace.scenarios_off or namespace.ssml_off or namespace.make_csv:
+                    self.parser.error("--ssml-interactive and --scenarios-off|--ssml-off|--make-csv are mutually "
+                                      "exclusive")
+                self.run_interactive_ssml_tests()
+            else:
+                tests_ok = True
+                if not namespace.scenarios_off:
+                    if not namespace.path:
+                        self.parser.error("Scenario tests require path")
+                    print("Testing scenarios...")
+                    tests_ok = self.run_scenario_tests(namespace.path, namespace.predefined_fields_storage,
+                                                       namespace.make_csv)
+                    print("Testing scenarios done\n")
+                else:
+                    print("Scenarios tests are off. Skipping them.")
+                if not namespace.ssml_off:
+                    print("Testing SSML strings...")
+                    tests_ok = self.run_ssml_tests() and tests_ok
+                    print("Testing SSML strings done\n")
+                else:
+                    print("SSML tests are off. Skipping them.")
+                if not tests_ok:
+                    sys.exit(1)
         else:
             raise Exception("Something going wrong due parsing the args")
 
-    def generate_tests_folder(self, path: str, update=False):
+    def generate_tests_folder(self, path: str, update=False) -> None:
         settings = self.app_config.SETTINGS(
             config_path=self.app_config.CONFIGS_PATH, secret_path=self.app_config.SECRET_PATH,
             references_path=self.app_config.REFERENCES_PATH, app_name=self.app_config.APP_NAME
@@ -86,7 +118,7 @@ class TestsCommand(AppCommand):
                     if not update:
                         raise
 
-    def run_tests(self, path, predefined_fields_storage, make_csv) -> bool:
+    def run_scenario_tests(self, path, predefined_fields_storage, make_csv) -> bool:
         path = define_path(path)
         predefined_fields_storage = define_path(predefined_fields_storage)
         if not os.path.exists(path):
@@ -98,7 +130,22 @@ class TestsCommand(AppCommand):
         else:
             return TestSuite(path, self.app_config, predefined_fields_storage, make_csv).run()
 
-    def get_test_template_path(self):
+    def run_ssml_tests(self) -> bool:
+        settings = self.app_config.SETTINGS(
+            config_path=self.app_config.CONFIGS_PATH, secret_path=self.app_config.SECRET_PATH,
+            references_path=self.app_config.REFERENCES_PATH, app_name=self.app_config.APP_NAME)
+        source = settings.get_source()
+        resources = self.app_config.RESOURCES(source, self.app_config.REFERENCES_PATH, settings)
+        ssml_resources = self.app_config.SSML_RESOURCES
+        return self.ssml_suite.test_statics(resources, ssml_resources)
+
+    def run_interactive_ssml_tests(self) -> None:
+        prompt = input("Enter ssml string to check (leave empty to exit):\n> ")
+        while prompt:
+            self.ssml_suite.test_single_string(prompt)
+            prompt = input("> ")
+
+    def get_test_template_path(self) -> str:
         path = os.path.join(self.app_config.REFERENCES_PATH, self.TEST_TEMPLATE_PATH)
         if not os.path.exists(path):
             print(f"[!] Template for test file does not found. Expected at path {path}. Using default")

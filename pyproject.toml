@@ -51,13 +51,14 @@ tensorflow = [
     { version = "2.8.0", markers = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
 ]
 tensorflow-macos = {version = "2.8.0", markers = "sys_platform == 'darwin' and platform_machine == 'arm64'"}
-tensorflow-aarch64 = {version = "2.8.4", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'"}
+tensorflow-aarch64 = {version = "2.8.0", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'"}
 timeout-decorator = "0.4.1"
 tqdm = "4.64.1"
 incremental = "21.3.0"
 Twisted = "22.8.0"
 freezegun = "1.1.0"
 protobuf = "3.19.6"
+lxml = "4.9.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.0.0"
@@ -70,7 +71,7 @@ unit_test = "python -m unittest discover -b -v -s tests"
 runapp_http_test = """python -m smart_kit create_app http_test_app &&
                       cd http_test_app &&
                       PYTHONPATH=".." timeout 10 python manage.py run_app || code=$?;
-                      if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi"""
+                      if [ $code -ne 124 ] && [ $code -ne 0 ]; then exit $code; fi"""
 runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        python -m smart_kit create_app kafka_test_app &&
                        cp .github/kafka_config.yml kafka_test_app/static/configs/kafka_config.yml &&
@@ -80,7 +81,7 @@ runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        echo 'MAIN_LOOP = MainLoop' >> app_config.py
                        docker-compose -f ../.github/docker-compose.yml exec -T kafka kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 3 --topic toTestApp &&
                        PYTHONPATH=".." timeout 20 python manage.py run_app || code=$?;
-                       if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi"""
+                       if [ $code -ne 124 ] && [ $code -ne 0 ]; then exit $code; fi"""
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
