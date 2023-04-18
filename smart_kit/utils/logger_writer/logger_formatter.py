@@ -15,7 +15,7 @@ loggers_formatter_factory = build_factory(loggers_formatter)
 TYPES = {
     'str': str,
     'dict': dict,
-    'int': Number,
+    'int': int,
     'bool': bool,
 }
 
@@ -57,13 +57,13 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
                     continue
                 record_args[k] = self._check_fields(v, types[k]['fields'])
                 continue
-            if isinstance(v, TYPES[types[k]['type']]):  # все ок
+            if isinstance(v, TYPES[types[k]['type']]):  # noqa
                 continue
 
             # пытаемся кастануть тип
             try:
                 record_args[k] = TYPES[types[k]['type']](v)
-            except:
+            except ValueError:
                 record_args[k] = '__del__'
                 record_args[f'{k}__str'] = str(v)
 
