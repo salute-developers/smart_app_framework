@@ -11,6 +11,7 @@ class MemoryAdapter(AsyncDBAdapter):
 
     def __init__(self, config=None):
         super(AsyncDBAdapter, self).__init__(config)
+        config = self.config or {}
         self.init_params = copy(config.get("init_params", {}))
         self.init_params["getsizeof"] = len
         self.init_params.setdefault("maxsize", self.MEM_CACHE_SIZE)
