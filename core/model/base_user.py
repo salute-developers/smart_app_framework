@@ -24,7 +24,8 @@ class BaseUser(Model):
     variables: Variables
     private_vars: Variables
     local_vars: Variables
-    message_vars: Variables
+    message_vars: Variables  # работают в рамках обработки одного сообщения, очищаются каждое новое пришедшее сообщение.
+                             # Не сохраняются между запросами в интеграцию в рамках обработки одного mid.
     descriptions: Descriptions
 
     def __init__(self, id, message, values, descriptions, load_error=False):
