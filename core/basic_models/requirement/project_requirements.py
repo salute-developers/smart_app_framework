@@ -7,8 +7,6 @@ from scenarios.user.user_model import User
 
 
 class SettingsRequirement(Requirement):
-    cache_result = True
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
         self._config = items.get("config", "template_settings")

@@ -13,7 +13,6 @@ class AnySubstringInLoweredTextRequirement(Requirement):
     """Условие возвращает True, если хотя бы одна подстрока из списка substrings встречается
     в оригинальном тексте в нижнем регистре, иначе - False.
     """
-    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -49,7 +48,6 @@ class IntersectionWithTokensSetRequirement(NormalizedInputWordsRequirement):
     в список слов input_words, иначе - False.
     Слова из input_words также проходят нормализацию перед сравнением.
     """
-    cache_result = True
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -72,7 +70,6 @@ class NormalizedTextInSetRequirement(NormalizedInputWordsRequirement):
     """Условие возвращает True, если в нормализованном представлении запрос полностью совпадает с одной из
     нормализованных строк из input_words, иначе - False.
     """
-    cache_result = True
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
@@ -93,7 +90,6 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
     """Условие возвращает True, если кол-во номеров телефонов больше/меньше/.. X, иначе - False.
     Строго говоря, считается кол-во токенов, имеющих token_type = "PHONE_NUMBER_TOKEN".
     """
-    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
@@ -112,7 +108,6 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
 
 class NumInRangeRequirement(Requirement):
     """Условие возвращает True, если число находится в заданном диапазоне, иначе - False."""
-    cache_result = True
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
