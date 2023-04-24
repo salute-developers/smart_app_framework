@@ -28,9 +28,8 @@ class Variables:
         ttl = ttl if ttl is not None else self.DEFAULT_TTL
         self._storage[key] = value, time.time() + ttl
 
-    def update(self, key, value, ttl=None) -> None:
-        _, old_expire_time = self._storage[key]
-        expire_time = ttl + time.time() if ttl else old_expire_time
+    def update(self, key, value) -> None:
+        _, expire_time = self._storage[key]
         self._storage[key] = value, expire_time
 
     def get(self, key, default=None):
