@@ -96,11 +96,6 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         except AttributeError:
             message_maker = LoggerMessageCreator
 
-        # cast log_params["params"] to str
-        # TODO: think how to make it more general
-        if params and "params" in params:
-            params["params"] = str(params["params"])
-
         log_store_for_map = getattr(logging, "log_store_for_map", None)
         if log_store_for_map is not None and params is not None:
             log_store_for = log_store_for_map.get(params.get(log_const.KEY_NAME), log_store_for)
@@ -114,7 +109,7 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         # см. tests.core_tests.test_utils.test_logger.TestLogger.test_escaping
         message = message_maker.escape(message)
 
-        logger.log(level_name, message, params, exc_info=exc_info)
+        logger.log(level_name, message, params, exc_info=exc_info, stacklevel=2)
     except timeout_decorator.TimeoutError:
         raise
     except Exception:

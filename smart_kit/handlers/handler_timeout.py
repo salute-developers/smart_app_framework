@@ -15,7 +15,7 @@ from core.monitoring.monitoring import monitoring
 class HandlerTimeout(HandlerBase):
 
     async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+        commands = []
         callback_id = user.message.callback_id
         if user.behaviors.has_callback(callback_id):
             params = {log_const.KEY_NAME: "handling_timeout"}

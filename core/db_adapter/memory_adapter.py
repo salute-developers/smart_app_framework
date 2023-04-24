@@ -1,12 +1,22 @@
-from core.db_adapter import error
 from core.db_adapter.db_adapter import AsyncDBAdapter
+from copy import copy
+from cachetools import TTLCache
+from core.db_adapter import error
 
 
 class MemoryAdapter(AsyncDBAdapter):
+    IS_ASYNC = True
+    MEM_CACHE_SIZE = 250 * 1024 * 1024
+    TTL = 12 * 60 * 60
 
     def __init__(self, config=None):
         super(AsyncDBAdapter, self).__init__(config)
-        self.memory_storage = {}
+        config = self.config or {}
+        self.init_params = copy(config.get("init_params", {}))
+        self.init_params["getsizeof"] = len
+        self.init_params.setdefault("maxsize", self.MEM_CACHE_SIZE)
+        self.init_params.setdefault("ttl", self.TTL)
+        self.memory_storage = TTLCache(**self.init_params)
 
     async def _glob(self, path, pattern):
         raise error.NotSupportedOperation

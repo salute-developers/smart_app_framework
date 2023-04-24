@@ -43,7 +43,7 @@ def run_testfile(
             csv_case_callback = csv_file_callback(test_case)
         else:
             csv_case_callback = None
-        if asyncio.get_event_loop().run_until_complete(TestCase(
+        if asyncio.get_event_loop().run_until_complete(test_case_cls(
             app_model,
             settings,
             user_cls,
@@ -109,7 +109,7 @@ class TestSuite:
                                         references_path=self.app_config.REFERENCES_PATH,
                                         app_name=self.app_config.APP_NAME)
 
-    def run(self):
+    def run(self) -> bool:
         total = 0
         total_success = 0
         for path, dirs, files in os.walk(self.path):
@@ -136,6 +136,7 @@ class TestSuite:
                 total_success += file_success
 
         print(f"[+] Total: {total_success}/{total}")
+        return total_success == total
 
 
 class TestCase:
@@ -155,7 +156,7 @@ class TestCase:
         self.__user_cls = user_cls
         self.__from_msg_cls = from_msg_cls
 
-    async def run(self) -> bool:
+    async def _run(self) -> bool:
         success = True
 
         app_callback_id = None
@@ -226,6 +227,12 @@ class TestCase:
             self.user_state = user.raw_str
         return success
 
+    async def run(self) -> bool:
+        try:
+            return await self._run()
+        finally:
+            self.finalize()
+
     def _generate_answers(self, user, commands, message):
         answers = []
         commands = commands or []
@@ -273,4 +280,7 @@ class TestCase:
         return response
 
     def post_setup_user(self, user):
+        pass
+
+    def finalize(self):
         pass
