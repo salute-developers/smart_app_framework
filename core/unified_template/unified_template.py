@@ -84,19 +84,3 @@ class UnifiedTemplate:
 
     def __str__(self):
         return str(self.input)
-
-
-if __name__ == '__main__':
-    template = UnifiedTemplate(
-        {
-            "type": "unified_template",
-            "template": "{{ (get_config() or {})['abra'] | tojson }}",
-            "loader": "json",
-        }
-    )
-
-    rendered = template.render(**{
-        "get_config": lambda: {"abra": 42}
-    })
-
-    print(rendered)
