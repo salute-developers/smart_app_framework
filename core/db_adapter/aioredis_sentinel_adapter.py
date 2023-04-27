@@ -2,7 +2,7 @@ import copy
 
 import typing
 
-from aioredis.sentinel import Sentinel
+from redis.asyncio.sentinel import Sentinel
 from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.db_adapter import error
 from core.monitoring.monitoring import monitoring

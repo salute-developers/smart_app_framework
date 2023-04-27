@@ -1,6 +1,9 @@
+import json
+
 from core.basic_models.requirement.basic_requirements import requirements
 from core.basic_models.actions.basic_actions import actions
 from core.db_adapter.db_adapter import db_adapters
+from core.repositories.classifier_repository import ClassifierRepository
 import scenarios.scenario_models.field.field_filler_description as ffd
 from smart_kit.resources import SmartAppResources
 
@@ -21,7 +24,16 @@ class CustomAppResources(SmartAppResources):
         :param repositories: Список репозиториев родителя
         :return: Переопределённый в наследниках список репозиториев
         """
-        return repositories
+        result_repositories = repositories + [
+            ClassifierRepository(
+                description_path=self.subfolder_path("classifiers"),
+                data_path=self.subfolder_path("classifiers_data"),
+                loader=json.loads,
+                source=self.source,
+                key="external_classifiers"
+            ),
+        ]
+        return result_repositories
 
     def init_field_filler_description(self):
         super().init_field_filler_description()

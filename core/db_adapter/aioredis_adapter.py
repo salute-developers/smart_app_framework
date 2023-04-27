@@ -1,6 +1,6 @@
 import copy
 
-import aioredis
+from redis import asyncio as aioredis
 import typing
 
 from core.db_adapter.db_adapter import AsyncDBAdapter
