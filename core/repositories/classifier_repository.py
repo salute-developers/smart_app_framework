@@ -4,7 +4,7 @@ if _get_distribution_safe("tensorflow") is None:
     raise RuntimeError(
         """
         Your version of smart-app-framework has no necessary ML libraries.
-        Install smart-app-framework[ml] to use this module 
+        Install smart-app-framework[ml] to use this module
         """
     )
 

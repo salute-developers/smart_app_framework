@@ -28,7 +28,7 @@ class DillRepository(BaseRepository):
             py_version = sys.version_info
             py_suffix = f"_py{py_version.major}{py_version.minor}"
             py_version_resolved_filename = (
-                    self.filename.parent / f"{self.filename.stem}{py_suffix}{self.filename.suffix}"
+                self.filename.parent / f"{self.filename.stem}{py_suffix}{self.filename.suffix}"
             )
             with self.source.open(py_version_resolved_filename, 'rb') as stream:
                 data = dill.load(stream)
