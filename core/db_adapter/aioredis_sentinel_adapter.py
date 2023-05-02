@@ -1,18 +1,19 @@
 import copy
-
+import importlib
 import typing
 
-from redis.asyncio.sentinel import Sentinel
-from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.db_adapter import error
-from core.monitoring.monitoring import monitoring
+from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.logging.logger_utils import log
+from core.monitoring.monitoring import monitoring
 
 
 class AIORedisSentinelAdapter(AsyncDBAdapter):
     def __init__(self, config=None):
         super().__init__(config)
-        self._sentinel: typing.Optional[Sentinel] = None
+        self.aioredis = importlib.import_module("redis", "asyncio")
+        sentinel_type = self.aioredis.sentinel.Sentinel
+        self._sentinel: typing.Optional[sentinel_type] = None
         self.service_name = None
         self.socket_timeout = None
 
@@ -51,7 +52,7 @@ class AIORedisSentinelAdapter(AsyncDBAdapter):
         sentinels_tuples = []
         for sent in sentinels:
             sentinels_tuples.append(tuple(sent))
-        self._sentinel = Sentinel(sentinels_tuples, **config)
+        self._sentinel = self.aioredis.sentinel.Sentinel(sentinels_tuples, **config)
 
     async def _open(self, filename, *args, **kwargs):
         pass
