@@ -9,7 +9,7 @@ from core.model.factory import build_factory
 from core.model.registered import Registered
 
 
-def to_num(s: str):
+def to_num(s):
     try:
         return int(s)
     except ValueError:
@@ -63,7 +63,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         if types is None:
             return record_args
         for k, v in record_args.items():
-            if k not in types:  # скипаем проверку если поля нет в конфиге
+            if k not in types or v is None:  # скипаем проверку если поля нет в конфиге, или value = None
                 continue
             if types[k]['type'] == 'dict':  # отдельно рекурсивно обрабатываем словари
                 if not isinstance(v, dict):  # преобразуем в строку в новое поле, если тип не соответсвует
@@ -78,7 +78,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
             # пытаемся кастануть тип
             try:
                 record_args[k] = TYPE_CASTS[types[k]['type']](v)
-            except ValueError:
+            except (ValueError, TypeError):
                 record_args[k] = '__del__'
                 record_args[f'{k}__str'] = str(v)
 
