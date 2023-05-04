@@ -3,7 +3,7 @@ import shutil
 
 import smart_kit
 from smart_kit.management.base import Manager, AppCommand
-from smart_kit.management.version import get_nlpf_version
+from core.utils.version import get_nlpf_version
 
 
 class SmartKitManager(Manager):

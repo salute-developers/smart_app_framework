@@ -1,5 +1,3 @@
-import json
-
 import core.basic_models.operators.comparators as cmp
 import core.basic_models.operators.operators as op
 import core.basic_models.requirement.device_requirements as dr
@@ -53,7 +51,6 @@ from core.descriptions.descriptions import registered_description_factories
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
     LimitedQueuedHashableObjectsDescriptionsItems
 from core.model.registered import registered_factories
-from core.repositories.classifier_repository import ClassifierRepository
 from core.repositories.file_repository import FileRepository
 from core.repositories.folder_repository import FolderRepository
 from core.request.base_request import requests_registered
@@ -132,13 +129,6 @@ class SmartAppResources(BaseConfig):
                            source=source, key="last_action_ids"),
             FolderRepository(self.subfolder_path("bundles"), loader=ordered_json, source=source,
                              key="bundles"),
-            ClassifierRepository(
-                description_path=self.subfolder_path("classifiers"),
-                data_path=self.subfolder_path("classifiers_data"),
-                loader=json.loads,
-                source=source,
-                key="external_classifiers"
-            )
         ]
 
         self.repositories = self.override_repositories(self.repositories)

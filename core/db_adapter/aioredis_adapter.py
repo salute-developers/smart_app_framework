@@ -1,19 +1,19 @@
 import copy
-
-import aioredis
+import importlib
 import typing
 
-from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.db_adapter import error
-from core.monitoring.monitoring import monitoring
-
+from core.db_adapter.db_adapter import AsyncDBAdapter
 from core.logging.logger_utils import log
+from core.monitoring.monitoring import monitoring
 
 
 class AIORedisAdapter(AsyncDBAdapter):
     def __init__(self, config=None):
         super().__init__(config)
-        self._redis: typing.Optional[aioredis.Redis] = None
+        self.aioredis = importlib.import_module("redis", "asyncio")
+        redis_type = self.aioredis.Redis
+        self._redis: typing.Optional[redis_type] = None
 
         try:
             del self.config["type"]
@@ -43,7 +43,7 @@ class AIORedisAdapter(AsyncDBAdapter):
         if not isinstance(redis_url, str):
             raise ValueError(
                 "redis should be specified like redis://[[username]:[password]]@localhost:6379/0")
-        self._redis = aioredis.from_url(redis_url, **config)
+        self._redis = self.aioredis.from_url(redis_url, **config)
 
     def _open(self, filename, *args, **kwargs):
         pass
