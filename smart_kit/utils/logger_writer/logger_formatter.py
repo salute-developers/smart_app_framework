@@ -65,7 +65,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         for k, v in record_args.items():
             if k not in types or v is None:  # скипаем проверку если поля нет в конфиге, или value = None
                 continue
-            if types[k]['type'] == 'dict':  # отдельно рекурсивно обрабатываем словари
+            if types[k]["type"] == "dict":  # отдельно рекурсивно обрабатываем словари
                 if not isinstance(v, dict):  # преобразуем в строку в новое поле, если тип не соответсвует
                     record_args[k] = '__del__'
                     record_args[f'{k}__str'] = str(v)
