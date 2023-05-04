@@ -17,17 +17,17 @@ def to_num(s):
 
 
 TYPES = {
-    'str': str,
-    'dict': dict,
-    'int': Number,
-    'bool': bool,
+    "str": str,
+    "dict": dict,
+    "int": Number,
+    "bool": bool,
 }
 
 TYPE_CASTS = {
-    'str': str,
-    'dict': dict,
-    'int': to_num,
-    'bool': bool,
+    "str": str,
+    "dict": dict,
+    "int": to_num,
+    "bool": bool,
 }
 
 
@@ -49,13 +49,13 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         super(SmartKitJsonFormatter, self).add_fields(log_record, record, message_dict)
         dt = datetime.fromtimestamp(record.created)
         st = dt.strftime("%Y-%m-%dT%H:%M:%S")
-        log_record['timestamp'] = "%s.%06d" % (st, record.msecs * 1000)
-        log_record['version'] = self.VERSION
-        log_record['nlpf_version'] = self.NLPF_VERSION
-        log_record['team'] = self.DEV_TEAM
-        log_record['application'] = self.APPLICATION_NAME
+        log_record["timestamp"] = "%s.%06d" % (st, record.msecs * 1000)
+        log_record["version"] = self.VERSION
+        log_record["nlpf_version"] = self.NLPF_VERSION
+        log_record["team"] = self.DEV_TEAM
+        log_record["application"] = self.APPLICATION_NAME
         if isinstance(record.args, dict):
-            log_record['args'] = self._check_fields(record.args)
+            log_record["args"] = self._check_fields(record.args)
 
     def _check_fields(self, record_args: Dict[str, Any], types: Optional[Dict[str, dict]] = None):
         if types is None:
@@ -67,22 +67,22 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
                 continue
             if types[k]["type"] == "dict":  # отдельно рекурсивно обрабатываем словари
                 if not isinstance(v, dict):  # преобразуем в строку в новое поле, если тип не соответсвует
-                    record_args[k] = '__del__'
-                    record_args[f'{k}__str'] = str(v)
+                    record_args[k] = "__del__"
+                    record_args[f"{k}__str"] = str(v)
                     continue
-                record_args[k] = self._check_fields(v, types[k]['fields'])
+                record_args[k] = self._check_fields(v, types[k]["fields"])
                 continue
-            if isinstance(v, TYPES[types[k]['type']]):  # noqa
+            if isinstance(v, TYPES[types[k]["type"]]):  # noqa
                 continue
 
             # пытаемся кастануть тип
             try:
-                record_args[k] = TYPE_CASTS[types[k]['type']](v)
+                record_args[k] = TYPE_CASTS[types[k]["type"]](v)
             except (ValueError, TypeError):
-                record_args[k] = '__del__'
-                record_args[f'{k}__str'] = str(v)
+                record_args[k] = "__del__"
+                record_args[f"{k}__str"] = str(v)
 
-        return {k: v for k, v in record_args.items() if v != '__del__'}
+        return {k: v for k, v in record_args.items() if v != "__del__"}
 
     def format(self, record: logging.LogRecord) -> str:
         # В готовый json логов добавляем поле с размером json-а.
