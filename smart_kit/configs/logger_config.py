@@ -5,7 +5,7 @@ import yaml
 
 from core.configs.base_config import BaseConfig
 from core.repositories.file_repository import FileRepository
-from smart_kit.management.version import get_nlpf_version
+from core.utils.version import get_nlpf_version
 from smart_kit.utils.logger_writer.logger_formatter import SmartKitJsonFormatter
 
 

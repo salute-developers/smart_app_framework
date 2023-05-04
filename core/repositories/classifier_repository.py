@@ -1,4 +1,4 @@
-from smart_kit.management.version import _get_distribution_safe
+from core.utils.version import _get_distribution_safe
 
 if _get_distribution_safe("tensorflow") is None:
     raise RuntimeError(
