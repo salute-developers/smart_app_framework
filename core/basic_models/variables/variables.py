@@ -18,7 +18,7 @@ class Variables:
     @property
     def values(self) -> Dict[str, Any]:
         self.expire()
-        return {key: value[0] for key, value in self._storage}
+        return {key: value[0] for key, value in self._storage.items()}
 
     def set(self, key, value, ttl=None) -> None:
         ttl = ttl if ttl is not None else self.DEFAULT_TTL
