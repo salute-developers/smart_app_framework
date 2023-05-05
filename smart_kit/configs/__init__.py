@@ -1,5 +1,6 @@
 import importlib
 import os
+from functools import lru_cache
 
 ENVIRONMENT_VARIABLE = "SMART_KIT_APP_CONFIG"
 
@@ -17,6 +18,7 @@ def get_static_path(app_config_path):
     return static_path
 
 
+@lru_cache
 def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     app_config = os.getenv(environment_variable)
     app_config = importlib.import_module(app_config)
@@ -47,6 +49,7 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
     from smart_kit.utils.cache import JSONCache
     from smart_kit.testing.suite import TestCase
+    from smart_kit.testing.ssml_test.suite import SsmlTestSuite
 
     set_default(app_config, "LOCAL_TESTING", CLInterface)
     set_default(app_config, "TEST_CASE", TestCase)
@@ -63,6 +66,9 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     set_default(app_config, "SETTINGS", Settings)
     set_default(app_config, "RESOURCES", SmartAppResources)
     set_default(app_config, "FROM_MSG", SmartAppFromMessage)
+    set_default(app_config, "SSML_TEST_SUITE", SsmlTestSuite)
+    set_default(app_config, "SSML_TEST_ADDRESS", "http://tkle-mvp1466.vm.esrt.cloud.sbrf.ru:7100/validate_ssml")
+    set_default(app_config, "SSML_RESOURCES", ["scenarios", "forms", "external_actions", "behaviors"])
 
     set_default(app_config, "NORMALIZATION_CACHE_TTL", 0)
     set_default(app_config, "NORMALIZATION_CACHE", JSONCache)

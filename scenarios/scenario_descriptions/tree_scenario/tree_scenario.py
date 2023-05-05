@@ -1,6 +1,7 @@
 # coding: utf-8
-from typing import Dict, Any
+from typing import Dict, Any, List
 
+from core.basic_models.actions.command import Command
 from scenarios.scenario_descriptions.form_filling_scenario import FormFillingScenario
 from scenarios.scenario_descriptions.tree_scenario.tree_scenario_node import TreeScenarioNode
 from core.model.factory import dict_factory
@@ -84,7 +85,7 @@ class TreeScenario(FormFillingScenario):
         return all_forms_fields
 
     @monitoring.got_histogram("scenario_time")
-    def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None):
+    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         main_form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)
@@ -124,14 +125,14 @@ class TreeScenario(FormFillingScenario):
                         fill_other = fill_other and field_descr.fill_other
                         field_data = {field_key: extracted}
                         _validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
-                                                                               internal_form, field_data, params)
+                                                                              internal_form, field_data, params)
                         if _validation_error_msg:
                             # return only first validation message in form
                             validation_error_msg = validation_error_msg or _validation_error_msg
                         else:
                             data_extracted.update(field_data)
-            on_filled_node_actions, is_break = self._fill_form(user, text_preprocessing_result,
-                                                               internal_form, data_extracted)
+            on_filled_node_actions, is_break = await self._fill_form(user, text_preprocessing_result,
+                                                                     internal_form, data_extracted)
             if is_break:
                 return on_filled_node_actions
             on_filled_actions.extend(on_filled_node_actions)
@@ -159,7 +160,7 @@ class TreeScenario(FormFillingScenario):
             new_node = self.get_next_node(user, current_node, text_preprocessing_result, params)
 
         field = self._find_field(form, text_preprocessing_result,
-                                                   user, params) if form else None
+                                 user, params) if form else None
 
         reply_commands = on_filled_actions
         if field:
@@ -169,10 +170,10 @@ class TreeScenario(FormFillingScenario):
                           content={HistoryConstants.content_fields.FIELD: field.description.id},
                           result=HistoryConstants.event_results.ASK_QUESTION)
             user.history.add_event(event)
-        _command = self.get_reply(user, text_preprocessing_result, current_node.actions, field, main_form)
+        _command = await self.get_reply(user, text_preprocessing_result, current_node.actions, field, main_form)
         reply_commands.extend(_command)
 
         if not reply_commands:
-            reply_commands = self.get_no_commands_action(user, text_preprocessing_result)
+            reply_commands = await self.get_no_commands_action(user, text_preprocessing_result)
 
         return reply_commands

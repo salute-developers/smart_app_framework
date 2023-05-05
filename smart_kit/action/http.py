@@ -1,7 +1,9 @@
-import json
+import asyncio
 from typing import Optional, Dict, Union, List, Any
 
-import requests
+import aiohttp
+import aiohttp.client_exceptions
+from aiohttp import ClientTimeout
 
 import core.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
@@ -49,8 +51,11 @@ class HTTPRequestAction(NodeAction):
 
     def preprocess(self, user, text_processing, params):
         behavior_description = user.descriptions["behaviors"].get(self.behavior)
-        timeout = behavior_description.timeout(user) if behavior_description else self.DEFAULT_TIMEOUT
-        self.method_params.setdefault("timeout", timeout)
+        self.method_params.setdefault(
+            "timeout",
+            behavior_description.timeout(user) if behavior_description else self.DEFAULT_TIMEOUT
+        )
+        self.method_params["timeout"] = ClientTimeout(self.method_params["timeout"])
 
     @staticmethod
     def _check_headers_validity(headers: Dict[str, Any], user) -> Dict[str, str]:
@@ -60,28 +65,30 @@ class HTTPRequestAction(NodeAction):
                     headers[header_name] = str(header_value)
                 else:
                     log(f"{__class__.__name__}._check_headers_validity remove header {header_name} because "
-                        f"({type(header_value)}) is not in [int, float, bool, str, bytes]", user=user, params={
-                        log_const.KEY_NAME: "sent_http_remove_header",
-                    })
+                        f"({type(header_value)}) is not in [int, float, bool, str, bytes]", user=user,
+                        params={
+                            log_const.KEY_NAME: "sent_http_remove_header",
+                        })
                     del headers[header_name]
         return headers
 
-    def _make_response(self, request_parameters, user):
+    async def _make_response(self, request_parameters: dict, user: BaseUser):
         try:
-            with requests.request(**request_parameters) as response:
+            async with aiohttp.request(**request_parameters) as response:
                 response.raise_for_status()
                 self._log_response(user, response)
                 return response
-        except requests.exceptions.Timeout:
+        except (aiohttp.ServerTimeoutError, asyncio.TimeoutError):
             self.error = self.TIMEOUT
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError):
+        except aiohttp.ClientError:
             self.error = self.CONNECTION
 
     def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                             params: Optional[Dict[str, Union[str, float, int]]] = None):
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
-        request_parameters = self._get_rendered_tree_recursive(self._get_template_tree(self.method_params), params)
+        request_parameters = self._get_rendered_tree_recursive(self._get_template_tree(self.method_params),
+                                                               params)
         req_headers = request_parameters.get("headers")
         if req_headers:
             # Заголовки в запросах должны иметь тип str или bytes. Поэтому добавлена проверка и приведение к типу str,
@@ -101,37 +108,37 @@ class HTTPRequestAction(NodeAction):
         additional_params = additional_params or {}
         log(f"{self.__class__.__name__}.run get https response ", user=user, params={
             'headers': dict(response.headers),
-            'time': response.elapsed.microseconds,
-            'cookie': {i.name: i.value for i in response.cookies},
-            'status': response.status_code,
+            'cookie': {k: v.value for k, v in response.cookies.items()},
+            'status': response.status,
             log_const.KEY_NAME: "got_http_response",
             **additional_params,
         })
 
-    def process_result(self, response, user, text_preprocessing_result, params):
+    async def process_result(self, response, user, text_preprocessing_result, params):
         behavior_description = user.descriptions["behaviors"][self.behavior] if self.behavior else None
         action = None
         if self.error is None:
             try:
-                data = response.json()
-            except json.decoder.JSONDecodeError:
+                data = await response.json()
+            except aiohttp.client_exceptions.ContentTypeError:
                 data = None
             user.variables.set(self.store, data)
             action = behavior_description.success_action if behavior_description else None
-        elif behavior_description:
+        elif behavior_description is not None:
             if self.error == self.TIMEOUT:
                 action = behavior_description.timeout_action
             else:
                 action = behavior_description.fail_action
-        return action.run(user, text_preprocessing_result, None) if action else None
+        if action:
+            return await action.run(user, text_preprocessing_result, None)
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self.preprocess(user, text_preprocessing_result, params)
         params = params or {}
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)
         self._log_request(user, request_parameters)
-        response = self._make_response(request_parameters, user)
+        response = await self._make_response(request_parameters, user)
         if response:
             log("response data: %(body)s", params={"body": response.json()}, level="INFO")
-        return self.process_result(response, user, text_preprocessing_result, params)
+        return await self.process_result(response, user, text_preprocessing_result, params)

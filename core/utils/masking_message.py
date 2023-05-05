@@ -2,7 +2,9 @@ from typing import Optional, Union, Match, Dict, List
 import re
 
 MASK = "***"
-DEFAULT_MASKING_FIELDS = {"token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "profileId": 0}
+DEFAULT_MASKING_FIELDS = {
+    "token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "profileId": 0, "searchResult": 0,
+}
 CARD_MASKING_FIELDS = ["message", "debug_info", "normalizedMessage", "incoming_text", "annotations", "inner_entities",
                        "preprocess_result", "original_message", "original_tokenized_elements"]
 
@@ -84,7 +86,7 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
                                                 mask_available_depth, masking_on=True)
                 else:
                     counter = structure_mask(data[key], depth=1, available_depth=mask_available_depth)
-                    masked_data[key] = f'*items-{counter.items}*collections-{counter.collections}*maxdepth-{counter.max_depth}*'
+                    masked_data[key] = f'*items-{counter.items}*collections-{counter.collections}*maxdepth-{counter.max_depth}*'  # noqa
             elif data[key] is not None:  # в случае простого элемента. маскируем как ***
                 masked_data[key] = '***'
             else:
@@ -133,7 +135,7 @@ def structure_mask(data: Union[Dict, List], depth: int, available_depth: int = -
         counter = Counter()
 
     for key, _ in key_gen:
-        if isinstance(data[key],(dict, list)):
+        if isinstance(data[key], (dict, list)):
             counter.collections += 1
             # если встречаем коллекцию и глубина не превышена идем внутрь
             if depth < available_depth or available_depth == -1:

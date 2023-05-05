@@ -6,13 +6,15 @@ import core.logging.logger_constants as log_const
 
 class TwistedServer:
     def __init__(self, port, interface, handler, debug=False):
-        log("TwistedServer.__init__ started.", params={log_const.KEY_NAME: log_const.TWISTED_SERVER},
-                      level="WARNING")
+        log("TwistedServer.__init__ started.",
+            params={log_const.KEY_NAME: log_const.TWISTED_SERVER},
+            level="WARNING")
         site = server.Site(handler(debug=debug))
         reactor.listenTCP(port, site, interface=interface or "")
         reactor.startRunning(False)
-        log("TwistedServer.__init__ finished.", params={log_const.KEY_NAME: log_const.TWISTED_SERVER},
-                      level="WARNING")
+        log("TwistedServer.__init__ finished.",
+            params={log_const.KEY_NAME: log_const.TWISTED_SERVER},
+            level="WARNING")
 
     def iterate(self):
         reactor.iterate()

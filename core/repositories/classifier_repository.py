@@ -1,9 +1,19 @@
+from core.utils.version import _get_distribution_safe
+
+if _get_distribution_safe("tensorflow") is None:
+    raise RuntimeError(
+        """
+        Your version of smart-app-framework has no necessary ML libraries.
+        Install smart-app-framework[ml] to use this module
+        """
+    )
+
 import os
 from collections import OrderedDict
 from typing import Callable, Any, Dict
 
 import tensorflow as tf
-from keras.utils.generic_utils import CustomObjectScope
+from tensorflow.keras.utils import CustomObjectScope
 
 import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import SkipClassifier, SciKitClassifier, ExternalClassifier, \
@@ -48,8 +58,8 @@ class ClassifierRepository(BaseRepository):
         res = False
         # Проверяем что существуют обе директории: с конфигами классификаторов и чекпоинтами моделей,
         # также проверяем что эти обе директории не пустые
-        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path))
-                and os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
+        if (os.path.exists(self._description_path) and len(os.listdir(self._description_path)) and
+                os.path.exists(self._data_path) and len(os.listdir(self._data_path))):
             res = True
         return res
 
@@ -67,7 +77,7 @@ class ClassifierRepository(BaseRepository):
         self._folder_repository.load()
         classifiers_dict = self._folder_repository.data
 
-        gpu_available = tf.test.is_gpu_available()
+        gpu_available = len(tf.config.list_physical_devices("GPU")) > 0
         repository = None
 
         for classifier_key in classifiers_dict:

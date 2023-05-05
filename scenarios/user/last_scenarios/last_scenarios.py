@@ -25,7 +25,6 @@ class LastScenarios:
         if scenario_name in self.scenarios_names:
             self.scenarios_names.remove(scenario_name)
 
-
     @property
     def last_scenario_name(self):
         return self.scenarios_names[-1] if self.scenarios_names else None

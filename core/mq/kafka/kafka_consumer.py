@@ -59,15 +59,17 @@ class KafkaConsumer(BaseKafkaConsumer):
         log("KafkaConsumer.subscribe<on_assign>: assign %(partitions)s %(log_level)s", params=params, level=log_level)
 
     def subscribe(self, topics=None):
-        topics = topics or list(self._config["topics"].values())
+        topics = list(set(topics or list(self._config["topics"].values())))
 
         params = {
             "topics": topics
         }
         log("Topics to subscribe: %(topics)s", params=params)
 
-        self._consumer.subscribe(topics,
-                                 on_assign=self.get_on_assign_callback() if self.assign_offset_end else KafkaConsumer.on_assign_log)
+        self._consumer.subscribe(
+            topics,
+            on_assign=self.get_on_assign_callback() if self.assign_offset_end else KafkaConsumer.on_assign_log
+        )
 
     def get_on_assign_callback(self):
         if "cooperative" in self._config["conf"].get("partition.assignment.strategy", ""):

@@ -1,5 +1,3 @@
-import json
-
 import core.basic_models.operators.comparators as cmp
 import core.basic_models.operators.operators as op
 import core.basic_models.requirement.device_requirements as dr
@@ -13,8 +11,11 @@ from core.basic_models.actions.counter_actions import CounterIncrementAction, Co
     CounterClearAction, CounterSetAction, CounterCopyAction
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.external_actions import ExternalActions
-from core.basic_models.actions.push_action import PushAction, PushActionHttp, PushAuthenticationActionHttp, PUSH_NOTIFY, \
-    GetRuntimePermissionsAction
+from core.basic_models.actions.push_action import (PushAction,
+                                                   PushActionHttp,
+                                                   PushAuthenticationActionHttp,
+                                                   PUSH_NOTIFY,
+                                                   GetRuntimePermissionsAction)
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
@@ -45,14 +46,11 @@ from core.configs.base_config import BaseConfig
 from core.db_adapter.aioredis_adapter import AIORedisAdapter
 from core.db_adapter.db_adapter import db_adapters
 from core.db_adapter.ignite_adapter import IgniteAdapter
-from core.db_adapter.ignite_thread_adapter import IgniteThreadAdapter
 from core.db_adapter.memory_adapter import MemoryAdapter
-from core.db_adapter.redis_adapter import RedisAdapter
 from core.descriptions.descriptions import registered_description_factories
 from core.model.queued_objects.limited_queued_hashable_objects_description import \
     LimitedQueuedHashableObjectsDescriptionsItems
 from core.model.registered import registered_factories
-from core.repositories.classifier_repository import ClassifierRepository
 from core.repositories.file_repository import FileRepository
 from core.repositories.folder_repository import FolderRepository
 from core.request.base_request import requests_registered
@@ -131,13 +129,6 @@ class SmartAppResources(BaseConfig):
                            source=source, key="last_action_ids"),
             FolderRepository(self.subfolder_path("bundles"), loader=ordered_json, source=source,
                              key="bundles"),
-            ClassifierRepository(
-                description_path=self.subfolder_path("classifiers"),
-                data_path=self.subfolder_path("classifiers_data"),
-                loader=json.loads,
-                source=source,
-                key="external_classifiers"
-            )
         ]
 
         self.repositories = self.override_repositories(self.repositories)
@@ -407,9 +398,7 @@ class SmartAppResources(BaseConfig):
     def init_db_adapters(self):
         db_adapters[None] = MemoryAdapter
         db_adapters["ignite"] = IgniteAdapter
-        db_adapters["ignite_thread"] = IgniteThreadAdapter
         db_adapters["memory"] = MemoryAdapter
-        db_adapters["redis"] = RedisAdapter
         db_adapters["aioredis"] = AIORedisAdapter
         db_adapters["aioredis_sentinel"] = AIORedisSentinelAdapter
 

@@ -25,8 +25,10 @@ class PushAction(StringAction):
             "type": "push",
             "surface": "COMPANION", // не обязательное, по дефолту "COMPANION", без шаблонной генерации
             "content": {
-                "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!{% else %}Хотите что нибудь заказать?{% endif %}",
-                "fullText": "В нашем магазине большой ассортимент{% if day_time = 'evening' %}. Успей заказать!{% endif %}",
+                "notificationHeader": "{% if day_time = 'morning' %}Время завтракать!"
+                                      "{% else %}Хотите что нибудь заказать?{% endif %}",
+                "fullText": "В нашем магазине большой ассортимент"
+                            "{% if day_time = 'evening' %}. Успей заказать!{% endif %}",
                 "mobileAppParameters": {
                     "DeeplinkAndroid": "{[ deep_link_url }}",
                     "DeeplinkIos": "{{ deep_link_url }}",
@@ -66,8 +68,8 @@ class PushAction(StringAction):
             request_data = deep_update_dict(request_data, request_data_update)
         return request_data
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
@@ -90,7 +92,7 @@ class PushAuthenticationActionHttp(PushAction):
      - Для всех полей доступна шаблонная генерация. Можно также передавать значение обычной строкой.
 
     Response:
-        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.  # noqa
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_authentification_response"]
             - user.variables.value or user.variables.value["push_authentification_response"]
@@ -130,19 +132,19 @@ class PushAuthenticationActionHttp(PushAction):
         authorization_token = self.BASIC_METHOD_AUTH + auth_string.decode("ascii")
         return authorization_token
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)
 
 
 class GetRuntimePermissionsAction(PushAction):
     """ Action для получения разрешения на отправку пуш уведомлений в SmartPush API через http.
 
     Ссылка на документацию с примерами получения разрешения на уведомления:
-     - Разрешение на уведомления: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications
+     - Разрешение на уведомления: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/permission-notifications  # noqa
 
     Note: Навык на HTTP не поддерживает использование двух команд на один сценарий, поэтому в success_action'е
           behavior'а необходимо прописать продолжение сценария с использованием PushActionHttp.
@@ -164,8 +166,8 @@ class GetRuntimePermissionsAction(PushAction):
         self.behavior = items.get("behavior") or COMMON_BEHAVIOR
         self.command = GET_RUNTIME_PERMISSIONS
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
@@ -192,12 +194,12 @@ class PushActionHttp(PushAction):
     Аутентификация:
      - Осуществляется с помощью access_token, который можно получить через PushAuthenticationActionHttp
     Ссылка на документацию с примерами отправки уведомлений:
-     - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications
+     - Отправка уведомлений: https://developers.sber.ru/docs/ru/va/how-to/app-support/smartpush/api/sending-notifications  # noqa
     Шаблонная генерация:
      - Для всех полей доступна шаблонная генерация. Можно также передавать значение обычной строкой.
 
     Response:
-        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.
+        Результат запроса сохраняется в переменной user.variables, после выполнения метода process_result класса HTTPRequestAction.  # noqa
         Для доступа к данным можно воспользоваться одним из следущих вариантов:
             - user.variables.raw or user.variables.raw["push_http_response"]
             - user.variables.value or user.variables.value["push_http_response"]
@@ -208,8 +210,8 @@ class PushActionHttp(PushAction):
             "type_request": "apprequest-lite", // обязательный параметр
             "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
             "surface": "COMPANION", // обязательный параметр.
-            "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite
-            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
+            "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite  # noqa
+            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)  # noqa
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
             "templateContent": { // обязательный параметр (Параметры шаблона)
                 "id": "49061553-27c7-4471-9145-d8d6137657da", // обязательный параметр (Идентификатор шаблона)
@@ -230,7 +232,7 @@ class PushActionHttp(PushAction):
             "type": "push_http", // обязательный параметр
             "type_request": "apprequest", // обязательный параметр
             "behavior": "some_behavior", // опциональный параметр, по дефолту "common_behavior"
-            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)
+            "access_token": "{{variables.push_authentification_response.access_token}}", // обязательный параметр (получить можно через PushAuthenticationActionHttp)  # noqa
             "url": "some_url", // опциональный параметр, по дефолту https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest
             "callbackUrl": "some_url", // опциональный параметр headers (URL для доставки статусов уведомлений)
             "sender": {
@@ -307,8 +309,8 @@ class PushActionHttp(PushAction):
     def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
         self.http_request_action = HTTPRequestAction(items, id)
 
-    def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -329,4 +331,4 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        return self.http_request_action.run(user, text_preprocessing_result, params)
+        return await self.http_request_action.run(user, text_preprocessing_result, params)

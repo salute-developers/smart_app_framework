@@ -32,7 +32,7 @@ class SmartPayCreateAction(SmartPayAction):
         {
             "type": "smartpay_create",
             "behavior": "some_behavior", // обязательный параметр
-            "smartpay_params": { // обязательноый параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#создание-счета)
+            "smartpay_params": { // обязательноый параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#создание-счета)  # noqa
                 "ptype": 1,
                 "invoice": {
                     "purchaser": {
@@ -159,7 +159,7 @@ class SmartPayPerformAction(SmartPayAction):
             "type": "smartpay_perform",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // обязательный параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#проведение-платежа)
+            "smartpay_params": { // обязательный параметр (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#проведение-платежа)  # noqa
                 "user_id": {
                     "partner_client_id": "2223"
                 },
@@ -226,7 +226,7 @@ class SmartPayConfirmAction(SmartPayAction):
         {
             "type": "smartpay_confirm",
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // опциональный параметр, задаётся для неполной суммы (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#подтверждение-оплаты)
+            "smartpay_params": { // опциональный параметр, задаётся для неполной суммы (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#подтверждение-оплаты)  # noqa
                 "invoice": {
                     "order": {
                         "amount": 79801,
@@ -283,7 +283,7 @@ class SmartPayRefundAction(SmartPayAction):
             "type": "smartpay_refund",
             "behavior": "some_behavior", // обязательный параметр
             "invoice_id": "0", // обязательный параметр
-            "smartpay_params": { // опциональный параметр, задаётся при частичном возврате (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#частичный-возврат-платежа)
+            "smartpay_params": { // опциональный параметр, задаётся при частичном возврате (см. https://developers.sber.ru/docs/ru/va/reference/smartservices/smartpay/processing/smartpay-api#частичный-возврат-платежа)  # noqa
                 "invoice": {
                     "order": {
                         "current_amount": 79900,

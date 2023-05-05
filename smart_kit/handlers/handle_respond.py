@@ -10,7 +10,6 @@ from scenarios.user.user_model import User
 
 from smart_kit.handlers.handler_base import HandlerBase
 from smart_kit.names.action_params_names import TO_MESSAGE_NAME, SEND_TIMESTAMP
-from core.monitoring.monitoring import monitoring
 
 
 class HandlerRespond(HandlerBase):
@@ -27,8 +26,8 @@ class HandlerRespond(HandlerBase):
         callback_id = user.message.callback_id
         return user.behaviors.get_callback_action_params(callback_id)
 
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = await super().run(payload, user)
         callback_id = user.message.callback_id
         action_params = self.get_action_params(payload, user)
         action_name = self.get_action_name(payload, user)
@@ -47,8 +46,6 @@ class HandlerRespond(HandlerBase):
         else:
             log("HandlerRespond with action %(action_name)s started without callback", user, params)
 
-        monitoring.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__, user)
-
         text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
 
         if payload.get("message"):
@@ -59,7 +56,7 @@ class HandlerRespond(HandlerBase):
             log("text preprocessing result: '%(normalized_text)s'", user, params, level="DEBUG")
 
         action = user.descriptions["external_actions"][action_name]
-        commands.extend(action.run(user, text_preprocessing_result, action_params))
+        commands.extend(await action.run(user, text_preprocessing_result, action_params) or [])
         return commands
 
     @staticmethod

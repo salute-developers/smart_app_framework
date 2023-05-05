@@ -19,23 +19,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
-    - name: Install dependencies
+        python-version: '3.8.x'
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    - name: Install Poetry plugins
       run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
+         poetry self add "poetry-dynamic-versioning[plugin]"
     - name: Build and publish
       env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        PYPI_USERNAME: __token__
+        PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+        poetry build --format wheel
+        poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
     - name: Build for Sber
-      env:
-        PACKAGE_NAME: sber_nlp_platform_smart_app_framework
       run: |
-        python setup.py sdist bdist_wheel
+        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
+        poetry build --format wheel
     - name: Upload Assets
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')

@@ -1,21 +1,19 @@
 import copy
-
-import aioredis
+import importlib
 import typing
 
-from core.db_adapter.db_adapter import DBAdapter
 from core.db_adapter import error
+from core.db_adapter.db_adapter import AsyncDBAdapter
+from core.logging.logger_utils import log
 from core.monitoring.monitoring import monitoring
 
-from core.logging.logger_utils import log
 
-
-class AIORedisAdapter(DBAdapter):
-    IS_ASYNC = True
-
+class AIORedisAdapter(AsyncDBAdapter):
     def __init__(self, config=None):
         super().__init__(config)
-        self._redis: typing.Optional[aioredis.Redis] = None
+        self.aioredis = importlib.import_module("redis", "asyncio")
+        redis_type = self.aioredis.Redis
+        self._redis: typing.Optional[redis_type] = None
 
         try:
             del self.config["type"]
@@ -24,18 +22,18 @@ class AIORedisAdapter(DBAdapter):
 
     @monitoring.got_histogram("save_time")
     async def save(self, id, data):
-        return await self._run(self._save, id, data)
+        return await self._async_run(self._save, id, data)
 
     @monitoring.got_histogram("save_time")
     async def replace_if_equals(self, id, sample, data):
-        return await self._run(self._replace_if_equals, id, sample, data)
+        return await self._async_run(self._replace_if_equals, id, sample, data)
 
     @monitoring.got_histogram("get_time")
     async def get(self, id):
-        return await self._run(self._get, id)
+        return await self._async_run(self._get, id)
 
     async def path_exists(self, path):
-        return await self._run(self._path_exists, path)
+        return await self._async_run(self._path_exists, path)
 
     async def connect(self):
         print("Here is the content of REDIS_CONFIG:", self.config)
@@ -45,7 +43,7 @@ class AIORedisAdapter(DBAdapter):
         if not isinstance(redis_url, str):
             raise ValueError(
                 "redis should be specified like redis://[[username]:[password]]@localhost:6379/0")
-        self._redis = aioredis.from_url(redis_url, **config)
+        self._redis = self.aioredis.from_url(redis_url, **config)
 
     def _open(self, filename, *args, **kwargs):
         pass
@@ -61,14 +59,14 @@ class AIORedisAdapter(DBAdapter):
         data = await self._redis.get(id)
         return data
 
-    def _list_dir(self, path):
+    async def _list_dir(self, path):
         raise error.NotSupportedOperation
 
-    def _glob(self, path, pattern):
+    async def _glob(self, path, pattern):
         raise error.NotSupportedOperation
 
     async def _path_exists(self, path):
         return await self._redis.exists(path)
 
-    def _on_prepare(self):
+    async def _on_prepare(self):
         pass

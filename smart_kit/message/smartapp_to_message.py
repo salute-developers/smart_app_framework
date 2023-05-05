@@ -5,6 +5,7 @@ from copy import copy
 
 from core.utils.masking_message import masking
 from core.message.msg_validator import MessageValidator
+from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.utils import SmartAppToMessage_pb2
 
 
@@ -12,7 +13,7 @@ class SmartAppToMessage:
     ROOT_NODES_KEY = "root_nodes"
     PAYLOAD = "payload"
 
-    def __init__(self, command, message, request, forward_fields=None, masking_fields=None,
+    def __init__(self, command, message, request: SmartKitKafkaRequest, forward_fields=None, masking_fields=None,
                  validators: Iterable[MessageValidator] = ()):
         root_nodes = command.payload.pop(self.ROOT_NODES_KEY, None)
         self.command = command

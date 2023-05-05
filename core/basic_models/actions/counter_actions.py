@@ -21,25 +21,25 @@ class CounterAction(Action):
 
 
 class CounterIncrementAction(CounterAction):
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].inc(self.value, self.lifetime)
         return commands
 
 
 class CounterDecrementAction(CounterAction):
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].dec(-self.value, self.lifetime)
         return commands
 
 
 class CounterClearAction(CounterAction):
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters.clear(self.key)
         return commands
 
@@ -57,9 +57,9 @@ class CounterSetAction(CounterAction):
         self.reset_time = items.get("reset_time", False)
         self.time_shift = items.get("time_shift", 0)
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].set(self.value, self.reset_time, self.time_shift)
         return commands
 
@@ -72,9 +72,9 @@ class CounterCopyAction(Action):
         self.reset_time = items.get("reset_time", False)
         self.time_shift = items.get("time_shift", 0)
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = super().run(user, text_preprocessing_result, params)
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         value = user.counters[self.src].value
         user.counters[self.dst].set(value, self.reset_time, self.time_shift)
         return commands

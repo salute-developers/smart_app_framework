@@ -19,7 +19,6 @@ LOGGING_UUID = "logging_uuid"
 CLASS_NAME = "class_name"
 LOG_STORE_FOR = "log_store_for"
 HEADERS = "headers"
-CALLER_INFO = "caller_info"
 
 
 class LoggerMessageCreator:
@@ -87,11 +86,6 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         if not logger.isEnabledFor(level_name):
             return
 
-        caller = inspect.getframeinfo(previous_frame)
-        caller_info = {"filename": caller.filename, "function": caller.function, "line_num": caller.lineno}
-        params = params or {}
-        params[CALLER_INFO] = caller_info
-
         instance = previous_frame.f_locals.get('self', None)
 
         from smart_kit.configs import get_app_config
@@ -101,11 +95,6 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
                 raise AttributeError
         except AttributeError:
             message_maker = LoggerMessageCreator
-
-        # cast log_params["params"] to str
-        # TODO: think how to make it more general
-        if params and "params" in params:
-            params["params"] = str(params["params"])
 
         log_store_for_map = getattr(logging, "log_store_for_map", None)
         if log_store_for_map is not None and params is not None:
@@ -120,10 +109,10 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
         # см. tests.core_tests.test_utils.test_logger.TestLogger.test_escaping
         message = message_maker.escape(message)
 
-        logger.log(level_name, message, params, exc_info=exc_info)
+        logger.log(level_name, message, params, exc_info=exc_info, stacklevel=2)
     except timeout_decorator.TimeoutError:
         raise
-    except:
+    except Exception:
         default_logger.log(logging.getLevelName("ERROR"), "Failed to write a log. Exception occurred",
                            params, exc_info=True, stack_info=True)
 

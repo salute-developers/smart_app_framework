@@ -1,4 +1,5 @@
 # coding: utf-8
+import asyncio
 import random
 from copy import copy
 from functools import cached_property
@@ -16,6 +17,7 @@ from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMP
 T = TypeVar("T")
 
 ANSWER_TO_USER = "ANSWER_TO_USER"
+SAVED_COOKIES = "SAVED_COOKIES"
 
 
 class NodeAction(CommandAction):
@@ -85,8 +87,8 @@ class NodeAction(CommandAction):
             result = value
         return result
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         raise NotImplementedError
 
 
@@ -102,7 +104,7 @@ class StringAction(NodeAction):
         "type": "string",
         "command": "recharge_mobile",
         "nodes": {
-          "phone": "{% if approve and phone_number is defined and phone_number not in (None, 1) %}{{ phone_number }}{% endif %}",
+          "phone": "{% if approve and phone_number is defined and phone_number not in (None, 1) %}{{ phone_number }}{% endif %}",  # noqa
           "amount": "{% if approve and amount is defined %}{{ amount | int }}{% endif%}",
           "currency": "{% if approve and currency is defined %}{{ currency }}{% endif%}",
           "card": "{% if approve and card is defined %}{{ card }}{% endif %}"
@@ -116,6 +118,7 @@ class StringAction(NodeAction):
     def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
         command_params = dict()
+        params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
 
@@ -125,11 +128,20 @@ class StringAction(NodeAction):
                 command_params[key] = rendered
         return command_params
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         params = params or {}
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
+
+        if self.command == ANSWER_TO_USER and user.private_vars.get(SAVED_COOKIES):
+            command_params["items"].append({
+                "command": {
+                    "type": "setcookie",
+                    "cookies": user.private_vars.get(SAVED_COOKIES)
+                }
+            })
+
         commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
                             request_data=self.request_data)]
         return commands
@@ -153,8 +165,8 @@ class AfinaAnswerAction(NodeAction):
         super(AfinaAnswerAction, self).__init__(items, id)
         self.command: str = ANSWER_TO_USER
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         answer_params = dict()
         result = []
@@ -260,8 +272,8 @@ class SDKAnswer(NodeAction):
         for (d, k) in dicts:
             d[k] = d[k][random_index % len(d[k])]
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
@@ -413,8 +425,8 @@ class SDKAnswerToUser(NodeAction):
     def build_root(self):
         return self._root
 
-    def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-            params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+    async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
 
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})

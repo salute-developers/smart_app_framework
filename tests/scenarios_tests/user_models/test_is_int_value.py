@@ -1,15 +1,14 @@
 # coding: utf-8
-from unittest import TestCase
+import unittest
 
 from scenarios.scenario_models.field_requirements.field_requirements import IsIntFieldRequirement
 
 
-class IsIntFieldRequirementTest(TestCase):
+class IsIntFieldRequirementTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         items = {}
-        cls.requirement = IsIntFieldRequirement(items)
+        self.requirement = IsIntFieldRequirement(items)
 
     def test_is_int_number_string(self):
         text = "123"

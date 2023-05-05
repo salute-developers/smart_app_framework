@@ -10,7 +10,6 @@ from core.utils.pickle_copy import pickle_deepcopy
 from scenarios.user.user_model import User
 
 from smart_kit.handlers.handler_base import HandlerBase
-from core.monitoring.monitoring import monitoring
 
 
 class HandlerServerAction(HandlerBase):
@@ -26,19 +25,15 @@ class HandlerServerAction(HandlerBase):
     def get_action_params(self, payload: Dict[str, Any]):
         return payload[SERVER_ACTION].get("parameters", {})
 
-    def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+        commands = await super().run(payload, user)
         action_params = pickle_deepcopy(self.get_action_params(payload))
         params = {log_const.KEY_NAME: "handling_server_action",
                   "server_action_params": str(action_params),
                   "server_action_id": self.get_action_name(payload, user)}
         log("HandlerServerAction %(server_action_id)s started", user, params)
 
-        app_info = user.message.app_info
-        monitoring.counter_incoming(self.app_name, user.message.message_name, self.__class__.__name__,
-                                    user, app_info=app_info)
-
         action_id = self.get_action_name(payload, user)
         action = user.descriptions["external_actions"][action_id]
-        commands.extend(action.run(user, TextPreprocessingResult({}), action_params))
+        commands.extend(await action.run(user, TextPreprocessingResult({}), action_params) or [])
         return commands

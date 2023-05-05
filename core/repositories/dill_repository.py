@@ -1,4 +1,7 @@
 # coding: utf-8
+import sys
+from pathlib import Path
+
 import dill
 
 import core.logging.logger_constants as log_const
@@ -16,14 +19,18 @@ class DillRepository(BaseRepository):
     """
     def __init__(self, filename, source=None, required=True, *args, **kwargs):
         super(DillRepository, self).__init__(source=source, *args, **kwargs)
-        self.filename = filename
+        self.filename = Path(filename)
         self.required = required
 
     def load(self):
         dill._dill._reverse_typemap['ClassType'] = type
         try:
-
-            with self.source.open(self.filename, 'rb') as stream:
+            py_version = sys.version_info
+            py_suffix = f"_py{py_version.major}{py_version.minor}"
+            py_version_resolved_filename = (
+                self.filename.parent / f"{self.filename.stem}{py_suffix}{self.filename.suffix}"
+            )
+            with self.source.open(py_version_resolved_filename, 'rb') as stream:
                 data = dill.load(stream)
                 self.fill(data)
         except FileNotFoundError as error:

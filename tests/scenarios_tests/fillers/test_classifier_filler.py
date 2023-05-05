@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 from unittest.mock import patch
 
 from core.basic_models.classifiers.basic_classifiers import ExternalClassifier
@@ -6,7 +6,7 @@ from scenarios.scenario_models.field.field_filler_description import ClassifierF
 from smart_kit.utils.picklable_mock import PicklableMock
 
 
-class TestClassifierFiller(TestCase):
+class TestClassifierFiller(unittest.TestCase):
 
     def setUp(self):
         test_items = {
@@ -39,7 +39,7 @@ class TestClassifierFiller(TestCase):
         self.assertIsNone(actual_res)
 
 
-class TestClassifierFillerMeta(TestCase):
+class TestClassifierFillerMeta(unittest.TestCase):
 
     def setUp(self):
         test_items = {
@@ -54,7 +54,8 @@ class TestClassifierFillerMeta(TestCase):
         self.mock_user.descriptions = {
             "external_classifiers": ["read_book_or_not_classifier", "hello_scenario_classifier"]}
 
-    @patch.object(ExternalClassifier, "find_best_answer", return_value=[{"answer": "нет", "score": 1.0, "other": False}])
+    @patch.object(ExternalClassifier, "find_best_answer",
+                  return_value=[{"answer": "нет", "score": 1.0, "other": False}])
     def test_filler_extract(self, mock_classifier_model):
         """Тест кейз проверяет что мы получаем тот же самый ответ, что вернула модель."""
         expected_res = [{"answer": "нет", "score": 1.0, "other": False}]

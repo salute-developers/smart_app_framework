@@ -71,7 +71,7 @@
         "command": "ANSWER_TO_USER",
         "nodes": {
           "pronounceTextType": "application/ssml",
-          "pronounceText": "С помощью <say-as interpret-as=\"spell-out\">SSML</say-as> разметки я умею делать <break time=\"2s\" /> паузы, <break /> произносить слова по <say-as interpret-as=\"characters\">буквам</say-as> и многое другое.",
+          "pronounceText": "<speak>С помощью <say-as interpret-as=\"spell-out\">SSML</say-as> разметки я умею делать <break time=\"2s\" /> паузы, <break /> произносить слова по <say-as interpret-as=\"characters\">буквам</say-as> и многое другое.</speak>",
           "items": [
             {
               "bubble": {

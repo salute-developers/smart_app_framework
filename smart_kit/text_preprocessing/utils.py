@@ -6,7 +6,7 @@ from typing import Dict
 
 from core.text_preprocessing.constants import ANIMACY_TOKEN
 from core.text_preprocessing.grammem.grammem_constants import TEXT, LEMMA, TOKEN_TYPE, LIST_OF_TOKEN_TYPES_DATA, \
-    TOKEN_VALUE, VALUE, COMPOSITE_TOKEN_TYPE, IS_BEGINNING_OF_COMPOSITE, GRAMMEM_INFO, PART_OF_SPEECH, IS_STOP_WORD, \
+    TOKEN_VALUE, VALUE, COMPOSITE_TOKEN_TYPE, IS_BEGINNING_OF_COMPOSITE, GRAMMEM_INFO, IS_STOP_WORD, \
     PART_OF_SPEECH_PYMORPHY
 
 NUM_TOKEN = "NUM_TOKEN"
@@ -136,8 +136,8 @@ def return_lemmas_only(token_desc_list: list, include_sentence_endpoint: bool = 
 
 class BaseNormalizePhoneNumbers(object):
     def __init__(self):
-        self.boundary_start = '(?:[^\d\+]|^)'
-        self.boundary_end = '(?:[^\d\-\:]|$)'
+        self.boundary_start = "(?:[^\d\+]|^)"
+        self.boundary_end = "(?:[^\d\-\:]|$)"
         self.plus_regex = re.compile(r"(\+ *)(\+7\d{10})")
 
     def remove_additional_phone_pluses(self, text: str) -> str:
@@ -308,8 +308,10 @@ class UnicodeSymbolsConverter:
 
 class ReplaceSynonyms(object):
     """
-    class to replace whole words in text avoiding replacements inside words based on regular expressions and synonyms dictionary from __init__
-    example on "сбер": 'храните деньги в сберегательных кассах. сбер.' -> 'храните средства в сберегательных кассах. сбербанк.'
+    class to replace whole words in text avoiding replacements inside words
+    based on regular expressions and synonyms dictionary from __init__
+    example on "сбер":
+     'храните деньги в сберегательных кассах. сбер.' -> 'храните средства в сберегательных кассах. сбербанк.'
     requires lowered text without punctuation
     """
 
@@ -452,8 +454,8 @@ class CurrencyTokensOneIterationMerger(object):
                 roubles = False
             else:
                 is_amount = self._is_amount(tokenized_elements, i)
-                looks_like_2_amounts = is_amount and self._is_amount(tokenized_elements, i - 2) \
-                                       and self._denominator_are_ok(tokenized_elements, i)
+                looks_like_2_amounts = (is_amount and self._is_amount(tokenized_elements, i - 2) and
+                                        self._denominator_are_ok(tokenized_elements, i))
                 if looks_like_2_amounts:
                     final_tokens = self._sum_2_amounts(final_tokens, tokenized_elements, i)
                     skip = True

@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 
 from core.model.registered import registered_factories
 from scenarios.scenario_models.field.field_filler_description import FieldFillerDescription, CompositeFiller
@@ -15,10 +15,9 @@ class MockFiller:
         return self.result
 
 
-class TestCompositeFiller(TestCase):
+class TestCompositeFiller(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         registered_factories[FieldFillerDescription] = field_filler_factory
         field_filler_description["mock_filler"] = MockFiller
         TestCompositeFiller.user = PicklableMock()

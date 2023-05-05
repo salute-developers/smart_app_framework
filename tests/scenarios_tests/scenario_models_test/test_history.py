@@ -121,7 +121,7 @@ class ScenarioHistoryTest(TestCase):
                 }
             ]
         }
-        expected_keys = {'event_type_1',}
+        expected_keys = {'event_type_1', }
 
         history = History(items, descriptions, None)
         history.expire()
