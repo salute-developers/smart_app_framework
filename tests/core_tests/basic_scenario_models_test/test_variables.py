@@ -19,17 +19,19 @@ class VariablesTest(unittest.TestCase):
         self.assertEqual(self.variables.get("key"), "value")
         self.assertEqual(self.variables.get("nonexistkey", "defaultvalue"), "defaultvalue")
 
-    def test_update(self):
+    def test_update_0(self):
         with unittest.mock.patch("time.time", return_value=1):
             self.variables.set("key", "value", 2)
             self.variables.update("key", "new_value")
         self.assertEqual(self.variables._storage["key"], ("new_value", 3))
 
+    def test_update_1(self):
         with unittest.mock.patch("time.time", return_value=1):
             self.variables.set("key", "value", 2)
             self.variables.update("key", "new_value", 4)
         self.assertEqual(self.variables._storage["key"], ("new_value", 3))
 
+    def test_update_2(self):
         with unittest.mock.patch("time.time", return_value=1):
             self.variables.update("key", "new_value", 4)
         self.assertEqual(self.variables._storage["key"], ("new_value", 5))
