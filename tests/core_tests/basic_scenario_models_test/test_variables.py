@@ -25,6 +25,15 @@ class VariablesTest(unittest.TestCase):
             self.variables.update("key", "new_value")
         self.assertEqual(self.variables._storage["key"], ("new_value", 3))
 
+        with unittest.mock.patch("time.time", return_value=1):
+            self.variables.set("key", "value", 2)
+            self.variables.update("key", "new_value", 4)
+        self.assertEqual(self.variables._storage["key"], ("new_value", 3))
+
+        with unittest.mock.patch("time.time", return_value=1):
+            self.variables.update("key", "new_value", 4)
+        self.assertEqual(self.variables._storage["key"], ("new_value", 5))
+
     def test_delete(self):
         self.variables.set("key", "value")
         self.variables.delete("key")

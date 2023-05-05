@@ -21,16 +21,19 @@ class Variables:
         result = {}
         for key in self._storage:
             value, _ = self._storage[key]
-            result[key] = value
+            result.update({key: value})
         return result
 
     def set(self, key, value, ttl=None) -> None:
         ttl = ttl if ttl is not None else self.DEFAULT_TTL
-        self._storage[key] = value, time.time() + ttl
+        self._storage.update({key: (value, time.time() + ttl)})
 
-    def update(self, key, value) -> None:
-        _, expire_time = self._storage[key]
-        self._storage[key] = value, expire_time
+    def update(self, key, value, ttl=None) -> None:
+        _, expire_time = self._storage.get(key, (None, None))
+        if not expire_time:
+            ttl = ttl if ttl is not None else self.DEFAULT_TTL
+            expire_time = ttl + time.time()
+        self._storage.update({key: (value, expire_time)})
 
     def get(self, key, default=None):
         value, expire_time = self._storage.get(key, (default, time.time() + self.DEFAULT_TTL))
