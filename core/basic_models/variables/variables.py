@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 
 
 class Variables:
@@ -7,7 +7,7 @@ class Variables:
 
     def __init__(self, items, user, savable: bool = True):
         self._savable = savable
-        self._storage: Dict[str, Any] = items or {}
+        self._storage: Dict[str, Tuple[Any, float]] = items or {}
 
     @property
     def raw(self) -> Optional[Dict[str, Any]]:
@@ -18,20 +18,18 @@ class Variables:
     @property
     def values(self) -> Dict[str, Any]:
         self.expire()
-        result = {}
-        for key in self._storage:
-            value, _ = self._storage[key]
-            result[key] = value
-        return result
+        return {key: value[0] for key, value in self._storage.items()}
 
     def set(self, key, value, ttl=None) -> None:
         ttl = ttl if ttl is not None else self.DEFAULT_TTL
-        self._storage[key] = value, time.time() + ttl
+        self._storage.update({key: (value, time.time() + ttl)})
 
     def update(self, key, value, ttl=None) -> None:
-        _, old_ttl = self._storage[key]
-        ttl = ttl or old_ttl
-        self.set(key, value, ttl)
+        _, expire_time = self._storage.get(key, (None, None))
+        if not expire_time:
+            ttl = ttl if ttl is not None else self.DEFAULT_TTL
+            expire_time = ttl + time.time()
+        self._storage.update({key: (value, expire_time)})
 
     def get(self, key, default=None):
         value, expire_time = self._storage.get(key, (default, time.time() + self.DEFAULT_TTL))
