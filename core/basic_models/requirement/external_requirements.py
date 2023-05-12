@@ -10,14 +10,14 @@ from core.descriptions.smart_updatable_descriptions_items import SmartUpdatableD
 
 class ExternalRequirements(SmartUpdatableDescriptionsItems):
     def __init__(self, items):
-        super(ExternalRequirements, self).__init__(requirement_factory, items, ordered=True)
+        super().__init__(requirement_factory, items, ordered=True)
 
 
 class ExternalRequirement(Requirement):
     requirement: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ExternalRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.requirement = items["requirement"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,

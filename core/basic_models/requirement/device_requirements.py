@@ -13,7 +13,7 @@ from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 class BaseContainsRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(BaseContainsRequirement, self).__init__(items)
+        super().__init__(items)
 
     @property
     def descr_to_check_in(self):
@@ -32,7 +32,7 @@ class ChannelRequirement(BaseContainsRequirement):
 
     # should_process_message compatible
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ChannelRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.channels = items["channels"]
 
     @property
@@ -44,9 +44,8 @@ class ChannelRequirement(BaseContainsRequirement):
 
 
 class PlatformTypeRequirement(Requirement):
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(PlatformTypeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.platfrom_type = items["platfrom_type"]
 
@@ -73,9 +72,8 @@ class PlatformVersionRequirement(BasicVersionRequirement):
 
 
 class SurfaceRequirement(Requirement):
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(SurfaceRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.surface = items["surface"]
 
@@ -85,7 +83,6 @@ class SurfaceRequirement(Requirement):
 
 
 class SurfaceVersionRequirement(BasicVersionRequirement):
-
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
         surface_version = convert_version_to_list_of_int(user.message.device.surface_version)
@@ -93,9 +90,8 @@ class SurfaceVersionRequirement(BasicVersionRequirement):
 
 
 class AppTypeRequirement(Requirement):
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(AppTypeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.app_type = items["app_type"]
 
@@ -105,9 +101,8 @@ class AppTypeRequirement(Requirement):
 
 
 class CapabilitiesPropertyAvailableRequirement(Requirement):
-
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CapabilitiesPropertyAvailableRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         items = items or {}
         self.property_type = items["property_type"]
 

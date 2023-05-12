@@ -6,9 +6,11 @@ from typing import List, Optional
 from core.basic_models.actions.command import Command
 from core.descriptions.descriptions import Descriptions
 from core.logging.logger_utils import log
+from core.message.from_message import SmartAppFromMessage
 from core.utils.exception_handlers import exc_handler
 
 import scenarios.logging.logger_constants as log_const
+from scenarios.user.user_model import User
 from smart_kit.handlers.handle_close_app import HandlerCloseApp
 from smart_kit.handlers.handle_take_runtime_permissions import HandlerTakeRuntimePermissions
 from smart_kit.handlers.handler_base import HandlerBase
@@ -71,8 +73,9 @@ class SmartAppModel:
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
-    async def answer(self, message, user) -> Optional[List[Command]]:
+    async def answer(self, message: SmartAppFromMessage, user: User) -> Optional[List[Command]]:
         user.expire()
+        user.message_vars.clear()
         handler = self.get_handler(message.type)
 
         if not user.load_error:

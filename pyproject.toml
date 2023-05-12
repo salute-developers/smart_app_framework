@@ -86,7 +86,7 @@ runapp_kafka_test = """docker-compose -f .github/docker-compose.yml up -d &&
                        echo 'MAIN_LOOP = MainLoop' >> app_config.py &&
                        sleep 5 &&
                        docker-compose -f ../.github/docker-compose.yml exec -T kafka kafka-topics.sh --create --bootstrap-server localhost:9092 --partitions 3 --topic toTestApp &&
-                       PYTHONPATH=".." timeout 20 python manage.py run_app || code=$?;
+                       PYTHONPATH=".." timeout 60 python manage.py run_app || code=$?;
                        if [ $code -ne 124 ] && [ $code -ne 0 ]; then exit $code; fi"""
 
 [build-system]

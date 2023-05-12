@@ -27,6 +27,22 @@ requirement_factory = build_factory(requirements)
 
 
 class Requirement:
+    """Класс для проверки заданного условия
+
+    Параметры:
+        items["cache_result"]   Использовать ли закешированный результат в рамках обработки сообщения и совпадения items
+
+    Атрибуты:
+        cache_result    то же, что и items["cache_result"]
+
+    Примечания:
+        Кэширование допустимо только в случае, если функция выдаёт один и тот же результат в рамках времени кэширования,
+        в нашем случае - в рамках обработки одного сообщения. Таким образом, если на результат requirement влияют
+        переменные, которые могут поменяться в ходе обработке сообщения, например, user.counters, то кэширование не
+        подойдёт для рассматриваемого requirement.
+    """
+    cache_result = False
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         items = items or {}
         self._descr = items.get("_description")
@@ -36,6 +52,8 @@ class Requirement:
         self.is_logging_debug_mode = logging.getLogger(globals().get("__name__")).isEnabledFor(
             logging.getLevelName("DEBUG")
         )
+        if "cache_result" in items:
+            self.cache_result = items["cache_result"]
 
     def _log_params(self):
         return {
@@ -53,10 +71,25 @@ class Requirement:
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
               params: Dict[str, Any] = None) -> bool:
-        try:
-            result = self._check(text_preprocessing_result, user, params)
-        except Exception:
-            return self.on_check_error(text_preprocessing_result, user)
+        if self.cache_result:
+            cached_results = user.message_vars.get("cached_req_results")
+            if not cached_results:
+                cached_results = dict()
+                user.message_vars.set("cached_req_results", cached_results)
+
+            if self.hash_for_cache in cached_results:
+                result = cached_results[self.hash_for_cache]
+            else:
+                try:
+                    result = self._check(text_preprocessing_result, user, params)
+                    cached_results[self.hash_for_cache] = result
+                except Exception:
+                    return self.on_check_error(text_preprocessing_result, user)
+        else:
+            try:
+                result = self._check(text_preprocessing_result, user, params)
+            except Exception:
+                return self.on_check_error(text_preprocessing_result, user)
         if self.is_logging_debug_mode:
             log_params = self._log_params()
             log_params[log_const.KEY_NAME] = log_const.REQUIREMENT_TRACE_VALUE
@@ -78,12 +111,16 @@ class Requirement:
             level="ERROR", exc_info=True)
         return result
 
+    @cached_property
+    def hash_for_cache(self):
+        return hashlib.md5(f"{self.__class__.__name__}{self.items}".encode()).hexdigest()
+
 
 class CompositeRequirement(Requirement):
     requirements: List[Requirement]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CompositeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirements = items["requirements"]
         self.requirements = self.build_requirements()
 
@@ -116,7 +153,7 @@ class NotRequirement(Requirement):
     requirement: Requirement
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NotRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._requirement = items["requirement"]
         self.requirement = self.build_requirement()
 
@@ -134,7 +171,7 @@ class ComparisonRequirement(Requirement):
     operator: Operator
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ComparisonRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._operator = items["operator"]
         self.operator = self.build_operator()
 
@@ -147,7 +184,7 @@ class RandomRequirement(Requirement):
     percent: int
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(RandomRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -160,7 +197,7 @@ class TopicRequirement(Requirement):
     topics: List[str]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(TopicRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.topics = items["topics"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -170,7 +207,7 @@ class TopicRequirement(Requirement):
 
 class TemplateRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(TemplateRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self._template = UnifiedTemplate(items["template"])
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -191,7 +228,7 @@ class RollingRequirement(Requirement):
     percent: int
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(RollingRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -277,7 +314,7 @@ class ClassifierRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(ClassifierRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self._classifier = items["classifier"]
 
     @cached_property
@@ -306,7 +343,7 @@ class FormFieldValueRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(FormFieldValueRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.form_name = items["form_name"]
         self.field_name = items["field_name"]
         self.value = items["value"]
@@ -323,7 +360,7 @@ class EnvironmentRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(EnvironmentRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.values = items.get("values", [])
         # Из конфига получаем среду исполнения
         from smart_kit.configs import get_app_config
@@ -343,7 +380,7 @@ class CharacterIdRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(CharacterIdRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self.values = items["values"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
@@ -357,7 +394,7 @@ class FeatureToggleRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(FeatureToggleRequirement, self).__init__(items=items, id=id)
+        super().__init__(items=items, id=id)
         self.toggle_name = items["toggle_name"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,

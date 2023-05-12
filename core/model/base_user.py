@@ -24,6 +24,8 @@ class BaseUser(Model):
     variables: Variables
     private_vars: Variables
     local_vars: Variables
+    message_vars: Variables  # Хранятся в рамках обработки одного сообщения, очищаются каждое новое пришедшее сообщение.
+                             # Не сохраняются между запросами в интеграцию в рамках одного mid.  # noqa: E114, E116
     descriptions: Descriptions
 
     def __init__(self, id, message, values, descriptions, load_error=False):
@@ -51,6 +53,7 @@ class BaseUser(Model):
             Field("local_vars", Variables, None, False),
             Field("variables", Variables),
             Field("private_vars", Variables),
+            Field("message_vars", Variables, None, False),
         ]
 
     @property
@@ -69,3 +72,4 @@ class BaseUser(Model):
         self.variables.expire()
         self.private_vars.expire()
         self.local_vars.expire()
+        self.message_vars.expire()

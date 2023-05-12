@@ -15,7 +15,7 @@ class AnySubstringInLoweredTextRequirement(Requirement):
     """
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(AnySubstringInLoweredTextRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.substrings = self.items["substrings"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
@@ -28,7 +28,7 @@ class AnySubstringInLoweredTextRequirement(Requirement):
 class NormalizedInputWordsRequirement(Requirement):
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NormalizedInputWordsRequirement, self).__init__(items, id)
+        super().__init__(items, id)
 
         # Получаем используемый нормализатор из конфига аппа
         from smart_kit.configs import get_app_config
@@ -110,7 +110,7 @@ class NumInRangeRequirement(Requirement):
     """Условие возвращает True, если число находится в заданном диапазоне, иначе - False."""
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
-        super(NumInRangeRequirement, self).__init__(items, id)
+        super().__init__(items, id)
         self.min_num = float(items["min_num"])
         self.max_num = float(items["max_num"])
 
