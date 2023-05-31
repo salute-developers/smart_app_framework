@@ -26,7 +26,8 @@ def run_testfile(
         test_case_cls: type,
         storaged_predefined_fields: Dict[str, Any],
         csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
-        interactive: bool = False
+        interactive: bool = False,
+        test_suite: Optional["TestSuite"] = None,
 ) -> Tuple[int, int]:
     test_file_path = os.path.join(path, file)
     if not os.path.isfile(test_file_path) or not test_file_path.endswith('.json'):
@@ -53,6 +54,7 @@ def run_testfile(
             storaged_predefined_fields=storaged_predefined_fields,
             interactive=interactive,
             csv_case_callback=csv_case_callback,
+            test_suite=test_suite,
         ).run()):
             print(f"[+] {test_case} OK")
             success += 1
@@ -130,7 +132,8 @@ class TestSuite:
                     self.app_config.FROM_MSG,
                     self.app_config.TEST_CASE,
                     self.storaged_predefined_fields,
-                    csv_file_callback
+                    csv_file_callback,
+                    test_suite=self,
                 )
                 total += file_total
                 total_success += file_success
@@ -142,7 +145,8 @@ class TestSuite:
 class TestCase:
     def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type, parametrizer_cls: type,
                  from_msg_cls: type, messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
-                 csv_case_callback: Optional[Callable[[Any], None]] = None, user: Optional[dict] = None):
+                 csv_case_callback: Optional[Callable[[Any], None]] = None, test_suite: Optional[TestSuite] = None,
+                 user: Optional[dict] = None):
         self.messages = messages
         self.user_state = json.dumps(user)
         self.interactive = interactive
@@ -151,6 +155,7 @@ class TestCase:
         self.settings = settings
         self.storaged_predefined_fields = storaged_predefined_fields
         self.csv_case_callback = csv_case_callback
+        self.test_suite = test_suite
 
         self.__parametrizer_cls = parametrizer_cls
         self.__user_cls = user_cls
