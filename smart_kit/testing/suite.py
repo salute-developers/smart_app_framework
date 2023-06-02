@@ -1,3 +1,4 @@
+from __future__ import annotations
 import asyncio
 import json
 import os
@@ -12,7 +13,7 @@ from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.models.smartapp_model import SmartAppModel
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.testing.utils import Environment
-from smart_kit.utils.diff import partial_diff
+from smart_kit.utils.diff import Diff
 
 
 def run_testfile(
@@ -23,7 +24,7 @@ def run_testfile(
         user_cls: type,
         parametrizer_cls: type,
         from_msg_cls: type,
-        test_case_cls: type,
+        test_case_cls: type[TestCase],
         storaged_predefined_fields: Dict[str, Any],
         csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
         interactive: bool = False
@@ -208,7 +209,7 @@ class TestCase:
             app_callback_id = None
             for actual, expected in zip(answers, expected_answers):
                 actual_value = actual.as_dict
-                diff = partial_diff(expected, actual_value)
+                diff = Diff.partial_diff(expected, actual_value)
                 if diff:
                     success = False
                     print(diff)
@@ -220,7 +221,7 @@ class TestCase:
                     app_callback_id
                 )
 
-            user_diff = partial_diff(expected_user, user.raw)
+            user_diff = Diff.partial_diff(expected_user, user.raw)
             if user_diff:
                 success = False
                 print(user_diff)
