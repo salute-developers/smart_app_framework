@@ -27,7 +27,8 @@ from core.basic_models.answer_items.answer_items import items_factory, SdkAnswer
 from core.basic_models.classifiers.basic_classifiers import classifiers, classifier_factory, Classifier, \
     ExternalClassifier, SciKitClassifier, SkipClassifier
 from core.basic_models.classifiers.external_classifiers import ExternalClassifiers
-from core.basic_models.requirement.basic_requirements import requirement_factory, IntersectionRequirement
+from core.basic_models.requirement.basic_requirements import requirement_factory, IntersectionRequirement, \
+    TopicRequirement, RollingRequirement
 from core.basic_models.requirement.basic_requirements import requirements, Requirement, AndRequirement, \
     OrRequirement, NotRequirement, TemplateRequirement, RandomRequirement, TimeRequirement, DateTimeRequirement, \
     ClassifierRequirement, FormFieldValueRequirement, EnvironmentRequirement, CharacterIdRequirement, \
@@ -349,11 +350,13 @@ class SmartAppResources(BaseConfig):
         requirements["platform_version"] = dr.PlatformVersionRequirement
         requirements["random"] = RandomRequirement
         requirements["regexp_in_template"] = RegexpInTemplateRequirement
+        requirements["rolling"] = RollingRequirement
         requirements["surface"] = dr.SurfaceRequirement
         requirements["surface_version"] = dr.SurfaceVersionRequirement
         requirements["template"] = TemplateRequirement
         requirements["template_in_array"] = TemplateInArrayRequirement
         requirements["time"] = TimeRequirement
+        requirements["topic"] = TopicRequirement
         requirements["settings"] = SettingsRequirement
 
     def init_sdk_items(self):
