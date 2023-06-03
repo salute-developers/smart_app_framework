@@ -68,10 +68,7 @@ class SmartAppFromMessage:
         self.validators = validators
 
     def validate(self) -> bool:
-        """
-            Try to json.load message and check for all required fields
-        """
-
+        """Try to json.load message and check for all required fields"""
         for validator in self.validators:
             if not validator.validate(self.message_name, self.payload):
                 return False

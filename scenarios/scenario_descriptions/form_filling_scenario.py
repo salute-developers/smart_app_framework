@@ -35,7 +35,7 @@ class FormFillingScenario(BaseScenario):
         question_field = self._field(form, text_preprocessing_result, user, params)
         return question_field.ask_again_counter < len(question_field.description.ask_again_requests)
 
-    def ask_again(self, text_preprocessing_result, user, params):
+    async def ask_again(self, text_preprocessing_result, user, params):
         form = user.forms[self.form_type]
         question_field = self._field(form, text_preprocessing_result, user, params)
         question = question_field.description.ask_again_requests[question_field.ask_again_counter]
@@ -47,7 +47,7 @@ class FormFillingScenario(BaseScenario):
                   content={HistoryConstants.content_fields.FIELD: question_field.description.id},
                   result=HistoryConstants.event_results.ASK_QUESTION))
 
-        return question.run(user, text_preprocessing_result, params)
+        return await question.run(user, text_preprocessing_result, params)
 
     def _check_field(self, text_preprocessing_result, user, params):
         form = user.forms[self.form_type]
@@ -94,7 +94,6 @@ class FormFillingScenario(BaseScenario):
 
     def _extract_data(self, form, text_normalization_result, user, params):
         result = {}
-
         callback_id = user.message.callback_id
         action_params = user.behaviors.get_callback_action_params(callback_id) or {}
         request_field = action_params.get(REQUEST_FIELD)
@@ -113,18 +112,13 @@ class FormFillingScenario(BaseScenario):
                                                                 text_normalization_result, user, params))
         return result
 
-    def _validate_extracted_data(self,
-                                 user,
-                                 text_preprocessing_result,
-                                 form,
-                                 data_extracted,
-                                 params) -> List[Command]:
+    async def _validate_extracted_data(self, user, text_preprocessing_result, form,
+                                       data_extracted, params) -> List[Command]:
         error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)
             # is not None is necessary, because 0 and False should be checked, None - shouldn't fill
-            if value is not None and \
-                    not field.field_validator.requirement.check(value, params):
+            if value is not None and not field.field_validator.requirement.check(value, params):
                 log_params = {
                     log_const.KEY_NAME: log_const.SCENARIO_RESULT_VALUE,
                     "field_key": field_key
@@ -132,7 +126,7 @@ class FormFillingScenario(BaseScenario):
                 message = "Field is not valid: %(field_key)s"
                 log(message, user, log_params)
                 actions = field.field_validator.actions
-                error_msgs = self.get_action_results(user, text_preprocessing_result, actions)
+                error_msgs = await self.get_action_results(user, text_preprocessing_result, actions)
                 break
         return error_msgs
 
@@ -191,8 +185,8 @@ class FormFillingScenario(BaseScenario):
         logging_params.update(self._log_params())
         log("Extracted data=%(data_extracted_str)s", user, logging_params)
 
-        validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
-                                                             form, data_extracted, params)
+        validation_error_msg = await self._validate_extracted_data(user, text_preprocessing_result,
+                                                                   form, data_extracted, params)
         if validation_error_msg:
             reply_messages = validation_error_msg
         else:

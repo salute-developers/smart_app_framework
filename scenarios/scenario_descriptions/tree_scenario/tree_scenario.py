@@ -124,8 +124,8 @@ class TreeScenario(FormFillingScenario):
                     if extracted is not None and fill_other:
                         fill_other = fill_other and field_descr.fill_other
                         field_data = {field_key: extracted}
-                        _validation_error_msg = self._validate_extracted_data(user, text_preprocessing_result,
-                                                                              internal_form, field_data, params)
+                        _validation_error_msg = await self._validate_extracted_data(user, text_preprocessing_result,
+                                                                                    internal_form, field_data, params)
                         if _validation_error_msg:
                             # return only first validation message in form
                             validation_error_msg = validation_error_msg or _validation_error_msg
