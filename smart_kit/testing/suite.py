@@ -146,7 +146,7 @@ class TestCase:
     def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type, parametrizer_cls: type,
                  from_msg_cls: type, messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
                  csv_case_callback: Optional[Callable[[Any], None]] = None, test_suite: Optional[TestSuite] = None,
-                 user: Optional[dict] = None, override_template_settings: Optional[dict] = None):
+                 user: Optional[dict] = None, override_configs: Optional[dict] = None):
         self.messages = messages
         self.user_state = json.dumps(user)
         self.interactive = interactive
@@ -161,12 +161,9 @@ class TestCase:
         self.__user_cls = user_cls
         self.__from_msg_cls = from_msg_cls
 
-        # save ref to initial state of template_settings
-        self._saved_template_settings = self.settings.registered_repositories["template_settings"].data
-        self.settings.registered_repositories["template_settings"].data = {
-            **self._saved_template_settings,
-            **(override_template_settings or {}),
-        }
+        # save refs to initial states of configs to be overridden
+        self._saved_configs_states = {}
+        self.apply_override_configs(override_configs or {})
 
     async def _run(self) -> bool:
         success = True
@@ -294,7 +291,25 @@ class TestCase:
     def post_setup_user(self, user):
         pass
 
+    def apply_override_configs(self, override_configs):
+        for repo_key, override_value in override_configs.items():
+            if repo_key in self.settings.registered_repositories:
+                self._saved_configs_states[repo_key] = self.settings.registered_repositories[repo_key].data
+                if isinstance(override_value, list):
+                    self.settings.registered_repositories[repo_key].data = override_value
+                elif isinstance(override_value, dict):
+                    self.settings.registered_repositories[repo_key].data = {
+                        **self._saved_configs_states[repo_key],
+                        **override_value,
+                    }
+                else:
+                    raise ValueError(
+                        "Only list and dict types are supported for override_configs values! "
+                        f"{type(override_value)=}; {override_value=}"
+                    )
+
     def finalize(self):
-        # rollback state of template_settings
+        # rollback states of overriden configs
         # look at data.setter at Repository class
-        self.settings.registered_repositories["template_settings"].data = self._saved_template_settings
+        for repo_key, state in self._saved_configs_states.items():
+            self.settings.registered_repositories[repo_key].data = state
