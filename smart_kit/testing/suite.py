@@ -146,7 +146,7 @@ class TestCase:
     def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type, parametrizer_cls: type,
                  from_msg_cls: type, messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
                  csv_case_callback: Optional[Callable[[Any], None]] = None, test_suite: Optional[TestSuite] = None,
-                 user: Optional[dict] = None):
+                 user: Optional[dict] = None, override_template_settings: Optional[dict] = None):
         self.messages = messages
         self.user_state = json.dumps(user)
         self.interactive = interactive
@@ -160,6 +160,13 @@ class TestCase:
         self.__parametrizer_cls = parametrizer_cls
         self.__user_cls = user_cls
         self.__from_msg_cls = from_msg_cls
+
+        # save ref to initial state of template_settings
+        self._saved_template_settings = self.settings.registered_repositories["template_settings"].data
+        self.settings.registered_repositories["template_settings"].data = {
+            **self._saved_template_settings,
+            **(override_template_settings or {}),
+        }
 
     async def _run(self) -> bool:
         success = True
@@ -288,4 +295,6 @@ class TestCase:
         pass
 
     def finalize(self):
-        pass
+        # rollback state of template_settings
+        # look at data.setter at Repository class
+        self.settings.registered_repositories["template_settings"].data = self._saved_template_settings
