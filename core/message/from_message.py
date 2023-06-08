@@ -44,7 +44,7 @@ class SmartAppFromMessage:
     SESSION_ID = "sessionId"
     CALLBACK_ID_HEADER_NAME = CALLBACK_ID_HEADER
 
-    _REQUIRED_FIELDS_MAP: Dict[Optional[str], Set[str]] = {
+    _REQUIRED_FIELDS_MAP = {
         None: {MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME},  # default
         "PUSH_RESULT": {MESSAGE_ID, MESSAGE_NAME},
         "PUSH_SENDING_RESULT": {MESSAGE_ID, MESSAGE_NAME}
@@ -85,7 +85,7 @@ class SmartAppFromMessage:
 
         try:
             message_name = self.as_dict.get(self.MESSAGE_NAME)
-            required_fields = self._REQUIRED_FIELDS_MAP[message_name]
+            required_fields = self._REQUIRED_FIELDS_MAP.get(message_name) or self._REQUIRED_FIELDS_MAP[None]
             for r_field in required_fields:
                 if r_field not in self.as_dict:
                     self.print_validation_error(r_field)
