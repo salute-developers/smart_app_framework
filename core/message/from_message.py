@@ -44,6 +44,12 @@ class SmartAppFromMessage:
     SESSION_ID = "sessionId"
     CALLBACK_ID_HEADER_NAME = CALLBACK_ID_HEADER
 
+    _REQUIRED_FIELDS_MAP = {
+        None: {MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME},  # default
+        "PUSH_RESULT": {MESSAGE_ID, MESSAGE_NAME},
+        "PUSH_SENDING_RESULT": {MESSAGE_ID, MESSAGE_NAME}
+    }
+
     # following fields are used for validation
     incremental_id: int
     message_name: str
@@ -78,7 +84,9 @@ class SmartAppFromMessage:
             return False
 
         try:
-            for r_field in self._required_fields:
+            message_name = self.as_dict.get(self.MESSAGE_NAME)
+            required_fields = self._REQUIRED_FIELDS_MAP.get(message_name) or self._REQUIRED_FIELDS_MAP[None]
+            for r_field in required_fields:
                 if r_field not in self.as_dict:
                     self.print_validation_error(r_field)
                     return False
@@ -145,10 +153,6 @@ class SmartAppFromMessage:
     @property
     def _callback_id_header_name(self) -> str:
         return CALLBACK_ID_HEADER
-
-    @property
-    def _required_fields(self) -> Set[str]:
-        return {self.MESSAGE_ID, self.UUID, self.PAYLOAD, self.SESSION_ID, self.MESSAGE_NAME}
 
     @property
     def session_id(self) -> Optional[str]:
