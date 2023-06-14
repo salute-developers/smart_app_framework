@@ -62,27 +62,29 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
             types = self.fields_type
         if types is None:
             return record_args
+
+        new_args = {}
         for k, v in record_args.items():
             if k not in types or v is None:  # скипаем проверку если поля нет в конфиге, или value = None
+                new_args[k] = v
                 continue
             if types[k]["type"] == "dict":  # отдельно рекурсивно обрабатываем словари
                 if not isinstance(v, dict):  # преобразуем в строку в новое поле, если тип не соответсвует
-                    record_args[k] = "__del__"
-                    record_args[f"{k}__str"] = str(v)
+                    new_args[f"{k}__str"] = str(v)
                     continue
-                record_args[k] = self._check_fields(v, types[k]["fields"])
+                new_args[k] = self._check_fields(v, types[k]["fields"])
                 continue
             if isinstance(v, TYPES[types[k]["type"]]):  # noqa
+                new_args[k] = v
                 continue
 
             # пытаемся кастануть тип
             try:
-                record_args[k] = TYPE_CASTS[types[k]["type"]](v)
+                new_args[k] = TYPE_CASTS[types[k]["type"]](v)
             except (ValueError, TypeError):
-                record_args[k] = "__del__"
-                record_args[f"{k}__str"] = str(v)
+                new_args[f"{k}__str"] = str(v)
 
-        return {k: v for k, v in record_args.items() if v != "__del__"}
+        return new_args
 
     def format(self, record: logging.LogRecord) -> str:
         # В готовый json логов добавляем поле с размером json-а.

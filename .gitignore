@@ -36,3 +36,4 @@ htmlcov
 
 tests/TestPass.csv
 tests/parsed_log.csv
+_trial_marker
