@@ -6,6 +6,7 @@ from functools import cached_property
 from typing import AnyStr, Optional, Tuple, Any, Dict, Callable
 
 from core.configs.global_constants import LINK_BEHAVIOR_FLAG
+from core.utils.utils import deep_update_dict
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.configs.settings import Settings
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -298,10 +299,10 @@ class TestCase:
                 if isinstance(override_value, list):
                     self.settings.registered_repositories[repo_key].data = override_value
                 elif isinstance(override_value, dict):
-                    self.settings.registered_repositories[repo_key].data = {
-                        **self._saved_configs_states[repo_key],
-                        **override_value,
-                    }
+                    self.settings.registered_repositories[repo_key].data = deep_update_dict(
+                        self._saved_configs_states[repo_key],
+                        override_value,
+                    )
                 else:
                     raise ValueError(
                         "Only list and dict types are supported for override_configs values! "

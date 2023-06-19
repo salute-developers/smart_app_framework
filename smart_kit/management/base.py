@@ -1,3 +1,17 @@
+import logging.config
+
+from smart_kit.configs.logger_config import LOGGING_CONFIG
+from smart_kit.configs.logger_config import LoggerConfig
+
+
+def init_logger(app_config):
+    logger_config = LoggerConfig(app_config.CONFIGS_PATH)
+    logger_config.init()
+    config = logger_config[LOGGING_CONFIG]
+    logging.log_store_for_map = config.get('log_store_for_map', None)
+    logging.config.dictConfig(config)
+
+
 class AppCommand:
     @classmethod
     def doc(cls):

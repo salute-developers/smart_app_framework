@@ -5,7 +5,7 @@ import sys
 
 import smart_kit
 from core.descriptions.descriptions import Descriptions
-from smart_kit.management.base import AppCommand
+from smart_kit.management.base import AppCommand, init_logger
 from smart_kit.testing.ssml_test.suite import SsmlTestSuite
 from smart_kit.testing.suite import TestSuite
 
@@ -56,6 +56,7 @@ class TestsCommand(AppCommand):
         )
 
     def execute(self, *args, **kwargs) -> None:
+        init_logger(self.app_config)
         namespace = self.parser.parse_args(args)
         if namespace.gen:
             if not namespace.path:

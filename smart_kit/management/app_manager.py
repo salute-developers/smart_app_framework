@@ -1,22 +1,11 @@
-import logging.config
 from collections import namedtuple
 
-from smart_kit.configs.logger_config import LOGGING_CONFIG
-from smart_kit.configs.logger_config import LoggerConfig
-from smart_kit.management.base import HelpCommand
+from smart_kit.management.base import HelpCommand, init_logger
 from smart_kit.management.cache import CreateCacheCommand
 from smart_kit.management.tests import TestsCommand
 from smart_kit.management.plugins import activate_plugins
 from smart_kit.start_points.app import run as app_runner
 from smart_kit.management.get_bundles_from_pps import GetBundleCommand
-
-
-def init_logger(app_config):
-    logger_config = LoggerConfig(app_config.CONFIGS_PATH)
-    logger_config.init()
-    config = logger_config[LOGGING_CONFIG]
-    logging.log_store_for_map = config.get('log_store_for_map', None)
-    logging.config.dictConfig(config)
 
 
 class AppCommand:

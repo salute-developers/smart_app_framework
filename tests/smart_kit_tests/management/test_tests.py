@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from smart_kit.management.tests import TestsCommand
 
 
+@patch("smart_kit.management.tests.init_logger", lambda _: None)
 class TestsCommandTest1(unittest.IsolatedAsyncioTestCase):  # TODO тесты на manage.py tests
     """Проверки на реакцию на флажки в аргументах команды"""
 

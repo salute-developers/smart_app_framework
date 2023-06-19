@@ -2,12 +2,11 @@ import unittest
 from unittest.mock import MagicMock
 
 from core.request.rest_request import RestRequest
-from smart_kit.utils.picklable_mock import PicklableMock
 
 
 class RestRequestTest(unittest.TestCase):
     def setUp(self):
-        self.expected = PicklableMock()
+        self.expected = MagicMock()
 
     def test_get(self):
         self.rr = RestRequest({"method": "get"})
