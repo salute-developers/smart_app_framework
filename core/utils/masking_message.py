@@ -3,10 +3,15 @@ import re
 
 MASK = "***"
 DEFAULT_MASKING_FIELDS = {
-    "token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "profileId": 0, "searchResult": 0,
+    "token": 0, "access_token": 0, "refresh_token": 0, "epkId": 0, "ucp_id": 0, "profileId": 0, "searchResult": 0,
 }
-CARD_MASKING_FIELDS = ["message", "debug_info", "normalizedMessage", "incoming_text", "annotations", "inner_entities",
-                       "preprocess_result", "original_message", "original_tokenized_elements"]
+CARD_MASKING_FIELDS = ["message", "debug_info", "normalizedMessage", "normalized_text",
+                       "incoming_text", "annotations", "inner_entities",
+                       "preprocess_result", "original_message", "original_tokenized_elements", "lemma",
+                       "original_text", "asr_original_message", "asr_normalized_message",
+                       "human_normalized_text", "human_normalized_text_with_anaphora",
+                       "unified_normalized_text", "ner_prediction"]
+
 
 card_regular = re.compile(r"(?:(\d{18})|(\d{16})|(?:\d{4} ){3}(\d{4})(\s?\d{2})?)")
 
