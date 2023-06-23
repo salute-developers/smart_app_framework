@@ -640,11 +640,13 @@ class MainLoop(BaseMainLoop):
 
         try:
             save_tries = 0
-            user_save_no_collisions = False
+            user_save_ok = False
             answers = []
             user = None
             timeout_from_message = None
-            while save_tries < self.user_save_collisions_tries and not user_save_no_collisions:
+            callback_found = True
+            while save_tries < self.user_save_collisions_tries and not user_save_ok:
+                callback_found = False
                 save_tries += 1
                 orig_message_raw = json.loads(mq_message.value())
                 orig_message_raw[SmartAppFromMessage.MESSAGE_NAME] = message_names.LOCAL_TIMEOUT
@@ -658,15 +660,16 @@ class MainLoop(BaseMainLoop):
                 user = await self.load_user(db_uid, timeout_from_message)
 
                 if user.behaviors.has_callback(callback_id):
+                    callback_found = True
                     commands = await self.model.answer(timeout_from_message, user)
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
                                                      topic_key=topic_key,
                                                      kafka_key=kafka_key)
 
-                    user_save_no_collisions = await self.save_user(db_uid, user, mq_message)
+                    user_save_ok = await self.save_user(db_uid, user, mq_message)
 
-                    if not user_save_no_collisions:
+                    if not user_save_ok:
                         log("MainLoop.do_behavior_timeout: save user got collision on uid %(uid)s db_version "
                             "%(db_version)s.",
                             user=user,
@@ -682,7 +685,7 @@ class MainLoop(BaseMainLoop):
 
             self.remove_timer(timeout_from_message)
 
-            if not user_save_no_collisions:
+            if not user_save_ok and callback_found:
                 log("MainLoop.do_behavior_timeout: db_save collision all tries left on uid %(uid)s db_version "
                     "%(db_version)s.",
                     user=user,
@@ -696,7 +699,7 @@ class MainLoop(BaseMainLoop):
                     level="WARNING")
                 monitoring.counter_save_collision_tries_left(self.app_name)
 
-            if user_save_no_collisions:
+            if user_save_ok:
                 self.save_behavior_timeouts(user, mq_message, kafka_key)
                 for answer in answers:
                     self._send_request(user, answer, mq_message)
