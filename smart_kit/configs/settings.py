@@ -1,7 +1,8 @@
-import yaml
-import os
 import asyncio
+import os
 import typing
+
+import yaml
 
 from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
@@ -49,8 +50,8 @@ class Settings(BaseConfig, metaclass=Singleton):
 
         use_secrets_path_for_kafka: bool = template_settings_repo.data.get('kafka_use_secrets_path', True)
         kafka_config_repo = FileRepository(
-                self._get_kafka_settings_filepath("kafka_config.yml", use_secrets_path=use_secrets_path_for_kafka),
-                loader=yaml.safe_load, key="kafka")
+            self._get_kafka_settings_filepath("kafka_config.yml", use_secrets_path=use_secrets_path_for_kafka),
+            loader=yaml.safe_load, key="kafka")
 
         ceph_config_repo = FileRepository(
             self.subfolder_path("ceph_config.yml"), loader=yaml.safe_load, key=self.CephAdapterKey)
