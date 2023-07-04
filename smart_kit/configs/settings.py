@@ -1,6 +1,8 @@
-import yaml
-import os
 import asyncio
+import os
+import typing
+
+import yaml
 
 from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
@@ -21,16 +23,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         self.app_name = kwargs.get("app_name")
         self.adapters = {Settings.CephAdapterKey: CephAdapter, self.OSAdapterKey: OSAdapter}
         self.loop = asyncio.get_event_loop()
-        self.repositories = [
-            UpdatableFileRepository(
-                self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings"
-            ),
-            FileRepository(self.subfolder_secret_path("kafka_config.yml"), loader=yaml.safe_load, key="kafka"),
-            FileRepository(
-                self.subfolder_path("ceph_config.yml"), loader=yaml.safe_load, key=self.CephAdapterKey
-            ),
-            FileRepository(self.subfolder_path("aiohttp.yml"), loader=yaml.safe_load, key="aiohttp"),
-        ]
+        self.repositories = self._load_base_repositories()
         self.repositories = self.override_repositories(self.repositories)
         self.init()
 
@@ -49,6 +42,35 @@ class Settings(BaseConfig, metaclass=Singleton):
         :return: Переопределённый в наследниках список репозиториев
         """
         return repositories
+
+    def _load_base_repositories(self) -> typing.List[FileRepository]:
+        """Load base repositories with service settings"""
+        template_settings_repo = UpdatableFileRepository(
+            self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings")
+
+        use_secrets_path_for_kafka: bool = template_settings_repo.data.get("kafka_use_secrets_path", True)
+        kafka_config_repo = FileRepository(
+            self._get_kafka_settings_filepath("kafka_config.yml", use_secrets_path=use_secrets_path_for_kafka),
+            loader=yaml.safe_load, key="kafka")
+
+        ceph_config_repo = FileRepository(
+            self.subfolder_path("ceph_config.yml"), loader=yaml.safe_load, key=self.CephAdapterKey)
+
+        aiohttp_config_repo = FileRepository(self.subfolder_path("aiohttp.yml"), loader=yaml.safe_load, key="aiohttp")
+
+        return [
+            template_settings_repo,
+            kafka_config_repo,
+            ceph_config_repo,
+            aiohttp_config_repo,
+        ]
+
+    def _get_kafka_settings_filepath(
+            self, filename: typing.Any, use_secrets_path: bool = True) -> typing.Union[bytes, str]:
+        """Возвращает путь к файлу с настройками кафки. По умолчанию возвращает путь к файлу в секретах."""
+        if use_secrets_path:
+            return self.subfolder_secret_path(filename)
+        return self.subfolder_path(filename)
 
     @property
     def _subfolder(self):
