@@ -48,7 +48,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         template_settings_repo = UpdatableFileRepository(
             self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings")
 
-        use_secrets_path_for_kafka: bool = template_settings_repo.data.get('kafka_use_secrets_path', True)
+        use_secrets_path_for_kafka: bool = template_settings_repo.data.get("kafka_use_secrets_path", True)
         kafka_config_repo = FileRepository(
             self._get_kafka_settings_filepath("kafka_config.yml", use_secrets_path=use_secrets_path_for_kafka),
             loader=yaml.safe_load, key="kafka")
