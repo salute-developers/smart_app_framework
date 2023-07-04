@@ -78,6 +78,9 @@ class MainLoop(BaseMainLoop):
         self.queues = [asyncio.Queue() for _ in range(self.max_concurrent_messages)]
         self.total_messages = 0
 
+        # override default value
+        self.MAX_LOG_TIME = self._get_max_log_time_from_settings(settings=self.template_settings or {})
+
         try:
             kafka_config = _enrich_config_from_secret(
                 self.settings["kafka"]["template-engine"], self.settings.get("secret_kafka", {})
@@ -115,6 +118,10 @@ class MainLoop(BaseMainLoop):
                                                               "class_name": self.__class__.__name__},
                 level="ERROR", exc_info=True)
             raise
+
+    def _get_max_log_time_from_settings(self, settings: dict) -> int:
+        """Get max log time from settings or use default value for kafka polling"""
+        return settings.get("kafka_max_log_time", self.MAX_LOG_TIME)
 
     def run(self):
         signal.signal(signal.SIGINT, self.stop)
