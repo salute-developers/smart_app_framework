@@ -67,6 +67,12 @@ class KafkaPublisher(BaseKafkaPublisher):
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
+            if headers and REPLY_TOPIC_KEY in headers:
+                reply_topic_key = headers[REPLY_TOPIC_KEY]
+                reply_topics = self._config[REPLY_TOPIC]
+                mapped_reply_topic = reply_topics[reply_topic_key]
+                headers.pop(REPLY_TOPIC_KEY)
+                headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
         except BufferError:
             params = {
