@@ -2,7 +2,7 @@
 import logging
 import os
 import time
-from typing import Union
+from typing import Union, Optional, Dict
 
 from confluent_kafka import Producer
 
@@ -30,7 +30,15 @@ class KafkaPublisher(BaseKafkaPublisher):
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers=None):
+    def _map_reply_topic_key(self, headers: Optional[Dict]):
+        if headers and REPLY_TOPIC_KEY in headers:
+            reply_topic_key = headers[REPLY_TOPIC_KEY]
+            reply_topics = self._config[REPLY_TOPIC]
+            mapped_reply_topic = reply_topics[reply_topic_key]
+            headers.pop(REPLY_TOPIC_KEY)
+            headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic
+
+    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[Dict] = None):
         try:
             topic = self._config["topic"]
             if topic_key is not None:
@@ -38,12 +46,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
-            if headers and REPLY_TOPIC_KEY in headers:
-                reply_topic_key = headers[REPLY_TOPIC_KEY]
-                reply_topics = self._config[REPLY_TOPIC]
-                mapped_reply_topic = reply_topics[reply_topic_key]
-                headers.pop(REPLY_TOPIC_KEY)
-                headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic
+            self._map_reply_topic_key(headers)
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
         except BufferError:
             params = {
@@ -67,12 +70,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
-            if headers and REPLY_TOPIC_KEY in headers:
-                reply_topic_key = headers[REPLY_TOPIC_KEY]
-                reply_topics = self._config[REPLY_TOPIC]
-                mapped_reply_topic = reply_topics[reply_topic_key]
-                headers.pop(REPLY_TOPIC_KEY)
-                headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic
+            self._map_reply_topic_key(headers)
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
         except BufferError:
             params = {
