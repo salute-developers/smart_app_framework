@@ -2,7 +2,7 @@
 import logging
 import os
 import time
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, List, Tuple, Any
 
 from confluent_kafka import Producer
 
@@ -30,15 +30,15 @@ class KafkaPublisher(BaseKafkaPublisher):
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def _map_reply_topic_key(self, headers: Optional[Dict]):
-        if headers and REPLY_TOPIC_KEY in headers:
-            reply_topic_key = headers[REPLY_TOPIC_KEY]
-            reply_topics = self._config[REPLY_TOPIC]
-            mapped_reply_topic = reply_topics[reply_topic_key]
-            headers.pop(REPLY_TOPIC_KEY)
-            headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic.encode()
+    def _map_reply_topic_key(self, headers: Optional[List[Tuple[Any, Any]]]):
+        if headers:
+            for i, (key, value) in headers:
+                reply_topics = self._config[REPLY_TOPIC]
+                if key == REPLY_TOPIC_KEY:
+                    mapped_reply_topic = reply_topics[value]
+                    headers[i] = (KAFKA_REPLY_TOPIC, mapped_reply_topic.encode())
 
-    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[Dict] = None):
+    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[List[Tuple[Any, Any]]] = None):
         try:
             topic = self._config["topic"]
             if topic_key is not None:
@@ -58,7 +58,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             monitoring.got_counter("kafka_producer_exception")
         self._poll()
 
-    def send_to_topic(self, value, key=None, topic=None, headers=None):
+    def send_to_topic(self, value, key=None, topic=None, headers: Optional[List[Tuple[Any, Any]]] = None):
         try:
             if topic is None:
                 params = {
