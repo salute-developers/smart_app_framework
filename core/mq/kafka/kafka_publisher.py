@@ -36,7 +36,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             reply_topics = self._config[REPLY_TOPIC]
             mapped_reply_topic = reply_topics[reply_topic_key]
             headers.pop(REPLY_TOPIC_KEY)
-            headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic
+            headers[KAFKA_REPLY_TOPIC] = mapped_reply_topic.encode()
 
     def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[Dict] = None):
         try:
