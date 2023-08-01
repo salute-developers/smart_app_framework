@@ -2,13 +2,11 @@
 import logging
 import os
 import time
-from typing import Union, Optional, Dict, List, Tuple, Any
+from typing import Union, Optional, List, Tuple, Any
 
 from confluent_kafka import Producer
 
 import core.logging.logger_constants as log_const
-from core.configs.config_constants import REPLY_TOPIC_KEY, REPLY_TOPIC
-from core.configs.global_constants import KAFKA_REPLY_TOPIC
 from core.logging.logger_utils import log
 from core.monitoring.monitoring import monitoring
 from core.mq.kafka.base_kafka_publisher import BaseKafkaPublisher
@@ -30,14 +28,6 @@ class KafkaPublisher(BaseKafkaPublisher):
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def _map_reply_topic_key(self, headers: Optional[List[Tuple[Any, Any]]]):
-        if headers:
-            for i, (key, value) in headers:
-                reply_topics = self._config[REPLY_TOPIC]
-                if key == REPLY_TOPIC_KEY:
-                    mapped_reply_topic = reply_topics[value]
-                    headers[i] = (KAFKA_REPLY_TOPIC, mapped_reply_topic.encode())
-
     def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[List[Tuple[Any, Any]]] = None):
         try:
             topic = self._config["topic"]
@@ -46,7 +36,6 @@ class KafkaPublisher(BaseKafkaPublisher):
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
-            self._map_reply_topic_key(headers)
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
         except BufferError:
             params = {
@@ -70,7 +59,6 @@ class KafkaPublisher(BaseKafkaPublisher):
             producer_params = dict()
             if key is not None:
                 producer_params["key"] = key
-            self._map_reply_topic_key(headers)
             self._producer.produce(topic=topic, value=value, headers=headers or [], **producer_params)
         except BufferError:
             params = {

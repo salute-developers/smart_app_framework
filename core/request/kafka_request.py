@@ -13,7 +13,7 @@ class KafkaRequest(BaseRequest):
     TOPIC = "topic"
 
     def __init__(self, items, id=None):
-        super(KafkaRequest, self).__init__(items)
+        super().__init__(items)
         items = items or {}
         self.topic_key = items.get(self.TOPIC_KEY)
         self.kafka_key = items.get(self.KAFKA_KEY)
