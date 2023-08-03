@@ -10,6 +10,7 @@ import core.basic_models.classifiers.classifiers_constants as cls_const
 import core.logging.logger_constants as log_const
 import scenarios.logging.logger_constants as scenarios_log_const
 from core.basic_models.classifiers.basic_classifiers import Classifier
+from core.configs.global_constants import KAFKA_REPLY_TOPIC
 from core.utils.masking_message import masking
 from core.utils.stats_timer import StatsTimer
 
@@ -22,7 +23,7 @@ HEADERS = "headers"
 
 
 class LoggerMessageCreator:
-    LOGGER_HEADERS = ["kafka_replyTopic", "app_callback_id"]
+    LOGGER_HEADERS = [KAFKA_REPLY_TOPIC, "app_callback_id"]
     ART_NAMES = [
         "channel", "type", "device_channel", "device_channel_version", "device_platform", "group",
         "device_platform_version", "device_platform_client_type", "csa_profile_id", "test_deploy"

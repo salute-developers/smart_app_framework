@@ -2,7 +2,7 @@
 import logging
 import os
 import time
-from typing import Union
+from typing import Union, Optional, List, Tuple, Any
 
 from confluent_kafka import Producer
 
@@ -28,7 +28,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             conf["logger"] = debug_logger
         self._producer = Producer(**conf)
 
-    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers=None):
+    def send(self, value: Union[str, bytes], key=None, topic_key=None, headers: Optional[List[Tuple[Any, Any]]] = None):
         try:
             topic = self._config["topic"]
             if topic_key is not None:
@@ -47,7 +47,7 @@ class KafkaPublisher(BaseKafkaPublisher):
             monitoring.got_counter("kafka_producer_exception")
         self._poll()
 
-    def send_to_topic(self, value, key=None, topic=None, headers=None):
+    def send_to_topic(self, value, key=None, topic=None, headers: Optional[List[Tuple[Any, Any]]] = None):
         try:
             if topic is None:
                 params = {
