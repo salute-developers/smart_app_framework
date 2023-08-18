@@ -4,7 +4,7 @@ import json
 import os
 from csv import DictWriter, QUOTE_MINIMAL
 from functools import cached_property
-from typing import AnyStr, Optional, Tuple, Any, Dict, Callable
+from typing import AnyStr, Optional, Tuple, Any, Dict, Callable, List
 
 from core.configs.global_constants import LINK_BEHAVIOR_FLAG
 from core.utils.utils import deep_update_dict
@@ -167,6 +167,39 @@ class TestCase:
         self._saved_configs_states = {}
         self.apply_override_configs(override_configs or {})
 
+    def _compare_answers(self, answers: List[SmartAppToMessage], expected_response: dict) -> bool:
+        expected_answers = expected_response["messages"]
+        success = True
+
+        if len(answers) != len(expected_answers):
+            print(
+                f"[!] Expected quantity of messages differ from received.\n"
+                f" Expected: {len(expected_answers)}. Actual: {len(answers)}."
+            )
+            return False
+
+        for actual, expected in zip(answers, expected_answers):
+            actual_value = actual.as_dict
+            diff = Diff.partial_diff(expected, actual_value)
+            if diff:
+                success = False
+                print(diff)
+            if self.csv_case_callback:
+                self.csv_case_callback(diff)
+
+        return success
+
+    def _compare_user(self, user: User, expected_response: dict):
+        expected_user = expected_response["user"]
+
+        success = True
+
+        user_diff = Diff.partial_diff(expected_user, user.raw)
+        if user_diff:
+            success = False
+            print(user_diff)
+        return success
+
     async def _run(self) -> bool:
         success = True
 
@@ -205,36 +238,18 @@ class TestCase:
             predefined_fields_resp = response.get("predefined_fields")
             if predefined_fields_resp:
                 response = self.handle_predefined_fields_response(predefined_fields_resp, response)
-            expected_answers = response["messages"]
-            expected_user = response["user"]
 
-            if len(commands) != len(response["messages"]):
-                print(
-                    f"[!] Expected quantity of messages differ from received.\n"
-                    f" Expected: {len(response['messages'])}. Actual: {len(answers)}."
-                )
+            if not self._compare_answers(answers, response) or not self._compare_user(user, response):
                 success = False
-                continue
 
+            # Последний app_callback_id в answers, используется в заголовках следующего сообщения
             app_callback_id = None
-            for actual, expected in zip(answers, expected_answers):
-                actual_value = actual.as_dict
-                diff = Diff.partial_diff(expected, actual_value)
-                if diff:
-                    success = False
-                    print(diff)
-                if self.csv_case_callback:
-                    self.csv_case_callback(diff)
-                # Последний app_callback_id в answers, используется в заголовках следующего сообщения
-                app_callback_id = actual.request.values.get(
+            for answer in answers:
+                app_callback_id = answer.request.values.get(
                     self.__from_msg_cls.CALLBACK_ID_HEADER_NAME,
                     app_callback_id
                 )
 
-            user_diff = Diff.partial_diff(expected_user, user.raw)
-            if user_diff:
-                success = False
-                print(user_diff)
             self.user_state = user.raw_str
         return success
 
