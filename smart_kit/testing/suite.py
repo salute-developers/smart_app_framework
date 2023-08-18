@@ -148,9 +148,10 @@ class TestSuite:
 
 class TestCase:
     def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type[User], parametrizer_cls: type,
-                 from_msg_cls: type[SmartAppFromMessage], messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
-                 csv_case_callback: Optional[Callable[[Any], None]] = None, test_suite: Optional[TestSuite] = None,
-                 user: Optional[dict] = None, override_configs: Optional[dict] = None):
+                 from_msg_cls: type[SmartAppFromMessage], messages: dict, storaged_predefined_fields: Dict[str, Any],
+                 interactive: bool, csv_case_callback: Optional[Callable[[Any], None]] = None,
+                 test_suite: Optional[TestSuite] = None, user: Optional[dict] = None,
+                 override_configs: Optional[dict] = None):
         self.messages = messages
         self.user_state = json.dumps(user)
         self.interactive = interactive
