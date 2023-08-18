@@ -7,7 +7,9 @@ from functools import cached_property
 from typing import AnyStr, Optional, Tuple, Any, Dict, Callable, List
 
 from core.configs.global_constants import LINK_BEHAVIOR_FLAG
+from core.message.from_message import SmartAppFromMessage
 from core.utils.utils import deep_update_dict
+from scenarios.user.user_model import User
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.configs.settings import Settings
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -145,8 +147,8 @@ class TestSuite:
 
 
 class TestCase:
-    def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type, parametrizer_cls: type,
-                 from_msg_cls: type, messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
+    def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type[User], parametrizer_cls: type,
+                 from_msg_cls: type[SmartAppFromMessage], messages: dict, storaged_predefined_fields: Dict[str, Any], interactive: bool,
                  csv_case_callback: Optional[Callable[[Any], None]] = None, test_suite: Optional[TestSuite] = None,
                  user: Optional[dict] = None, override_configs: Optional[dict] = None):
         self.messages = messages
