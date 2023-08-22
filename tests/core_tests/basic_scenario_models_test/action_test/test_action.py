@@ -112,7 +112,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         items = {"nodes": "test"}
         action = Action(items)
         try:
-            await action.run(None, None)
+            async for command in action.run(None, None):
+                pass
             result = False
         except NotImplementedError:
             result = True

@@ -26,7 +26,8 @@ class HandlerServerAction(HandlerBase):
         return payload[SERVER_ACTION].get("parameters", {})
 
     async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+        async for command in super().run(payload, user):
+            yield command
         action_params = pickle_deepcopy(self.get_action_params(payload))
         params = {log_const.KEY_NAME: "handling_server_action",
                   "server_action_params": str(action_params),
@@ -35,5 +36,5 @@ class HandlerServerAction(HandlerBase):
 
         action_id = self.get_action_name(payload, user)
         action = user.descriptions["external_actions"][action_id]
-        commands.extend(await action.run(user, TextPreprocessingResult({}), action_params) or [])
-        return commands
+        async for command in action.run(user, TextPreprocessingResult({}), action_params):
+            yield command

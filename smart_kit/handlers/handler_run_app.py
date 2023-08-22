@@ -22,14 +22,15 @@ class HandlerRunApp(HandlerBase):
         )
 
     async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+        async for command in super().run(payload, user):
+            yield command
 
         params = {log_const.KEY_NAME: "handling_run_app"}
         log(f"{self.__class__.__name__}.run started", user, params)
 
-        commands.extend(await self._handle_base(user))
-        return commands
+        async for command in self._handle_base(user):
+            yield command
 
     async def _handle_base(self, user: User) -> List[Command]:
-        answer, is_answer_found = await self.dialogue_manager.run(TextPreprocessingResult({}), user)
-        return answer or []
+        async for command in self.dialogue_manager.run(TextPreprocessingResult({}), user):
+            yield command

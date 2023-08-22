@@ -12,12 +12,14 @@ class HandlerTakeRuntimePermissions(HandlerBase):
     SUCCESS_CODE = 1
 
     async def run(self, payload, user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+        async for command in super().run(payload, user):
+            yield command
         log(f"{self.__class__.__name__} started", user)
         if payload.get(STATUS_CODE, {}).get(CODE) == self.SUCCESS_CODE:
-            commands.extend(await user.behaviors.success(user.message.callback_id))
+            async for command in user.behaviors.success(user.message.callback_id):
+                yield command
             user.variables.set("permitted_actions", payload.get(PERMITTED_ACTIONS, []))
         else:
-            commands.extend(await user.behaviors.fail(user.message.callback_id))
+            async for command in user.behaviors.fail(user.message.callback_id):
+                yield command
         user.variables.set("take_runtime_permissions_status_code", payload.get(STATUS_CODE, {}))
-        return commands

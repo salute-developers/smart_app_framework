@@ -90,6 +90,7 @@ class NodeAction(CommandAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         raise NotImplementedError
+        yield
 
 
 class StringAction(NodeAction):
@@ -142,9 +143,8 @@ class StringAction(NodeAction):
                 }
             })
 
-        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=self.request_data)]
-        return commands
+        yield Command(self.command, command_params, self.id, request_type=self.request_type,
+                      request_data=self.request_data)
 
 
 class AfinaAnswerAction(NodeAction):

@@ -32,7 +32,8 @@ class DialogueManager:
         before_action = user.descriptions["external_actions"].get("before_action")
         if before_action:
             params = user.parametrizer.collect(text_preprocessing_result)
-            await before_action.run(user, text_preprocessing_result, params)
+            async for command in before_action.run(user, text_preprocessing_result, params):
+                yield command
         scenarios_names = user.last_scenarios.scenarios_names
         scenario_key = user.message.payload[field.INTENT]
         if scenario_key in scenarios_names:
@@ -42,11 +43,15 @@ class DialogueManager:
                 if not scenario.text_fits(text_preprocessing_result, user):
                     params = user.parametrizer.collect(text_preprocessing_result)
                     if scenario.check_ask_again_requests(text_preprocessing_result, user, params):
-                        reply = await scenario.ask_again(text_preprocessing_result, user, params)
-                        return reply, True
+                        async for command in scenario.ask_again(text_preprocessing_result, user, params):
+                            yield command
+                        return
                     monitoring.counter_nothing_found(self.app_name, scenario_key, user)
-                    return await self._nothing_found_action.run(user, text_preprocessing_result), False
-        return await self.run_scenario(scenario_key, text_preprocessing_result, user), True
+                    async for command in self._nothing_found_action.run(user, text_preprocessing_result):
+                        yield command
+                    return
+        async for command in self.run_scenario(scenario_key, text_preprocessing_result, user):
+            yield command
 
     async def run_scenario(self, scen_id, text_preprocessing_result, user):
         initial_last_scenario = user.last_scenarios.last_scenario_name
@@ -56,10 +61,9 @@ class DialogueManager:
                   log_const.SCENARIO_DESCRIPTION_VALUE: scenario.scenario_description
                   }
         log(log_const.LAST_SCENARIO_MESSAGE, user, params)
-        run_scenario_result = await scenario.run(text_preprocessing_result, user)
+        async for command in scenario.run(text_preprocessing_result, user):
+            yield command
 
         actual_last_scenario = user.last_scenarios.last_scenario_name
         if actual_last_scenario and actual_last_scenario != initial_last_scenario:
             monitoring.counter_scenario_change(self.app_name, actual_last_scenario, user)
-
-        return run_scenario_result

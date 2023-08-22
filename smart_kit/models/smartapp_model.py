@@ -79,12 +79,11 @@ class SmartAppModel:
         handler = self.get_handler(message.type)
 
         if not user.load_error:
-            commands = await handler.run(message.payload, user)
+            async for command in handler.run(message.payload, user):
+                yield command
         else:
             log("Error in loading user data", user, level="ERROR", exc_info=True)
             raise Exception("Error in loading user data")
-
-        return commands
 
     async def on_answer_error(self, message, user):
         user.do_not_save = True
@@ -102,6 +101,6 @@ class SmartAppModel:
         if user.settings["template_settings"].get("debug_info"):
             set_debug_info(self.app_name, callback_action_params, error)
         exception_action = user.descriptions["external_actions"]["exception_action"]
-        commands = await exception_action.run(user=user, text_preprocessing_result=None,
-                                              params=callback_action_params)
-        return commands
+        async for command in exception_action.run(user=user, text_preprocessing_result=None,
+                                                  params=callback_action_params):
+            yield command

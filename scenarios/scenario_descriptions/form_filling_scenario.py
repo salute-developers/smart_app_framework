@@ -47,7 +47,8 @@ class FormFillingScenario(BaseScenario):
                   content={HistoryConstants.content_fields.FIELD: question_field.description.id},
                   result=HistoryConstants.event_results.ASK_QUESTION))
 
-        return await question.run(user, text_preprocessing_result, params)
+        async for command in question.run(user, text_preprocessing_result, params):
+            yield command
 
     def _check_field(self, text_preprocessing_result, user, params):
         form = user.forms[self.form_type]
@@ -114,7 +115,6 @@ class FormFillingScenario(BaseScenario):
 
     async def _validate_extracted_data(self, user, text_preprocessing_result, form,
                                        data_extracted, params) -> List[Command]:
-        error_msgs = []
         for field_key, field in form.description.fields.items():
             value = data_extracted.get(field_key)
             # is not None is necessary, because 0 and False should be checked, None - shouldn't fill
@@ -126,9 +126,9 @@ class FormFillingScenario(BaseScenario):
                 message = "Field is not valid: %(field_key)s"
                 log(message, user, log_params)
                 actions = field.field_validator.actions
-                error_msgs = await self.get_action_results(user, text_preprocessing_result, actions)
+                async for command in self.get_action_results(user, text_preprocessing_result, actions):
+                    yield command
                 break
-        return error_msgs
 
     async def _fill_form(self, user, text_preprocessing_result, form, data_extracted) -> Tuple[List[Command], bool]:
         on_filled_actions = []
@@ -160,7 +160,8 @@ class FormFillingScenario(BaseScenario):
             message = "Ask question on field: %(field)s"
             log(message, user, params)
             action_params[REQUEST_FIELD] = {"type": field.description.type, "id": field.description.id}
-            action_messages = await self.get_action_results(user, text_preprocessing_result, actions, action_params)
+            async for command in self.get_action_results(user, text_preprocessing_result, actions, action_params):
+                yield command
         else:
             actions = reply_actions
             params = {
@@ -170,9 +171,9 @@ class FormFillingScenario(BaseScenario):
             message = "Finished scenario: %(id)s"
             log(message, user, params)
             user.preprocessing_messages_for_scenarios.clear()
-            action_messages = await self.get_action_results(user, text_preprocessing_result, actions, action_params)
+            async for command in self.get_action_results(user, text_preprocessing_result, actions, action_params):
+                yield command
             user.last_scenarios.delete(self.id)
-        return action_messages
 
     @monitoring.got_histogram("scenario_time")
     async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:

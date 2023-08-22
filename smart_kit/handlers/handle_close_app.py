@@ -16,13 +16,16 @@ class HandlerCloseApp(HandlerBase):
         self._clear_current_scenario = ClearCurrentScenarioAction()
 
     async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+        async for command in super().run(payload, user):
+            yield command
+
         text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
+        async for command in self._clear_current_scenario.run(user, text_preprocessing_result):
+            yield command
+
         params = {
             log_const.KEY_NAME: "HandlerCloseApp"
         }
-        await self._clear_current_scenario.run(user, text_preprocessing_result)
         if payload.get("message"):
             params["tpr_str"] = str(text_preprocessing_result.raw)
         log("HandlerCloseApp with text preprocessing result", user, params)
-        return commands
