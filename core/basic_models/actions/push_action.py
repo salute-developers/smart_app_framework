@@ -78,9 +78,8 @@ class PushAction(StringAction):
             "content": self._generate_command_context(user, text_preprocessing_result, params),
         }
         requests_data = self._render_request_data(params)
-        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
-        return commands
+        yield Command(self.command, command_params, self.id, request_type=self.request_type,
+                      request_data=requests_data, need_payload_wrap=False, need_message_name=False)
 
 
 class PushAuthenticationActionHttp(PushAction):
@@ -137,7 +136,8 @@ class PushAuthenticationActionHttp(PushAction):
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        return await self.http_request_action.run(user, text_preprocessing_result, params)
+        async for command in self.http_request_action.run(user, text_preprocessing_result, params):
+            yield command
 
 
 class GetRuntimePermissionsAction(PushAction):
@@ -183,9 +183,8 @@ class GetRuntimePermissionsAction(PushAction):
             }
         }
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
-        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=self.request_data, need_payload_wrap=False, need_message_name=False)]
-        return commands
+        yield Command(self.command, command_params, self.id, request_type=self.request_type,
+                      request_data=self.request_data, need_payload_wrap=False, need_message_name=False)
 
 
 class PushActionHttp(PushAction):
@@ -331,4 +330,5 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        return await self.http_request_action.run(user, text_preprocessing_result, params)
+        async for command in self.http_request_action.run(user, text_preprocessing_result, params):
+            yield command

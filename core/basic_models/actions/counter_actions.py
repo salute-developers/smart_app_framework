@@ -23,25 +23,25 @@ class CounterAction(Action):
 class CounterIncrementAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = []
         user.counters[self.key].inc(self.value, self.lifetime)
-        return commands
+        return
+        yield
 
 
 class CounterDecrementAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = []
         user.counters[self.key].dec(-self.value, self.lifetime)
-        return commands
+        return
+        yield
 
 
 class CounterClearAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = []
         user.counters.clear(self.key)
-        return commands
+        return
+        yield
 
 
 class CounterSetAction(CounterAction):
@@ -59,9 +59,9 @@ class CounterSetAction(CounterAction):
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = []
         user.counters[self.key].set(self.value, self.reset_time, self.time_shift)
-        return commands
+        return
+        yield
 
 
 class CounterCopyAction(Action):
@@ -74,7 +74,7 @@ class CounterCopyAction(Action):
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        commands = []
         value = user.counters[self.src].value
         user.counters[self.dst].set(value, self.reset_time, self.time_shift)
-        return commands
+        return
+        yield

@@ -130,7 +130,8 @@ class HTTPRequestAction(NodeAction):
             else:
                 action = behavior_description.fail_action
         if action:
-            return await action.run(user, text_preprocessing_result, None)
+            async for command in action.run(user, text_preprocessing_result, None):
+                yield command
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
@@ -141,4 +142,5 @@ class HTTPRequestAction(NodeAction):
         response = await self._make_response(request_parameters, user)
         if response:
             log("response data: %(body)s", params={"body": response.json()}, level="INFO")
-        return await self.process_result(response, user, text_preprocessing_result, params)
+        async for command in self.process_result(response, user, text_preprocessing_result, params):
+            yield command

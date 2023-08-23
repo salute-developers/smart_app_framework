@@ -40,5 +40,5 @@ class SmartGeoAction(StringAction):
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
 
-        commands = await super().run(user, text_preprocessing_result, params)
-        return commands
+        async for command in super().run(user, text_preprocessing_result, params):
+            yield command

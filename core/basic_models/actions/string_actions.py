@@ -169,7 +169,6 @@ class AfinaAnswerAction(NodeAction):
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         answer_params = dict()
-        result = []
 
         nodes = self.nodes.items() if self.nodes else []
         for key, template in nodes:
@@ -180,9 +179,8 @@ class AfinaAnswerAction(NodeAction):
                     answer_params[key] = rendered
 
         if answer_params:
-            result = [Command(self.command, answer_params, self.id, request_type=self.request_type,
-                              request_data=self.request_data)]
-        return result
+            yield Command(self.command, answer_params, self.id, request_type=self.request_type,
+                          request_data=self.request_data)
 
 
 class SDKAnswer(NodeAction):
@@ -240,7 +238,7 @@ class SDKAnswer(NodeAction):
                    ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SDKAnswer, self).__init__(items, id)
+        super().__init__(items, id)
         self.command: str = ANSWER_TO_USER
         if self._nodes == {}:
             self._nodes = {i: items.get(i) for i in items if
@@ -274,21 +272,12 @@ class SDKAnswer(NodeAction):
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
         self.do_random(rendered)
         if rendered or not self.no_empty_nodes:
-            result = [
-                Command(
-                    self.command,
-                    rendered,
-                    self.id,
-                    request_type=self.request_type,
-                    request_data=self.request_data,
-                )
-            ]
-        return result
+            yield Command(self.command, rendered, self.id,
+                          request_type=self.request_type, request_data=self.request_data)
 
 
 class SDKAnswerToUser(NodeAction):
@@ -427,8 +416,6 @@ class SDKAnswerToUser(NodeAction):
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-
-        result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})
         rendered = self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
         if self._nodes[self.RANDOM_CHOICE]:
@@ -454,13 +441,4 @@ class SDKAnswerToUser(NodeAction):
             if part.requirement.check(text_preprocessing_result, user):
                 out.update(part.render(rendered))
         if rendered or not self.no_empty_nodes:
-            result = [
-                Command(
-                    self.command,
-                    out,
-                    self.id,
-                    request_type=self.request_type,
-                    request_data=self.request_data,
-                )
-            ]
-        return result
+            yield Command(self.command, out, self.id, request_type=self.request_type, request_data=self.request_data)

@@ -23,5 +23,5 @@ class ExternalAction(CommandAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         action: Action = user.descriptions["external_actions"][self._action_key]
-        commands = await action.run(user, text_preprocessing_result, params)
-        return commands
+        async for command in action.run(user, text_preprocessing_result, params):
+            yield command

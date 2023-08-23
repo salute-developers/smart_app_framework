@@ -80,8 +80,8 @@ class GiveMeMemoryAction(StringAction):
             user.behaviors.add(callback_id, self.behavior, scenario_id,
                                text_preprocessing_result.raw, pickle_deepcopy(params))
 
-        commands = await super().run(user, text_preprocessing_result, params)
-        return commands
+        async for command in super().run(user, text_preprocessing_result, params):
+            yield command
 
 
 class RememberThisAction(StringAction):
@@ -174,5 +174,5 @@ class RememberThisAction(StringAction):
         if REPLY_TOPIC_KEY not in self.request_data and KAFKA_REPLY_TOPIC not in self.request_data:
             self.request_data[KAFKA_REPLY_TOPIC] = user.settings["template_settings"]["consumer_topic"]
 
-        commands = await super().run(user, text_preprocessing_result, params)
-        return commands
+        async for command in super().run(user, text_preprocessing_result, params):
+            yield command
