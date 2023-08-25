@@ -14,7 +14,7 @@ class SmartAppToMessage:
     PAYLOAD = "payload"
 
     def __init__(self, command, message, request: SmartKitKafkaRequest, forward_fields=None, masking_fields=None,
-                 validators: Iterable[MessageValidator] = ()):
+                 validators: Iterable[MessageValidator] = (), **kwargs):
         root_nodes = command.payload.pop(self.ROOT_NODES_KEY, None)
         self.command = command
         self.root_nodes = root_nodes or {}
@@ -23,6 +23,7 @@ class SmartAppToMessage:
         self.forward_fields = forward_fields or ()
         self.masking_fields = masking_fields
         self.validators = validators
+        self._kwargs = kwargs
 
     @cached_property
     def payload(self):
