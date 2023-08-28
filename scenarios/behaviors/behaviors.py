@@ -165,7 +165,8 @@ class Behaviors:
                 callback_id, "behavior_fail", monitoring.counter_behavior_fail, "fail", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            async for command in behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params):
+            async for command in behavior.fail_action.run(self._user, text_preprocessing_result,
+                                                          callback_action_params):
                 yield command
         else:
             log(f"behavior.fail not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
