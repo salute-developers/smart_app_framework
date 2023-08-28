@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from aiohttp import ClientTimeout
 
 from smart_kit.action.http import HTTPRequestAction
+from tests.core_tests.basic_scenario_models_test.action_test.test_action import AsyncIterator
 
 
 class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
@@ -14,7 +15,8 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": AsyncMock(timeout=Mock(return_value=3))
+                    "my_behavior": Mock(timeout=Mock(return_value=3),
+                                        success_action=Mock(run=AsyncIterator()))
                 }
             }
         )
@@ -43,7 +45,8 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             "store": "user_variable",
             "behavior": "my_behavior",
         }
-        await HTTPRequestAction(items).run(self.user, None, {})
+        async for command in HTTPRequestAction(items).run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="https://my.url.com", method='POST', timeout=ClientTimeout(3))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
         self.assertTrue(self.user.variables.set.called)
@@ -68,7 +71,8 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             "url": "my.url.com",
             "value": "my_value"
         }
-        await HTTPRequestAction(items).run(self.user, None, params)
+        async for command in HTTPRequestAction(items).run(self.user, None, params):
+            pass
         request_mock.assert_called_with(
             url="https://my.url.com", method='POST', timeout=ClientTimeout(3), json={"param": "my_value"}
         )
@@ -89,7 +93,8 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             "store": "user_variable",
             "behavior": "my_behavior",
         }
-        await HTTPRequestAction(items).run(self.user, None, {})
+        async for command in HTTPRequestAction(items).run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(headers={
             "header_1": "32",
             "header_2": "32.03",
@@ -104,6 +109,7 @@ class HttpRequestActionTest(unittest.IsolatedAsyncioTestCase):
             },
             "store": "user_variable",
         }
-        await HTTPRequestAction(items).run(self.user, None, {})
+        async for command in HTTPRequestAction(items).run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(method=HTTPRequestAction.DEFAULT_METHOD,
                                         timeout=ClientTimeout(HTTPRequestAction.DEFAULT_TIMEOUT))

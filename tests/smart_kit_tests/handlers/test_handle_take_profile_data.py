@@ -6,15 +6,15 @@ from smart_kit.handlers.handler_take_profile_data import HandlerTakeProfileData,
 
 
 async def success(x):
-    return "success"
+    yield "success"
 
 
 async def fail(x):
-    return "fail"
+    yield "fail"
 
 
 async def timeout(x):
-    return "timeout"
+    yield "timeout"
 
 
 class MockVariables(Mock):
@@ -40,7 +40,8 @@ class HandleTakeProfileDataTest(unittest.IsolatedAsyncioTestCase):
 
         def behavior_outcome(result):
             async def outcome(x):
-                return result
+                for command in result:
+                    yield command
             return outcome
 
         self.test_user = MagicMock('user', message=MagicMock(message_name="some_name"), variables=MockVariables(),
@@ -56,12 +57,18 @@ class HandleTakeProfileDataTest(unittest.IsolatedAsyncioTestCase):
     async def test_handle_take_profile_data_run_fail(self):
         obj = HandlerTakeProfileData(self.app_name)
         payload = {"status_code": {"code": 102}}
-        self.assertEqual(await obj.run(payload, self.test_user), ["fail"])
+        result = []
+        async for command in obj.run(payload, self.test_user):
+            result.append(command)
+        self.assertEqual(result, ["fail"])
 
     async def test_handle_take_profile_data_run_success(self):
         obj = HandlerTakeProfileData(self.app_name)
         payload = {"profile_data": {"geo": {"reverseGeocoding": {"country": "Российская Федерация"},
                                             "location": {"lat": 10.125, "lon": 10.0124}}},
                    "status_code": {"code": 1}}
-        self.assertEqual(await obj.run(payload, self.test_user), ["success"])
+        result = []
+        async for command in obj.run(payload, self.test_user):
+            result.append(command)
+        self.assertEqual(result, ["success"])
         self.assertEqual(self.test_user.variables.get("smart_geo"), payload["profile_data"]["geo"])

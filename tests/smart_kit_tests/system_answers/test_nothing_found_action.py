@@ -29,9 +29,17 @@ class SystemAnswersTest1(unittest.IsolatedAsyncioTestCase):
     async def test_system_answer_nothing_found_action_run(self):
         obj1 = nothing_found_action.NothingFoundAction()
         obj2 = nothing_found_action.NothingFoundAction(self.test_items1, self.test_id)
+        result = []
+        async for command in obj1.run(self.test_user1, self.test_text_preprocessing_result):
+            result.append(command)
+        command = result[0]
         self.assertTrue(isinstance(
-            (await obj1.run(self.test_user1, self.test_text_preprocessing_result)).pop(), Command)
+            command, Command)
         )
+        result = []
+        async for command in obj2.run(self.test_user1, self.test_text_preprocessing_result):
+            result.append(command)
+        command = result[0]
         self.assertTrue(isinstance(
-            (await obj2.run(self.test_user1, self.test_text_preprocessing_result)).pop(), Command)
+            command, Command)
         )
