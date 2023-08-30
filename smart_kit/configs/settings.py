@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 import os
-import typing
+from typing import Optional, Any, Union, List
 
 import yaml
 
@@ -43,7 +45,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         """
         return repositories
 
-    def _load_base_repositories(self) -> typing.List[FileRepository]:
+    def _load_base_repositories(self) -> List[FileRepository]:
         """Load base repositories with service settings"""
         template_settings_repo = UpdatableFileRepository(
             self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings")
@@ -67,7 +69,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         ]
 
     def _get_kafka_settings_filepath(
-            self, filename: typing.Any, use_secrets_path: bool = True) -> typing.Union[bytes, str]:
+            self, filename: Any, use_secrets_path: bool = True) -> Union[bytes, str]:
         """Возвращает путь к файлу с настройками кафки. По умолчанию возвращает путь к файлу в секретах."""
         if use_secrets_path:
             return self.subfolder_secret_path(filename)
@@ -97,3 +99,9 @@ class Settings(BaseConfig, metaclass=Singleton):
 
         self._source = source
         return source
+
+    @classmethod
+    def get_instance(cls) -> Optional[Settings]:
+        if cls._instances:
+            return next(iter(cls._instances.values()))
+        return None

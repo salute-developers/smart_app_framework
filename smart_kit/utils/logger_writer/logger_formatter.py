@@ -7,6 +7,7 @@ from pythonjsonlogger import jsonlogger
 import logging
 from core.model.factory import build_factory
 from core.model.registered import Registered
+from smart_kit.configs.settings import Settings
 
 
 def to_num(s):
@@ -54,6 +55,8 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         log_record["nlpf_version"] = self.NLPF_VERSION
         log_record["team"] = self.DEV_TEAM
         log_record["application"] = self.APPLICATION_NAME
+        if settings := Settings.get_instance():
+            log_record["environment"] = settings.get("template_settings").get("environment")
         if isinstance(record.args, dict):
             log_record["args"] = self._check_fields(record.args)
 
