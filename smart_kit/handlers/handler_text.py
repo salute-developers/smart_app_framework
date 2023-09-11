@@ -36,6 +36,7 @@ class HandlerText(HandlerBase):
         async for command in self._handle_base(text_preprocessing_result, user):
             yield command
 
-    async def _handle_base(self, text_preprocessing_result: TextPreprocessingResult, user: User) -> AsyncGenerator[Command, None]:
+    async def _handle_base(self, text_preprocessing_result: TextPreprocessingResult,
+                           user: User) -> AsyncGenerator[Command, None]:
         async for command in self.dialogue_manager.run(text_preprocessing_result, user):
             yield command
