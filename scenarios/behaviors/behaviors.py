@@ -3,15 +3,14 @@ import math
 import socket
 from collections import namedtuple
 from time import time
-from typing import Dict, List
+from typing import Dict, AsyncGenerator
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
-from core.names.field import APP_INFO
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.pickle_copy import pickle_deepcopy
-from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PARAMS, LOCAL_VARS
+from scenarios.actions.action_params_names import TO_MESSAGE_NAME, LOCAL_VARS
 from core.monitoring.monitoring import monitoring
 
 
@@ -129,7 +128,7 @@ class Behaviors:
             params=log_params,
         )
 
-    async def success(self, callback_id: str) -> List[Command]:
+    async def success(self, callback_id: str) -> AsyncGenerator[Command, None]:
         callback = self._get_callback(callback_id)
         if callback:
             self._check_hostname(callback_id, callback)
@@ -154,7 +153,7 @@ class Behaviors:
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
 
-    async def fail(self, callback_id: str) -> List[Command]:
+    async def fail(self, callback_id: str) -> AsyncGenerator[Command, None]:
         callback = self._get_callback(callback_id)
         if callback:
             self._check_hostname(callback_id, callback)
@@ -175,7 +174,7 @@ class Behaviors:
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
 
-    async def timeout(self, callback_id: str) -> List[Command]:
+    async def timeout(self, callback_id: str) -> AsyncGenerator[Command, None]:
         callback = self._get_callback(callback_id)
         if callback:
             self._add_returned_callback(callback_id)
@@ -195,7 +194,7 @@ class Behaviors:
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
 
-    async def misstate(self, callback_id: str) -> List[Command]:
+    async def misstate(self, callback_id: str) -> AsyncGenerator[Command, None]:
         callback = self._get_callback(callback_id)
         if callback:
             self._check_hostname(callback_id, callback)

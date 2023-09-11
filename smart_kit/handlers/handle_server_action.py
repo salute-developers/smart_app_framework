@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional, AsyncGenerator
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
@@ -25,7 +25,7 @@ class HandlerServerAction(HandlerBase):
     def get_action_params(self, payload: Dict[str, Any]):
         return payload[SERVER_ACTION].get("parameters", {})
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: Dict[str, Any], user: User) -> AsyncGenerator[Command, None]:
         async for command in super().run(payload, user):
             yield command
         action_params = pickle_deepcopy(self.get_action_params(payload))

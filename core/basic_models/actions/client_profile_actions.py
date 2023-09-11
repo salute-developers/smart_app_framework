@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, Union, List
+from typing import Dict, Any, Optional, Union, AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
@@ -73,7 +73,7 @@ class GiveMeMemoryAction(StringAction):
             self.request_data[KAFKA_REPLY_TOPIC] = config["template_settings"]["consumer_topic"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
@@ -157,7 +157,7 @@ class RememberThisAction(StringAction):
         })
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         self._nodes.update({
             "consumer": {
                 "projectId": user.settings["template_settings"]["project_id"]

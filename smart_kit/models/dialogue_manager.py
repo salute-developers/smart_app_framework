@@ -1,6 +1,8 @@
 # coding: utf-8
 from functools import cached_property
+from typing import AsyncGenerator
 
+from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
 from core.names import field
 
@@ -28,7 +30,7 @@ class DialogueManager:
     def _nothing_found_action(self):
         return self.actions.get(self.NOTHING_FOUND_ACTION) or NothingFoundAction()
 
-    async def run(self, text_preprocessing_result, user):
+    async def run(self, text_preprocessing_result, user) -> AsyncGenerator[Command, None]:
         before_action = user.descriptions["external_actions"].get("before_action")
         if before_action:
             params = user.parametrizer.collect(text_preprocessing_result)
@@ -53,7 +55,7 @@ class DialogueManager:
         async for command in self.run_scenario(scenario_key, text_preprocessing_result, user):
             yield command
 
-    async def run_scenario(self, scen_id, text_preprocessing_result, user):
+    async def run_scenario(self, scen_id, text_preprocessing_result, user) -> AsyncGenerator[Command, None]:
         initial_last_scenario = user.last_scenarios.last_scenario_name
         scenario = self.scenarios[scen_id]
         params = {log_const.KEY_NAME: log_const.CHOSEN_SCENARIO_VALUE,

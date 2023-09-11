@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -26,7 +26,7 @@ class HandlerRespond(HandlerBase):
         callback_id = user.message.callback_id
         return user.behaviors.get_callback_action_params(callback_id)
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: Dict[str, Any], user: User) -> AsyncGenerator[Command, None]:
         async for command in super().run(payload, user):
             yield command
         callback_id = user.message.callback_id

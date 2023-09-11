@@ -1,4 +1,4 @@
-from typing import List
+from typing import AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -11,7 +11,7 @@ from smart_kit.names.field import STATUS_CODE, CODE, PERMITTED_ACTIONS
 class HandlerTakeRuntimePermissions(HandlerBase):
     SUCCESS_CODE = 1
 
-    async def run(self, payload, user: User) -> List[Command]:
+    async def run(self, payload, user: User) -> AsyncGenerator[Command, None]:
         async for command in super().run(payload, user):
             yield command
         log(f"{self.__class__.__name__} started", user)

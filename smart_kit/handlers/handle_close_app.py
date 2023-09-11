@@ -1,4 +1,4 @@
-from typing import List, Any, Dict
+from typing import Any, Dict, AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -15,7 +15,7 @@ class HandlerCloseApp(HandlerBase):
         super().__init__(app_name)
         self._clear_current_scenario = ClearCurrentScenarioAction()
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: Dict[str, Any], user: User) -> AsyncGenerator[Command, None]:
         async for command in super().run(payload, user):
             yield command
 

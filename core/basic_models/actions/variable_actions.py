@@ -1,6 +1,6 @@
 import collections
 import json
-from typing import Optional, Dict, Any, Union, List
+from typing import Optional, Dict, Any, Union, AsyncGenerator
 
 from jinja2 import exceptions as jexcept
 
@@ -29,7 +29,7 @@ class BaseSetVariableAction(Action):
         raise NotImplementedError
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
@@ -77,7 +77,7 @@ class DeleteVariableAction(Action):
         self.key: str = items["key"]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         user.variables.delete(self.key)
         return
         yield
@@ -90,7 +90,7 @@ class ClearVariablesAction(Action):
         super().__init__(items, id)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         user.variables.clear()
         return
         yield

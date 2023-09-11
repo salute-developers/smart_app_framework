@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, Union, AsyncGenerator
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.actions.string_actions import StringAction
@@ -19,6 +19,6 @@ class NothingFoundAction(Action):
         self._action = StringAction({"command": NOTHING_FOUND})
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         async for command in self._action.run(user, text_preprocessing_result, params=params):
             yield command

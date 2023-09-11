@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import List, Dict, Any
+from typing import Dict, Any, AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -14,7 +14,7 @@ from core.monitoring.monitoring import monitoring
 
 class HandlerTimeout(HandlerBase):
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: Dict[str, Any], user: User) -> AsyncGenerator[Command, None]:
         callback_id = user.message.callback_id
         if user.behaviors.has_callback(callback_id):
             params = {log_const.KEY_NAME: "handling_timeout"}

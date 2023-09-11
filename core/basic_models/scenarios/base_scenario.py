@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import Dict, Any, List
+from typing import Dict, Any, List, AsyncGenerator
 
 import core.logging.logger_constants as log_const
 import scenarios.logging.logger_constants as scenarios_log_const
@@ -67,7 +67,7 @@ class BaseScenario:
         return False
 
     async def get_no_commands_action(self, user, text_preprocessing_result,
-                                     params: Dict[str, Any] = None) -> List[Command]:
+                                     params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
         log_params = {log_const.KEY_NAME: scenarios_log_const.CHOSEN_ACTION_VALUE,
                       scenarios_log_const.CHOSEN_ACTION_VALUE: self._empty_answer}
         log(scenarios_log_const.CHOSEN_ACTION_MESSAGE, user, log_params)
@@ -80,7 +80,7 @@ class BaseScenario:
                 params=log_params, level='WARNING')
 
     async def get_action_results(self, user, text_preprocessing_result,
-                                 actions: List[Action], params: Dict[str, Any] = None) -> List[Command]:
+                                 actions: List[Action], params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
         for action in actions:
             log_params = self._log_params()
             log_params["class"] = action.__class__.__name__
@@ -100,6 +100,7 @@ class BaseScenario:
     def history(self):
         return {"scenario_path": [{"scenario": self.id, "node": None}]}
 
-    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+    async def run(self, text_preprocessing_result, user,
+                  params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
         async for command in self.get_action_results(user, text_preprocessing_result, self.actions, params):
             yield command
