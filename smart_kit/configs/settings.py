@@ -99,4 +99,3 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
 
         self._source = source
         return source
-

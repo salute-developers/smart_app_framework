@@ -25,6 +25,4 @@ class SingletonOneInstance(type):
         return SingletonOneInstance._instance
 
     def get_instance(cls: Type[T]) -> Optional[T]:
-        if SingletonOneInstance._instance:
-            return cls.__call__()
-        return None
+        return SingletonOneInstance._instance
