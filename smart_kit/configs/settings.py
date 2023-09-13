@@ -10,10 +10,10 @@ from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
 from core.db_adapter.os_adapter import OSAdapter
 from core.repositories.file_repository import UpdatableFileRepository, FileRepository
-from core.utils.singleton import Singleton
+from core.utils.singleton import SingletonOneInstance
 
 
-class Settings(BaseConfig, metaclass=Singleton):
+class Settings(BaseConfig, metaclass=SingletonOneInstance):
     CephAdapterKey = "ceph"
     OSAdapterKey = "os"
 
@@ -100,8 +100,3 @@ class Settings(BaseConfig, metaclass=Singleton):
         self._source = source
         return source
 
-    @classmethod
-    def get_instance(cls) -> Optional[Settings]:
-        if cls._instances:
-            return next(iter(cls._instances.values()))
-        return None
