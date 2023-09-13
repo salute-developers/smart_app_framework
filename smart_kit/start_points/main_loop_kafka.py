@@ -493,45 +493,45 @@ class MainLoop(BaseMainLoop):
                                 user=user, level="WARNING")
                         user.local_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
 
-                        publish_time_ms_sum = 0
-                        with StatsTimer() as script_timer:
-                            async for command in self.model.answer(message, user):
-                                answers = self._generate_answers(user=user, commands=[command], message=message,
-                                                                 topic_key=topic_key, kafka_key=kafka_key)
-                                if answers:
-                                    for answer in answers:
-                                        with StatsTimer() as publish_timer:
-                                            self._send_request(user, answer, mq_message)
-                                        publish_time_ms_sum += publish_timer.msecs
-                                        stats += "Publishing time: {} msecs\n".format(publish_timer.msecs)
+                    publish_time_ms_sum = 0
+                    with StatsTimer() as script_timer:
+                        async for command in self.model.answer(message, user):
+                            answers = self._generate_answers(user=user, commands=[command], message=message,
+                                                             topic_key=topic_key, kafka_key=kafka_key)
+                            if answers:
+                                for answer in answers:
+                                    with StatsTimer() as publish_timer:
+                                        self._send_request(user, answer, mq_message)
+                                    publish_time_ms_sum += publish_timer.msecs
+                                    stats += "Publishing time: {} msecs\n".format(publish_timer.msecs)
 
-                        script_time_ms = script_timer.msecs - publish_time_ms_sum
-                        script_time_sec = script_time_ms / 1000
-                        monitoring.sampling_script_time(self.app_name, script_time_sec)
-                        stats += "Script time: {} msecs\n".format(script_time_ms)
+                    script_time_ms = script_timer.msecs - publish_time_ms_sum
+                    script_time_sec = script_time_ms / 1000
+                    monitoring.sampling_script_time(self.app_name, script_time_sec)
+                    stats += "Script time: {} msecs\n".format(script_time_ms)
 
-                        with StatsTimer() as save_timer:
-                            user_save_no_collisions = await self.save_user(db_uid, user, message)
+                    with StatsTimer() as save_timer:
+                        user_save_no_collisions = await self.save_user(db_uid, user, message)
 
-                        monitoring.sampling_save_time(self.app_name, save_timer.secs)
-                        stats += "Saving time: {} msecs\n".format(save_timer.msecs)
+                    monitoring.sampling_save_time(self.app_name, save_timer.secs)
+                    stats += "Saving time: {} msecs\n".format(save_timer.msecs)
 
-                        log(stats, user=user)
+                    log(stats, user=user)
 
-                        if user_save_no_collisions:
-                            self.save_behavior_timeouts(user, mq_message, kafka_key)
-                        else:
-                            log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
-                                user=user,
-                                params={log_const.KEY_NAME: "ignite_collision",
-                                        "db_uid": db_uid,
-                                        "message_key": mq_message.key(),
-                                        "message_partition": mq_message.partition(),
-                                        "kafka_key": kafka_key,
-                                        "uid": user.id,
-                                        "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
-                                level="WARNING")
-                            continue
+                    if user_save_no_collisions:
+                        self.save_behavior_timeouts(user, mq_message, kafka_key)
+                    else:
+                        log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
+                            user=user,
+                            params={log_const.KEY_NAME: "ignite_collision",
+                                    "db_uid": db_uid,
+                                    "message_key": mq_message.key(),
+                                    "message_partition": mq_message.partition(),
+                                    "kafka_key": kafka_key,
+                                    "uid": user.id,
+                                    "db_version": str(user.private_vars.get(user.USER_DB_VERSION))},
+                            level="WARNING")
+                        continue
             else:
                 try:
                     data = message.masked_value
