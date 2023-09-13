@@ -232,11 +232,13 @@ class TestCase:
 
             self.post_setup_user(user)
 
-            commands = await self.app_model.answer(message, user) or []
-
-            answers = self._generate_answers(
-                user=user, commands=commands, message=message
-            )
+            commands = []
+            answers = []
+            async for command in self.app_model.answer(message, user):
+                commands.append(command)
+                answers.extend(self._generate_answers(
+                    user=user, commands=[command], message=message
+                ))
 
             predefined_fields_resp = response.get("predefined_fields")
             if predefined_fields_resp:
