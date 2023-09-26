@@ -1,7 +1,7 @@
 # coding: utf-8
 import sys
 import traceback
-from typing import List, Optional
+from typing import AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.descriptions.descriptions import Descriptions
@@ -73,20 +73,19 @@ class SmartAppModel:
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
-    async def answer(self, message: SmartAppFromMessage, user: User) -> Optional[List[Command]]:
+    async def answer(self, message: SmartAppFromMessage, user: User) -> AsyncGenerator[Command, None]:
         user.expire()
         user.message_vars.clear()
         handler = self.get_handler(message.type)
 
         if not user.load_error:
-            commands = await handler.run(message.payload, user)
+            async for command in handler.run(message.payload, user):
+                yield command
         else:
             log("Error in loading user data", user, level="ERROR", exc_info=True)
             raise Exception("Error in loading user data")
 
-        return commands
-
-    async def on_answer_error(self, message, user):
+    async def on_answer_error(self, message, user) -> AsyncGenerator[Command, None]:
         user.do_not_save = True
         monitoring.counter_exception(self.app_name)
         params = {log_const.KEY_NAME: log_const.DIALOG_ERROR_VALUE,
@@ -102,6 +101,6 @@ class SmartAppModel:
         if user.settings["template_settings"].get("debug_info"):
             set_debug_info(self.app_name, callback_action_params, error)
         exception_action = user.descriptions["external_actions"]["exception_action"]
-        commands = await exception_action.run(user=user, text_preprocessing_result=None,
-                                              params=callback_action_params)
-        return commands
+        async for command in exception_action.run(user=user, text_preprocessing_result=None,
+                                                  params=callback_action_params):
+            yield command

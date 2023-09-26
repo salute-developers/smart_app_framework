@@ -1,10 +1,9 @@
 # coding: utf-8
-import asyncio
 import random
 from copy import copy
 from functools import cached_property
 from itertools import chain
-from typing import Union, Dict, List, Any, Optional, Tuple, TypeVar, Type
+from typing import Union, Dict, List, Any, Optional, Tuple, TypeVar, Type, AsyncGenerator
 
 from core.basic_models.actions.basic_actions import CommandAction
 from core.basic_models.actions.command import Command
@@ -88,8 +87,9 @@ class NodeAction(CommandAction):
         return result
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         raise NotImplementedError
+        yield
 
 
 class StringAction(NodeAction):
@@ -129,7 +129,7 @@ class StringAction(NodeAction):
         return command_params
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         params = params or {}
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
@@ -142,9 +142,8 @@ class StringAction(NodeAction):
                 }
             })
 
-        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
-                            request_data=self.request_data)]
-        return commands
+        yield Command(self.command, command_params, self.id, request_type=self.request_type,
+                      request_data=self.request_data)
 
 
 class AfinaAnswerAction(NodeAction):
@@ -166,10 +165,9 @@ class AfinaAnswerAction(NodeAction):
         self.command: str = ANSWER_TO_USER
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         answer_params = dict()
-        result = []
 
         nodes = self.nodes.items() if self.nodes else []
         for key, template in nodes:
@@ -180,9 +178,8 @@ class AfinaAnswerAction(NodeAction):
                     answer_params[key] = rendered
 
         if answer_params:
-            result = [Command(self.command, answer_params, self.id, request_type=self.request_type,
-                              request_data=self.request_data)]
-        return result
+            yield Command(self.command, answer_params, self.id, request_type=self.request_type,
+                          request_data=self.request_data)
 
 
 class SDKAnswer(NodeAction):
@@ -240,7 +237,7 @@ class SDKAnswer(NodeAction):
                    ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SDKAnswer, self).__init__(items, id)
+        super().__init__(items, id)
         self.command: str = ANSWER_TO_USER
         if self._nodes == {}:
             self._nodes = {i: items.get(i) for i in items if
@@ -273,22 +270,13 @@ class SDKAnswer(NodeAction):
             d[k] = d[k][random_index % len(d[k])]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        result = []
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
         self.do_random(rendered)
         if rendered or not self.no_empty_nodes:
-            result = [
-                Command(
-                    self.command,
-                    rendered,
-                    self.id,
-                    request_type=self.request_type,
-                    request_data=self.request_data,
-                )
-            ]
-        return result
+            yield Command(self.command, rendered, self.id,
+                          request_type=self.request_type, request_data=self.request_data)
 
 
 class SDKAnswerToUser(NodeAction):
@@ -426,9 +414,7 @@ class SDKAnswerToUser(NodeAction):
         return self._root
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-
-        result = []
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})
         rendered = self._get_rendered_tree(self.nodes[self.STATIC], params, self.no_empty_nodes)
         if self._nodes[self.RANDOM_CHOICE]:
@@ -454,13 +440,4 @@ class SDKAnswerToUser(NodeAction):
             if part.requirement.check(text_preprocessing_result, user):
                 out.update(part.render(rendered))
         if rendered or not self.no_empty_nodes:
-            result = [
-                Command(
-                    self.command,
-                    out,
-                    self.id,
-                    request_type=self.request_type,
-                    request_data=self.request_data,
-                )
-            ]
-        return result
+            yield Command(self.command, out, self.id, request_type=self.request_type, request_data=self.request_data)

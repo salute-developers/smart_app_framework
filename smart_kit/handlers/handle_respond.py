@@ -1,5 +1,5 @@
 from time import time
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, AsyncGenerator
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -26,8 +26,9 @@ class HandlerRespond(HandlerBase):
         callback_id = user.message.callback_id
         return user.behaviors.get_callback_action_params(callback_id)
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
-        commands = await super().run(payload, user)
+    async def run(self, payload: Dict[str, Any], user: User) -> AsyncGenerator[Command, None]:
+        async for command in super().run(payload, user):
+            yield command
         callback_id = user.message.callback_id
         action_params = self.get_action_params(payload, user)
         action_name = self.get_action_name(payload, user)
@@ -56,8 +57,8 @@ class HandlerRespond(HandlerBase):
             log("text preprocessing result: '%(normalized_text)s'", user, params, level="DEBUG")
 
         action = user.descriptions["external_actions"][action_name]
-        commands.extend(await action.run(user, text_preprocessing_result, action_params) or [])
-        return commands
+        async for command in action.run(user, text_preprocessing_result, action_params):
+            yield command
 
     @staticmethod
     def get_processing_time(user: User):

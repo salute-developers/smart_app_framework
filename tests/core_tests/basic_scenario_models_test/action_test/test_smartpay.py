@@ -1,11 +1,12 @@
 import unittest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock, AsyncMock, Mock
 
 from aiohttp import ClientTimeout
 
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from smart_kit.utils.picklable_mock import PicklableMock, AsyncPicklableMock
+from tests.core_tests.basic_scenario_models_test.action_test.test_action import AsyncIterator
 from tests.smart_kit_tests.action.test_http import HttpRequestActionTest
 
 
@@ -15,7 +16,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=PicklableMock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "my_behavior": AsyncMock(timeout=PicklableMock(return_value=3))
+                    "my_behavior": Mock(timeout=PicklableMock(return_value=3),
+                                        success_action=PicklableMock(run=AsyncIterator([])))
                 }
             }
         )
@@ -145,7 +147,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayCreateAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices", method="POST",
                                         timeout=ClientTimeout(3), json=items.get("smartpay_params"))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
@@ -186,7 +189,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayPerformAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="POST",
                                         timeout=ClientTimeout(3), json=items.get("smartpay_params"))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
@@ -206,7 +210,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayGetStatusAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="GET", timeout=ClientTimeout(3),
                                         params={"inv_status": "executed", "wait": 50})
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
@@ -246,7 +251,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayConfirmAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="PUT",
                                         timeout=ClientTimeout(3), json=items["smartpay_params"])
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
@@ -264,7 +270,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayConfirmAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="PUT", timeout=ClientTimeout(3))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
         self.assertTrue(self.user.variables.set.called)
@@ -281,7 +288,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayDeleteAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="DELETE", timeout=ClientTimeout(3))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
         self.assertTrue(self.user.variables.set.called)
@@ -318,7 +326,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayRefundAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="PATCH",
                                         timeout=ClientTimeout(3), json=items["smartpay_params"])
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
@@ -336,7 +345,8 @@ class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
         settings_mock.return_value = self.settings
         HttpRequestActionTest.set_request_mock_attribute(request_mock, return_value={'data': 'value'})
         action = SmartPayRefundAction(items)
-        await action.run(self.user, None, {})
+        async for command in action.run(self.user, None, {}):
+            pass
         request_mock.assert_called_with(url="0.0.0.0/invoices/0", method="PATCH", timeout=ClientTimeout(3))
         self.assertTrue(self.user.descriptions["behaviors"]["my_behavior"].success_action.run.called)
         self.assertTrue(self.user.variables.set.called)
