@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 import os
-import typing
+from typing import Optional, Any, Union, List
 
 import yaml
 
@@ -8,10 +10,10 @@ from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
 from core.db_adapter.os_adapter import OSAdapter
 from core.repositories.file_repository import UpdatableFileRepository, FileRepository
-from core.utils.singleton import Singleton
+from core.utils.singleton import SingletonOneInstance
 
 
-class Settings(BaseConfig, metaclass=Singleton):
+class Settings(BaseConfig, metaclass=SingletonOneInstance):
     CephAdapterKey = "ceph"
     OSAdapterKey = "os"
 
@@ -43,7 +45,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         """
         return repositories
 
-    def _load_base_repositories(self) -> typing.List[FileRepository]:
+    def _load_base_repositories(self) -> List[FileRepository]:
         """Load base repositories with service settings"""
         template_settings_repo = UpdatableFileRepository(
             self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings")
@@ -67,7 +69,7 @@ class Settings(BaseConfig, metaclass=Singleton):
         ]
 
     def _get_kafka_settings_filepath(
-            self, filename: typing.Any, use_secrets_path: bool = True) -> typing.Union[bytes, str]:
+            self, filename: Any, use_secrets_path: bool = True) -> Union[bytes, str]:
         """Возвращает путь к файлу с настройками кафки. По умолчанию возвращает путь к файлу в секретах."""
         if use_secrets_path:
             return self.subfolder_secret_path(filename)
