@@ -232,13 +232,9 @@ class TestCase:
 
             self.post_setup_user(user)
 
-            commands = []
-            answers = []
-            async for command in self.app_model.answer(message, user):
-                commands.append(command)
-                answers.extend(self._generate_answers(
-                    user=user, commands=[command], message=message
-                ))
+            commands = [command async for command in self.app_model.answer(message, user)]
+            answers = self._generate_answers(user=user, commands=commands, message=message)
+            answers.extend(self._generate_history_answers(user, message))
 
             predefined_fields_resp = response.get("predefined_fields")
             if predefined_fields_resp:
@@ -275,6 +271,9 @@ class TestCase:
             answer = SmartAppToMessage(command=command, message=message, request=request)
             answers.append(answer)
         return answers
+
+    def _generate_history_answers(self, user, message):
+        return []
 
     def create_message(self, data, headers=None):
         defaults = Environment().as_dict
