@@ -233,9 +233,7 @@ class TestCase:
             self.post_setup_user(user)
 
             commands = [command async for command in self.app_model.answer(message, user)]
-            answers = self._generate_answers(
-                    user=user, commands=commands, message=message
-            )
+            answers = self._generate_answers(user=user, commands=commands, message=message)
             answers.extend(self._generate_history_answers(user, message))
 
             predefined_fields_resp = response.get("predefined_fields")
