@@ -7,7 +7,6 @@ from unittest.mock import Mock
 
 import scenarios.behaviors.behaviors
 from smart_kit.utils.picklable_mock import PicklableMock, AsyncPicklableMock
-from tests.core_tests.basic_scenario_models_test.action_test.test_action import AsyncIterator
 
 
 class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
@@ -19,11 +18,9 @@ class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
         self.description = PicklableMock()
         self.description.timeout = Mock(return_value=10)
         self.success_action = AsyncPicklableMock()
-        self.success_action.run = AsyncIterator()
+        self.success_action.run = AsyncPicklableMock()
         self.fail_action = AsyncPicklableMock()
-        self.fail_action.run = AsyncIterator()
         self.timeout_action = AsyncPicklableMock()
-        self.timeout_action.run = AsyncIterator()
 
         self.description.success_action = self.success_action
         self.description.fail_action = self.fail_action
@@ -39,8 +36,7 @@ class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
         items = {str(callback_id): item}
         behaviors = scenarios.behaviors.behaviors.Behaviors(items, self.descriptions, self.user)
         behaviors.initialize()
-        async for command in behaviors.success(callback_id):
-            pass
+        await behaviors.success(callback_id)
         # self.success_action.run.assert_called_once_with(self.user, TextPreprocessingResult({}))
         self.success_action.run.assert_called_once()
         self.assertDictEqual(behaviors.raw, {})
@@ -50,8 +46,7 @@ class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
         items = {}
         behaviors = scenarios.behaviors.behaviors.Behaviors(items, self.descriptions, self.user)
         behaviors.initialize()
-        async for command in behaviors.success(callback_id):
-            pass
+        await behaviors.success(callback_id)
         self.success_action.run.assert_not_called()
 
     async def test_fail(self):
@@ -61,8 +56,7 @@ class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
         items = {str(callback_id): item}
         behaviors = scenarios.behaviors.behaviors.Behaviors(items, self.descriptions, self.user)
         behaviors.initialize()
-        async for command in behaviors.fail(callback_id):
-            pass
+        await behaviors.fail(callback_id)
         self.fail_action.run.assert_called_once()
         self.assertDictEqual(behaviors.raw, {})
 
@@ -73,8 +67,7 @@ class BehaviorsTest(unittest.IsolatedAsyncioTestCase):
         items = {str(callback_id): item}
         behaviors = scenarios.behaviors.behaviors.Behaviors(items, self.descriptions, self.user)
         behaviors.initialize()
-        async for command in behaviors.timeout(callback_id):
-            pass
+        await behaviors.timeout(callback_id)
         self.timeout_action.run.assert_called_once()
         self.assertDictEqual(behaviors.raw, {})
 

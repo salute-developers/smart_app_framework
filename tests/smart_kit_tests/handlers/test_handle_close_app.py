@@ -40,7 +40,4 @@ class HandlerTest6(unittest.IsolatedAsyncioTestCase):
     async def test_handler_close_app_run(self):
         self.assertIsNotNone(handle_close_app.log_const.KEY_NAME)
         obj = handle_close_app.HandlerCloseApp(app_name=self.app_name)
-        result = []
-        async for command in obj.run(self.test_payload, self.test_user):
-            result.append(command)
-        self.assertEqual([], result)
+        self.assertEqual([], await obj.run(self.test_payload, self.test_user))

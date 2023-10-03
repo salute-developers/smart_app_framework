@@ -31,9 +31,7 @@ class TestRandomAction(IsolatedAsyncioTestCase):
             ]
         }
         action = RandomAction(items, 5)
-        result = []
-        async for command in action.run(None, None):
-            result.append(command)
+        result = await action.run(None, None)
         self.assertIsNotNone(result)
 
     async def test_2(self):
@@ -49,7 +47,5 @@ class TestRandomAction(IsolatedAsyncioTestCase):
             ]
         }
         action = RandomAction(items, 5)
-        result = []
-        async for command in action.run(None, None):
-            result.append(command)
+        result = await action.run(None, None)
         self.assertIsNotNone(result)

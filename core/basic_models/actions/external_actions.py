@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any, Union, AsyncGenerator
+from typing import Optional, Dict, Any, Union, List
 
 from core.basic_models.actions.basic_actions import CommandAction, Action
 from core.basic_models.actions.basic_actions import action_factory
@@ -21,7 +21,7 @@ class ExternalAction(CommandAction):
         self._action_key: str = items["action"]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         action: Action = user.descriptions["external_actions"][self._action_key]
-        async for command in action.run(user, text_preprocessing_result, params):
-            yield command
+        commands = await action.run(user, text_preprocessing_result, params)
+        return commands

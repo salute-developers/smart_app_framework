@@ -1,8 +1,6 @@
 # coding: utf-8
 from functools import cached_property
-from typing import AsyncGenerator
 
-from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
 from core.names import field
 
@@ -30,12 +28,11 @@ class DialogueManager:
     def _nothing_found_action(self):
         return self.actions.get(self.NOTHING_FOUND_ACTION) or NothingFoundAction()
 
-    async def run(self, text_preprocessing_result, user) -> AsyncGenerator[Command, None]:
+    async def run(self, text_preprocessing_result, user):
         before_action = user.descriptions["external_actions"].get("before_action")
         if before_action:
             params = user.parametrizer.collect(text_preprocessing_result)
-            async for command in before_action.run(user, text_preprocessing_result, params):
-                yield command
+            await before_action.run(user, text_preprocessing_result, params)
         scenarios_names = user.last_scenarios.scenarios_names
         scenario_key = user.message.payload[field.INTENT]
         if scenario_key in scenarios_names:
@@ -45,17 +42,13 @@ class DialogueManager:
                 if not scenario.text_fits(text_preprocessing_result, user):
                     params = user.parametrizer.collect(text_preprocessing_result)
                     if scenario.check_ask_again_requests(text_preprocessing_result, user, params):
-                        async for command in scenario.ask_again(text_preprocessing_result, user, params):
-                            yield command
-                        return
+                        reply = await scenario.ask_again(text_preprocessing_result, user, params)
+                        return reply, True
                     monitoring.counter_nothing_found(self.app_name, scenario_key, user)
-                    async for command in self._nothing_found_action.run(user, text_preprocessing_result):
-                        yield command
-                    return
-        async for command in self.run_scenario(scenario_key, text_preprocessing_result, user):
-            yield command
+                    return await self._nothing_found_action.run(user, text_preprocessing_result), False
+        return await self.run_scenario(scenario_key, text_preprocessing_result, user), True
 
-    async def run_scenario(self, scen_id, text_preprocessing_result, user) -> AsyncGenerator[Command, None]:
+    async def run_scenario(self, scen_id, text_preprocessing_result, user):
         initial_last_scenario = user.last_scenarios.last_scenario_name
         scenario = self.scenarios[scen_id]
         params = {log_const.KEY_NAME: log_const.CHOSEN_SCENARIO_VALUE,
@@ -63,9 +56,10 @@ class DialogueManager:
                   log_const.SCENARIO_DESCRIPTION_VALUE: scenario.scenario_description
                   }
         log(log_const.LAST_SCENARIO_MESSAGE, user, params)
-        async for command in scenario.run(text_preprocessing_result, user):
-            yield command
+        run_scenario_result = await scenario.run(text_preprocessing_result, user)
 
         actual_last_scenario = user.last_scenarios.last_scenario_name
         if actual_last_scenario and actual_last_scenario != initial_last_scenario:
             monitoring.counter_scenario_change(self.app_name, actual_last_scenario, user)
+
+        return run_scenario_result

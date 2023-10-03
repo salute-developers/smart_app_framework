@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import Dict, Any, List, AsyncGenerator
+from typing import Dict, Any, List
 
 import core.logging.logger_constants as log_const
 import scenarios.logging.logger_constants as scenarios_log_const
@@ -67,40 +67,44 @@ class BaseScenario:
         return False
 
     async def get_no_commands_action(self, user, text_preprocessing_result,
-                                     params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
+                                     params: Dict[str, Any] = None) -> List[Command]:
         log_params = {log_const.KEY_NAME: scenarios_log_const.CHOSEN_ACTION_VALUE,
                       scenarios_log_const.CHOSEN_ACTION_VALUE: self._empty_answer}
         log(scenarios_log_const.CHOSEN_ACTION_MESSAGE, user, log_params)
         try:
-            async for command in self.empty_answer.run(user, text_preprocessing_result, params):
-                yield command
+            empty_answer = await self.empty_answer.run(user, text_preprocessing_result, params) or []
         except KeyError:
             log_params = {log_const.KEY_NAME: scenarios_log_const.CHOSEN_ACTION_VALUE}
             log("Scenario has empty answer, but empty_answer action isn't defined",
                 params=log_params, level='WARNING')
+            empty_answer = []
+        return empty_answer
 
     async def get_action_results(self, user, text_preprocessing_result,
-                                 actions: List[Action], params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
+                                 actions: List[Action], params: Dict[str, Any] = None) -> List[Command]:
+        results = []
         for action in actions:
+            result = await action.run(user, text_preprocessing_result, params) or []
             log_params = self._log_params()
             log_params["class"] = action.__class__.__name__
             log("called action: %(class)s", user, log_params)
-            async for command in action.run(user, text_preprocessing_result, params):
-                if command.action_id:
-                    log_params = self._log_params()
-                    log_params["id"] = command.action_id
-                    log("external action id: %(id)s", user, log_params)
 
-                log_params = self._log_params()
-                log_params["name"] = command.name
-                log("action result name: %(name)s", user, log_params)
-                yield command
+            if result:
+                for command in result:
+                    if command.action_id:
+                        log_params = self._log_params()
+                        log_params["id"] = command.action_id
+                        log("external action id: %(id)s", user, log_params)
+
+                    log_params = self._log_params()
+                    log_params["name"] = command.name
+                    log("action result name: %(name)s", user, log_params)
+                results.extend(result)
+        return results
 
     @property
     def history(self):
         return {"scenario_path": [{"scenario": self.id, "node": None}]}
 
-    async def run(self, text_preprocessing_result, user,
-                  params: Dict[str, Any] = None) -> AsyncGenerator[Command, None]:
-        async for command in self.get_action_results(user, text_preprocessing_result, self.actions, params):
-            yield command
+    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+        return await self.get_action_results(user, text_preprocessing_result, self.actions, params)

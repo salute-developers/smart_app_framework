@@ -7,12 +7,11 @@ from smart_kit.utils.picklable_mock import PicklableMock
 
 
 async def mock_dialogue_manager1_run(x, y):
-    yield "TestAnswer"
+    return ["TestAnswer"], True
 
 
 async def mock_dialogue_manager2_run(x, y):
-    return
-    yield
+    return [], False
 
 
 class HandlerTest5(unittest.IsolatedAsyncioTestCase):
@@ -51,24 +50,12 @@ class HandlerTest5(unittest.IsolatedAsyncioTestCase):
     async def test_handler_text_handle_base(self):
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        result = []
-        async for command in obj1._handle_base(self.test_text_preprocessing_result, self.test_user):
-            result.append(command)
-        self.assertEqual(result, ["TestAnswer"])
-        result = []
-        async for command in obj2._handle_base(self.test_text_preprocessing_result, self.test_user):
-            result.append(command)
-        self.assertEqual(result, [])
+        self.assertEqual(await obj1._handle_base(self.test_text_preprocessing_result, self.test_user), ["TestAnswer"])
+        self.assertEqual(await obj2._handle_base(self.test_text_preprocessing_result, self.test_user), [])
 
     async def test_handler_text_run(self):
         self.assertIsNotNone(handler_text.log_const.NORMALIZED_TEXT_VALUE)
         obj1 = handler_text.HandlerText(self.app_name, self.test_dialog_manager1)
         obj2 = handler_text.HandlerText(self.app_name, self.test_dialog_manager2)
-        result = []
-        async for command in obj1.run(self.test_payload, self.test_user):
-            result.append(command)
-        self.assertEqual(result, ["TestAnswer"])
-        result = []
-        async for command in obj2.run(self.test_payload, self.test_user):
-            result.append(command)
-        self.assertEqual(result, [])
+        self.assertEqual(await obj1.run(self.test_payload, self.test_user), ["TestAnswer"])
+        self.assertEqual(await obj2.run(self.test_payload, self.test_user), [])

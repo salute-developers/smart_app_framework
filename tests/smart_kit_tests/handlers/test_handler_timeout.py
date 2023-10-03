@@ -7,7 +7,7 @@ from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
 
 async def mock_behaviors_timeout(x):
-    yield 120
+    return [120]
 
 
 class HandlerTest2(unittest.IsolatedAsyncioTestCase):
@@ -35,7 +35,4 @@ class HandlerTest2(unittest.IsolatedAsyncioTestCase):
         obj = handler_timeout.HandlerTimeout(self.app_name)
         self.assertIsNotNone(obj.KAFKA_KEY)
         self.assertIsNotNone(handler_timeout.log_const.KEY_NAME)
-        result = []
-        async for command in obj.run(self.test_payload, self.test_user):
-            result.append(command)
-        self.assertTrue(result == [120])
+        self.assertTrue(await obj.run(self.test_payload, self.test_user) == [120])

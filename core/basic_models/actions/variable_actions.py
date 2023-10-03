@@ -1,6 +1,6 @@
 import collections
 import json
-from typing import Optional, Dict, Any, Union, AsyncGenerator
+from typing import Optional, Dict, Any, Union, List
 
 from jinja2 import exceptions as jexcept
 
@@ -29,7 +29,8 @@ class BaseSetVariableAction(Action):
         raise NotImplementedError
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
             # if path is wrong, it may fail with UndefinedError
@@ -47,8 +48,7 @@ class BaseSetVariableAction(Action):
                 value = None
 
         self._set(user, value)
-        return
-        yield
+        return commands
 
 
 class SetVariableAction(BaseSetVariableAction):
@@ -77,10 +77,10 @@ class DeleteVariableAction(Action):
         self.key: str = items["key"]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.variables.delete(self.key)
-        return
-        yield
+        return commands
 
 
 class ClearVariablesAction(Action):
@@ -90,10 +90,10 @@ class ClearVariablesAction(Action):
         super().__init__(items, id)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.variables.clear()
-        return
-        yield
+        return commands
 
 
 class SetLocalVariableAction(BaseSetVariableAction):

@@ -1,7 +1,7 @@
 # coding: utf-8
 import base64
 import uuid
-from typing import Union, Dict, Any, Optional, AsyncGenerator
+from typing import Union, Dict, List, Any, Optional
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
@@ -69,7 +69,7 @@ class PushAction(StringAction):
         return request_data
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
@@ -78,8 +78,9 @@ class PushAction(StringAction):
             "content": self._generate_command_context(user, text_preprocessing_result, params),
         }
         requests_data = self._render_request_data(params)
-        yield Command(self.command, command_params, self.id, request_type=self.request_type,
-                      request_data=requests_data, need_payload_wrap=False, need_message_name=False)
+        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
+                            request_data=requests_data, need_payload_wrap=False, need_message_name=False)]
+        return commands
 
 
 class PushAuthenticationActionHttp(PushAction):
@@ -132,12 +133,11 @@ class PushAuthenticationActionHttp(PushAction):
         return authorization_token
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
-        async for command in self.http_request_action.run(user, text_preprocessing_result, params):
-            yield command
+        return await self.http_request_action.run(user, text_preprocessing_result, params)
 
 
 class GetRuntimePermissionsAction(PushAction):
@@ -167,7 +167,7 @@ class GetRuntimePermissionsAction(PushAction):
         self.command = GET_RUNTIME_PERMISSIONS
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
@@ -183,8 +183,9 @@ class GetRuntimePermissionsAction(PushAction):
             }
         }
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
-        yield Command(self.command, command_params, self.id, request_type=self.request_type,
-                      request_data=self.request_data, need_payload_wrap=False, need_message_name=False)
+        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
+                            request_data=self.request_data, need_payload_wrap=False, need_message_name=False)]
+        return commands
 
 
 class PushActionHttp(PushAction):
@@ -309,7 +310,7 @@ class PushActionHttp(PushAction):
         self.http_request_action = HTTPRequestAction(items, id)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -330,5 +331,4 @@ class PushActionHttp(PushAction):
                 "payload": self.payload
             }
         self.http_request_action.method_params["json"] = request_body_parameters
-        async for command in self.http_request_action.run(user, text_preprocessing_result, params):
-            yield command
+        return await self.http_request_action.run(user, text_preprocessing_result, params)

@@ -1,5 +1,4 @@
 # coding: utf-8
-import inspect
 import json
 import unittest
 import uuid
@@ -64,7 +63,7 @@ class MockAction:
         self.result = items.get("result")
 
     async def run(self, user, text_preprocessing_result, params=None):
-        yield self.result or "test action run"
+        return self.result or ["test action run"]
 
 
 class UserMockAction:
@@ -94,33 +93,6 @@ class MockSimpleParametrizer:
         return self.data
 
 
-class AsyncIterator:
-    def __init__(self, *args, seq=None, **kwargs):
-        self.called = False
-        self.iter = iter(seq or list())
-        for key, val in kwargs.items():
-            self.__setattr__(key, val)
-
-    def __aiter__(self):
-        self.called = True
-        return self
-
-    async def __anext__(self):
-        try:
-            return next(self.iter)
-        except StopIteration:
-            raise StopAsyncIteration
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def assert_called_once(self):
-        assert self.called
-
-    def assert_not_called(self):
-        assert not self.called
-
-
 class ActionTest(unittest.IsolatedAsyncioTestCase):
     def test_nodes_1(self):
         items = {"nodes": {"answer": "test"}}
@@ -140,8 +112,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         items = {"nodes": "test"}
         action = Action(items)
         try:
-            async for command in action.run(None, None):
-                pass
+            await action.run(None, None)
             result = False
         except NotImplementedError:
             result = True
@@ -152,22 +123,17 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = ExternalAction(items)
         user = PicklableMock()
         user.descriptions = {"external_actions": {"test_action_key": MockAction()}}
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(result, ["test action run"])
+        self.assertEqual(await action.run(user, None), ["test action run"])
 
     async def test_doing_nothing_action(self):
         items = {"nodes": {"answer": "test"}, "command": "test_name"}
         action = DoingNothingAction(items)
-        self.assertTrue(inspect.isasyncgen(action.run(None, None)))
-        result = []
-        async for command in action.run(None, None):
-            result.append(command)
+        result = await action.run(None, None)
+        self.assertIsInstance(result, list)
         command = result[0]
         self.assertIsInstance(command, Command)
-        self.assertEqual("test_name", command.name)
-        self.assertEqual({"answer": "test"}, command.payload)
+        self.assertEqual(command.name, "test_name")
+        self.assertEqual(command.payload, {"answer": "test"})
 
     async def test_requirement_action(self):
         requirements["test"] = MockRequirement
@@ -176,15 +142,10 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = RequirementAction(items)
         self.assertIsInstance(action.requirement, MockRequirement)
         self.assertIsInstance(action.internal_item, MockAction)
-        result = []
-        async for command in action.run(None, None):
-            result.append(command)
-        self.assertEqual(result, ["test action run"])
+        self.assertEqual(await action.run(None, None), ["test action run"])
         items = {"requirement": {"type": "test", "result": False}, "action": {"type": "test"}}
         action = RequirementAction(items)
-        result = []
-        async for command in action.run(None, None):
-            result.append(command)
+        result = await action.run(None, None)
         self.assertEqual(result, [])
 
     async def test_requirement_choice(self):
@@ -195,10 +156,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
-        result = []
-        async for command in choice_action.run(None, None):
-            result.append(command)
-        self.assertEqual(result, [["action2"]])
+        result = await choice_action.run(None, None)
+        self.assertEqual(result, ["action2"])
 
     async def test_requirement_choice_else(self):
         items = {
@@ -211,10 +170,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         choice_action = ChoiceAction(items)
         self.assertIsInstance(choice_action.items, list)
         self.assertIsInstance(choice_action.items[0], RequirementAction)
-        result = []
-        async for command in choice_action.run(None, None):
-            result.append(command)
-        self.assertEqual(result, [["action3"]])
+        result = await choice_action.run(None, None)
+        self.assertEqual(result, ["action3"])
 
     async def test_string_action(self):
         expected = [Command("cmd_id", {"item": "template", "params": "params"})]
@@ -226,9 +183,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         items = {"command": "cmd_id", "nodes": {"item": "template", "params": "{{params}}"}}
         action = StringAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)
 
@@ -244,10 +199,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(result, [["main_action"]])
+        self.assertEqual(await action.run(user, None), ["main_action"])
 
     async def test_else_action_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -261,10 +213,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "else_action": {"type": "test", "result": ["else_action"]},
         }
         action = ElseAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(result, [["else_action"]])
+        self.assertEqual(await action.run(user, None), ["else_action"])
 
     async def test_else_action_no_else_if(self):
         registered_factories[Requirement] = requirement_factory
@@ -277,10 +226,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(result, [["main_action"]])
+        self.assertEqual(await action.run(user, None), ["main_action"])
 
     async def test_else_action_no_else_else(self):
         registered_factories[Requirement] = requirement_factory
@@ -293,10 +239,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "action": {"type": "test", "result": ["main_action"]},
         }
         action = ElseAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(result, [])
+        result = await action.run(user, None)
+        self.assertEqual([], result)
 
     async def test_composite_action(self):
         registered_factories[Action] = action_factory
@@ -304,9 +248,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         items = {"actions": [{"type": "action_mock"}, {"type": "action_mock"}]}
         action = CompositeAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(['test action run', 'test action run'], result)
 
     async def test_node_action_support_templates(self):
@@ -331,10 +273,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(template, UnifiedTemplate)
         user = PicklableMagicMock()
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(expected, result[0].payload["answer"])
+        output = (await action.run(user=user, text_preprocessing_result=None))[0].payload["answer"]
+        self.assertEqual(output, expected)
 
     async def test_string_action_support_templates(self):
         params = {
@@ -355,10 +295,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = StringAction(items)
         user = PicklableMagicMock()
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        self.assertEqual(expected, result[0].payload)
+        output = (await action.run(user=user, text_preprocessing_result=None))[0].payload
+        self.assertEqual(output, expected)
 
     async def test_push_action(self):
         params = {
@@ -400,10 +338,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         action = PushAction(items)
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
-        command = result[0]
+        command = (await action.run(user=user, text_preprocessing_result=None))[0]
         self.assertEqual(command.raw, expected)
         # проверяем наличие кастомных хэдеров для сервиса пушей
         self.assertTrue(SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS in command.request_data)
@@ -450,10 +385,8 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         user.settings = settings
         text_preprocessing_result = BaseTextPreprocessingResult(items)
-        result = []
-        async for command in action.run(user=user, text_preprocessing_result=text_preprocessing_result):
-            result.append(command)
-        self.assertEqual(result[0].raw, expected)
+        command = (await action.run(user=user, text_preprocessing_result=text_preprocessing_result))[0]
+        self.assertEqual(command.raw, expected)
 
     def test_push_action_http_with_apprequest_lite_type_request(self):
         items = {
@@ -615,7 +548,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4), success_action="")
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -642,8 +575,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             "scope": "SMART_PUSH"
         }
         http_request_action.method_params["json"] = request_body_parameters
-        async for command in http_request_action.run(user, None, None):
-            pass
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/oauth",
             headers={
@@ -660,7 +592,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4), success_action="")
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -717,8 +649,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         http_request_action.method_params["json"] = request_body_parameters
-        async for command in http_request_action.run(user, None, None):
-            pass
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite",
             headers={
@@ -735,7 +666,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             parametrizer=Mock(collect=lambda *args, **kwargs: {}),
             descriptions={
                 "behaviors": {
-                    "common_behavior": Mock(timeout=Mock(return_value=4), success_action="")
+                    "common_behavior": AsyncMock(timeout=Mock(return_value=4))
                 }
             }
         )
@@ -902,8 +833,7 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         http_request_action.method_params["json"] = request_body_parameters
-        async for command in http_request_action.run(user, None, None):
-            pass
+        await http_request_action.run(user, None, None)
         request_mock.assert_called_with(
             url="https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest",
             headers={
@@ -933,16 +863,14 @@ class NonRepeatingActionTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_run_available_indexes(self):
         self.user.last_action_ids["last_action_ids_storage"].get_list.side_effect = [[0]]
-        async for command in self.action.run(self.user, None):
-            self.assertEqual(self.expected1, command)
+        result = await self.action.run(self.user, None)
         self.user.last_action_ids["last_action_ids_storage"].add.assert_called_once()
+        self.assertEqual(result, self.expected1)
 
     async def test_run_no_available_indexes(self):
         self.user.last_action_ids["last_action_ids_storage"].get_list.side_effect = [[0, 1]]
-        result = []
-        async for command in self.action.run(self.user, None):
-            result.append(command)
-        self.assertEqual(result, [self.expected])
+        result = await self.action.run(self.user, None)
+        self.assertEqual(result, self.expected)
 
 
 class CounterIncrementActionTest(unittest.IsolatedAsyncioTestCase):
@@ -953,9 +881,7 @@ class CounterIncrementActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = {"test": counter}
         items = {"key": "test"}
         action = CounterIncrementAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        await action.run(user, None)
         user.counters["test"].inc.assert_called_once()
 
 
@@ -967,9 +893,7 @@ class CounterDecrementActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = {"test": counter}
         items = {"key": "test"}
         action = CounterDecrementAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        await action.run(user, None)
         user.counters["test"].dec.assert_called_once()
 
 
@@ -980,9 +904,7 @@ class CounterClearActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters.inc = PicklableMock()
         items = {"key": "test"}
         action = CounterClearAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        await action.run(user, None)
         user.counters.clear.assert_called_once()
 
 
@@ -995,9 +917,7 @@ class CounterSetActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = counters
         items = {"key": "test"}
         action = CounterSetAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        await action.run(user, None)
         user.counters["test"].set.assert_called_once()
 
 
@@ -1010,9 +930,7 @@ class CounterCopyActionTest(unittest.IsolatedAsyncioTestCase):
         user.counters = {"src": counter_src, "dst": counter_dst}
         items = {"source": "src", "destination": "dst"}
         action = CounterCopyAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        await action.run(user, None)
         user.counters["dst"].set.assert_called_once_with(user.counters["src"].value,
                                                          action.reset_time, action.time_shift)
 
@@ -1030,9 +948,7 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         action = AfinaAnswerAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(expected[0]._name, result[0].name)
         self.assertEqual(expected[0].raw, result[0].raw)
 
@@ -1052,9 +968,7 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
             "nodes": {"answer": ["a1", "a1", "a1"], "pronounce_text": ["pt2"], "picture": ["1.jpg", "1.jpg", "1.jpg"]}
         }
         action = AfinaAnswerAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(expected[0]._name, result[0].name)
         self.assertEqual(expected[0].raw, result[0].raw)
 
@@ -1067,9 +981,7 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         user.message.payload = {"personInfo": {"name": "Ivan Ivanov"}}
         items = {"nodes": {"answer": ["{{payload.personInfo.name}}"]}}
         action = AfinaAnswerAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(expected[0]._name, result[0].name)
         self.assertEqual(expected[0].raw, result[0].raw)
 
@@ -1081,9 +993,7 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"render_templates": template}
         items = None
         action = AfinaAnswerAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(result, [])
 
     async def test__items_empty_dict(self):
@@ -1094,9 +1004,7 @@ class AfinaAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"render_templates": template}
         items = {}
         action = AfinaAnswerAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(result, [])
 
 
@@ -1250,9 +1158,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
 
         for i in range(10):
             action = SDKAnswer(items)
-            result = []
-            async for command in action.run(user, None):
-                result.append(command)
+            result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
             self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in expect_arr)
             self.assertFalse(json.dumps(result[0].raw, sort_keys=True) in not_expect_arr)
@@ -1277,9 +1183,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         exp_list = [exp1, exp2]
         for i in range(10):
             action = SDKAnswer(items)
-            result = []
-            async for command in action.run(user, None):
-                result.append(command)
+            result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
             self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in exp_list)
 
@@ -1366,9 +1270,7 @@ class CardAnswerActionTest(unittest.IsolatedAsyncioTestCase):
         not_expect_arr = [nexp1, nexp2]
         for i in range(10):
             action = SDKAnswer(items)
-            result = []
-            async for command in action.run(user, None):
-                result.append(command)
+            result = await action.run(user, None)
             self.assertEqual("ANSWER_TO_USER", result[0].name)
             self.assertTrue(json.dumps((result[0].raw), sort_keys=True) in expect_arr)
             self.assertFalse(json.dumps((result[0].raw), sort_keys=True) in not_expect_arr)
@@ -1468,9 +1370,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
 
         action = SDKAnswerToUser(items)
         for i in range(3):
-            result = []
-            async for command in action.run(user, None):
-                result.append(command)
+            result = await action.run(user, None)
             self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_root(self):
@@ -1505,9 +1405,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
 
         action = SDKAnswerToUser(items)
         for i in range(3):
-            result = []
-            async for command in action.run(user, None):
-                result.append(command)
+            result = await action.run(user, None)
             self.assertTrue(json.dumps(result[0].raw, sort_keys=True) in [exp1, exp2])
 
     async def test_SDKItemAnswer_simple(self):
@@ -1519,9 +1417,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockParametrizer(user, {})
         items = {"type": "sdk_answer_to_user", "items": [{"type": "bubble_text", "text": "42"}]}
         action = SDKAnswerToUser(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertDictEqual(
             result[0].raw,
             {'messageName': 'ANSWER_TO_USER', 'payload': {'items': [{'bubble': {'text': '42', 'markdown': True}}]}}
@@ -1547,9 +1443,7 @@ class SDKRandomAnswer(unittest.IsolatedAsyncioTestCase):
             },
         }
         action = SDKAnswerToUser(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertDictEqual(
             result[0].raw,
             {
@@ -1602,9 +1496,7 @@ class GiveMeMemoryActionTest(unittest.IsolatedAsyncioTestCase):
         }
         text_preprocessing_result = PicklableMock()
         action = GiveMeMemoryAction(items)
-        result = []
-        async for command in action.run(user, text_preprocessing_result):
-            result.append(command)
+        result = await action.run(user, text_preprocessing_result)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)
 
@@ -1692,8 +1584,6 @@ class RememberThisActionTest(unittest.IsolatedAsyncioTestCase):
             }
         }
         action = RememberThisAction(items)
-        result = []
-        async for command in action.run(user, None):
-            result.append(command)
+        result = await action.run(user, None)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)

@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import Union, Dict, Any, Optional, AsyncGenerator
+from typing import Union, Dict, Any, Optional, List
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.actions.command import Command
@@ -22,26 +22,26 @@ class CounterAction(Action):
 
 class CounterIncrementAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].inc(self.value, self.lifetime)
-        return
-        yield
+        return commands
 
 
 class CounterDecrementAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].dec(-self.value, self.lifetime)
-        return
-        yield
+        return commands
 
 
 class CounterClearAction(CounterAction):
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters.clear(self.key)
-        return
-        yield
+        return commands
 
 
 class CounterSetAction(CounterAction):
@@ -58,10 +58,10 @@ class CounterSetAction(CounterAction):
         self.time_shift = items.get("time_shift", 0)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.counters[self.key].set(self.value, self.reset_time, self.time_shift)
-        return
-        yield
+        return commands
 
 
 class CounterCopyAction(Action):
@@ -73,8 +73,8 @@ class CounterCopyAction(Action):
         self.time_shift = items.get("time_shift", 0)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         value = user.counters[self.src].value
         user.counters[self.dst].set(value, self.reset_time, self.time_shift)
-        return
-        yield
+        return commands

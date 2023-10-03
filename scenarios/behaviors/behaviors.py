@@ -3,14 +3,15 @@ import math
 import socket
 from collections import namedtuple
 from time import time
-from typing import Dict, AsyncGenerator
+from typing import Dict, List
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
+from core.names.field import APP_INFO
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.pickle_copy import pickle_deepcopy
-from scenarios.actions.action_params_names import TO_MESSAGE_NAME, LOCAL_VARS
+from scenarios.actions.action_params_names import TO_MESSAGE_NAME, TO_MESSAGE_PARAMS, LOCAL_VARS
 from core.monitoring.monitoring import monitoring
 
 
@@ -128,8 +129,9 @@ class Behaviors:
             params=log_params,
         )
 
-    async def success(self, callback_id: str) -> AsyncGenerator[Command, None]:
+    async def success(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)
@@ -143,18 +145,19 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            async for command in behavior.success_action.run(self._user, text_preprocessing_result,
-                                                             callback_action_params):
-                yield command
+            result = await behavior.success_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.success not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
                 params={log_const.KEY_NAME: log_const.BEHAVIOR_SUCCESS_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
+        return result
 
-    async def fail(self, callback_id: str) -> AsyncGenerator[Command, None]:
+    async def fail(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)
@@ -164,18 +167,18 @@ class Behaviors:
                 callback_id, "behavior_fail", monitoring.counter_behavior_fail, "fail", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            async for command in behavior.fail_action.run(self._user, text_preprocessing_result,
-                                                          callback_action_params):
-                yield command
+            result = await behavior.fail_action.run(self._user, text_preprocessing_result, callback_action_params) or []
         else:
             log(f"behavior.fail not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
                 params={log_const.KEY_NAME: log_const.BEHAVIOR_FAIL_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
+        return result
 
-    async def timeout(self, callback_id: str) -> AsyncGenerator[Command, None]:
+    async def timeout(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
+        result = []
         if callback:
             self._add_returned_callback(callback_id)
             behavior = self.descriptions[callback.behavior_id]
@@ -184,18 +187,19 @@ class Behaviors:
                 callback_id, "behavior_timeout", monitoring.counter_behavior_timeout, "timeout", callback_action_params
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            async for command in behavior.timeout_action.run(self._user, text_preprocessing_result,
-                                                             callback_action_params):
-                yield command
+            result = await behavior.timeout_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log(f"behavior.timeout not found valid callback for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
                 self._user,
                 params={log_const.KEY_NAME: log_const.BEHAVIOR_TIMEOUT_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
+        return result
 
-    async def misstate(self, callback_id: str) -> AsyncGenerator[Command, None]:
+    async def misstate(self, callback_id: str) -> List[Command]:
         callback = self._get_callback(callback_id)
+        result = []
         if callback:
             self._check_hostname(callback_id, callback)
             self._add_returned_callback(callback_id)
@@ -209,9 +213,8 @@ class Behaviors:
                 callback_action_params,
             )
             text_preprocessing_result = TextPreprocessingResult(callback.text_preprocessing_result)
-            async for command in behavior.misstate_action.run(self._user, text_preprocessing_result,
-                                                              callback_action_params):
-                yield command
+            result = await behavior.misstate_action.run(self._user, text_preprocessing_result, callback_action_params)
+            result = result or []
         else:
             log("behavior.misstate not found valid callback"
                 f" for callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s",
@@ -219,6 +222,7 @@ class Behaviors:
                 params={log_const.KEY_NAME: log_const.BEHAVIOR_MISSTATE_VALUE,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id})
         self._delete(callback_id)
+        return result
 
     def _get_callback(self, callback_id):
         callback = self._callbacks.get(callback_id)

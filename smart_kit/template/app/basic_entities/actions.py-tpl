@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any, Optional, AsyncGenerator
+from typing import Union, Dict, Any, Optional, List
 
 from core.basic_models.actions.basic_actions import Action
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
@@ -18,7 +18,7 @@ class CustomAction(Action):
         self.test_param = items.get("test_param")
 
     async def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         # тело действия
-        return
-        yield  # для поддержания интерфейса генератора
+        return commands
