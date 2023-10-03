@@ -1,7 +1,8 @@
+import asyncio
 import copy
 import time
 from functools import cached_property
-from typing import Optional, Dict, Any, Union, AsyncGenerator
+from typing import Optional, Dict, Any, Union, List
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.actions.command import Command
@@ -35,10 +36,10 @@ class ClearFormAction(Action):
         self.form = items["form"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.forms.remove_item(self.form)
-        return
-        yield
+        return commands
 
 
 class ClearInnerFormAction(ClearFormAction):
@@ -52,12 +53,12 @@ class ClearInnerFormAction(ClearFormAction):
         self.inner_form = items["inner_form"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         form = user.forms[self.form]
         if form:
             form.forms.remove_item(self.inner_form)
-        return
-        yield
+        return commands
 
 
 class RemoveFormFieldAction(Action):
@@ -72,11 +73,11 @@ class RemoveFormFieldAction(Action):
         self.field = items["field"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         form = user.forms[self.form]
         form.fields.remove_item(self.field)
-        return
-        yield
+        return commands
 
 
 class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
@@ -91,12 +92,12 @@ class RemoveCompositeFormFieldAction(RemoveFormFieldAction):
         self.inner_form = items["inner_form"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         form = user.forms[self.form]
         inner_form = form.forms[self.inner_form]
         inner_form.fields.remove_item(self.field)
-        return
-        yield
+        return commands
 
 
 class BreakScenarioAction(Action):
@@ -107,11 +108,11 @@ class BreakScenarioAction(Action):
         self.scenario_id = items.get("scenario_id")
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         scenario_id = self.scenario_id if self.scenario_id is not None else user.last_scenarios.last_scenario_name
         user.scenario_models[scenario_id].set_break()
-        return
-        yield
+        return commands
 
 
 class SaveBehaviorAction(Action):
@@ -126,14 +127,14 @@ class SaveBehaviorAction(Action):
         self.check_scenario = items.get("check_scenario", True)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         scenario_id = None
         if self.check_scenario:
             scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
-        return
-        yield
+        return commands
 
 
 class BasicSelfServiceActionWithState(StringAction):
@@ -159,17 +160,17 @@ class BasicSelfServiceActionWithState(StringAction):
     def _check(self, user):
         return not user.behaviors.check_got_saved_id(self.behavior_action.behavior)
 
-    async def _run(self, user, text_preprocessing_result, params=None) -> AsyncGenerator[Command, None]:
-        async for command in self.behavior_action.run(user, text_preprocessing_result, params):
-            yield command
-        async for command in self.command_action.run(user, text_preprocessing_result, params):
-            yield command
+    async def _run(self, user, text_preprocessing_result, params=None):
+        await self.behavior_action.run(user, text_preprocessing_result, params)
+        command_action_result = await self.command_action.run(user, text_preprocessing_result, params) or []
+        return command_action_result
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Union[None, str, List[Command]]:
+        commands = []
         if self._check(user):
-            async for command in self._run(user, text_preprocessing_result, params):
-                yield command
+            commands.extend(await self._run(user, text_preprocessing_result, params))
+        return commands
 
 
 class DeleteVariableAction(Action):
@@ -177,27 +178,23 @@ class DeleteVariableAction(Action):
     key: str
 
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super().__init__(items, id)
+        super(DeleteVariableAction, self).__init__(items, id)
         self.key: str = items["key"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
         user.variables.delete(self.key)
-        return
-        yield
 
 
 class ClearVariablesAction(Action):
     version: Optional[int]
 
     def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
-        super().__init__(items, id)
+        super(ClearVariablesAction, self).__init__(items, id)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> None:
         user.variables.clear()
-        return
-        yield
 
 
 class FillFieldAction(Action):
@@ -223,12 +220,12 @@ class FillFieldAction(Action):
         return self.template.render(params)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
         data = self._get_data(params)
         self._fill(user, data)
-        return
-        yield
+        return commands
 
 
 class CompositeFillFieldAction(FillFieldAction):
@@ -255,7 +252,8 @@ class RunScenarioAction(Action):
         self.scenario: UnifiedTemplate = UnifiedTemplate(items["scenario"])
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         if params is None:
             params = user.parametrizer.collect(text_preprocessing_result)
         else:
@@ -263,18 +261,19 @@ class RunScenarioAction(Action):
         scenario_id = self.scenario.render(params)
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
-            async for command in scenario.run(text_preprocessing_result, user, params):
-                yield command
+            commands.extend(await scenario.run(text_preprocessing_result, user, params))
+        return commands
 
 
 class RunLastScenarioAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         if scenario:
-            async for command in scenario.run(text_preprocessing_result, user, params):
-                yield command
+            commands.extend(await scenario.run(text_preprocessing_result, user, params))
+        return commands
 
 
 class ChoiceScenarioAction(Action):
@@ -304,20 +303,21 @@ class ChoiceScenarioAction(Action):
         return self._else_item
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         choice_is_made = False
 
         for scenario, requirement in zip(self._scenarios, self.requirement_items):
             check_res = requirement.check(text_preprocessing_result, user, params)
             if check_res:
-                async for command in RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params):
-                    yield command
+                commands.extend(await RunScenarioAction(items=scenario).run(user, text_preprocessing_result, params))
                 choice_is_made = True
                 break
 
         if not choice_is_made and self._else_item:
-            async for command in self.else_item.run(user, text_preprocessing_result, params):
-                yield command
+            commands.extend(await self.else_item.run(user, text_preprocessing_result, params) or [])
+
+        return commands
 
 
 def clear_scenario(user, scenario_id):
@@ -328,20 +328,20 @@ def clear_scenario(user, scenario_id):
 
 class ClearCurrentScenarioAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
             clear_scenario(user, last_scenario_id)
-        return
-        yield
+        return commands
 
 
 class ClearAllScenariosAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         user.last_scenarios.clear_all()
-        return
-        yield
+        return commands
 
 
 class ClearScenarioByIdAction(Action):
@@ -354,11 +354,11 @@ class ClearScenarioByIdAction(Action):
         self.scenario_id = items.get("scenario_id")
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         if self.scenario_id:
             clear_scenario(user, self.scenario_id)
-        return
-        yield
+        return commands
 
 
 class ClearCurrentScenarioFormAction(Action):
@@ -366,12 +366,12 @@ class ClearCurrentScenarioFormAction(Action):
         super().__init__(items, id)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
             user.forms.clear_form(last_scenario_id)
-        return
-        yield
+        return commands
 
 
 class ResetCurrentNodeAction(Action):
@@ -380,12 +380,12 @@ class ResetCurrentNodeAction(Action):
         self.node_id = items.get('node_id', None)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         if last_scenario_id:
             user.scenario_models[last_scenario_id].current_node = self.node_id
-        return
-        yield
+        return commands
 
 
 class AddHistoryEventAction(Action):
@@ -403,7 +403,8 @@ class AddHistoryEventAction(Action):
                 self.event_content[k] = UnifiedTemplate(v)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         last_scenario_id = user.last_scenarios.last_scenario_name
         scenario = user.descriptions["scenarios"].get(last_scenario_id)
         if scenario:
@@ -424,38 +425,39 @@ class AddHistoryEventAction(Action):
                 content=self.event_content
             )
             user.history.add_event(event)
-        return
-        yield
+        return commands
 
 
 class EmptyAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         log("%(class_name)s.run: action do nothing.",
             params={log_const.KEY_NAME: "empty_action", "class_name": self.__class__.__name__}, user=user)
-        return
-        yield
+        return commands
 
 
 class RunScenarioByProjectNameAction(Action):
 
     async def run(self, user: User, text_preprocessing_result: TextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         scenario_id = user.message.project_name
         scenario = user.descriptions["scenarios"].get(scenario_id)
         if scenario:
-            async for command in scenario.run(text_preprocessing_result, user, params):
-                yield command
+            commands.extend(await scenario.run(text_preprocessing_result, user, params))
         else:
             log("%(class_name)s warning: %(scenario_id)s isn't exist",
                 params={log_const.KEY_NAME: "warning_in_RunScenarioByProjectNameAction",
                         "class_name": self.__class__.__name__, "scenario_id": scenario_id},
                 user=user, level="WARNING")
+        return commands
 
 
 class ProcessBehaviorAction(Action):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        commands = []
         callback_id = user.message.callback_id
 
         log(f"%(class_name)s.run: got callback_id %({log_const.BEHAVIOR_CALLBACK_ID_VALUE})s.",
@@ -468,14 +470,13 @@ class ProcessBehaviorAction(Action):
                 params={log_const.KEY_NAME: "process_behavior_action_warning",
                         "class_name": self.__class__.__name__,
                         log_const.BEHAVIOR_CALLBACK_ID_VALUE: callback_id}, level="WARNING", user=user)
-            return
+            return commands
 
         if user.message.payload:
-            async for command in user.behaviors.success(callback_id):
-                yield command
+            commands.extend(await user.behaviors.success(callback_id))
         else:
-            async for command in user.behaviors.fail(callback_id):
-                yield command
+            commands.extend(await user.behaviors.fail(callback_id))
+        return commands
 
 
 class SelfServiceActionWithState(BasicSelfServiceActionWithState):
@@ -490,7 +491,7 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         self.rewrite_saved_messages = items.get("rewrite_saved_messages", False)
         self._check_scenario: bool = items.get("check_scenario", True)
 
-    async def _run(self, user, text_preprocessing_result, params=None) -> AsyncGenerator[Command, None]:
+    async def _run(self, user, text_preprocessing_result, params=None) -> List[Command]:
         action_params = copy.copy(params or {})
 
         command_params = dict()
@@ -513,8 +514,9 @@ class SelfServiceActionWithState(BasicSelfServiceActionWithState):
         save_params = self._get_save_params(user, action_params, command_params)
         self._save_behavior(callback_id, user, scenario, text_preprocessing_result, save_params)
 
-        yield Command(self.command, command_params, self.id, request_type=self.request_type,
-                      request_data=request_data)
+        commands = [Command(self.command, command_params, self.id, request_type=self.request_type,
+                            request_data=request_data)]
+        return commands
 
     def _get_extra_request_data(self, user, params, callback_id):
         extra_request_data = {}

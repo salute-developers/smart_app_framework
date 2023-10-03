@@ -23,11 +23,11 @@ async def mock_scenario2_text_fits():
 
 
 async def mock_scenario1_run(x, y):
-    yield x.name + y.name
+    return x.name + y.name
 
 
 async def mock_scenario2_run(x, y):
-    yield y.name + x.name
+    return y.name + x.name
 
 
 class ModelsTest1(unittest.IsolatedAsyncioTestCase):
@@ -108,47 +108,29 @@ class ModelsTest1(unittest.IsolatedAsyncioTestCase):
                                                  'external_actions': {}}, self.app_name)
 
         # путь по умолчанию без выполнения условий
-        result = []
-        async for command in obj1.run(self.test_text_preprocessing_result, self.test_user1):
-            result.append(command)
-        self.assertEqual(
-            result, ["TestNameResult"]
+        self.assertTrue(
+            await obj1.run(self.test_text_preprocessing_result, self.test_user1) == ("TestNameResult", True)
         )
-        result = []
-        async for command in obj2.run(self.test_text_preprocessing_result, self.test_user1):
-            result.append(command)
-        self.assertEqual(
-            result, ["TestNameResult"]
+        self.assertTrue(
+            await obj2.run(self.test_text_preprocessing_result, self.test_user1) == ("TestNameResult", True)
         )
 
         # случай когда срабатоли оба условия
-        result = []
-        async for command in obj1.run(self.test_text_preprocessing_result, self.test_user2):
-            result.append(command)
-        self.assertEqual(
-            result, ["TestNameResult"]
+        self.assertTrue(
+            await obj1.run(self.test_text_preprocessing_result, self.test_user2) == ("TestNameResult", True)
         )
         # случай, когда 2-е условие не выполнено
-        result = []
-        async for command in obj2.run(self.test_text_preprocessing_result, self.test_user3):
-            result.append(command)
-        self.assertEqual(
-            result, ['TestNameResult']
+        self.assertTrue(
+            await obj2.run(self.test_text_preprocessing_result, self.test_user3) == ('TestNameResult', True)
         )
 
     async def test_dialogue_manager_run_scenario(self):
         obj = dialogue_manager.DialogueManager({'scenarios': self.test_scenarios,
                                                 'external_actions': {'nothing_found_action': self.TestAction}},
                                                self.app_name)
-        result = []
-        async for command in obj.run_scenario(1, self.test_text_preprocessing_result, self.test_user1):
-            result.append(command)
-        self.assertEqual(
-            result, ["ResultTestName"]
+        self.assertTrue(
+            await obj.run_scenario(1, self.test_text_preprocessing_result, self.test_user1) == "ResultTestName"
         )
-        result = []
-        async for command in obj.run_scenario(2, self.test_text_preprocessing_result, self.test_user1):
-            result.append(command)
-        self.assertEqual(
-            result, ["TestNameResult"]
+        self.assertTrue(
+            await obj.run_scenario(2, self.test_text_preprocessing_result, self.test_user1) == "TestNameResult"
         )

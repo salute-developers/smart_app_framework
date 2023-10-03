@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, Union, AsyncGenerator
+from typing import Dict, Any, Optional, Union, List
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
@@ -35,10 +35,10 @@ class SmartGeoAction(StringAction):
         self.behavior = items.get("behavior", "smart_geo_behavior")
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
                            text_preprocessing_result.raw, action_params=pickle_deepcopy(params))
 
-        async for command in super().run(user, text_preprocessing_result, params):
-            yield command
+        commands = await super().run(user, text_preprocessing_result, params)
+        return commands

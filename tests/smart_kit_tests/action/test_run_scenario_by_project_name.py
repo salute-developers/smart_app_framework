@@ -8,7 +8,7 @@ from scenarios.actions.action import RunScenarioByProjectNameAction
 
 class TestScenarioDesc(dict):
     async def run(self, argv1, argv2, params):
-        yield 'result to run scenario'
+        return ['result to run scenario']
 
 
 class RunScenarioByProjectNameActionTest1(unittest.IsolatedAsyncioTestCase):
@@ -35,18 +35,12 @@ class RunScenarioByProjectNameActionTest1(unittest.IsolatedAsyncioTestCase):
     async def test_run_scenario_by_project_name_run(self):
         obj1 = RunScenarioByProjectNameAction(self.items)
         # без оглядки на аннотации из PEP 484
-        result = []
-        async for command in obj1.run(self.test_user1, self.test_text_preprocessing_result, {'any_attr': {'any_data'}}):
-            result.append(command)
         self.assertEqual(
-            result,
+            await obj1.run(self.test_user1, self.test_text_preprocessing_result, {'any_attr': {'any_data'}}),
             ['result to run scenario']
         )
         obj2 = RunScenarioByProjectNameAction(self.items)
-        result = []
-        async for command in obj2.run(self.test_user2, self.test_text_preprocessing_result):
-            result.append(command)
-        self.assertEqual([], result)
+        self.assertEqual([], await obj2.run(self.test_user2, self.test_text_preprocessing_result))
 
     def test_run_scenario_by_project_name_log_vars(self):
         obj = RunScenarioByProjectNameAction(self.items)

@@ -7,7 +7,7 @@ from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
 
 async def mock_test_action_run(x, y, z):
-    yield 10
+    return [10]
 
 
 class HandlerTest4(unittest.IsolatedAsyncioTestCase):
@@ -74,9 +74,5 @@ class HandlerTest4(unittest.IsolatedAsyncioTestCase):
         obj1 = handle_respond.HandlerRespond(app_name=self.app_name)
         obj2 = handle_respond.HandlerRespond(self.app_name, "any action name")
         with self.assertRaises(KeyError):
-            async for command in obj1.run(self.test_payload, self.test_user1):
-                pass
-        result = []
-        async for command in obj2.run(self.test_payload, self.test_user2):
-            result.append(command)
-        self.assertTrue(result == [10])
+            await obj1.run(self.test_payload, self.test_user1)
+        self.assertTrue(await obj2.run(self.test_payload, self.test_user2) == [10])

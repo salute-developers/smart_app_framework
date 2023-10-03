@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional, Dict, Union, Any, AsyncGenerator
+from typing import Optional, Dict, Union, List, Any
 
 import aiohttp
 import aiohttp.client_exceptions
@@ -114,7 +114,7 @@ class HTTPRequestAction(NodeAction):
             **additional_params,
         })
 
-    async def process_result(self, response, user, text_preprocessing_result, params) -> AsyncGenerator[Command, None]:
+    async def process_result(self, response, user, text_preprocessing_result, params):
         behavior_description = user.descriptions["behaviors"][self.behavior] if self.behavior else None
         action = None
         if self.error is None:
@@ -130,11 +130,10 @@ class HTTPRequestAction(NodeAction):
             else:
                 action = behavior_description.fail_action
         if action:
-            async for command in action.run(user, text_preprocessing_result, None):
-                yield command
+            return await action.run(user, text_preprocessing_result, None)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> AsyncGenerator[Command, None]:
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
         self.preprocess(user, text_preprocessing_result, params)
         params = params or {}
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)
@@ -142,5 +141,4 @@ class HTTPRequestAction(NodeAction):
         response = await self._make_response(request_parameters, user)
         if response:
             log("response data: %(body)s", params={"body": response.json()}, level="INFO")
-        async for command in self.process_result(response, user, text_preprocessing_result, params):
-            yield command
+        return await self.process_result(response, user, text_preprocessing_result, params)

@@ -25,7 +25,6 @@ from scenarios.scenario_models.history import Event
 from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock, AsyncPicklableMock
-from tests.core_tests.basic_scenario_models_test.action_test.test_action import AsyncIterator
 from tests.core_tests.requirements_test.test_requirements import MockRequirement
 
 
@@ -35,8 +34,7 @@ class MockAction:
         self.result = items.get("result")
 
     async def run(self, user, text_preprocessing_result, params=None):
-        for command in self.result or ["test action run"]:
-            yield command
+        return self.result or ["test action run"]
 
 
 class MockParametrizer:
@@ -60,8 +58,7 @@ class ClearFormIdActionTest(unittest.IsolatedAsyncioTestCase):
     async def test_run(self):
         action = ClearFormAction({"form": "form"})
         user = PicklableMagicMock()
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         user.forms.remove_item.assert_called_once_with("form")
 
 
@@ -70,8 +67,7 @@ class ClearInnerFormActionTest(unittest.IsolatedAsyncioTestCase):
         action = ClearInnerFormAction({"form": "form", "inner_form": "inner_form"})
         user, form = PicklableMagicMock(), PicklableMagicMock()
         user.forms.__getitem__.return_value = form
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         form.forms.remove_item.assert_called_once_with("inner_form")
 
 
@@ -83,8 +79,7 @@ class BreakScenarioTest(unittest.IsolatedAsyncioTestCase):
         scenario_model = PicklableMagicMock()
         scenario_model.set_break = Mock(return_value=None)
         user.scenario_models = {scenario_id: scenario_model}
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         user.scenario_models[scenario_id].set_break.assert_called_once()
 
     async def test_run_2(self):
@@ -95,8 +90,7 @@ class BreakScenarioTest(unittest.IsolatedAsyncioTestCase):
         scenario_model = PicklableMagicMock()
         scenario_model.set_break = Mock(return_value=None)
         user.scenario_models = {scenario_id: scenario_model}
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         user.scenario_models[scenario_id].set_break.assert_called_once()
 
 
@@ -105,8 +99,7 @@ class RemoveFormFieldActionTest(unittest.IsolatedAsyncioTestCase):
         action = RemoveFormFieldAction({"form": "form", "field": "field"})
         user, form = PicklableMagicMock(), PicklableMagicMock()
         user.forms.__getitem__.return_value = form
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         form.fields.remove_item.assert_called_once_with("field")
 
 
@@ -116,8 +109,7 @@ class RemoveCompositeFormFieldActionTest(unittest.IsolatedAsyncioTestCase):
         user, inner_form, form = PicklableMagicMock(), PicklableMagicMock(), PicklableMagicMock()
         form.forms.__getitem__.return_value = inner_form
         user.forms.__getitem__.return_value = form
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         inner_form.fields.remove_item.assert_called_once_with("field")
 
 
@@ -140,8 +132,7 @@ class SaveBehaviorActionTest(unittest.IsolatedAsyncioTestCase):
         action = SaveBehaviorAction(data)
         tpr = PicklableMock()
         tpr_raw = tpr.raw
-        async for command in action.run(self.user, tpr):
-            pass
+        await action.run(self.user, tpr)
         self.user.behaviors.add.assert_called_once_with(self.user.message.generate_new_callback_id(), "test",
                                                         self.user.last_scenarios.last_scenario_name, tpr_raw,
                                                         action_params=None)
@@ -154,8 +145,7 @@ class SaveBehaviorActionTest(unittest.IsolatedAsyncioTestCase):
         action = SaveBehaviorAction(data)
         text_preprocessing_result_raw = PicklableMock()
         text_preprocessing_result = Mock(raw=text_preprocessing_result_raw)
-        async for command in action.run(self.user, text_preprocessing_result, None):
-            pass
+        await action.run(self.user, text_preprocessing_result, None)
         self.user.behaviors.add.assert_called_once_with(self.user.message.generate_new_callback_id(), "test", None,
                                                         text_preprocessing_result_raw, action_params=None)
 
@@ -183,9 +173,7 @@ class SelfServiceActionWithStateTest(unittest.IsolatedAsyncioTestCase):
         action = SelfServiceActionWithState(data)
         text_preprocessing_result_raw = PicklableMock()
         text_preprocessing_result = Mock(raw=text_preprocessing_result_raw)
-        result = []
-        async for command in action.run(self.user, text_preprocessing_result, None):
-            result.append(command)
+        result = await action.run(self.user, text_preprocessing_result, None)
         behavior.check_got_saved_id.assert_called_once()
         behavior.add.assert_called_once()
         self.assertEqual(result[0].name, "cmd_id")
@@ -201,9 +189,7 @@ class SelfServiceActionWithStateTest(unittest.IsolatedAsyncioTestCase):
         self.user.behaviors = behavior
         behavior.check_got_saved_id = Mock(return_value=True)
         action = SelfServiceActionWithState(data)
-        result = []
-        async for command in action.run(self.user, None):
-            result.append(command)
+        result = await action.run(self.user, None)
         behavior.add.assert_not_called()
         self.assertEqual(result, [])
 
@@ -232,9 +218,7 @@ class SelfServiceActionWithStateTest(unittest.IsolatedAsyncioTestCase):
         action = SelfServiceActionWithState(data)
         text_preprocessing_result_raw = PicklableMock()
         text_preprocessing_result = Mock(raw=text_preprocessing_result_raw)
-        result = []
-        async for command in action.run(self.user, text_preprocessing_result, None):
-            result.append(command)
+        result = await action.run(self.user, text_preprocessing_result, None)
         behavior.check_got_saved_id.assert_called_once()
         behavior.add.assert_called_once()
         self.assertEqual(result[0].name, "cmd_id")
@@ -262,22 +246,19 @@ class SetVariableActionTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_action(self):
         action = SetVariableAction({"key": "some_key", "value": "some_value"})
-        async for command in action.run(self.user, None):
-            pass
+        await action.run(self.user, None)
         self.user.variables.set.assert_called_with("some_key", "some_value", None)
 
     async def test_action_jinja_key_default(self):
         self.user.message.payload = {"some_value": "some_value_test"}
         action = SetVariableAction({"key": "some_key", "value": "{{payload.some_value}}"})
-        async for command in action.run(self.user, None):
-            pass
+        await action.run(self.user, None)
         self.user.variables.set.assert_called_with("some_key", "some_value_test", None)
 
     async def test_action_jinja_no_key(self):
         self.user.message.payload = {"some_value": "some_value_test"}
         action = SetVariableAction({"key": "some_key", "value": "{{payload.no_key}}"})
-        async for command in action.run(self.user, None):
-            pass
+        await action.run(self.user, None)
         self.user.variables.set.assert_called_with("some_key", "", None)
 
 
@@ -295,8 +276,7 @@ class DeleteVariableActionTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_action(self):
         action = DeleteVariableAction({"key": "some_key_1"})
-        async for command in action.run(self.user, None):
-            pass
+        await action.run(self.user, None)
         self.user.variables.delete.assert_called_with("some_key_1")
 
 
@@ -318,8 +298,7 @@ class ClearVariablesActionTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_action(self):
         action = ClearVariablesAction()
-        async for command in action.run(self.user, None):
-            pass
+        await action.run(self.user, None)
         self.user.variables.clear.assert_called_with()
 
 
@@ -335,8 +314,7 @@ class FillFieldActionTest(unittest.IsolatedAsyncioTestCase):
         field = PicklableMock()
         field.fill = PicklableMock()
         user.forms["test_form"].fields = {"test_field": field}
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         field.fill.assert_called_once_with(params["test_field"])
 
 
@@ -356,8 +334,7 @@ class CompositeFillFieldActionTest(unittest.IsolatedAsyncioTestCase):
         field = PicklableMock()
         field.fill = PicklableMock()
         user.forms["test_form"].forms["test_internal_form"].fields = {"test_field": field}
-        async for command in action.run(user, None):
-            pass
+        await action.run(user, None)
         field.fill.assert_called_once_with(params["test_field"])
 
 
@@ -368,11 +345,9 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockParametrizer(user, {})
         scen = AsyncPicklableMock()
         scen_result = ['done']
-        scen.run = AsyncIterator(seq=scen_result)
+        scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
+        result = await action.run(user, PicklableMock())
         self.assertEqual(result, scen_result)
 
     async def test_scenario_action_with_jinja_good(self):
@@ -384,11 +359,9 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockParametrizer(user, {"data": params})
         scen = AsyncPicklableMock()
         scen_result = ['done']
-        scen.run = AsyncIterator(seq=scen_result)
+        scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"ANNA.pipeline.scenario": scen}}
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
+        result = await action.run(user, PicklableMock())
         self.assertEqual(result, scen_result)
 
     async def test_scenario_action_no_scenario(self):
@@ -399,9 +372,7 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         scen_result = 'done'
         scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
+        result = await action.run(user, PicklableMock())
         self.assertEqual(result, [])
 
     async def test_scenario_action_without_jinja(self):
@@ -410,11 +381,9 @@ class ScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockParametrizer(user, {})
         scen = AsyncPicklableMock()
         scen_result = ['done']
-        scen.run = AsyncIterator(seq=scen_result)
+        scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"next_scenario": scen}}
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
+        result = await action.run(user, PicklableMock())
         self.assertEqual(result, scen_result)
 
 
@@ -425,15 +394,13 @@ class RunLastScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         scen = AsyncPicklableMock()
         scen_result = ['done']
-        scen.run = AsyncIterator(seq=scen_result)
+        scen.run.return_value = scen_result
         user.descriptions = {"scenarios": {"test": scen}}
         user.last_scenarios = PicklableMock()
         last_scenario_name = "test"
         user.last_scenarios.scenarios_names = [last_scenario_name]
         user.last_scenarios.last_scenario_name = last_scenario_name
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
+        result = await action.run(user, PicklableMock())
         self.assertEqual(result, scen_result)
 
 
@@ -456,13 +423,10 @@ class ChoiceScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user = PicklableMock()
         user.parametrizer = MockParametrizer(user, {})
         scen = AsyncPicklableMock()
-        scen.run = AsyncIterator(seq=expected_result)
+        scen.run.return_value = expected_result
         if expected_scen:
             user.descriptions = {"scenarios": {expected_scen: scen}}
-        result = []
-        async for command in action.run(user, PicklableMock()):
-            result.append(command)
-        return result
+        return await action.run(user, PicklableMock())
 
     async def test_choice_scenario_action(self):
         # Проверяем, что запустили нужный сценарий, в случае если выполнился его requirement
@@ -540,9 +504,7 @@ class ClearCurrentScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"scenarios": {scenario_name: scenario}}
 
         action = ClearCurrentScenarioAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
@@ -555,9 +517,7 @@ class ClearCurrentScenarioActionTest(unittest.IsolatedAsyncioTestCase):
         user.last_scenarios.delete = PicklableMock()
 
         action = ClearCurrentScenarioAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
@@ -576,9 +536,7 @@ class ClearScenarioByIdActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"scenarios": {scenario_name: scenario}}
 
         action = ClearScenarioByIdAction({"scenario_id": scenario_name})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.last_scenarios.delete.assert_called_once()
         user.forms.remove_item.assert_called_once()
@@ -590,9 +548,7 @@ class ClearScenarioByIdActionTest(unittest.IsolatedAsyncioTestCase):
         user.last_scenarios.last_scenario_name = "test_scenario"
 
         action = ClearScenarioByIdAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.last_scenarios.delete.assert_not_called()
         user.forms.remove_item.assert_not_called()
@@ -612,9 +568,7 @@ class ClearCurrentScenarioFormActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"scenarios": {scenario_name: scenario}}
 
         action = ClearCurrentScenarioFormAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.forms.clear_form.assert_called_once()
 
@@ -631,9 +585,7 @@ class ClearCurrentScenarioFormActionTest(unittest.IsolatedAsyncioTestCase):
         user.descriptions = {"scenarios": {scenario_name: scenario}}
 
         action = ClearCurrentScenarioFormAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         user.forms.remove_item.assert_not_called()
 
@@ -648,9 +600,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
         user.scenario_models = {'test_scenario': scenario_model}
 
         action = ResetCurrentNodeAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         self.assertIsNone(user.scenario_models['test_scenario'].current_node)
 
@@ -663,9 +613,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
         user.scenario_models = {'test_scenario': scenario_model}
 
         action = ResetCurrentNodeAction({})
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         self.assertEqual('some_node', user.scenario_models['test_scenario'].current_node)
 
@@ -681,9 +629,7 @@ class ResetCurrentNodeActionTest(unittest.IsolatedAsyncioTestCase):
             'node_id': 'another_node'
         }
         action = ResetCurrentNodeAction(items)
-        result = []
-        async for command in action.run(user, {}, {}):
-            result.append(command)
+        result = await action.run(user, {}, {})
         self.assertEqual([], result)
         self.assertEqual('another_node', user.scenario_models['test_scenario'].current_node)
 
@@ -722,8 +668,7 @@ class AddHistoryEventActionTest(unittest.IsolatedAsyncioTestCase):
         )
 
         action = AddHistoryEventAction(items)
-        async for command in action.run(self.user, None, None):
-            pass
+        await action.run(self.user, None, None)
 
         self.user.history.add_event.assert_called_once()
         self.user.history.add_event.assert_called_once_with(expected)
@@ -737,8 +682,7 @@ class AddHistoryEventActionTest(unittest.IsolatedAsyncioTestCase):
         }
 
         action = AddHistoryEventAction(items)
-        async for command in action.run(self.user, None, None):
-            pass
+        await action.run(self.user, None, None)
 
         self.user.history.add_event.assert_not_called()
 
@@ -761,8 +705,7 @@ class AddHistoryEventActionTest(unittest.IsolatedAsyncioTestCase):
         )
 
         action = AddHistoryEventAction(items)
-        async for command in action.run(self.user, None, None):
-            pass
+        await action.run(self.user, None, None)
 
         self.user.history.add_event.assert_called_once()
         self.user.history.add_event.assert_called_once_with(expected)
@@ -783,10 +726,7 @@ class SmartGeoActionTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         text_preprocessing_result = Mock()
         params = Mock()
-        result = []
-        async for command in self.smart_geo_action.run(user, text_preprocessing_result, params):
-            result.append(command)
-        command = result[0]
+        command = (await self.smart_geo_action.run(user, text_preprocessing_result, params))[0]
         answer = SmartAppToMessage(command, incoming_message, None)
         expected = {
             "messageId": "1605196199186625000",

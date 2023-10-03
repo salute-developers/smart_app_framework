@@ -14,7 +14,6 @@ MAIN_INNER_FORM_DELIMETER = "__"
 
 
 class TreeScenario(FormFillingScenario):
-    """Warning: Not adapted for async generator interfaces of actions yet"""
     def __init__(self, items, id):
         super(TreeScenario, self).__init__(items, id)
         self._start_node_key = items["start_node_key"]
