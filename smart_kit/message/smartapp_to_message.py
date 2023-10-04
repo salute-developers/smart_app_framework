@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Iterable, Optional, List
+from typing import TYPE_CHECKING, Iterable, Optional, List
 import json
 from copy import copy
 
-from core.basic_models.actions.command import Command
 from core.utils.masking_message import masking
-from core.message.msg_validator import MessageValidator
-from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.utils import SmartAppToMessage_pb2
+
+if TYPE_CHECKING:
+    from core.basic_models.actions.command import Command
+    from core.message.msg_validator import MessageValidator
+    from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 
 class SmartAppToMessage:
