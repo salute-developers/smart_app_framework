@@ -46,10 +46,12 @@ def card_sub_func(x: Match[str]) -> str:
 
 
 def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]] = None,
-            depth_level: int = 2, mask_available_depth: int = -1) -> Union[Dict, List]:
+            depth_level: int = 2, mask_available_depth: int = -1,
+            white_list: Optional[List[str]] = None) -> Union[Dict, List]:
     """
     :param data: коллекция для маскирования приватных данных
     :param masking_fields: поля для обязательной маскировки независимо от уровня
+    :param white_list: поля, которые не должны маскироваться
     :param depth_level: глубина сохранения структуры маскируемого поля
     :param mask_available_depth: глубина глубокой маскировки полей без сохранения структуры (см ниже)
     """
@@ -60,12 +62,13 @@ def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]]
     if masking_fields is None:
         masking_fields = DEFAULT_MASKING_FIELDS
 
-    return _masking(data, masking_fields, depth_level, mask_available_depth, masking_on=False, card_masking_on=False)
+    return _masking(data, masking_fields, depth_level, mask_available_depth,
+                    masking_on=False, card_masking_on=False, white_list=white_list)
 
 
 def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
              depth_level: int = 2, mask_available_depth: int = -1, masking_on: bool = False,
-             card_masking_on: bool = False) -> Union[Dict, List]:
+             card_masking_on: bool = False, white_list: Optional[List[str]] = None) -> Union[Dict, List]:
 
     # тут в зависимости от листа или словаря создаем итератор
     if isinstance(data, dict):
@@ -80,15 +83,17 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
         if isinstance(data[key], (set, tuple)):
             data[key] = list(data[key])
             value_is_collection = True
-        if masking_on or key in masking_fields:
+        if white_list is not None and key in white_list:
+            masked_data[key] = data[key]
+        elif masking_on or key in masking_fields:
             if value_is_collection:
                 # если глубина не превышена, идем внутрь с включенным флагом и уменьшаем глубину
                 if masking_on and depth_level > 0:
                     masked_data[key] = _masking(data[key], masking_fields, depth_level - 1,
-                                                mask_available_depth, masking_on=True)
+                                                mask_available_depth, masking_on=True, white_list=white_list)
                 elif key in masking_fields and masking_fields[key] > 0:
                     masked_data[key] = _masking(data[key], masking_fields, masking_fields[key] - 1,
-                                                mask_available_depth, masking_on=True)
+                                                mask_available_depth, masking_on=True, white_list=white_list)
                 else:
                     counter = structure_mask(data[key], depth=1, available_depth=mask_available_depth)
                     masked_data[key] = f'*items-{counter.items}*collections-{counter.collections}*maxdepth-{counter.max_depth}*'  # noqa
@@ -98,8 +103,8 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
                 masked_data[key] = data[key]
         elif key in CARD_MASKING_FIELDS or card_masking_on:  # проверка на реквизиты карты
             if value_is_collection:
-                masked_data[key] = _masking(data[key], masking_fields, depth_level,
-                                            mask_available_depth, masking_on, card_masking_on=True)
+                masked_data[key] = _masking(data[key], masking_fields, depth_level, mask_available_depth,
+                                            masking_on, card_masking_on=True, white_list=white_list)
             elif isinstance(data[key], str):
                 masked_data[key] = card_regular.sub(card_sub_func, data[key])
             elif isinstance(data[key], int):
@@ -114,7 +119,7 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
         elif value_is_collection:
             # если маскировка не нужна уходим глубже без включенного флага
             masked_data[key] = _masking(data[key], masking_fields, depth_level, mask_available_depth,
-                                        masking_on=False, card_masking_on=card_masking_on)
+                                        masking_on=False, card_masking_on=card_masking_on, white_list=white_list)
         else:
             masked_data[key] = data[key]
     return masked_data
@@ -123,7 +128,7 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
 def structure_mask(data: Union[Dict, List], depth: int, available_depth: int = -1,
                    counter: Optional[Counter] = None):
     """
-    Функция максировки для сложной структуры
+    Функция маскирования для сложной структуры
     :param data: структура маскируемая без сохранения структуры
     :param depth: текущая глубина вложенности
     :param available_depth: максимальная глубина прохода, при -1 глубина не ограничена

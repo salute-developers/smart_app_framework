@@ -69,10 +69,18 @@ class MaskingTest(TestCase):
         masked_message = masking(input_msg, masking_fields)
         self.assertEqual(expected, masked_message)
 
-        # если маскируемое поле окажется внутри банковского поля - то оно маскируется с заданной вложеностью
+        # если маскируемое поле окажется внутри банковского поля - то оно маскируется с заданной вложенностью
         input_msg = {'message': {'spec_token': ['12', ['12', {'data': {'key': '12'}}]]}}
         expected = {'message': {'spec_token': ['***', ['***', '*items-1*collections-1*maxdepth-2*']]}}
         masked_message = masking(input_msg, masking_fields)
+        self.assertEqual(expected, masked_message)
+
+    def test_white_list(self):
+        masking_fields = ["spec_token"]
+        input_msg = {"spec_token": {"a": "a", "b": "b"}}
+        white_list = ["b"]
+        expected = {"spec_token": {"a": "***", "b": "b"}}
+        masked_message = masking(input_msg, masking_fields, white_list=white_list)
         self.assertEqual(expected, masked_message)
 
     def test_depth(self):
