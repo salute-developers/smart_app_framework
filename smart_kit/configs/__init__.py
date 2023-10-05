@@ -23,7 +23,7 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     app_config = os.getenv(environment_variable)
     app_config = importlib.import_module(app_config)
 
-    static_path = os.getenv("STATIC_PATH") or get_static_path(app_config.__file__)
+    static_path = get_static_path(app_config.__file__)
     set_default(app_config, "STATIC_PATH", static_path)
     set_default(app_config, "CONFIGS_PATH", os.path.join(static_path, "./configs"))
     set_default(app_config, "SECRET_PATH", os.path.join(static_path, "./configs"))
