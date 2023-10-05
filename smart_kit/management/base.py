@@ -9,6 +9,7 @@ def init_logger(app_config):
     logger_config.init()
     config = logger_config[LOGGING_CONFIG]
     logging.log_store_for_map = config.get('log_store_for_map', None)
+    print(config)
     logging.config.dictConfig(config)
 
 
