@@ -1,11 +1,8 @@
 import importlib
 import os
 from functools import lru_cache
-import core.logging.logger_constants as log_const
-from core.logging.logger_utils import log
 
 ENVIRONMENT_VARIABLE = "SMART_KIT_APP_CONFIG"
-_logged_static_path_warning = False
 
 
 def set_default(module, name, value):
