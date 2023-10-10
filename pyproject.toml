@@ -61,7 +61,7 @@ freezegun = "1.1.0"
 protobuf = "3.20.3"
 lxml = "4.9.2"
 twisted = "22.10.0"
-urllib3 = "1.26.16"
+urllib3 = "1.26.17"
 certifi = "2023.07.22"
 
 [tool.poetry.extras]
