@@ -25,9 +25,11 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
 
     static_path = os.getenv("STATIC_PATH") or get_static_path(app_config.__file__)
     set_default(app_config, "STATIC_PATH", static_path)
-    set_default(app_config, "CONFIGS_PATH", os.path.join(static_path, "./configs"))
-    set_default(app_config, "SECRET_PATH", os.path.join(static_path, "./configs"))
-    references_path = os.path.join(static_path, "./references")
+    configs_path = os.getenv("CONFIGS_PATH") or os.path.join(static_path, "./configs")
+    set_default(app_config, "CONFIGS_PATH", configs_path)
+    secret_path = os.getenv("SECRET_PATH") or os.path.join(static_path, "./configs")
+    set_default(app_config, "SECRET_PATH", secret_path)
+    references_path = os.getenv("REFERENCES_PATH") or os.path.join(static_path, "./references")
     set_default(app_config, "REFERENCES_PATH", references_path)
 
     # import and init monitoring first - because other classes use a singleton instance of Monitoring
@@ -78,8 +80,11 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     set_default(app_config, "FROM_MSG_VALIDATORS", ())
     set_default(app_config, "AUTO_LISTENING", True)
 
-    set_default(app_config, "STATIC_CLASSIFIERS_PATH", os.path.join(references_path, "./classifiers"))
-    set_default(app_config, "STATIC_CLASSIFIERS_DATA_PATH", os.path.join(references_path, "./classifiers_data"))
+    static_classifiers_path = os.getenv("STATIC_CLASSIFIERS_PATH") or os.path.join(references_path, "./classifiers")
+    set_default(app_config, "STATIC_CLASSIFIERS_PATH", static_classifiers_path)
+    static_classifiers_data_path = (os.getenv("STATIC_CLASSIFIERS_DATA_PATH")
+                                    or os.path.join(references_path, "./classifiers_data"))  # noqa: W503
+    set_default(app_config, "STATIC_CLASSIFIERS_DATA_PATH", static_classifiers_data_path)
 
     # Переменной можно присвоить значение среды, где запускается апп,
     # например: "ift", "uat", "pt", "prod" (это ИФТ, ПСИ, НТ, ПРОМ)
