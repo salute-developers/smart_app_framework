@@ -82,8 +82,8 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
 
     static_classifiers_path = os.getenv("STATIC_CLASSIFIERS_PATH") or os.path.join(references_path, "./classifiers")
     set_default(app_config, "STATIC_CLASSIFIERS_PATH", static_classifiers_path)
-    static_classifiers_data_path = os.getenv("STATIC_CLASSIFIERS_DATA_PATH") \
-                                   or os.path.join(references_path, "./classifiers_data")
+    static_classifiers_data_path = (os.getenv("STATIC_CLASSIFIERS_DATA_PATH")
+                                    or os.path.join(references_path, "./classifiers_data"))  # noqa: W503
     set_default(app_config, "STATIC_CLASSIFIERS_DATA_PATH", static_classifiers_data_path)
 
     # Переменной можно присвоить значение среды, где запускается апп,
