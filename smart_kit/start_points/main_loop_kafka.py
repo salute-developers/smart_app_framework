@@ -174,7 +174,7 @@ class MainLoop(BaseMainLoop):
             task = asyncio.create_task(self.queue_worker(f'worker-{i}', queue))
             self.worker_tasks.append(task)
 
-        await asyncio.sleep(30)
+        time.sleep(30)
         #await self.poll_kafka(kafka_key, self.queues)  # blocks while self.is_works
 
         log("waiting for process unfinished tasks in queues")
