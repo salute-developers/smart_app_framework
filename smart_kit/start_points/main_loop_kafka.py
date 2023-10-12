@@ -74,8 +74,8 @@ class MainLoop(BaseMainLoop):
         self.warning_delay = self.waiting_message_timeout.get('warning', 200)
         self.skip_delay = self.waiting_message_timeout.get('skip', 8000)
         self.worker_tasks = []
-        self.max_concurrent_messages = self.template_settings.get("max_concurrent_messages", 10)
-        self.queues = [asyncio.Queue() for _ in range(self.max_concurrent_messages)]
+        self.max_concurrent_messages = self.template_settings.get("max_concurrent_messages", 1)
+        self.queues = []#[asyncio.Queue() for _ in range(self.max_concurrent_messages)]
         self.total_messages = 0
 
         # override default value
@@ -103,8 +103,8 @@ class MainLoop(BaseMainLoop):
 
             self.app_name = self.settings.app_name
             self.consumers = consumers
-            for key in self.consumers:
-                self.consumers[key].subscribe()
+            #for key in self.consumers:
+                #self.consumers[key].subscribe()
             self.publishers = publishers
             self.behaviors_timeouts_value_cls = namedtuple('behaviors_timeouts_value',
                                                            'db_uid, callback_id, mq_message, kafka_key')
@@ -174,7 +174,8 @@ class MainLoop(BaseMainLoop):
             task = asyncio.create_task(self.queue_worker(f'worker-{i}', queue))
             self.worker_tasks.append(task)
 
-        await self.poll_kafka(kafka_key, self.queues)  # blocks while self.is_works
+        await asyncio.sleep(30)
+        #await self.poll_kafka(kafka_key, self.queues)  # blocks while self.is_works
 
         log("waiting for process unfinished tasks in queues")
         await asyncio.gather(*(queue.join() for queue in self.queues))
