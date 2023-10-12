@@ -94,8 +94,8 @@ class MainLoop(BaseMainLoop):
             for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
                     consumers.update({key: KafkaConsumer(config)})
-                if config.get("publisher"):
-                    publishers.update({key: AsyncKafkaPublisher(config)})
+                #if config.get("publisher"):
+                #    publishers.update({key: AsyncKafkaPublisher(config)})
             log(
                 "%(class_name)s FINISHED CONSUMERS/PUBLISHERS CREATE",
                 params={"class_name": self.__class__.__name__}, level="WARNING"
