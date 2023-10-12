@@ -58,7 +58,7 @@ class MainLoop(BaseMainLoop):
         super().__init__(*args, **kwargs)
         # We have many async loops for messages processing in main thread
         # And 1 thread for independent consecutive Kafka reading
-        self.kafka_executor_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        #self.kafka_executor_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         self._timers = dict()  # stores aio timers for callbacks
         self.template_settings = self.settings["template_settings"]
         self.profiling_settings = self.template_settings.get("profiling", {})
