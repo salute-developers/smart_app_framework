@@ -1,5 +1,4 @@
 # coding: utf-8
-from copy import deepcopy
 from functools import lru_cache
 from typing import Dict, Any, Tuple, List
 
@@ -178,14 +177,14 @@ class FormFillingScenario(BaseScenario):
 
     @staticmethod
     @lru_cache
-    def _get_common_masking_fields(user) -> list:
+    def _get_common_masking_fields(user) -> dict:
         """Get global masking fields from user settings from file with name template_settings."""
-        return user.settings['template_settings'].get('masking_fields', []) if user is not None else []
+        return user.settings["template_settings"].get("masking_fields", {}) if user is not None else {}
 
     def _get_masked_params(self, data: dict, user) -> dict:
         """Masking data by global masking fields."""
         masking_fields = self._get_common_masking_fields(user)
-        return masking(data=deepcopy(data), masking_fields=masking_fields)
+        return masking(data=data, masking_fields=masking_fields)
 
     @monitoring.got_histogram("scenario_time")
     async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
