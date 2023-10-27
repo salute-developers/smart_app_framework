@@ -53,7 +53,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         for p in partitions:
             p.offset = consumer.last_stable_offset(p)
         self.on_assign_log(consumer, partitions)
-        consumer.incremental_assign(partitions)  # TODO support incremental_assign by our own: consume previous assignments and add new one
+        consumer.assign(consumer.assignment().update(partitions))
 
     def on_assign_log(self, consumer: AIOKafkaConsumer, partitions: List[TopicPartition]) -> None:
         log_level = "WARNING"
@@ -80,7 +80,6 @@ class KafkaConsumer(BaseKafkaConsumer):
             ))
         except KafkaError as e:
             self._error_callback(e)
-
 
     def get_on_assign_callback(self) -> Callable[[AIOKafkaConsumer, List[TopicPartition]], None]:
         if "cooperative" in self._config["conf"].get("partition_assignment_strategy", ""):

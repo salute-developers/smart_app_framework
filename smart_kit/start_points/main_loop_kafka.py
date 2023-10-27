@@ -271,7 +271,7 @@ class MainLoop(BaseMainLoop):
                 # Max delay between polls configured in consumer.poll_timeout param
                 mq_message = await consumer.poll()
             log_params["kafka_polling"] = poll_timer.msecs
-            if poll_timer.msecs > self.MAX_LOG_TIME:
+            if poll_timer.msecs > self.MAX_LOG_TIME:  # TODO align with new async interface
                 log("Long poll time: %(kafka_polling)s msecs\n", params=log_params, level="WARNING")
             if mq_message:
                 kwargs = {"kafka_key": kafka_key,
