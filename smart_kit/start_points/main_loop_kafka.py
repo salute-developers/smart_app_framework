@@ -40,6 +40,10 @@ if TYPE_CHECKING:
     from aiokafka import ConsumerRecord
 
 
+class LoopStop(RuntimeError):
+    pass
+
+
 def _enrich_config_from_secret(kafka_config, secret_config):
     for key in kafka_config:
         if secret_config.get(key):
@@ -125,7 +129,10 @@ class MainLoop(BaseMainLoop):
         log("%(class_name)s.run started", params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
                                                   "class_name": self.__class__.__name__})
         monitoring.pod_event(self.app_name, POD_UP)
-        self.loop.run_until_complete(self.general_coro())
+        try:
+            self.loop.run_until_complete(self.general_coro())
+        except LoopStop:
+            pass
 
         log("%(class_name)s stopping kafka", level="WARNING", params={"class_name": self.__class__.__name__})
 
@@ -727,4 +734,4 @@ class MainLoop(BaseMainLoop):
         try:
             self.loop.close()
         except RuntimeError:
-            pass
+            raise LoopStop
