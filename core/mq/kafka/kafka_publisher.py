@@ -16,7 +16,7 @@ from core.mq.kafka.base_kafka_publisher import BaseKafkaPublisher
 
 if TYPE_CHECKING:
     from asyncio import AbstractEventLoop
-    from typing import Union, Optional, Tuple, Any, Dict, Sequence
+    from typing import Optional, Tuple, Any, Dict, Sequence
 
 
 class KafkaPublisher(BaseKafkaPublisher):
@@ -35,7 +35,7 @@ class KafkaPublisher(BaseKafkaPublisher):
         loop.run_until_complete(self._producer.start())
 
     async def send(self, value: bytes, key: Any = None, topic_key: Optional[str] = None,
-                   headers: Optional[Sequence[tuple[str, bytes]]] = None) -> None:
+                   headers: Optional[Sequence[Tuple[str, bytes]]] = None) -> None:
         topic = self._config["topic"]
         if topic_key is not None:
             topic = topic[topic_key]
