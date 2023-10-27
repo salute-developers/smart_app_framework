@@ -148,7 +148,9 @@ class KafkaConsumer(BaseKafkaConsumer):
             "session.timeout.ms": "session_timeout_ms",
             "auto.commit.interval.ms": "auto_commit_interval_ms",
             "enable.auto.offset.store": None,
-            "auto.offset.reset": "auto_offset_reset"
+            "auto.offset.reset": "auto_offset_reset",
+            "debug": None,
+            "security.protocol": "security_protocol"
         }  # TODO map other old configs as well
         for old, new in param_old_to_new.items():
             if old in conf:

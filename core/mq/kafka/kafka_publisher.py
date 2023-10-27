@@ -93,6 +93,7 @@ class KafkaPublisher(BaseKafkaPublisher):
         param_old_to_new = {
             "bootstrap.servers": "bootstrap_servers",
             "topic.metadata.refresh.interval.ms": "metadata_max_age_ms",
+            "security.protocol": "security_protocol",
         }  # TODO map other old configs as well
         for old, new in param_old_to_new.items():
             if old in conf:
