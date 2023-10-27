@@ -1,5 +1,5 @@
 # coding=utf-8
-from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple
+from typing import Iterable, Dict, Optional, Any, List, Union, Sequence
 import json
 import uuid
 
@@ -57,7 +57,7 @@ class SmartAppFromMessage:
     uuid: dict
 
     def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
-                 kafka_key: Optional[str] = None, headers: Optional[Iterable[Tuple[Any, Any]]] = None,
+                 kafka_key: Optional[str] = None, headers: Optional[Sequence[tuple[str, bytes]]] = None,
                  masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
                  validators: Iterable[MessageValidator] = ()):
         self.logging_uuid = str(uuid.uuid4())
