@@ -724,4 +724,7 @@ class MainLoop(BaseMainLoop):
     def stop(self, signum, frame):
         log("Stop signal handler!")
         self.is_work = False
-        self.loop.close()
+        try:
+            self.loop.close()
+        except RuntimeError:
+            pass
