@@ -75,8 +75,8 @@ class KafkaConsumer(BaseKafkaConsumer):
         try:
             self._consumer.subscribe(topics, listener=CoreConsumerRebalanceListener(
                 consumer=self._consumer,
-                on_assign_callback=(self.get_on_assign_callback() if self.assign_offset_end
-                                    else self.on_assign_log)
+                # on_assign_callback=(self.get_on_assign_callback() if self.assign_offset_end
+                #                     else self.on_assign_log)
             ))
         except KafkaError as e:
             self._error_callback(e)

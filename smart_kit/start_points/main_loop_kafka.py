@@ -93,6 +93,7 @@ class MainLoop(BaseMainLoop):
             for key, config in kafka_config_copy.items():
                 if config.get("consumer"):
                     self.consumers.update({key: KafkaConsumer(config, self.loop)})
+                    self.consumers[key].subscribe()
                 if config.get("publisher"):
                     self.publishers.update({key: KafkaPublisher(config, self.loop)})
             log(
@@ -101,8 +102,6 @@ class MainLoop(BaseMainLoop):
             )
 
             self.app_name = self.settings.app_name
-            for key in self.consumers:
-                self.consumers[key].subscribe()
             self.behaviors_timeouts_value_cls = namedtuple('behaviors_timeouts_value',
                                                            'db_uid, callback_id, mq_message, kafka_key')
             self.behaviors_timeouts = HeapqKV(value_to_key_func=lambda val: val.callback_id)
