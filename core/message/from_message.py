@@ -167,6 +167,10 @@ class SmartAppFromMessage:
     def channel(self) -> Optional[str]:
         return self.uuid.get(field.USER_CHANNEL)
 
+    @channel.setter
+    def channel(self, value):
+        self.uuid[field.USER_CHANNEL] = value
+
     @property
     def uid(self) -> Optional[str]:
         return self.uuid.get(field.USER_ID)
