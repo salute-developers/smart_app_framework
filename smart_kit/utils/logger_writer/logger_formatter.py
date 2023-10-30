@@ -50,7 +50,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         super(SmartKitJsonFormatter, self).add_fields(log_record, record, message_dict)
         dt = datetime.fromtimestamp(record.created)
         st = dt.strftime("%Y-%m-%dT%H:%M:%S")
-        log_record["timestamp"] = "%s.%06d" % (st, record.msecs * 1000)
+        log_record["timestamp"] = "%s.%06d" % (st, (record.created - int(record.created)) * 1e6)
         log_record["version"] = self.VERSION
         log_record["nlpf_version"] = self.NLPF_VERSION
         log_record["team"] = self.DEV_TEAM
