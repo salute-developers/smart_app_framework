@@ -15,6 +15,7 @@ from core.monitoring.twisted_server import TwistedServer
 from core.model.base_user import BaseUser
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.message.validators.base_validator import BaseMessageValidator
+from smart_kit.message.validators.base_validator_with_resources import BaseMessageValidatorWithResources
 from smart_kit.start_points.postprocess import PostprocessMainLoop
 from smart_kit.models.smartapp_model import SmartAppModel
 
@@ -49,6 +50,11 @@ class BaseMainLoop:
             self.is_work = True
             self.to_msg_validators: Iterable[BaseMessageValidator] = to_msg_validators
             self.from_msg_validators: Iterable[BaseMessageValidator] = from_msg_validators
+
+            for validators in (self.from_msg_validators, self.to_msg_validators):
+                for v in validators:
+                    if isinstance(v, BaseMessageValidatorWithResources):
+                        v.resources = self.model.resources
 
             template_settings = self.settings["template_settings"]
 

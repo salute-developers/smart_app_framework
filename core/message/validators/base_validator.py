@@ -30,5 +30,6 @@ class BaseMessageValidator(ABC):
             else:
                 raise
 
+    @abstractmethod
     def _validate(self, message: SmartAppFromMessage):
         raise NotImplementedError
