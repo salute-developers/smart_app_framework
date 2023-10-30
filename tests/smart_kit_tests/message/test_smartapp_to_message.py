@@ -1,7 +1,7 @@
 # coding: utf-8
 import unittest
 
-from core.message.msg_validator import MessageValidator
+from core.message.validators.base_validator import BaseMessageValidator
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock
 
@@ -54,7 +54,7 @@ class TestSmartAppToMessage(unittest.TestCase):
         self.assertTrue(obj.payload == {"z": 1, "q": 0})
 
 
-class PieMessageValidator(MessageValidator):
+class PieMessageValidator(BaseMessageValidator):
     def validate(self, message_name: str, payload: dict):
         return 3.14 < payload.get("pi", 0) < 3.15
 

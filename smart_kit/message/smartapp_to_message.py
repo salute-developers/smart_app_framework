@@ -10,7 +10,7 @@ from smart_kit.utils import SmartAppToMessage_pb2
 
 if TYPE_CHECKING:
     from core.basic_models.actions.command import Command
-    from core.message.msg_validator import MessageValidator
+    from core.message.validators.base_validator import BaseMessageValidator
     from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 
@@ -19,7 +19,7 @@ class SmartAppToMessage:
     PAYLOAD = "payload"
 
     def __init__(self, command: Command, message, request: SmartKitKafkaRequest,
-                 forward_fields=None, masking_fields=None, validators: Iterable[MessageValidator] = (),
+                 forward_fields=None, masking_fields=None, validators: Iterable[BaseMessageValidator] = (),
                  masking_white_list: Optional[List[str]] = None, **kwargs):
         root_nodes = command.payload.pop(self.ROOT_NODES_KEY, None)
         self.command = command

@@ -2,11 +2,11 @@ import json
 from unittest import TestCase
 
 from core.message.from_message import SmartAppFromMessage
-from core.message.msg_validator import MessageValidator
+from core.message.validators.base_validator import BaseMessageValidator
 from core.utils.utils import current_time_ms
 
 
-class PieMessageValidator(MessageValidator):
+class PieMessageValidator(BaseMessageValidator):
     def validate(self, message_name: str, payload: dict):
         return 3.14 < payload.get("pi", 0) < 3.15
 
