@@ -353,8 +353,8 @@ class MainLoop(BaseMainLoop):
     def _get_timeout_from_message(self, orig_message_raw: Dict, callback_id, headers):
         timeout_from_message = SmartAppFromMessage(orig_message_raw, headers=headers,
                                                    masking_fields=self.masking_fields,
-                                                   validators=self.from_msg_validators)
-        timeout_from_message.callback_id = callback_id
+                                                   validators=self.from_msg_validators,
+                                                   callback_id=callback_id)
         return timeout_from_message
 
     def _get_topic_key(self, mq_message: KafkaMessage, kafka_key):

@@ -1,4 +1,5 @@
 # coding=utf-8
+from functools import cached_property
 from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple
 import json
 import uuid
@@ -59,7 +60,7 @@ class SmartAppFromMessage:
     def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
                  kafka_key: Optional[str] = None, headers: Optional[Iterable[Tuple[Any, Any]]] = None,
                  masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
-                 validators: Iterable[MessageValidator] = ()):
+                 validators: Iterable[MessageValidator] = (), callback_id: Optional[str] = None):
         self.logging_uuid = str(uuid.uuid4())
         self._value = value
         self.topic_key = topic_key
@@ -69,7 +70,7 @@ class SmartAppFromMessage:
         if self._headers_required and headers is None:
             raise LookupError(f"{self.__class__.__name__} no incoming headers.")
         self.headers = Headers(headers or {})
-        self._callback_id = None  # FIXME: by some reason it possibly to change callback_id
+        self._callback_id = callback_id  # FIXME: by some reason it possibly to change callback_id
         self.masking_fields = masking_fields
         self.validators = validators
 
@@ -219,7 +220,7 @@ class SmartAppFromMessage:
             annotations[annotation] = dict(zip(classes, probas))
         return annotations
 
-    @property
+    @cached_property
     def callback_id(self) -> Optional[str]:
         if self._callback_id is not None:
             return self._callback_id
@@ -233,10 +234,6 @@ class SmartAppFromMessage:
             log(f"{self._callback_id_header_name} missed in headers for message_id %(message_id)s",
                 params={log_const.KEY_NAME: "callback_id_missing", "message_id": self.incremental_id}, level="WARNING")
             return None
-
-    @callback_id.setter
-    def callback_id(self, value: str):
-        self._callback_id = value
 
     @property
     def has_callback_id(self):
