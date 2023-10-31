@@ -18,3 +18,6 @@ class CoreConsumerRebalanceListener(ConsumerRebalanceListener):
 
     def on_partitions_assigned(self, assigned: List[TopicPartition]):
         self._on_assign_callback(self._consumer, assigned)
+
+    def on_partitions_revoked(self, revoked):
+        pass

@@ -56,7 +56,7 @@ class SmartAppFromMessage:
     payload: dict
     uuid: dict
 
-    def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
+    def __init__(self, value: Dict[str, Any], topic_key: Optional[str] = None, creation_time: Optional[int] = None,
                  kafka_key: Optional[str] = None, headers: Optional[Sequence[Tuple[str, bytes]]] = None,
                  masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
                  validators: Iterable[MessageValidator] = ()):

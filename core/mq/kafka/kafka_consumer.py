@@ -64,7 +64,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         }
         log("KafkaConsumer.subscribe<on_assign>: assign %(partitions)s %(log_level)s", params=params, level=log_level)
 
-    def subscribe(self, topics: Iterable[str] = None) -> None:
+    def subscribe(self, topics: Optional[Iterable[str]] = None) -> None:
         topics = list(set(topics or list(self._config["topics"].values())))
 
         params = {
@@ -92,7 +92,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         self._consumer.unsubscribe()
 
     async def poll(self) -> Optional[ConsumerRecord]:
-        msg = await self._consumer.getone()
+        msg = await self._consumer.getone()  # NoOffsetForPartitionError: if no offset is stored for a given partition and no reset policy is available
         return self._process_message(msg)
 
     async def consume(self, num_messages: int = 1) -> AsyncGenerator[Optional[ConsumerRecord], None]:
