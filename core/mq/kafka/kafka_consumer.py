@@ -92,7 +92,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         self._consumer.unsubscribe()
 
     async def poll(self) -> Optional[ConsumerRecord]:
-        msg = await self._consumer.getone()  # NoOffsetForPartitionError: if no offset is stored for a given partition and no reset policy is available
+        msg = await self._consumer.getone()
         return self._process_message(msg)
 
     async def consume(self, num_messages: int = 1) -> AsyncGenerator[Optional[ConsumerRecord], None]:
