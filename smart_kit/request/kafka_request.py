@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from core.configs.global_constants import CALLBACK_ID_HEADER, KAFKA_REPLY_TOPIC
 from core.request.kafka_request import KafkaRequest
 from core.configs.config_constants import REPLY_TOPIC_KEY, REPLY_TOPIC
 from smart_kit.configs.settings import Settings
+
+if TYPE_CHECKING:
+    from aiokafka import ConsumerRecord
 
 
 class SmartKitKafkaRequest(KafkaRequest):
@@ -22,7 +29,7 @@ class SmartKitKafkaRequest(KafkaRequest):
     def _callback_id_header_name(self):
         return CALLBACK_ID_HEADER
 
-    def _get_new_headers(self, source_mq_message):
+    def _get_new_headers(self, source_mq_message: ConsumerRecord):
         headers_dict = dict(super()._get_new_headers(source_mq_message))
         if self._callback_id:
             headers_dict[self._callback_id_header_name] = str(self._callback_id).encode()

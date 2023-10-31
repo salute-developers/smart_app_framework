@@ -1,56 +1,64 @@
 # coding: utf-8
+from __future__ import annotations
 
 import logging
 import os
 import time
 import uuid
+from typing import TYPE_CHECKING
 
-from confluent_kafka import Consumer, TIMESTAMP_NOT_AVAILABLE
-from confluent_kafka.cimpl import KafkaError, KafkaException, OFFSET_END, Message as KafkaMessage
+from aiokafka import AIOKafkaConsumer, TopicPartition
+from aiokafka.helpers import create_ssl_context
+from kafka.errors import KafkaError
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.monitoring.monitoring import monitoring
 from core.mq.kafka.base_kafka_consumer import BaseKafkaConsumer
+from core.mq.kafka.consumer_rebalance_listener import CoreConsumerRebalanceListener
+
+if TYPE_CHECKING:
+    from aiokafka import ConsumerRecord
+    from typing import Optional, Callable, Iterable, AsyncGenerator, Any, Dict, List
+    from asyncio import AbstractEventLoop
 
 
 class KafkaConsumer(BaseKafkaConsumer):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any], loop: AbstractEventLoop):
         self._config = config["consumer"]
         self.assign_offset_end = self._config.get("assign_offset_end", False)
         conf = self._config["conf"]
-        conf.setdefault("group.id", str(uuid.uuid1()))
-        self.autocommit_enabled = conf.get("enable.auto.commit", True)
+        self._update_old_config(conf)
+        self._setup_ssl(conf, self._config.get("ssl"))
+        conf.setdefault("group_id", str(uuid.uuid1()))
+        self.autocommit_enabled = conf.get("enable_auto_commit", True)
         internal_log_path = self._config.get("internal_log_path")
-        conf["error_cb"] = self._error_callback
         if internal_log_path:
-            debug_logger = logging.getLogger("debug_consumer")
+            debug_logger = logging.getLogger("debug_consumer")  # TODO add debug logger to _consumer events
             timestamp = time.strftime("_%d%m%Y_")
             debug_logger.addHandler(logging.FileHandler(
-                "{}/kafka_consumer_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())))
-            conf["logger"] = debug_logger
-        self._consumer = Consumer(**conf)
+                "{}/kafka_consumer_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())
+            ))
+        self._consumer = AIOKafkaConsumer(**conf, loop=loop)
+        loop.run_until_complete(self._consumer.start())
 
-    @staticmethod
-    def on_assign_offset_end(consumer, partitions):
+    def on_assign_offset_end(self, consumer: AIOKafkaConsumer, partitions: List[TopicPartition]) -> None:
         for p in partitions:
-            p.offset = OFFSET_END
-        KafkaConsumer.on_assign_log(consumer, partitions)
-        consumer.assign(partitions)
+            p.offset = consumer.last_stable_offset(p)
+        self.on_assign_log(consumer, partitions)
+        try:
+            consumer.assign(partitions)
+        except KafkaError as e:
+            self._error_callback(e)
 
-    @staticmethod
-    def on_coop_assign_offset_end(consumer, partitions):
+    def on_coop_assign_offset_end(self, consumer: AIOKafkaConsumer, partitions: List[TopicPartition]) -> None:
         for p in partitions:
-            p.offset = OFFSET_END
-        KafkaConsumer.on_assign_log(consumer, partitions)
-        consumer.incremental_assign(partitions)
+            p.offset = consumer.last_stable_offset(p)
+        self.on_assign_log(consumer, partitions)
+        consumer.assign(consumer.assignment().update(partitions))
 
-    @staticmethod
-    def on_assign_log(consumer, partitions):
+    def on_assign_log(self, consumer: AIOKafkaConsumer, partitions: List[TopicPartition]) -> None:
         log_level = "WARNING"
-        for p in partitions:
-            if p.error:
-                log_level = "ERROR"
         params = {
             "partitions": str(list([str(partition) for partition in partitions or []])),
             log_const.KEY_NAME: log_const.KAFKA_ON_ASSIGN_VALUE,
@@ -58,7 +66,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         }
         log("KafkaConsumer.subscribe<on_assign>: assign %(partitions)s %(log_level)s", params=params, level=log_level)
 
-    def subscribe(self, topics=None):
+    def subscribe(self, topics: Optional[Iterable[str]] = None) -> None:
         topics = list(set(topics or list(self._config["topics"].values())))
 
         params = {
@@ -66,43 +74,51 @@ class KafkaConsumer(BaseKafkaConsumer):
         }
         log("Topics to subscribe: %(topics)s", params=params)
 
-        self._consumer.subscribe(
-            topics,
-            on_assign=self.get_on_assign_callback() if self.assign_offset_end else KafkaConsumer.on_assign_log
-        )
+        try:
+            self._consumer.subscribe(topics, listener=CoreConsumerRebalanceListener(
+                consumer=self._consumer,
+                on_assign_callback=(self.get_on_assign_callback() if self.assign_offset_end
+                                    else self.on_assign_log)
+            ))
+        except KafkaError as e:
+            self._error_callback(e)
 
-    def get_on_assign_callback(self):
-        if "cooperative" in self._config["conf"].get("partition.assignment.strategy", ""):
-            callback = KafkaConsumer.on_coop_assign_offset_end
+    def get_on_assign_callback(self) -> Callable[[AIOKafkaConsumer, List[TopicPartition]], None]:
+        if "cooperative" in self._config["conf"].get("partition_assignment_strategy", ""):
+            callback = self.on_coop_assign_offset_end
         else:
-            callback = KafkaConsumer.on_assign_offset_end
+            callback = self.on_assign_offset_end
         return callback
 
-    def unsubscribe(self):
+    def unsubscribe(self) -> None:
         self._consumer.unsubscribe()
 
-    def poll(self):
-        msg = self._consumer.poll(self._config["poll_timeout"])
+    async def poll(self) -> Optional[ConsumerRecord]:
+        msg = await self._consumer.getone()
+        return self._process_message(msg)
+
+    async def consume(self, num_messages: int = 1) -> AsyncGenerator[Optional[ConsumerRecord], None]:
+        timeout_ms = self._config["poll_timeout"] * 1000
+        messages = await self._consumer.getmany(max_records=num_messages, timeout_ms=timeout_ms)
+        for partition_messages in messages.values():
+            for msg in partition_messages:
+                processed = self._process_message(msg)
+                yield processed
+
+    async def commit_offset(self, msg: ConsumerRecord) -> None:
         if msg is not None:
-            return self._process_message(msg)
+            if not self.autocommit_enabled:
+                tp = TopicPartition(msg.topic, msg.partition)
+                try:
+                    await self._consumer.commit({tp: msg.offset + 1})
+                except KafkaError as e:
+                    self._error_callback(e)
 
-    def consume(self, num_messages: int = 1):
-        messages = self._consumer.consume(num_messages=num_messages, timeout=self._config["poll_timeout"])
-        for msg in messages:
-            yield self._process_message(msg)
+    def get_msg_create_time(self, mq_message: ConsumerRecord) -> int:
+        timestamp = mq_message.timestamp
+        return timestamp
 
-    def commit_offset(self, msg):
-        if msg is not None:
-            if self.autocommit_enabled:
-                self._consumer.store_offsets(msg)
-            else:
-                self._consumer.commit(msg, **{"async": True})
-
-    def get_msg_create_time(self, mq_message):
-        timestamp_type, timestamp = mq_message.timestamp()
-        return timestamp if timestamp_type is not TIMESTAMP_NOT_AVAILABLE else None
-
-    def _error_callback(self, err):
+    def _error_callback(self, err: Any) -> None:
         params = {
             "error": str(err),
             log_const.KEY_NAME: log_const.EXCEPTION_VALUE
@@ -111,30 +127,56 @@ class KafkaConsumer(BaseKafkaConsumer):
         monitoring.got_counter("kafka_consumer_exception")
 
     # noinspection PyMethodMayBeStatic
-    def _process_message(self, msg: KafkaMessage):
-        err = msg.error()
-        if err:
-            if err.code() == KafkaError._PARTITION_EOF:
-                return None
-            else:
-                monitoring.got_counter("kafka_consumer_exception")
-                params = {
-                    "code": err.code(),
-                    "pid": os.getpid(),
-                    "topic": msg.topic(),
-                    "partition": msg.partition(),
-                    log_const.KEY_NAME: log_const.EXCEPTION_VALUE
-                }
-                log(
-                    "KafkaConsumer Error %(code)s at pid %(pid)s: topic=%(topic)s partition=[%(partition)s]\n",
-                    params=params, level="WARNING")
-                raise KafkaException(err)
-
-        if msg.value():
-            if msg.headers() is None:
-                msg.set_headers([])
+    def _process_message(self, msg: ConsumerRecord) -> Optional[ConsumerRecord]:
+        if msg.value:
+            if msg.headers is None:
+                msg.headers = list()
             return msg
 
-    def close(self):
-        self._consumer.close()
+    async def close(self) -> None:
+        await self._consumer.stop()
         log(f"consumer to topics {self._config['topics']} closed.")
+
+    def _setup_ssl(self, conf: Dict[str, Any], ssl_config: Optional[Dict[str, Any]] = None) -> None:
+        if ssl_config:
+            context = create_ssl_context(**ssl_config)
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
+
+    def _update_old_config(self, conf: Dict[str, Any]) -> None:
+        if "default.topic.config" in conf:
+            conf.update(conf["default.topic.config"])
+            del conf["default.topic.config"]
+        if "ssl.ca.location" in conf:
+            context = create_ssl_context(
+                cafile=conf["ssl.ca.location"],
+                certfile=conf["ssl.certificate.location"],
+                keyfile=conf["ssl.key.location"]
+            )
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
+        param_old_to_new = {
+            "group.id": "group_id",
+            "enable.auto.commit": "enable_auto_commit",
+            "partition.assignment.strategy": "partition_assignment_strategy",
+            "bootstrap.servers": "bootstrap_servers",
+            "topic.metadata.refresh.interval.ms": "metadata_max_age_ms",
+            "session.timeout.ms": "session_timeout_ms",
+            "auto.commit.interval.ms": "auto_commit_interval_ms",
+            "enable.auto.offset.store": None,
+            "auto.offset.reset": "auto_offset_reset",
+            "debug": None,
+            "security.protocol": "security_protocol",
+            "broker.version.fallback": None,
+            "api.version.fallback.ms": None,
+        }
+        for old, new in param_old_to_new.items():
+            if old in conf:
+                value = conf[old]
+                if value in ("smallest", "beginning"):
+                    value = "earliest"
+                elif value in ("largest", "end"):
+                    value = "latest"
+                if new:
+                    conf[new] = value
+                del conf[old]
