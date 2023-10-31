@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaTimeoutError
+from aiokafka.helpers import create_ssl_context
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
@@ -24,6 +25,7 @@ class KafkaPublisher(BaseKafkaPublisher):
         self._config = config["publisher"]
         conf = self._config["conf"]
         self._update_old_config(conf)
+        self._setup_ssl(conf, self._config.get("ssl"))
         internal_log_path = self._config.get("internal_log_path")
         if internal_log_path:
             debug_logger = logging.getLogger("debug_publisher")  # TODO add debug logger to _publisher events
@@ -89,12 +91,26 @@ class KafkaPublisher(BaseKafkaPublisher):
     async def close(self) -> None:
         await self._producer.stop()
 
+    def _setup_ssl(self, conf: Dict[str, Any], ssl_config: Optional[Dict[str, Any]] = None) -> None:
+        if ssl_config:
+            context = create_ssl_context(**ssl_config)
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
+
     def _update_old_config(self, conf: Dict[str, Any]) -> None:
+        if "ssl.ca.location" in conf:
+            context = create_ssl_context(
+                cafile=conf["ssl.ca.location"],
+                certfile=conf["ssl.certificate.location"],
+                keyfile=conf["ssl.key.location"]
+            )
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
         param_old_to_new = {
             "bootstrap.servers": "bootstrap_servers",
             "topic.metadata.refresh.interval.ms": "metadata_max_age_ms",
-            "security.protocol": "security_protocol",
-        }  # TODO map other old configs as well
+            "security.protocol": "security_protocol"
+        }
         for old, new in param_old_to_new.items():
             if old in conf:
                 if new:

@@ -8,6 +8,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from aiokafka import AIOKafkaConsumer, TopicPartition
+from aiokafka.helpers import create_ssl_context
 from kafka.errors import KafkaError
 
 import core.logging.logger_constants as log_const
@@ -28,6 +29,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         self.assign_offset_end = self._config.get("assign_offset_end", False)
         conf = self._config["conf"]
         self._update_old_config(conf)
+        self._setup_ssl(conf, self._config.get("ssl"))
         conf.setdefault("group_id", str(uuid.uuid1()))
         self.autocommit_enabled = conf.get("enable_auto_commit", True)
         internal_log_path = self._config.get("internal_log_path")
@@ -135,10 +137,24 @@ class KafkaConsumer(BaseKafkaConsumer):
         await self._consumer.stop()
         log(f"consumer to topics {self._config['topics']} closed.")
 
+    def _setup_ssl(self, conf: Dict[str, Any], ssl_config: Optional[Dict[str, Any]] = None) -> None:
+        if ssl_config:
+            context = create_ssl_context(**ssl_config)
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
+
     def _update_old_config(self, conf: Dict[str, Any]) -> None:
         if "default.topic.config" in conf:
             conf.update(conf["default.topic.config"])
             del conf["default.topic.config"]
+        if "ssl.ca.location" in conf:
+            context = create_ssl_context(
+                cafile=conf["ssl.ca.location"],
+                certfile=conf["ssl.certificate.location"],
+                keyfile=conf["ssl.key.location"]
+            )
+            conf["security_protocol"] = "SSL"
+            conf["ssl_context"] = context
         param_old_to_new = {
             "group.id": "group_id",
             "enable.auto.commit": "enable_auto_commit",
@@ -150,10 +166,17 @@ class KafkaConsumer(BaseKafkaConsumer):
             "enable.auto.offset.store": None,
             "auto.offset.reset": "auto_offset_reset",
             "debug": None,
-            "security.protocol": "security_protocol"
-        }  # TODO map other old configs as well
+            "security.protocol": "security_protocol",
+            "broker.version.fallback": None,
+            "api.version.fallback.ms": None,
+        }
         for old, new in param_old_to_new.items():
             if old in conf:
+                value = conf[old]
+                if value in ("smallest", "beginning"):
+                    value = "earliest"
+                elif value in ("largest", "end"):
+                    value = "latest"
                 if new:
-                    conf[new] = conf[old]
+                    conf[new] = value
                 del conf[old]
