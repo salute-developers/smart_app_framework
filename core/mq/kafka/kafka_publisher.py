@@ -106,6 +106,9 @@ class KafkaPublisher(BaseKafkaPublisher):
             )
             conf["security_protocol"] = "SSL"
             conf["ssl_context"] = context
+            del conf["ssl.ca.location"]
+            del conf["ssl.certificate.location"]
+            del conf["ssl.key.location"]
         param_old_to_new = {
             "bootstrap.servers": "bootstrap_servers",
             "topic.metadata.refresh.interval.ms": "metadata_max_age_ms",

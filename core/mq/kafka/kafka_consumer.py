@@ -155,6 +155,9 @@ class KafkaConsumer(BaseKafkaConsumer):
             )
             conf["security_protocol"] = "SSL"
             conf["ssl_context"] = context
+            del conf["ssl.ca.location"]
+            del conf["ssl.certificate.location"]
+            del conf["ssl.key.location"]
         param_old_to_new = {
             "group.id": "group_id",
             "enable.auto.commit": "enable_auto_commit",
