@@ -18,8 +18,8 @@ from core.monitoring.monitoring import monitoring
 
 class AIOHttpMainLoop(BaseHttpMainLoop):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.app = aiohttp.web.Application()
+        super().__init__(*args, **kwargs)
         self.app.add_routes([aiohttp.web.route('*', '/health', self.get_health_check)])
         self.app.add_routes([aiohttp.web.route('*', '/{tail:.*}', self.iterate)])
 
