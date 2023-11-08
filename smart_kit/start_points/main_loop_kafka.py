@@ -291,7 +291,7 @@ class MainLoop(BaseMainLoop):
     async def put_to_queue(self, mq_message, executable, kwargs):
         key = mq_message.key()
         if key:
-            queue_index = int(hashlib.sha1(key).hexdigest(), 16) % (len(self.queues) - 1)
+            queue_index = int(hashlib.sha1(key).hexdigest(), 16) % len(self.queues)
         else:
             queue_index = (len(self.queues) - 1)
 
