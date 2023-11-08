@@ -57,8 +57,8 @@ class SmartAppFromMessage:
     payload: dict
     uuid: dict
 
-    def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
-                 kafka_key: Optional[str] = None, headers: Optional[Iterable[Tuple[Any, Any]]] = None,
+    def __init__(self, value: Dict[str, Any], topic_key: Optional[str] = None, creation_time: Optional[int] = None,
+                 kafka_key: Optional[str] = None, headers: Optional[Sequence[Tuple[str, bytes]]] = None,
                  masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
                  validators: Iterable[MessageValidator] = (), callback_id: Optional[str] = None):
         self.logging_uuid = str(uuid.uuid4())
@@ -167,6 +167,10 @@ class SmartAppFromMessage:
     @property
     def channel(self) -> Optional[str]:
         return self.uuid.get(field.USER_CHANNEL)
+
+    @channel.setter
+    def channel(self, value):
+        self.uuid[field.USER_CHANNEL] = value
 
     @property
     def uid(self) -> Optional[str]:

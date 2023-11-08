@@ -1,15 +1,16 @@
 # coding: utf-8
+from functools import lru_cache
 from typing import Dict, Any, Tuple, List
 
+import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
 from core.basic_models.scenarios.base_scenario import BaseScenario
-from core.monitoring.monitoring import monitoring
 from core.logging.logger_utils import log
-
-import scenarios.logging.logger_constants as log_const
+from core.monitoring.monitoring import monitoring
+from core.utils.masking_message import masking
+from scenarios.actions.action_params_names import REQUEST_FIELD
 from scenarios.scenario_models.field.field import QuestionField
 from scenarios.scenario_models.history import Event, HistoryConstants
-from scenarios.actions.action_params_names import REQUEST_FIELD
 
 FORM_FIELD_DELIMETER = "__"
 
@@ -174,6 +175,17 @@ class FormFillingScenario(BaseScenario):
             user.last_scenarios.delete(self.id)
         return action_messages
 
+    @staticmethod
+    @lru_cache
+    def _get_common_masking_fields(user) -> dict:
+        """Get global masking fields from user settings from file with name template_settings."""
+        return user.settings["template_settings"].get("masking_fields", {}) if user is not None else {}
+
+    def _get_masked_params(self, data: dict, user) -> dict:
+        """Masking data by global masking fields."""
+        masking_fields = self._get_common_masking_fields(user)
+        return masking(data=data, masking_fields=masking_fields)
+
     @monitoring.got_histogram("scenario_time")
     async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
         form = self._get_form(user)
@@ -181,7 +193,7 @@ class FormFillingScenario(BaseScenario):
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)
 
         data_extracted = self._extract_data(form, text_preprocessing_result, user, params)
-        logging_params = {"data_extracted_str": str(data_extracted)}
+        logging_params = {"data_extracted_str": str(self._get_masked_params(data_extracted, user))}
         logging_params.update(self._log_params())
         log("Extracted data=%(data_extracted_str)s", user, logging_params)
 

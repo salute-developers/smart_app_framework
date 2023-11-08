@@ -18,9 +18,13 @@ class Device:
     def platform_version(self) -> str:
         return self._value.get("platformVersion") or ""
 
-    @cached_property
+    @property
     def surface(self) -> str:
         return self._value.get("surface") or ""
+
+    @surface.setter
+    def surface(self, value):
+        self._value["surface"] = value
 
     @cached_property
     def surface_version(self) -> str:

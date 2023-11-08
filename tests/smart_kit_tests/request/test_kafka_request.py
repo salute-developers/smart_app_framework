@@ -13,7 +13,7 @@ class RequestTest1(unittest.TestCase):
         self.test_items3 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10}  # пусть
         self.test_items4 = {"topic_key": "12345", "kafka_replyTopic": "any theme", "timeout": 10, "topic": "topic123"}
         self.test_source_mq_message = Mock('source_mq_message')
-        self.test_source_mq_message.headers = lambda: [("any header 1", 1)]
+        self.test_source_mq_message.headers = [("any header 1", 1)]
 
     def test_smart_kafka_request_init(self):
         obj1 = kafka_request.SmartKitKafkaRequest(self.test_items1)

@@ -7,7 +7,7 @@ template-engine:
         bootstrap.servers: "localhost:9092"
         debug: all
         default.topic.config:
-          auto.offset.reset: largest
+          auto.offset.reset: latest
         enable.auto.commit: true
         enable.auto.offset.store: false
         group.id: dialog_policy1
