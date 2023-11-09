@@ -1,6 +1,6 @@
 # coding=utf-8
 from functools import cached_property
-from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple
+from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple, Sequence
 import json
 import uuid
 
