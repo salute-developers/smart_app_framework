@@ -1,8 +1,8 @@
+import asyncio
 import json
 import typing
-import os
+from functools import cached_property
 
-import asyncio
 import aiohttp
 import aiohttp.web
 
@@ -10,10 +10,10 @@ import scenarios.logging.logger_constants as log_const
 from core.db_adapter.db_adapter import DBAdapterException, db_adapter_factory
 from core.logging.logger_utils import log
 from core.message.from_message import SmartAppFromMessage
+from core.monitoring.monitoring import monitoring
 from core.utils.stats_timer import StatsTimer
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.start_points.main_loop_http import BaseHttpMainLoop
-from core.monitoring.monitoring import monitoring
 
 
 class AIOHttpMainLoop(BaseHttpMainLoop):
@@ -35,6 +35,10 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
     async def close_db(self, app):
         app["database"].cancel()
         await app["database"]
+
+    @cached_property
+    def masking_fields(self):
+        return self.settings["template_settings"].get("masking_fields")
 
     async def load_user(self, db_uid, message):
         db_data = None
@@ -108,31 +112,35 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
 
     async def handle_message(self, message: SmartAppFromMessage) -> typing.Tuple[int, str, SmartAppToMessage]:
         if not message.validate():
-            answer = SmartAppToMessage(self.BAD_REQUEST_COMMAND, message=message, request=None)
+            answer = SmartAppToMessage(
+                self.BAD_REQUEST_COMMAND, message=message, request=None, masking_fields=self.masking_fields)
             code = 400
-            log(f"OUTGOING DATA: {answer.value} with code: {code}",
+            log(f"OUTGOING DATA: {answer.masked_value} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message", "msg_id": message.incremental_id})
             return code, "BAD REQUEST", answer
 
         answer, stats, user = await self.process_message(message)
         if not answer:
-            answer = SmartAppToMessage(self.NO_ANSWER_COMMAND, message=message, request=None)
+            answer = SmartAppToMessage(
+                self.NO_ANSWER_COMMAND, message=message, request=None, masking_fields=self.masking_fields)
             code = 204
-            log(f"OUTGOING DATA: {answer.value} with code: {code}",
+            log(f"OUTGOING DATA: {answer.masked_value} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
             return code, "NO CONTENT", answer
 
-        answer_message = SmartAppToMessage(answer, message, request=None, validators=self.to_msg_validators)
+        answer_message = SmartAppToMessage(
+            answer, message, request=None, validators=self.to_msg_validators, masking_fields=self.masking_fields)
         if answer_message.validate():
             code = 200
-            log_answer = str(answer_message.value).replace("%", "%%")
+            log_answer = str(answer_message.masked_value).replace("%", "%%")
             log(f"OUTGOING DATA: {log_answer} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
             return code, "OK", answer_message
         else:
             code = 500
-            answer = SmartAppToMessage(self.BAD_ANSWER_COMMAND, message=message, request=None)
-            log(f"OUTGOING DATA: {answer.value} with code: {code}",
+            answer = SmartAppToMessage(
+                self.BAD_ANSWER_COMMAND, message=message, request=None, masking_fields=self.masking_fields)
+            log(f"OUTGOING DATA: {answer.masked_value} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
             return code, "BAD ANSWER", answer
 
@@ -170,7 +178,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
         headers = self._get_headers(request.headers)
         body = await request.text()
         message = SmartAppFromMessage(json.loads(body), headers=headers, headers_required=False,
-                                      validators=self.from_msg_validators)
+                                      validators=self.from_msg_validators, masking_fields=self.masking_fields)
 
         status, reason, answer = await self.handle_message(message)
 
