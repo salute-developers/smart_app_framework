@@ -7,6 +7,7 @@ import uuid
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.message.app_info import AppInfo
 from core.message.device import Device
+from core.message.message import SmartAppMessage
 from core.names import field
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
@@ -37,7 +38,7 @@ class Headers:
         return bool(self.raw)
 
 
-class SmartAppFromMessage:
+class SmartAppFromMessage(SmartAppMessage):
     MESSAGE_NAME = "messageName"
     MESSAGE_ID = "messageId"
     UUID = "uuid"

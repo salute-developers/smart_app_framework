@@ -1,10 +1,10 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, TypeVar, Literal
+from typing import TYPE_CHECKING, TypeVar, Literal, Union
 from core.logging.logger_utils import log
 
 if TYPE_CHECKING:
-    from core.message.from_message import SmartAppFromMessage
+    from core.message.message import SmartAppMessage
 
 
 class ValidationException(Exception):
@@ -21,7 +21,7 @@ class BaseMessageValidator(ABC):
     def __init__(self, on_exception: OnException = "raise"):
         self.on_exception = on_exception
 
-    def validate(self, message: SmartAppFromMessage):
+    def validate(self, message: SmartAppMessage):
         try:
             self._validate(message)
         except self.VALIDATOR_EXCEPTION as e:
@@ -31,5 +31,5 @@ class BaseMessageValidator(ABC):
                 raise
 
     @abstractmethod
-    def _validate(self, message: SmartAppFromMessage):
+    def _validate(self, message: SmartAppMessage):
         raise NotImplementedError

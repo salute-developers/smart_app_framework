@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Iterable, Optional, List
 import json
 from copy import copy
 
+from core.message.message import SmartAppMessage
 from core.utils.masking_message import masking
 from smart_kit.utils import SmartAppToMessage_pb2
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 
-class SmartAppToMessage:
+class SmartAppToMessage(SmartAppMessage):
     ROOT_NODES_KEY = "root_nodes"
     PAYLOAD = "payload"
 
@@ -86,6 +87,8 @@ class SmartAppToMessage:
 
     def validate(self):
         for validator in self.validators:
-            if not validator.validate(self.command.name, self.payload):
+            try:
+                validator.validate(self)
+            except validator.VALIDATOR_EXCEPTION:  # FIXME: убрать return, ловить эксепшны в лупе
                 return False
         return True

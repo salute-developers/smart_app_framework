@@ -5,7 +5,8 @@ from core.message.validators.base_validator import BaseMessageValidator, OnExcep
 from core.message.message_constants import MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME
 
 if TYPE_CHECKING:
-    from core.message.from_message import SmartAppFromMessage
+    from core.message.message import SmartAppMessage
+
 
 
 class RequiredFieldsValidator(BaseMessageValidator):
@@ -31,8 +32,8 @@ class RequiredFieldsValidator(BaseMessageValidator):
         self._required_fields = required_fields or self.DEFAULT_REQUIRED_FIELDS
         self._field_types = field_types or self.DEFAULT_FIELD_TYPES
 
-    def _validate(self, message: SmartAppFromMessage):
-        message_name = message.message_name
+    def _validate(self, message: SmartAppMessage):
+        message_name = message.as_dict["messageName"]
         required_fields = self._required_fields.get(message_name) or self._required_fields[None]
         for r_field in required_fields:
             if r_field not in message.as_dict:
