@@ -6,6 +6,7 @@ name: Upload Python Package
 on:
   release:
     types: [created]
+  pull_request: {}
 
 jobs:
   deploy:
@@ -25,18 +26,26 @@ jobs:
     - name: Install Poetry plugins
       run: |
          poetry self add "poetry-dynamic-versioning[plugin]"
-    - name: Build and publish
-      env:
-        PYPI_USERNAME: __token__
-        PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Build for PyPi
       run: |
         poetry build --format wheel
-        poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
     - name: Build for Sber
       run: |
         sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
         poetry build --format wheel
-    - name: Upload Assets
+    - name: Publish to PyPi
+      if: startsWith(github.ref, 'refs/tags/')
+      env:
+        PYPI_USERNAME: __token__
+        PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        path: dist/*.whl
+    - name: Upload Release Assets
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
