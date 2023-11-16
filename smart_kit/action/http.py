@@ -77,7 +77,11 @@ class HTTPRequestAction(NodeAction):
             async with aiohttp.request(**request_parameters) as response:
                 response.raise_for_status()
                 self._log_response(user, response)
-                return response
+                try:
+                    return await response.json()
+                except aiohttp.client_exceptions.ContentTypeError:
+                    return await response.content.read()
+                return None
         except (aiohttp.ServerTimeoutError, asyncio.TimeoutError):
             self.error = self.TIMEOUT
         except aiohttp.ClientError:
@@ -118,11 +122,7 @@ class HTTPRequestAction(NodeAction):
         behavior_description = user.descriptions["behaviors"][self.behavior] if self.behavior else None
         action = None
         if self.error is None:
-            try:
-                data = await response.json()
-            except aiohttp.client_exceptions.ContentTypeError:
-                data = None
-            user.variables.set(self.store, data)
+            user.variables.set(self.store, response)
             action = behavior_description.success_action if behavior_description else None
         elif behavior_description is not None:
             if self.error == self.TIMEOUT:
@@ -139,6 +139,6 @@ class HTTPRequestAction(NodeAction):
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)
         self._log_request(user, request_parameters)
         response = await self._make_response(request_parameters, user)
-        if response:
-            log("response data: %(body)s", params={"body": response.json()}, level="INFO")
+        if response is not None:
+            log("response data: %(body)s", params={"body": response}, level="INFO")
         return await self.process_result(response, user, text_preprocessing_result, params)
