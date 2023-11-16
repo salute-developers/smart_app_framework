@@ -1,5 +1,6 @@
 {
   "exception_action": {
+    "type": "string",
     "command": "ANSWER_TO_USER",
     "nodes": {
       "answer": [
@@ -21,5 +22,13 @@
 		"type": "template",
 		"template": "{{ payload.get('new_session', False) and settings['template_settings'].get('reset_context_on_new_session', False)}}"
 	}
+  },
+  "exception_reset_scenario": {
+      "type": "external",
+      "action": "exception_action"
+  },
+  "timeout_reset_scenario": {
+      "type": "external",
+      "action": "exception_action"
   }
 }
