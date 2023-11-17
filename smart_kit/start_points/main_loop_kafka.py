@@ -75,6 +75,8 @@ class MainLoop(BaseMainLoop):
         self.skip_delay = self.waiting_message_timeout.get('skip', 8000)
         self.worker_tasks = []
         self.max_concurrent_messages = self.template_settings.get("max_concurrent_messages", 10)
+        if self.max_concurrent_messages < 1:
+            raise ValueError(f"max_concurrent_messages must be greater than 0 (actual: {self.max_concurrent_messages}")
         self.queues = [asyncio.Queue() for _ in range(self.max_concurrent_messages)]
         self.total_messages = 0
 
@@ -291,7 +293,7 @@ class MainLoop(BaseMainLoop):
     async def put_to_queue(self, mq_message, executable, kwargs):
         key = mq_message.key()
         if key:
-            queue_index = int(hashlib.sha1(key).hexdigest(), 16) % len(self.queues)
+            queue_index = int(hashlib.sha256(key).hexdigest(), 16) % len(self.queues)
         else:
             queue_index = (len(self.queues) - 1)
 
