@@ -76,7 +76,7 @@ class MainLoop(BaseMainLoop):
         self.worker_tasks = []
         self.max_concurrent_messages = self.template_settings.get("max_concurrent_messages", 10)
         if self.max_concurrent_messages < 1:
-            raise ValueError(f"max_concurrent_messages must be greater than 0 (actual: {self.max_concurrent_messages}")
+            raise ValueError(f"max_concurrent_messages must be greater than 0 (actual: {self.max_concurrent_messages})")
         self.queues = [asyncio.Queue() for _ in range(self.max_concurrent_messages)]
         self.total_messages = 0
 
