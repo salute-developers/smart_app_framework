@@ -1,11 +1,12 @@
 # coding: utf-8
 import random
 from concurrent.futures._base import CancelledError
+from typing import Optional
 
 import pyignite
 from pyignite import AioClient
 from pyignite.aio_cache import AioCache
-from pyignite.exceptions import ReconnectError, SocketError
+from pyignite.exceptions import ReconnectError, SocketError, CacheError
 
 import core.logging.logger_constants as log_const
 from core.db_adapter import error
@@ -15,7 +16,7 @@ from core.monitoring.monitoring import monitoring
 
 
 class IgniteAdapter(AsyncDBAdapter):
-    _client: AioClient
+    _client: Optional[AioClient]
     _cache = AioCache
 
     def __init__(self, config):
@@ -80,9 +81,9 @@ class IgniteAdapter(AsyncDBAdapter):
     @property
     def _handled_exception(self):
         # TypeError is raised during reconnection if all nodes are exhausted
-        return OSError, SocketError, ReconnectError, CancelledError
+        return OSError, SocketError, ReconnectError, CancelledError, CacheError
 
-    async def _on_prepare(self):
+    def _on_prepare(self):
         self._client = None
 
     async def _get_counter_name(self):
