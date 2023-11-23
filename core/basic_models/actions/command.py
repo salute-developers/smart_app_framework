@@ -1,10 +1,22 @@
 # coding: utf-8
+import time
+from copy import deepcopy
 from typing import Dict, Any
 
 
 class Command:
-    def __init__(self, name=None, params=None, action_id=None, request_type=None, request_data=None, loader=None,
-                 need_payload_wrap=True, need_message_name=True):
+    def __init__(
+        self,
+        name=None,
+        params=None,
+        action_id=None,
+        request_type=None,
+        request_data=None,
+        loader=None,
+        need_payload_wrap=True,
+        need_message_name=True,
+        **kwargs
+    ):
         """
         Initialize Command instance with params
 
@@ -24,6 +36,7 @@ class Command:
         self.loader: str = loader or "json.dumps"
         self.need_payload_wrap: bool = need_payload_wrap
         self.need_message_name: bool = need_message_name
+        self.creation_time = time.time()
 
     @property
     def raw(self):
@@ -31,3 +44,27 @@ class Command:
         if self.need_message_name:
             message["messageName"] = self.name
         return message
+
+    @classmethod
+    def from_command(
+        cls,
+        command: "Command",
+        name=None,
+        params=None,
+        action_id=None,
+        request_type=None,
+        request_data=None,
+        loader=None,
+        need_payload_wrap=None,
+        need_message_name=None,
+    ) -> "Command":
+        return cls(
+            name=(name or command.name),
+            params=(params or deepcopy(command.payload)),
+            action_id=(action_id or command.action_id),
+            request_type=(request_type or command.request_type),
+            request_data=(request_data or deepcopy(command.request_data)),
+            loader=(loader or command.loader),
+            need_payload_wrap=(need_payload_wrap or command.need_payload_wrap),
+            need_message_name=(need_message_name or command.need_message_name),
+        )
