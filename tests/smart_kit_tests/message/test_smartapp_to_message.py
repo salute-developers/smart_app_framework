@@ -62,9 +62,6 @@ class PieMessageValidator(BaseMessageValidator):
             raise ValidationException("pi should be between 3.14 and 3.15")
 
 
-
-
-
 class TestSmartAppToMessageValidation(unittest.TestCase):
     def test_validation(self):
         command_ = PicklableMock()

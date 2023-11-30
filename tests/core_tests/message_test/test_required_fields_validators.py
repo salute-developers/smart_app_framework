@@ -20,6 +20,7 @@ msg = {
     "2": ["test1", "test2"]
 }
 
+
 class TestRequiredFieldsValidator(TestCase):
     def test_valid_true(self):
         message = SmartAppFromMessage({

@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from core.message.message import SmartAppMessage
 
 
-
 class RequiredFieldsValidator(BaseMessageValidator):
     DEFAULT_REQUIRED_FIELDS: Dict[Optional[str], Iterable[str]] = {
         None: {MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME},  # default
