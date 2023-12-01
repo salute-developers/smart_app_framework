@@ -20,10 +20,11 @@ class Diff:
     @classmethod
     def partial_diff(cls, expected: Any, actual: Any, path="", dict_check_does_not_expected=False) -> Diff:
         diff = cls()
-        if (not isinstance(actual, type(expected)) or
-           (isinstance(actual, str) and isinstance(expected, str) and
-                expected != actual and not re.fullmatch(expected, actual)) or
-           expected != actual):
+        if (
+                not isinstance(actual, type(expected)) or
+                (isinstance(actual, str) and expected != actual and not re.fullmatch(expected, actual)) or
+                (not isinstance(actual, str) and expected != actual)
+        ):
             diff.different[path] = expected, actual
         return diff
 
