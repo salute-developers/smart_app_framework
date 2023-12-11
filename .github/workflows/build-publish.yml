@@ -1,15 +1,15 @@
 # This workflow will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Upload Python Package
+name: Build Python Package
 
 on:
   release:
     types: [created]
-  pull_request: {}
+  push: {}
 
 jobs:
-  deploy:
+  build:
 
     runs-on: ubuntu-latest
 
@@ -42,7 +42,6 @@ jobs:
         poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
-      if: ${{ github.event_name == 'pull_request' }}
       with:
         path: dist/*.whl
     - name: Upload Release Assets
