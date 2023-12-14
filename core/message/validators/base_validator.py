@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TypeVar, Literal, Union
-from core.logging.logger_utils import log
+from core.logging.logger_utils import log, MESSAGE_ID_STR
 
 if TYPE_CHECKING:
     from core.message.message import SmartAppMessage
@@ -26,9 +26,21 @@ class BaseMessageValidator(ABC):
             self._validate(message)
         except self.VALIDATOR_EXCEPTION as e:
             if self.on_exception == "log":
-                log(f"{self.__class__.__name__} Error: {e}")
-            else:
+                self._log(e, message)
+            if self.on_exception == "raise":
+                self._log(e, message, level="ERROR")
                 raise
+
+    def _log_params(self, message: SmartAppMessage):
+        return {
+            "key_name": "message_validator",
+            MESSAGE_ID_STR: message.incremental_id,
+            "validator": self.__class__.__name__,
+        }
+
+    def _log(self, exception: VALIDATOR_EXCEPTION, message: SmartAppMessage, level="WARNING"):
+        log_params = self._log_params(message)
+        log(f"{self.__class__.__name__} Error: {exception}", params=log_params, level=level)
 
     @abstractmethod
     def _validate(self, message: SmartAppMessage):

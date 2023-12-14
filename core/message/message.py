@@ -5,6 +5,8 @@ from core.message.validators.base_validator import BaseMessageValidator
 
 
 class SmartAppMessage(ABC):
+    MESSAGE_ID = "messageId"
+
     def __init__(self, validators: Iterable[BaseMessageValidator] = (), *args, **kwargs):
         self.validators = validators
 
@@ -25,3 +27,8 @@ class SmartAppMessage(ABC):
     @abstractmethod
     def as_dict(self):
         ...
+
+    # unique message_id
+    @property
+    def incremental_id(self) -> int:
+        return self.as_dict[self.MESSAGE_ID]

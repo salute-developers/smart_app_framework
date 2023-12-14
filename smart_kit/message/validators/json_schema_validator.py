@@ -3,6 +3,9 @@ from typing import Callable, TYPE_CHECKING
 
 import fastjsonschema
 import jsonschema
+
+from core.message.message import SmartAppMessage
+from core.logging.logger_utils import log
 from smart_kit.message.validators.base_validator_with_resources import BaseMessageValidatorWithResources
 
 if TYPE_CHECKING:
@@ -22,6 +25,12 @@ class JSONSchemaValidator(BaseMessageValidatorWithResources):
         cls.check_schema(schema)
         instance = cls(schema)
         return instance.validate
+
+    def _log(self, exception: VALIDATOR_EXCEPTION, message: SmartAppMessage, level="WARNING"):
+        log_params = self._log_params(message)
+        log_params["json_path"] = exception.json_path
+        log(f"{self.__class__.__name__} Error: {exception.message} on path: {exception.json_path}", params=log_params,
+            level=level)
 
     def _validate(self, message: SmartAppFromMessage):
         validator = self._schemas.get(message.message_name)

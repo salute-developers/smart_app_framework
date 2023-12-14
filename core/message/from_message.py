@@ -230,11 +230,6 @@ class SmartAppFromMessage(SmartAppMessage):
     def message_name(self, message_name: str):
         self._value[self.MESSAGE_NAME] = message_name
 
-    # unique message_id
-    @property
-    def incremental_id(self) -> int:
-        return self.as_dict[self.MESSAGE_ID]
-
     @property
     def as_dict(self) -> Dict[str, Any]:
         return self._value
