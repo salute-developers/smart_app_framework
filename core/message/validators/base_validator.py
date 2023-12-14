@@ -32,9 +32,13 @@ class BaseMessageValidator(ABC):
                 raise
 
     def _log_params(self, message: SmartAppMessage):
+        try:
+            mid = message.incremental_id
+        except KeyError:
+            mid = None
         return {
             "key_name": "message_validator",
-            MESSAGE_ID_STR: message.incremental_id,
+            MESSAGE_ID_STR: mid,
             "validator": self.__class__.__name__,
         }
 
