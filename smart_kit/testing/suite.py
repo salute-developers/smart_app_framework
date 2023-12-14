@@ -229,7 +229,7 @@ class TestCase:
 
             # Если использован флаг linkPreviousByCallbackId и после предыдущего сообщения был сохранен app_callback_id,
             # сообщению добавляются заголовки. Таким образом, сработает behavior, созданный предыдущим запросом
-            if (raw_msg.get(LINK_BEHAVIOR_FLAG) or raw_msg.get("load_callback") is not None) and app_callback_id:
+            if (link_previous_behavior or load_callback is not None) and app_callback_id:
                 headers = [(self.__from_msg_cls.CALLBACK_ID_HEADER_NAME, app_callback_id.encode())]
             else:
                 headers = [('kafka_correlationId', 'test_123')]
