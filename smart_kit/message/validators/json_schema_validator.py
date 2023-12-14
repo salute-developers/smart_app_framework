@@ -34,7 +34,8 @@ class JSONSchemaValidator(BaseMessageValidatorWithResources):
 
     def _validate(self, message: SmartAppFromMessage):
         validator = self._schemas.get(message.message_name)
-        validator(message.payload)
+        if validator:
+            validator(message.payload)
 
 
 class FastJSONSchemaValidator(JSONSchemaValidator):
