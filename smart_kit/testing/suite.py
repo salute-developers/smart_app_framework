@@ -11,8 +11,10 @@ from core.message.from_message import SmartAppFromMessage
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
 from smart_kit.compatibility.commands import combine_commands
+from smart_kit.configs import get_app_config
 from smart_kit.configs.settings import Settings
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
+from smart_kit.message.validators.base_validator_with_resources import BaseMessageValidatorWithResources
 from smart_kit.models.smartapp_model import SmartAppModel
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.testing.utils import Environment
@@ -224,6 +226,14 @@ class TestCase:
                 headers = [('kafka_correlationId', 'test_123')]
             message = self.create_message(request, headers=headers)
 
+            for v in message.validators:
+                if isinstance(v, BaseMessageValidatorWithResources):
+                    v.resources = self.app_model.resources
+
+            if not message.validate():
+                print(f"[!] Incoming message {message.message_name} validation failed.")
+                return False
+
             user = self.__user_cls(
                 id=message.uid, message=message, db_data=self.user_state, settings=self.settings,
                 descriptions=self.app_model.scenario_descriptions,
@@ -294,7 +304,7 @@ class TestCase:
             defaults["payload"].update({"message": message})
 
         defaults.update(data)
-        return self.__from_msg_cls(defaults, headers=headers)
+        return self.__from_msg_cls(defaults, headers=headers, validators=get_app_config().FROM_MSG_VALIDATORS)
 
     def handle_predefined_fields_response(self, predefined_fields_resp, response):
         predefined_fields_resp_data = self.storaged_predefined_fields[predefined_fields_resp]
