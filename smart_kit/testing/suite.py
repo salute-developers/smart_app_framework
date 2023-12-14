@@ -206,19 +206,30 @@ class TestCase:
     async def _run(self) -> bool:
         success = True
 
+        callbacks = {}
         app_callback_id = None
-        for index, message in enumerate(self.messages):
+        for index, raw_msg in enumerate(self.messages):
             print('Шаг', index)
             if index and self.interactive:
                 print("Нажмите ENTER, чтобы продолжить...")
                 input()
 
-            request = message["request"]
-            response = message["response"]
+            request = raw_msg["request"]
+            response = raw_msg["response"]
+
+            link_previous_behavior = raw_msg.get(LINK_BEHAVIOR_FLAG)
+            load_callback = raw_msg.get("load_callback")
+
+            if link_previous_behavior and load_callback is not None:
+                raise ValueError("Specifying the `link_previous_behavior` and `load_callback` "
+                                 "parameters at the same time is not allowed")
+
+            if load_callback is not None:
+                app_callback_id = callbacks[load_callback]
 
             # Если использован флаг linkPreviousByCallbackId и после предыдущего сообщения был сохранен app_callback_id,
             # сообщению добавляются заголовки. Таким образом, сработает behavior, созданный предыдущим запросом
-            if message.get(LINK_BEHAVIOR_FLAG) and app_callback_id:
+            if (raw_msg.get(LINK_BEHAVIOR_FLAG) or raw_msg.get("load_callback") is not None) and app_callback_id:
                 headers = [(self.__from_msg_cls.CALLBACK_ID_HEADER_NAME, app_callback_id.encode())]
             else:
                 headers = [('kafka_correlationId', 'test_123')]
@@ -250,6 +261,9 @@ class TestCase:
                     self.__from_msg_cls.CALLBACK_ID_HEADER_NAME,
                     app_callback_id
                 )
+
+            if raw_msg.get("save_callback") is not None:
+                callbacks[raw_msg["save_callback"]] = app_callback_id
 
             self.user_state = user.raw_str
         return success
