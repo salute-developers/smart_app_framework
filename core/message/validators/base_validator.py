@@ -18,7 +18,7 @@ OnException = Literal["raise", "log"]
 class BaseMessageValidator(ABC):
     VALIDATOR_EXCEPTION: T = ValidationException
 
-    def __init__(self, on_exception: OnException = "raise"):
+    def __init__(self, on_exception: OnException = "raise", *args, **kwargs):
         self.on_exception = on_exception
 
     def validate(self, message: SmartAppMessage):

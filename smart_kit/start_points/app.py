@@ -21,10 +21,8 @@ def run(app_config):
     log("FINISHED MODEL CREATE", level="WARNING")
 
     log("START MAIN_LOOP CREATE", level="WARNING")
-    loop = app_config.MAIN_LOOP(
-        model, app_config.USER, app_config.PARAMETRIZER, app_config.POSTPROCESSOR_MAIN_LOOP,
-        settings, app_config.TO_MSG_VALIDATORS, app_config.FROM_MSG_VALIDATORS,
-    )
+    loop = app_config.MAIN_LOOP(model, app_config.USER, app_config.PARAMETRIZER,
+                                app_config.POSTPROCESSOR_MAIN_LOOP, settings)
     log("FINISHED MAIN_LOOP CREATE", level="WARNING")
     loop.run()
     logging.shutdown()

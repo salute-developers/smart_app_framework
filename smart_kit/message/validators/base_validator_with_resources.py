@@ -8,7 +8,8 @@ from smart_kit.resources import SmartAppResources
 
 
 class BaseMessageValidatorWithResources(BaseMessageValidator, ABC):
-    def __init__(self, resources: Optional[SmartAppResources] = None, on_exception: OnException = "raise"):
+    def __init__(self, resources: Optional[SmartAppResources] = None, on_exception: OnException = "raise",
+                 *args, **kwargs):
         super().__init__(on_exception)
         self._resources: Optional[SmartAppResources] = None
         self.resources = resources

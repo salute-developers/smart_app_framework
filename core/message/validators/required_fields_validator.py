@@ -23,7 +23,8 @@ class RequiredFieldsValidator(BaseMessageValidator):
 
     def __init__(self, required_fields: Optional[Dict[Optional[str], Iterable[str]]] = None,
                  field_types: Optional[Dict[str, type]] = None,
-                 on_exception: OnException = "raise"):
+                 on_exception: OnException = "raise",
+                 *args, **kwargs):
         super().__init__(on_exception)
         if required_fields is None:
             required_fields = {}
