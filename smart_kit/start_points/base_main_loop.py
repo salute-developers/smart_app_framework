@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from typing import Type, Tuple, List
+from typing import Type
 import asyncio
 import signal
 
@@ -14,11 +14,10 @@ from core.monitoring.healthcheck_handler import RootResource
 from core.monitoring.twisted_server import TwistedServer
 from core.model.base_user import BaseUser
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
-from core.message.validators.base_validator import BaseMessageValidator
 from smart_kit.configs.settings import Settings
+from smart_kit.message.validators import get_validators_from_settings
 from smart_kit.start_points.postprocess import PostprocessMainLoop
 from smart_kit.models.smartapp_model import SmartAppModel
-from smart_kit.utils.dynamic_import import dynamic_import_object
 
 
 class BaseMainLoop:
@@ -47,7 +46,8 @@ class BaseMainLoop:
             self.postprocessor = postprocessor_cls()
             self.db_adapter = self.get_db()
             self.is_work = True
-            self.from_msg_validators, self.to_msg_validators = self.get_message_validators()
+            self.from_msg_validators = get_validators_from_settings("from", settings, model)
+            self.to_msg_validators = get_validators_from_settings("to", settings, model)
 
             template_settings = self.settings["template_settings"]
             save_tries = template_settings.get("user_save_collisions_tries", 0)
@@ -65,16 +65,6 @@ class BaseMainLoop:
                                                               "class_name": self.__class__.__name__},
                 level="ERROR", exc_info=True)
             raise
-
-    def get_message_validators(self) -> Tuple[List[BaseMessageValidator], List[BaseMessageValidator]]:
-        validators = self.settings["template_settings"].get("validators", {})
-
-        from_validators = [dynamic_import_object(e["class"])(resources=self.model.resources, **e["params"])
-                           for e in validators.get("from", [])]
-        to_validators = [dynamic_import_object(e["class"])(resources=self.model.resources, **e["params"])
-                         for e in validators.get("to", [])]
-
-        return from_validators, to_validators
 
     def get_db(self):
         db_adapter = db_adapter_factory(self.settings["template_settings"].get("db_adapter", {}))
