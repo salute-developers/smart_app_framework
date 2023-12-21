@@ -225,8 +225,11 @@ class TestCase:
                 headers = [(self.__from_msg_cls.CALLBACK_ID_HEADER_NAME, app_callback_id.encode())]
             else:
                 headers = [('kafka_correlationId', 'test_123')]
-            message = self.create_message(request, headers=headers,
-                                          validators=get_validators_from_settings("from", self.settings, self.app_model))
+
+            message = self.create_message(
+                request, headers=headers,
+                validators=get_validators_from_settings("from", self.settings, self.app_model)
+            )
 
             if not message.validate():
                 print(f"[!] Incoming message {message.message_name} validation failed.")
