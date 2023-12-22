@@ -39,6 +39,7 @@ class BaseMessageValidator(ABC):
         return {
             "key_name": "message_validator",
             MESSAGE_ID_STR: mid,
+            "message_name": message.message_name,
             "validator": self.__class__.__name__,
         }
 

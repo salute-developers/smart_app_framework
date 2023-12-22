@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, Dict, Any
 
 from core.message.validators.base_validator import BaseMessageValidator
 
 
 class SmartAppMessage(ABC):
+    MESSAGE_NAME = "messageName"
     MESSAGE_ID = "messageId"
 
-    def __init__(self, validators: Iterable[BaseMessageValidator] = (), *args, **kwargs):
+    def __init__(self, value: Dict[str, Any], validators: Iterable[BaseMessageValidator] = (), *args, **kwargs):
+        self._value = value
         self.validators = validators
 
     def validate(self) -> bool:
@@ -32,3 +34,11 @@ class SmartAppMessage(ABC):
     @property
     def incremental_id(self) -> int:
         return self.as_dict[self.MESSAGE_ID]
+
+    @property
+    def message_name(self) -> str:
+        return self.as_dict[self.MESSAGE_NAME]
+
+    @message_name.setter
+    def message_name(self, message_name: str):
+        self._value[self.MESSAGE_NAME] = message_name

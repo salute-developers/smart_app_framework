@@ -223,14 +223,6 @@ class SmartAppFromMessage(SmartAppMessage):
         return json.dumps(masked_data, ensure_ascii=False)
 
     @property
-    def message_name(self) -> str:
-        return self.as_dict[self.MESSAGE_NAME]
-
-    @message_name.setter
-    def message_name(self, message_name: str):
-        self._value[self.MESSAGE_NAME] = message_name
-
-    @property
     def as_dict(self) -> Dict[str, Any]:
         return self._value
 
