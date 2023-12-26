@@ -7,9 +7,11 @@ from core.message.validators.header_validator import MessageHeadersValidator
 
 class TestHeadersValidator(TestCase):
     def test_valid_true(self):
-        message = SmartAppFromMessage({}, headers=[('test_header', b'result')], validators=[MessageHeadersValidator()])
+        message = SmartAppFromMessage({"messageName": "ANSWER_FROM_USER", "messageId": 1111},
+                                      headers=[('test_header', b'result')], validators=[MessageHeadersValidator()])
         self.assertTrue(message.validate())
 
     def test_valid_false(self):
-        message = SmartAppFromMessage({}, headers=[], validators=[MessageHeadersValidator()])
+        message = SmartAppFromMessage({"messageName": "ANSWER_FROM_USER", "messageId": 1111},
+                                      headers=[], validators=[MessageHeadersValidator()])
         self.assertFalse(message.validate())
