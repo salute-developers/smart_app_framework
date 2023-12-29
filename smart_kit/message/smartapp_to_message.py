@@ -6,6 +6,7 @@ import json
 from copy import copy
 
 from core.utils.masking_message import masking
+from core.utils.utils import mask_numbers
 from smart_kit.utils import SmartAppToMessage_pb2
 
 if TYPE_CHECKING:
@@ -70,6 +71,7 @@ class SmartAppToMessage:
     @cached_property
     def masked_value(self):
         masked_data = masking(self.as_dict, self.masking_fields)
+        mask_numbers(masked_data)
         if self.command.loader == "json.dumps":
             return json.dumps(masked_data, ensure_ascii=False)
         elif self.command.loader == "protobuf":
