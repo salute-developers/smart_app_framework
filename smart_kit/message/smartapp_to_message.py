@@ -70,8 +70,7 @@ class SmartAppToMessage:
 
     @cached_property
     def masked_value(self):
-        masked_data = masking(self.as_dict, self.masking_fields)
-        mask_numbers(masked_data)
+        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields))
         if self.command.loader == "json.dumps":
             return json.dumps(masked_data, ensure_ascii=False)
         elif self.command.loader == "protobuf":

@@ -1,4 +1,5 @@
 # coding=utf-8
+import copy
 import datetime
 import gc
 import json
@@ -145,11 +146,13 @@ def deep_update_dict(original, update):
     return update
 
 
-def mask_numbers(masked_message: Dict[str, Any]):
+def mask_numbers(message: Dict[str, Any]) -> Dict[str, Any]:
+    masked_message = copy.deepcopy(message)
     items = masked_message.get("payload", {}).get("items", [])
     for item in items:
         if "bubble" in item:
             item["bubble"]["text"] = re.sub(r"\d+(?:[.,]\d+)?", "*number*", item["bubble"]["text"])
     pronounce_text = masked_message.get("payload", {}).get("pronounceText")
     if pronounce_text is not None:
-        masked_message["payload"]["pronounceText"] = re.sub(r"\d+(?:[.,]\d+)", "*number*", pronounce_text)
+        masked_message["payload"]["pronounceText"] = re.sub(r"\d+(?:[.,]\d+)?", "*number*", pronounce_text)
+    return masked_message

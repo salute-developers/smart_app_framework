@@ -252,8 +252,7 @@ class SmartAppFromMessage:
 
     @property
     def masked_value(self) -> str:
-        masked_data = masking(self.as_dict, self.masking_fields)
-        mask_numbers(masked_data)
+        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields))
         return json.dumps(masked_data, ensure_ascii=False)
 
     @property
