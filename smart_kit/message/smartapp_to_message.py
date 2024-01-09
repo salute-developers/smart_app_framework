@@ -71,7 +71,7 @@ class SmartAppToMessage:
 
     @cached_property
     def masked_value(self):
-        mask_numbers_flag = settings.Settings()["template_settings"]["mask_numbers"]
+        mask_numbers_flag = settings.Settings()["template_settings"].get("mask_numbers", False)
         masked_data = mask_numbers(masking(self.as_dict, self.masking_fields)) if mask_numbers_flag else \
             masking(self.as_dict, self.masking_fields)
         if self.command.loader == "json.dumps":
