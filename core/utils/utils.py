@@ -1,4 +1,5 @@
 # coding=utf-8
+import copy
 import datetime
 import gc
 import json
@@ -8,7 +9,7 @@ import weakref
 
 from collections import OrderedDict
 from math import isnan, isinf
-from typing import Optional
+from typing import Optional, Any, Dict
 from time import time
 
 from scenarios.user.user_model import User
@@ -143,3 +144,15 @@ def deep_update_dict(original, update):
         elif isinstance(value, dict):
             deep_update_dict(value, update[key])
     return update
+
+
+def mask_numbers(message: Dict[str, Any]) -> Dict[str, Any]:
+    masked_message = copy.deepcopy(message)
+    items = masked_message.get("payload", {}).get("items", [])
+    for item in items:
+        if "bubble" in item and "text" in item["bubble"]:
+            item["bubble"]["text"] = re.sub(r"\d+(?:[.,]\d+)?", "*number*", item["bubble"]["text"])
+    pronounce_text = masked_message.get("payload", {}).get("pronounceText")
+    if pronounce_text is not None:
+        masked_message["payload"]["pronounceText"] = re.sub(r"\d+(?:[.,]\d+)?", "*number*", pronounce_text)
+    return masked_message
