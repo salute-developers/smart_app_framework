@@ -15,6 +15,7 @@ from core.utils.utils import current_time_ms, mask_numbers
 from core.message.msg_validator import MessageValidator
 
 from smart_kit.configs import get_app_config
+from smart_kit.configs import settings
 
 
 class Headers:
@@ -252,7 +253,9 @@ class SmartAppFromMessage:
 
     @property
     def masked_value(self) -> str:
-        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields))
+        mask_numbers_flag = settings.Settings()["template_settings"]["mask_numbers"]
+        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields)) if mask_numbers_flag else \
+            masking(self.as_dict, self.masking_fields)
         return json.dumps(masked_data, ensure_ascii=False)
 
     @property

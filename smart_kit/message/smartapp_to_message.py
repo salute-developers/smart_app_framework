@@ -7,6 +7,7 @@ from copy import copy
 
 from core.utils.masking_message import masking
 from core.utils.utils import mask_numbers
+from smart_kit.configs import settings
 from smart_kit.utils import SmartAppToMessage_pb2
 
 if TYPE_CHECKING:
@@ -70,7 +71,9 @@ class SmartAppToMessage:
 
     @cached_property
     def masked_value(self):
-        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields))
+        mask_numbers_flag = settings.Settings()["template_settings"]["mask_numbers"]
+        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields)) if mask_numbers_flag else \
+            masking(self.as_dict, self.masking_fields)
         if self.command.loader == "json.dumps":
             return json.dumps(masked_data, ensure_ascii=False)
         elif self.command.loader == "protobuf":

@@ -150,7 +150,7 @@ def mask_numbers(message: Dict[str, Any]) -> Dict[str, Any]:
     masked_message = copy.deepcopy(message)
     items = masked_message.get("payload", {}).get("items", [])
     for item in items:
-        if "bubble" in item:
+        if "bubble" in item and "text" and item["bubble"]:
             item["bubble"]["text"] = re.sub(r"\d+(?:[.,]\d+)?", "*number*", item["bubble"]["text"])
     pronounce_text = masked_message.get("payload", {}).get("pronounceText")
     if pronounce_text is not None:
