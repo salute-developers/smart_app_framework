@@ -16,19 +16,13 @@ class TestValidator(TestCase):
     def test_valid_true(self):
         message = SmartAppFromMessage({"messageName": "test"}, headers=[])
         validator = MockMessageValidator()
-        try:
-            validator.validate(message)
-        except validator.VALIDATOR_EXCEPTION:
-            raise self.failureException("Message is not valid")
+        validator.validate(message)
 
     def test_valid_false(self):
         message = SmartAppFromMessage({"messageName": "no_test"}, headers=[])
         validator = MockMessageValidator()
-        try:
+        with self.assertRaises(validator.VALIDATOR_EXCEPTION):
             validator.validate(message)
-            raise self.failureException("Message is valid, but shouldn't")
-        except validator.VALIDATOR_EXCEPTION:
-            pass
 
     def test_valid_false_log(self):
         fh = logging.StreamHandler()
