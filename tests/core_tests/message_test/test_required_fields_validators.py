@@ -9,7 +9,7 @@ validator = RequiredFieldsValidator({
     "MESSAGE": ('1', '2', '3'),
 })
 
-validator_types = RequiredFieldsValidator({
+types_validator = RequiredFieldsValidator({
     None: ('1', '2'),
     "MESSAGE": ('1', '2', '3'),
 }, {'1': int, '2': str})
