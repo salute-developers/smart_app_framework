@@ -38,7 +38,7 @@ class RequiredFieldsValidator(BaseMessageValidator):
         for r_field in required_fields:
             if r_field not in message.as_dict:
                 raise ValidationException(f"Required field '{r_field}' is absent")
-            if r_field in self._field_types:
-                if not isinstance(message.as_dict[r_field], self._field_types[r_field]):  # noqa
-                    raise ValidationException(f"Field '{r_field}' has wrong type "
-                                              f"(required {self._field_types[r_field]})")
+            if r_field in self._field_types and \
+                    not isinstance(message.as_dict[r_field], self._field_types[r_field]):  # noqa
+                raise ValidationException(f"Field '{r_field}' has wrong type "
+                                          f"(required {self._field_types[r_field]})")
