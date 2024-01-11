@@ -130,6 +130,8 @@ class SmartAppResources(BaseConfig):
                            source=source, key="last_action_ids"),
             FolderRepository(self.subfolder_path("bundles"), loader=ordered_json, source=source,
                              key="bundles"),
+            FolderRepository(self.subfolder_path("classifiers"), loader=ordered_json, source=source,
+                             key="external_classifiers"),
         ]
 
         self.repositories = self.override_repositories(self.repositories)
