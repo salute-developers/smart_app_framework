@@ -46,12 +46,6 @@ class SmartAppFromMessage(SmartAppMessage):
     SESSION_ID = "sessionId"
     CALLBACK_ID_HEADER_NAME = CALLBACK_ID_HEADER
 
-    _REQUIRED_FIELDS_MAP = {
-        None: {MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME},  # default
-        "PUSH_RESULT": {MESSAGE_ID, MESSAGE_NAME},
-        "PUSH_SENDING_RESULT": {MESSAGE_ID, MESSAGE_NAME}
-    }
-
     # following fields are used for validation
     incremental_id: int
     message_name: str
@@ -74,49 +68,6 @@ class SmartAppFromMessage(SmartAppMessage):
         self._callback_id = callback_id  # FIXME: by some reason it possibly to change callback_id
         self.masking_fields = masking_fields
         self.validators = validators
-
-    def validate(self) -> bool:
-        for validator in self.validators:
-            try:
-                validator.validate(self)
-            except validator.VALIDATOR_EXCEPTION:  # FIXME: убрать return, ловить эксепшны в лупе
-                return False
-        return True
-
-    def print_validation_error(
-            self,
-            required_field: Optional[str] = None,
-            required_field_type: Optional[str] = None,
-    ) -> None:
-        if self._value:
-            params = {
-                "value": str(self._value),
-                "required_field": required_field,
-                "required_field_type": required_field_type,
-                log_const.KEY_NAME: log_const.EXCEPTION_VALUE
-            }
-            if required_field and required_field_type:
-                log(
-                    "Message validation error: Expected '%(required_field)s'"
-                    " of type '%(required_field_type)s': %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-            elif required_field:
-                log(
-                    "Message validation error: Required field "
-                    "'%(required_field)s' is missing: %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-            else:
-                log(
-                    "Message validation error: Format is wrong: %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-        else:
-            log("Message validation error: Message is empty", level="ERROR")
 
     @property
     def _callback_id_header_name(self) -> str:

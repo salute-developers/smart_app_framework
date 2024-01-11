@@ -84,11 +84,3 @@ class SmartAppToMessage(SmartAppMessage):
         elif self.command.loader == "protobuf":
             protobuf_message = self.as_protobuf_message(self.as_dict)
             return protobuf_message.SerializeToString()
-
-    def validate(self):
-        for validator in self.validators:
-            try:
-                validator.validate(self)
-            except validator.VALIDATOR_EXCEPTION:  # FIXME: убрать return, ловить эксепшны в лупе
-                return False
-        return True
