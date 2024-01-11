@@ -21,3 +21,4 @@ self_service_with_state_save_messages: true
 project_id: template-app-id
 consumer_topic: "app"
 kafka_message_key_recovery_log_level: "DEBUG"
+mask_numbers: false

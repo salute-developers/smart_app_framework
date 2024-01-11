@@ -12,10 +12,11 @@ from core.names import field
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.utils.masking_message import masking
-from core.utils.utils import current_time_ms
+from core.utils.utils import current_time_ms, mask_numbers
 from core.message.validators.base_validator import BaseMessageValidator
 
 from smart_kit.configs import get_app_config
+from smart_kit.configs import settings
 
 
 class Headers:
@@ -170,7 +171,9 @@ class SmartAppFromMessage(SmartAppMessage):
 
     @property
     def masked_value(self) -> str:
-        masked_data = masking(self.as_dict, self.masking_fields)
+        mask_numbers_flag = settings.Settings()["template_settings"].get("mask_numbers", False)
+        masked_data = mask_numbers(masking(self.as_dict, self.masking_fields)) if mask_numbers_flag else \
+            masking(self.as_dict, self.masking_fields)
         return json.dumps(masked_data, ensure_ascii=False)
 
     @property
