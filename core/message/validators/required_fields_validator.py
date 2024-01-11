@@ -33,7 +33,7 @@ class RequiredFieldsValidator(BaseMessageValidator):
         self._field_types = field_types or self.DEFAULT_FIELD_TYPES
 
     def _validate(self, message: SmartAppMessage):
-        message_name = message.as_dict["messageName"]
+        message_name = message.message_name
         required_fields = self._required_fields.get(message_name) or self._required_fields[None]
         for r_field in required_fields:
             if r_field not in message.as_dict:
