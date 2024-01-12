@@ -1,5 +1,6 @@
 # coding: utf-8
 import json
+import os
 import unittest
 import uuid
 from unittest.mock import Mock, MagicMock, patch, AsyncMock
@@ -29,8 +30,8 @@ from core.basic_models.actions.counter_actions import (
 from core.basic_models.actions.external_actions import ExternalAction
 from core.basic_models.actions.push_action import PushAction, PushAuthenticationActionHttp, PushActionHttp, \
     GetRuntimePermissionsAction
-from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
-    SDKAnswerToUser, NodeAction
+from core.basic_models.actions.string_actions import StringAction, StringFileUnifiedTemplateAction, \
+    AfinaAnswerAction, SDKAnswer, SDKAnswerToUser, NodeAction
 from core.basic_models.answer_items.answer_items import SdkAnswerItem, items_factory, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink
 from core.basic_models.requirement.basic_requirements import requirement_factory, Requirement, requirements
@@ -38,6 +39,7 @@ from core.model.registered import registered_factories
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME
 from smart_kit.action.http import HTTPRequestAction
+from smart_kit import configs
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock
 
@@ -183,6 +185,44 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
         user.parametrizer = MockSimpleParametrizer(user, {"data": params})
         items = {"command": "cmd_id", "nodes": {"item": "template", "params": "{{params}}"}}
         action = StringAction(items)
+        result = await action.run(user, None)
+        self.assertEqual(expected[0].name, result[0].name)
+        self.assertEqual(expected[0].payload, result[0].payload)
+
+    async def test_string_file_unified_template_action_inline(self):
+        expected = [Command("cmd_id", {"item": "template", "params": "params"})]
+        user = PicklableMagicMock()
+        template = PicklableMock()
+        template.get_template = Mock(return_value=["nlpp.payload.personInfo.identityCard"])
+        user.descriptions = {"render_templates": template}
+        params = {"params": "params"}
+        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
+        items = {"command": "cmd_id", "nodes": {"item": "template", "params": "{{params}}"}}
+        action = StringFileUnifiedTemplateAction(items)
+        result = await action.run(user, None)
+        self.assertEqual(expected[0].name, result[0].name)
+        self.assertEqual(expected[0].payload, result[0].payload)
+
+    async def test_string_file_unified_template_action_from_file(self):
+        expected = [Command("cmd_id", {"item": "template", "params": "params"})]
+        user = PicklableMagicMock()
+        template = PicklableMock()
+        template.get_template = Mock(return_value=["nlpp.payload.personInfo.identityCard"])
+        user.descriptions = {"render_templates": template}
+        params = {"params": "params"}
+        user.parametrizer = MockSimpleParametrizer(user, {"data": params})
+        items = {
+            "command": "cmd_id",
+            "nodes": {
+                "type": "unified_template",
+                "file": "test_string_file_unified_template_action.jinja2",
+                "loader": "json"
+            }
+        }
+        static_path = os.path.join(os.path.dirname(configs.__file__), os.pardir, os.pardir, "tests", "static")
+        cfg = MagicMock(STATIC_PATH=static_path)
+        configs.get_app_config = PicklableMagicMock(return_value=cfg)
+        action = StringFileUnifiedTemplateAction(items)
         result = await action.run(user, None)
         self.assertEqual(expected[0].name, result[0].name)
         self.assertEqual(expected[0].payload, result[0].payload)
@@ -565,7 +605,9 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                 'headers':
                     {
                         'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
-                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='  # noqa
+                        'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5'
+                                         'BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
+                        # noqa
                     }
             }
         }
