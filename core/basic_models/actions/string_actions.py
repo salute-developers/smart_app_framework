@@ -4,6 +4,8 @@ from copy import copy
 from functools import cached_property
 from itertools import chain
 from typing import Union, Dict, List, Any, Optional, Tuple, TypeVar, Type, AsyncGenerator
+from lazy import lazy
+from scenarios.user.user_model import User
 
 from core.basic_models.actions.basic_actions import CommandAction
 from core.basic_models.actions.command import Command
@@ -11,7 +13,8 @@ from core.basic_models.answer_items.answer_items import SdkAnswerItem
 from core.model.base_user import BaseUser
 from core.model.factory import list_factory
 from core.text_preprocessing.base import BaseTextPreprocessingResult
-from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME
+from core.unified_template.unified_template import UnifiedTemplate, UNIFIED_TEMPLATE_TYPE_NAME, \
+    UnifiedTemplateMultiLoader
 
 T = TypeVar("T")
 
@@ -112,6 +115,7 @@ class StringAction(NodeAction):
       }
     }
     """
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(StringAction, self).__init__(items, id)
 
@@ -146,6 +150,70 @@ class StringAction(NodeAction):
                       request_data=self.request_data)
 
 
+class StringFileUnifiedTemplateAction(StringAction):
+    @lazy
+    def nodes(self):
+        if self._nodes.get("type", "") == UNIFIED_TEMPLATE_TYPE_NAME:
+            return self._get_template_tree(self._nodes)
+        else:
+            return {k: self._get_template_tree(t) for k, t in self._nodes.items()}
+
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+        # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
+        command_params = dict()
+        params = copy(params) or {}
+        collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
+        params.update(collected)
+        if type(self.nodes) == UnifiedTemplateMultiLoader:
+            command_params = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
+        else:
+            for key, value in self.nodes.items():
+                rendered = self._get_rendered_tree(value, params, self.no_empty_nodes)
+                if rendered != "" or not self.no_empty_nodes:
+                    command_params[key] = rendered
+
+        yield Command(self.command, command_params, self.id, request_type=self.request_type,
+                      request_data=self.request_data)
+
+    def _get_template_tree(self, value):
+        is_dict_unified_template = isinstance(value, dict) and value.get("type") == UNIFIED_TEMPLATE_TYPE_NAME
+        if isinstance(value, str) or is_dict_unified_template:
+            result = UnifiedTemplateMultiLoader(value)
+        elif isinstance(value, dict):
+            result = {}
+            for inner_key, inner_value in value.items():
+                result[inner_key] = self._get_template_tree(inner_value)
+        elif isinstance(value, list):
+            result = []
+            for inner_value in value:
+                result.append(self._get_template_tree(inner_value))
+        else:
+            result = value
+        return result
+
+    def _get_rendered_tree_recursive(self, value, params, no_empty=False):
+        value_type = type(value)
+        if value_type is dict:
+            result = {}
+            for inner_key, inner_value in value.items():
+                rendered = self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
+                if rendered != "" or not no_empty:
+                    result[inner_key] = rendered
+        elif value_type is list:
+            result = []
+            for inner_value in value:
+                rendered = self._get_rendered_tree_recursive(inner_value, params, no_empty=no_empty)
+                if rendered != "" or not no_empty:
+                    result.append(rendered)
+
+        elif value_type is UnifiedTemplateMultiLoader:
+            result = value.render(params)
+        else:
+            result = value
+        return result
+
+
 class AfinaAnswerAction(NodeAction):
     """
     Example:
@@ -160,6 +228,7 @@ class AfinaAnswerAction(NodeAction):
     Output:
     [command1(pronounceText)]
     """
+
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
         super(AfinaAnswerAction, self).__init__(items, id)
         self.command: str = ANSWER_TO_USER

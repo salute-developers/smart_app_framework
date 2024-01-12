@@ -2,7 +2,7 @@ import asyncio
 import os
 import unittest
 from time import time
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 
 import smart_kit
 from core.basic_models.classifiers.basic_classifiers import ExternalClassifier
@@ -18,6 +18,7 @@ from core.basic_models.requirement.user_text_requirements import AnySubstringInL
     NormalizedTextInSetRequirement
 from core.basic_models.variables.variables import Variables
 from core.model.registered import registered_factories
+from smart_kit import configs
 from smart_kit.text_preprocessing.local_text_normalizer import LocalTextNormalizer
 from smart_kit.utils.picklable_mock import PicklableMock
 
@@ -243,6 +244,30 @@ class RequirementTest(unittest.TestCase):
         user.parametrizer.collect = Mock(return_value=params)
         with self.assertRaises(TypeError):
             _ = requirement.check(None, user)
+
+    def test_template_req_from_file(self):
+        items = {
+            "template": {
+                "type": "unified_template",
+                "file": "test_unified_template_requirement.jinja2",
+                "loader": "json"
+            }
+        }
+        static_path = os.path.join(os.path.dirname(configs.__file__), os.pardir, os.pardir, "tests", "static")
+        cfg = MagicMock(STATIC_PATH=static_path)
+        configs.get_app_config = MagicMock(return_value=cfg)
+        requirement = TemplateRequirement(items)
+        params = {
+            "payload": {
+                "groupCode": "BROKER",
+                "murexIds": ["AAA", "BBB"],
+                "message": " BBB    "
+            }
+        }
+        user = PicklableMock()
+        user.parametrizer = PicklableMock()
+        user.parametrizer.collect = Mock(return_value=params)
+        self.assertTrue(requirement.check(None, user))
 
     def test_rolling_requirement_true(self):
         user = PicklableMock()
