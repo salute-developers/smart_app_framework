@@ -7,12 +7,13 @@ import uuid
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.message.app_info import AppInfo
 from core.message.device import Device
+from core.message.message import SmartAppMessage
 from core.names import field
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.utils.masking_message import masking
 from core.utils.utils import current_time_ms, mask_numbers
-from core.message.msg_validator import MessageValidator
+from core.message.validators.base_validator import BaseMessageValidator
 
 from smart_kit.configs import get_app_config
 from smart_kit.configs import settings
@@ -38,19 +39,13 @@ class Headers:
         return bool(self.raw)
 
 
-class SmartAppFromMessage:
+class SmartAppFromMessage(SmartAppMessage):
     MESSAGE_NAME = "messageName"
     MESSAGE_ID = "messageId"
     UUID = "uuid"
     PAYLOAD = "payload"
     SESSION_ID = "sessionId"
     CALLBACK_ID_HEADER_NAME = CALLBACK_ID_HEADER
-
-    _REQUIRED_FIELDS_MAP = {
-        None: {MESSAGE_ID, UUID, PAYLOAD, SESSION_ID, MESSAGE_NAME},  # default
-        "PUSH_RESULT": {MESSAGE_ID, MESSAGE_NAME},
-        "PUSH_SENDING_RESULT": {MESSAGE_ID, MESSAGE_NAME}
-    }
 
     # following fields are used for validation
     incremental_id: int
@@ -61,7 +56,7 @@ class SmartAppFromMessage:
     def __init__(self, value: Dict[str, Any], topic_key: str = None, creation_time: Optional[int] = None,
                  kafka_key: Optional[str] = None, headers: Optional[Iterable[Tuple[Any, Any]]] = None,
                  masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
-                 validators: Iterable[MessageValidator] = (), callback_id: Optional[str] = None):
+                 validators: Iterable[BaseMessageValidator] = (), callback_id: Optional[str] = None):
         self.logging_uuid = str(uuid.uuid4())
         self._value = value
         self.topic_key = topic_key
@@ -74,83 +69,6 @@ class SmartAppFromMessage:
         self._callback_id = callback_id  # FIXME: by some reason it possibly to change callback_id
         self.masking_fields = masking_fields
         self.validators = validators
-
-    def validate(self) -> bool:
-        """Try to json.load message and check for all required fields"""
-        for validator in self.validators:
-            if not validator.validate(self.message_name, self.payload):
-                return False
-
-        if self._headers_required and not self.headers:
-            log("Message headers is empty", level="ERROR")
-            return False
-
-        try:
-            message_name = self.as_dict.get(self.MESSAGE_NAME)
-            required_fields = self._REQUIRED_FIELDS_MAP.get(message_name) or self._REQUIRED_FIELDS_MAP[None]
-            for r_field in required_fields:
-                if r_field not in self.as_dict:
-                    self.print_validation_error(r_field)
-                    return False
-
-                if r_field not in self.__annotations__:
-                    continue
-
-                if not isinstance(
-                        self.as_dict[r_field],
-                        self.__annotations__[r_field],
-                ):
-                    self.print_validation_error(
-                        r_field,
-                        self.__annotations__[r_field],
-                    )
-                    return False
-
-        except (json.JSONDecodeError, TypeError):
-            log(
-                "Message validation error: json decode error",
-                exc_info=True,
-                level="ERROR",
-            )
-            self.print_validation_error()
-            return False
-
-        return True
-
-    def print_validation_error(
-            self,
-            required_field: Optional[str] = None,
-            required_field_type: Optional[str] = None,
-    ) -> None:
-        if self._value:
-            params = {
-                "value": str(self._value),
-                "required_field": required_field,
-                "required_field_type": required_field_type,
-                log_const.KEY_NAME: log_const.EXCEPTION_VALUE
-            }
-            if required_field and required_field_type:
-                log(
-                    "Message validation error: Expected '%(required_field)s'"
-                    " of type '%(required_field_type)s': %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-            elif required_field:
-                log(
-                    "Message validation error: Required field "
-                    "'%(required_field)s' is missing: %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-            else:
-                log(
-                    "Message validation error: Format is wrong: %(value)s",
-                    params=params,
-                    level="ERROR",
-                )
-        else:
-            log("Message validation error: Message is empty", level="ERROR")
 
     @property
     def _callback_id_header_name(self) -> str:
@@ -257,19 +175,6 @@ class SmartAppFromMessage:
         masked_data = mask_numbers(masking(self.as_dict, self.masking_fields)) if mask_numbers_flag else \
             masking(self.as_dict, self.masking_fields)
         return json.dumps(masked_data, ensure_ascii=False)
-
-    @property
-    def message_name(self) -> str:
-        return self.as_dict[self.MESSAGE_NAME]
-
-    @message_name.setter
-    def message_name(self, message_name: str):
-        self._value[self.MESSAGE_NAME] = message_name
-
-    # unique message_id
-    @property
-    def incremental_id(self) -> int:
-        return self.as_dict[self.MESSAGE_ID]
 
     @property
     def as_dict(self) -> Dict[str, Any]:

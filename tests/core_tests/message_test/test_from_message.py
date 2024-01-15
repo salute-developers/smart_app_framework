@@ -2,13 +2,7 @@ import json
 from unittest import TestCase
 
 from core.message.from_message import SmartAppFromMessage
-from core.message.msg_validator import MessageValidator
 from core.utils.utils import current_time_ms
-
-
-class PieMessageValidator(MessageValidator):
-    def validate(self, message_name: str, payload: dict):
-        return 3.14 < payload.get("pi", 0) < 3.15
 
 
 class TestFromMessage(TestCase):
@@ -60,48 +54,3 @@ class TestFromMessage(TestCase):
         self.assertEqual(device["capabilities"], message.device.capabilities)
         self.assertEqual(device["additionalInfo"], message.device.additional_info)
         self.assertEqual(topic, message.topic_key)
-
-    def test_valid_true(self):
-        input_msg = {
-            "messageId": 2,
-            "sessionId": "234",
-            "uuid": {"userChannel": "web", "userId": "99", "chatId": "80"},
-            "payload": {"key": "some payload"},
-            "messageName": "some_type"
-        }
-        headers = [('test_header', 'result')]
-        message = SmartAppFromMessage(input_msg, headers=headers)
-        self.assertTrue(message.validate())
-
-    def test_valid_false(self):
-        input_msg = {
-            "uuid": {"userChannel": "web", "userId": 99, "chatId": 80},
-            "payload": "some payload"
-        }
-        headers = [('test_header', 'result')]
-
-        message = SmartAppFromMessage(input_msg, headers=headers)
-        self.assertFalse(message.validate())
-
-    def test_validation(self):
-        input_msg = {
-            "uuid": {"userChannel": "web", "userId": "99", "chatId": "80"},
-            "messageName": "some_name",
-            "messageId": "random_id",
-            "sessionId": "random_id",
-            "payload": {
-                "pi": 3.14159265358979,
-            }
-        }
-        headers = [('test_header', 'result')]
-
-        message = SmartAppFromMessage(
-            input_msg,
-            headers=headers, validators=(PieMessageValidator(),))
-        self.assertTrue(message.validate())
-
-        input_msg["payload"]["pi"] = 2.7182818284
-        message = SmartAppFromMessage(
-            input_msg,
-            headers=headers, validators=(PieMessageValidator(),))
-        self.assertFalse(message.validate())

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Iterable, Optional, List
 import json
 from copy import copy
 
+from core.message.message import SmartAppMessage
 from core.utils.masking_message import masking
 from core.utils.utils import mask_numbers
 from smart_kit.configs import settings
@@ -12,16 +13,16 @@ from smart_kit.utils import SmartAppToMessage_pb2
 
 if TYPE_CHECKING:
     from core.basic_models.actions.command import Command
-    from core.message.msg_validator import MessageValidator
+    from core.message.validators.base_validator import BaseMessageValidator
     from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 
-class SmartAppToMessage:
+class SmartAppToMessage(SmartAppMessage):
     ROOT_NODES_KEY = "root_nodes"
     PAYLOAD = "payload"
 
     def __init__(self, command: Command, message, request: SmartKitKafkaRequest,
-                 forward_fields=None, masking_fields=None, validators: Iterable[MessageValidator] = (),
+                 forward_fields=None, masking_fields=None, validators: Iterable[BaseMessageValidator] = (),
                  masking_white_list: Optional[List[str]] = None, **kwargs):
         root_nodes = command.payload.pop(self.ROOT_NODES_KEY, None)
         self.command = command
@@ -87,9 +88,3 @@ class SmartAppToMessage:
         elif self.command.loader == "protobuf":
             protobuf_message = self.as_protobuf_message(self.as_dict)
             return protobuf_message.SerializeToString()
-
-    def validate(self):
-        for validator in self.validators:
-            if not validator.validate(self.command.name, self.payload):
-                return False
-        return True

@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from typing import Type, Iterable
+from typing import Type
 import asyncio
 import signal
 
@@ -14,7 +14,8 @@ from core.monitoring.healthcheck_handler import RootResource
 from core.monitoring.twisted_server import TwistedServer
 from core.model.base_user import BaseUser
 from core.basic_models.parametrizers.parametrizer import BasicParametrizer
-from core.message.msg_validator import MessageValidator
+from smart_kit.configs.settings import Settings
+from smart_kit.message.validators import get_validators_from_settings
 from smart_kit.start_points.postprocess import PostprocessMainLoop
 from smart_kit.models.smartapp_model import SmartAppModel
 
@@ -26,9 +27,7 @@ class BaseMainLoop:
             user_cls: Type[BaseUser],
             parametrizer_cls: Type[BasicParametrizer],
             postprocessor_cls: Type[PostprocessMainLoop],
-            settings,
-            to_msg_validators: Iterable[MessageValidator] = (),
-            from_msg_validators: Iterable[MessageValidator] = (),
+            settings: Settings,
             *args, **kwargs
     ):
         log("%(class_name)s.__init__ started.", params={
@@ -47,11 +46,10 @@ class BaseMainLoop:
             self.postprocessor = postprocessor_cls()
             self.db_adapter = self.get_db()
             self.is_work = True
-            self.to_msg_validators: Iterable[MessageValidator] = to_msg_validators
-            self.from_msg_validators: Iterable[MessageValidator] = from_msg_validators
+            self.from_msg_validators = get_validators_from_settings("from", settings, model)
+            self.to_msg_validators = get_validators_from_settings("to", settings, model)
 
             template_settings = self.settings["template_settings"]
-
             save_tries = template_settings.get("user_save_collisions_tries", 0)
 
             self.user_save_check_for_collisions = True if save_tries > 0 else False

@@ -2,6 +2,9 @@ import importlib
 import os
 from functools import lru_cache
 
+from core.message.validators.header_validator import MessageHeadersValidator
+from core.message.validators.required_fields_validator import RequiredFieldsValidator
+
 ENVIRONMENT_VARIABLE = "SMART_KIT_APP_CONFIG"
 
 
@@ -76,8 +79,6 @@ def get_app_config(environment_variable=ENVIRONMENT_VARIABLE):
     set_default(app_config, "NORMALIZATION_CACHE", JSONCache)
 
     set_default(app_config, "PLUGINS", ())
-    set_default(app_config, "TO_MSG_VALIDATORS", ())
-    set_default(app_config, "FROM_MSG_VALIDATORS", ())
     set_default(app_config, "AUTO_LISTENING", True)
 
     static_classifiers_path = os.getenv("STATIC_CLASSIFIERS_PATH") or os.path.join(references_path, "./classifiers")

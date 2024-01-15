@@ -11,8 +11,11 @@ from core.message.from_message import SmartAppFromMessage
 from core.utils.utils import deep_update_dict
 from scenarios.user.user_model import User
 from smart_kit.compatibility.commands import combine_commands
+from smart_kit.configs import get_app_config
 from smart_kit.configs.settings import Settings
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
+from smart_kit.message.validators import get_validators_from_settings
+from smart_kit.message.validators.base_validator_with_resources import BaseMessageValidatorWithResources
 from smart_kit.models.smartapp_model import SmartAppModel
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.testing.utils import Environment
@@ -233,7 +236,15 @@ class TestCase:
                 headers = [(self.__from_msg_cls.CALLBACK_ID_HEADER_NAME, app_callback_id.encode())]
             else:
                 headers = [('kafka_correlationId', 'test_123')]
-            message = self.create_message(request, headers=headers)
+
+            message = self.create_message(
+                request, headers=headers,
+                validators=get_validators_from_settings("from", self.settings, self.app_model)
+            )
+
+            if not message.validate():
+                print(f"[!] Incoming message {message.message_name} validation failed.")
+                return False
 
             user = self.__user_cls(
                 id=message.uid, message=message, db_data=self.user_state, settings=self.settings,
@@ -289,7 +300,7 @@ class TestCase:
     def _generate_history_answers(self, user, message):
         return []
 
-    def create_message(self, data, headers=None):
+    def create_message(self, data, *args, **kwargs):
         defaults = Environment().as_dict
 
         predefined_fields = data.get("predefined_fields")
@@ -308,7 +319,7 @@ class TestCase:
             defaults["payload"].update({"message": message})
 
         defaults.update(data)
-        return self.__from_msg_cls(defaults, headers=headers)
+        return self.__from_msg_cls(defaults, *args, **kwargs)
 
     def handle_predefined_fields_response(self, predefined_fields_resp, response):
         predefined_fields_resp_data = self.storaged_predefined_fields[predefined_fields_resp]

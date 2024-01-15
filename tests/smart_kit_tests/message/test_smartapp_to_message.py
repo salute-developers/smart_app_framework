@@ -1,7 +1,8 @@
 # coding: utf-8
 import unittest
 
-from core.message.msg_validator import MessageValidator
+from core.message.from_message import SmartAppFromMessage
+from core.message.validators.base_validator import BaseMessageValidator, ValidationException
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock
 
@@ -54,9 +55,11 @@ class TestSmartAppToMessage(unittest.TestCase):
         self.assertTrue(obj.payload == {"z": 1, "q": 0})
 
 
-class PieMessageValidator(MessageValidator):
-    def validate(self, message_name: str, payload: dict):
-        return 3.14 < payload.get("pi", 0) < 3.15
+class PieMessageValidator(BaseMessageValidator):
+
+    def _validate(self, message: SmartAppFromMessage):
+        if not 3.14 < message.payload.get("pi", 0) < 3.15:
+            raise ValidationException("pi should be between 3.14 and 3.15")
 
 
 class TestSmartAppToMessageValidation(unittest.TestCase):
