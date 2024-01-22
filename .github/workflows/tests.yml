@@ -7,34 +7,71 @@ on:
   push: {}
 
 jobs:
-  tests:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.8"
+        cache: 'poetry'
+    - name: Install dependencies
+      run: poetry install --no-interaction --no-root --all-extras
+    - name: Lint with flake8
+      run: poetry run task lint
 
+  tests:
     strategy:
       fail-fast: false
       matrix:
-        os-version: ['ubuntu-20.04']
         python-version: ['3.8', '3.9', '3.10', '3.11']
 
-    runs-on: ${{ matrix.os-version }}
-    name: unittests with py-${{ matrix.python-version }} on ${{ matrix.os-version }}
-
+    runs-on: ubuntu-20.04
+    name: unittests with py-${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
+        cache: 'poetry'
     - name: Install dependencies
-      run: |
-        uname -a
-        poetry install --no-interaction --no-root --all-extras
-    - name: Lint with flake8
-      run: poetry run task lint
+      run: poetry install --no-interaction --no-root --all-extras
     - name: Test with unittest
       run: poetry run task unit_test
     - name: Test run_app on HttpMainLoop
       run: poetry run task runapp_http_test
     - name: Test run_app on KafkaMainLoop
       run: poetry run task runapp_kafka_test
+
+  build:
+    needs:
+      - lint
+      - tests
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.8"
+        cache: 'poetry'
+    - name: Install Poetry plugins
+      run: poetry self add "poetry-dynamic-versioning[plugin]"
+    - name: Build for PyPi
+      run: poetry build --format wheel
+    - name: Build for Sber
+      run: |
+        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
+        poetry build --format wheel
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: dist/*.whl

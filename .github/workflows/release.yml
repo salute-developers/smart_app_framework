@@ -1,18 +1,12 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-name: Build Python Package
+name: Build Release Package
 
 on:
   release:
     types: [created]
-  push: {}
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
       with:
@@ -26,25 +20,18 @@ jobs:
     - name: Install Poetry plugins
       run: |
          poetry self add "poetry-dynamic-versioning[plugin]"
-    - name: Build for PyPi
-      run: |
-        poetry build --format wheel
-    - name: Build for Sber
-      run: |
-        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
-        poetry build --format wheel
-    - name: Publish to PyPi
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Build and publish
       env:
         PYPI_USERNAME: __token__
         PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
+        poetry build --format wheel
         poetry publish --username=$PYPI_USERNAME --password=$PYPI_PASSWORD
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        path: dist/*.whl
-    - name: Upload Release Assets
+    - name: Build for Sber
+      run: |
+        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
+        poetry build --format wheel
+    - name: Upload Assets
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
