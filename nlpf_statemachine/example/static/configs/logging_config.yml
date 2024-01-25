@@ -43,7 +43,7 @@ handlers:
     stream: ext://sys.stdout
 formatters:
   file_json_formatter:
-    "()": smart_kit.base.logger_writer.logger_formatter.SmartKitJsonFormatter
+    "()": smart_kit.utils.logger_writer.logger_formatter.SmartKitJsonFormatter
     json_ensure_ascii: false
     format: "%(created)f %(msecs)d %(relativeCreated)d %(levelname)s %(name)s %(asctime)s
         %(module)s  %(message)s"
