@@ -1,0 +1,36 @@
+---
+template-engine:
+  main:
+    default_topic_key: dialog_policy
+    publisher:
+      conf:
+        bootstrap.servers: tkle-mess0066.vm.esrt.cloud.sbrf.ru:9092
+        topic.metadata.refresh.interval.ms: 100000
+      poll_timeout: 0
+      flush_timeout: 10000
+      partitions_count: 3
+      topic:
+        dialog_policy: toDP1313
+        goods_ihub: marketplaceToIhub
+        remember_memory: rememberMemory
+        give_memory: giveMemory
+        food_source: appToFoodtech
+    consumer:
+      assign_offset_end: true
+      default_topic_key: dialog_policy
+      poll_timeout: 0.01
+      topics:
+        dialog_policy: DPtoMarketplace1313
+        food_source: foodtechToApp
+      conf:
+        bootstrap.servers: tkle-mess0066.vm.esrt.cloud.sbrf.ru:9092
+        topic.metadata.refresh.interval.ms: 100000
+        group.id: marketplace_local
+        session.timeout.ms: 6000
+        enable.auto.commit: false
+        auto.commit.interval.ms: 1000
+        enable.auto.offset.store: true
+        default.topic.config:
+          auto.offset.reset: latest
+        debug: all
+      internal_log_path: "/tmp"
