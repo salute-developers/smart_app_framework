@@ -4,7 +4,7 @@
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Union
-from unittest import TestCase
+from unittest import TestCase, IsolatedAsyncioTestCase
 
 from pydantic import BaseModel
 
@@ -41,7 +41,23 @@ class SMTestCaseBase(TestCase):
         self.mocks = BaseMocks(core=self.core)
 
 
-class SMTestCase(SMTestCaseBase):
+class SMAsyncioTestCaseBase(IsolatedAsyncioTestCase):
+    """
+    # Базовый класс тест-кейс для фреймворка NLPF StateMachine.
+    """
+
+    CONTEXT_CLASS = Context
+    SMART_KIT_APP_CONFIG = "app_config"
+
+    def setUp(self) -> None:
+        """
+        ## Конфигурация базовых параметров перед запуском тестов.
+        """
+        self.core = TestsCore(smart_kit_app_config=self.SMART_KIT_APP_CONFIG)
+        self.mocks = BaseMocks(core=self.core)
+
+
+class SMTestCase(SMAsyncioTestCaseBase):
     """
     # Основной класс для написания тест-кейсов на фреймворке NLPF StateMachine.
 
