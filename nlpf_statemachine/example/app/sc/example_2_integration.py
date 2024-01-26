@@ -4,7 +4,9 @@
 1. Пример простой интеграции с TokenService.
 2. Пример run_app, где так же используется интеграция с токен-сервисом.
 """
-from nlpf_statemachine.example.app.sc.enums.integration_message_names import IntegrationRequestMessageName, IntegrationResponseMessageName
+from nlpf_statemachine.example.app.sc.enums.integration_message_names import (
+    IntegrationRequestMessageName, IntegrationResponseMessageName,
+)
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.sc.models.token_service_integration import GetTokenPayload, GetTokenRequest
 from nlpf_statemachine.kit import Scenario

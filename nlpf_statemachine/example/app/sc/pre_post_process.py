@@ -59,12 +59,14 @@ def post_process(message: BaseMessage, response: AnswerToUser, context: ExampleC
 
     if new_session:
         if context.local.ihapi_token:
-            response.payload.items = [
-                                         generate_item(
-                                             smart_app_data=InitCommand(
-                                                 token=context.local.ihapi_token.accessToken,
-                                             )),
-                                     ] + response.payload.items
+            items = [
+                generate_item(
+                    smart_app_data=InitCommand(
+                        token=context.local.ihapi_token.accessToken,
+                    )),
+            ]
+
+            response.payload.items = items + response.payload.items
         else:
             behaviour_log("No token in context.", level="ERROR", params={"message_id": message.messageId})
             raise ValueError("No token")
