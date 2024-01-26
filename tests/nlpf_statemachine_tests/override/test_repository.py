@@ -4,7 +4,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from nlpf_statemachine.config import CONTEXT_MANAGER_ID
+from nlpf_statemachine.const import CONTEXT_MANAGER_ID
 from nlpf_statemachine.override import SMRepository
 
 

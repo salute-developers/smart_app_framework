@@ -7,7 +7,7 @@ from copy import deepcopy
 from lazy import lazy
 
 from core.descriptions.descriptions import Descriptions
-from nlpf_statemachine.config import CONTEXT_MANAGER_ID, STATE_MACHINE_REPOSITORY_NAME
+from nlpf_statemachine.const import CONTEXT_MANAGER_ID, STATE_MACHINE_REPOSITORY_NAME
 from nlpf_statemachine.kit import ContextManager
 from nlpf_statemachine.override import SMDialogueManager, SMSmartAppModel, SMSmartAppResources
 from smart_kit.configs import get_app_config
