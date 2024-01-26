@@ -11,7 +11,7 @@ from nlpf_statemachine.kit import Screen
 from nlpf_statemachine.models import AssistantState, IntegrationMessage
 from tests.nlpf_statemachine_tests.utils import (
     AnyObj,
-    SMTestCase,
+    SMAsyncioTestCase,
     action_integration_mock,
     action_mock,
     assert_action_call,
@@ -20,7 +20,7 @@ from tests.nlpf_statemachine_tests.utils import (
 )
 
 
-class TestScenarioIntegration(SMTestCase):
+class TestScenarioIntegration(SMAsyncioTestCase):
     """
     # Тесты на работу интеграций.
 

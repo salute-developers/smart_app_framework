@@ -6,10 +6,10 @@ from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.user import ExampleUser
 from nlpf_statemachine.kit import ContextManager
 from nlpf_statemachine.models import BaseMessage, Context, DoNothing, ErrorResponse, NothingFound
-from tests.nlpf_statemachine_tests.utils import SMTestCase, action_mock, random_string
+from tests.nlpf_statemachine_tests.utils import SMAsyncioTestCase, action_mock, random_string
 
 
-class TestScenarioSimpleEvent(SMTestCase):
+class TestScenarioSimpleEvent(SMAsyncioTestCase):
     """
     # Тесты на простой запуск сценария с каким-либо событием.
     """

@@ -8,7 +8,7 @@ from nlpf_statemachine.example.app.user import ExampleUser
 from nlpf_statemachine.kit import ContextManager
 from nlpf_statemachine.models import Context, NothingFound
 from tests.nlpf_statemachine_tests.utils import (
-    SMTestCase,
+    SMAsyncioTestCase,
     action_mock,
     assert_action_call,
     classifier_mock,
@@ -16,7 +16,7 @@ from tests.nlpf_statemachine_tests.utils import (
 )
 
 
-class TestScenarioIntentOrFallbackOnlyGlobal(SMTestCase):
+class TestScenarioIntentOrFallbackOnlyGlobal(SMAsyncioTestCase):
     """
     # Тесты на отработку классификации глобальных интентов и падение в фолбек.
     """

@@ -9,10 +9,10 @@ from pydantic import BaseModel
 
 from nlpf_statemachine.models import BaseMessage, Context, RequestMessageName
 from nlpf_statemachine.override import SMUser
-from tests.nlpf_statemachine_tests.utils import SMTestCaseBase, random_string
+from tests.nlpf_statemachine_tests.utils import SMAsyncioTestCaseBase, random_string
 
 
-class TestUser(SMTestCaseBase):
+class TestUser(SMAsyncioTestCaseBase):
     """
     # Тесты на объект User в StateMachine.
     """

@@ -6,7 +6,7 @@ from nlpf_statemachine.example.app.user import ExampleUser
 from nlpf_statemachine.kit import ContextManager, Screen
 from nlpf_statemachine.models import AssistantState, BaseMessage, Context
 from tests.nlpf_statemachine_tests.utils import (
-    SMTestCase,
+    SMAsyncioTestCase,
     action_mock,
     action_with_exception_mock,
     assert_action_call,
@@ -14,7 +14,7 @@ from tests.nlpf_statemachine_tests.utils import (
 )
 
 
-class TestContextManagerExceptions(SMTestCase):
+class TestContextManagerExceptions(SMAsyncioTestCase):
     """
     # Тесты на обработку ошибок в эшкенах.
     """

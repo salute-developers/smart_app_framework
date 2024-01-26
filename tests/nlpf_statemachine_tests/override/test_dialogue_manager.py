@@ -8,10 +8,10 @@ from pydantic import BaseModel
 
 from core.basic_models.actions.command import Command
 from nlpf_statemachine.models import AssistantResponsePayload, Response
-from tests.nlpf_statemachine_tests.utils import SMTestCaseBase, random_guid
+from tests.nlpf_statemachine_tests.utils import SMAsyncioTestCaseBase, random_guid
 
 
-class TestScenarioSimpleEvent(SMTestCaseBase):
+class TestScenarioSimpleEvent(SMAsyncioTestCaseBase):
     """
     # Тесты на переопределение DialogManager.
     """

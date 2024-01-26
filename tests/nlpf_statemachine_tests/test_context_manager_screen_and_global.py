@@ -8,7 +8,7 @@ from nlpf_statemachine.example.app.user import ExampleUser
 from nlpf_statemachine.kit import ContextManager, Screen
 from nlpf_statemachine.models import AssistantState, Context
 from tests.nlpf_statemachine_tests.utils import (
-    SMTestCase,
+    SMAsyncioTestCase,
     action_mock,
     assert_action_call,
     classifier_mock,
@@ -16,7 +16,7 @@ from tests.nlpf_statemachine_tests.utils import (
 )
 
 
-class TestScenarioWithScreen(SMTestCase):
+class TestScenarioWithScreen(SMAsyncioTestCase):
     """
     # Тесты на работу классификации при наличии страниц.
     """

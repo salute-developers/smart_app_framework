@@ -9,13 +9,15 @@
 
 from .base import AnyObj, assert_action_call, random_guid, random_string
 from .mocks import TestsCore, action_integration_mock, action_mock, action_with_exception_mock, classifier_mock
-from .test_case import SMTestCase, SMTestCaseBase
+from .test_case import SMAsyncioTestCaseBase, SMAsyncioTestCase, SMTestCase, SMTestCaseBase
 
 __version__ = "0.0.1"
 
 __all__ = [
     __version__,
     AnyObj,
+    SMAsyncioTestCase,
+    SMAsyncioTestCaseBase,
     SMTestCase,
     SMTestCaseBase,
     TestsCore,
