@@ -10,7 +10,8 @@ from pydantic import BaseModel
 
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.logging.logger_utils import behaviour_log
-from nlpf_statemachine.config import DEFAULT_INTEGRATION_BEHAVIOR_ID, GLOBAL_NODE_NAME
+from nlpf_statemachine.config import DEFAULT_INTEGRATION_BEHAVIOR_ID
+from nlpf_statemachine.const import GLOBAL_NODE_NAME
 from nlpf_statemachine.models import (
     Context,
     DoNothing,
