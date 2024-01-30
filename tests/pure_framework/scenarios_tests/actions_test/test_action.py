@@ -25,7 +25,7 @@ from scenarios.scenario_models.history import Event
 from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.utils.picklable_mock import PicklableMock, PicklableMagicMock, AsyncPicklableMock
-from tests.core_tests.requirements_test.test_requirements import MockRequirement
+from tests.pure_framework.core_tests.requirements_test.test_requirements import MockRequirement
 
 
 class MockAction:

@@ -6,7 +6,7 @@ from aiohttp import ClientTimeout
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from smart_kit.utils.picklable_mock import PicklableMock, AsyncPicklableMock
-from tests.smart_kit_tests.action.test_http import HttpRequestActionTest
+from tests.pure_framework.smart_kit_tests.action.test_http import HttpRequestActionTest
 
 
 class SmartPayActionTest(unittest.IsolatedAsyncioTestCase):
