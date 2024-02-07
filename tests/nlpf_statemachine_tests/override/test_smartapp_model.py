@@ -117,7 +117,7 @@ class TestSmartAppModel(SMTestCaseBase):
             super_run=super_run,
             context_manager_run=context_manager_run,
         )
-        super_run.assert_called_with(payload=message.payload.dict(), user=user)
+        super_run.assert_called_with(payload=message.payload.model_dump(), user=user)
 
     @patch("nlpf_statemachine.kit.context_manager.ContextManager.run")
     @patch("smart_kit.handlers.handle_server_action.HandlerServerAction.run")
@@ -217,7 +217,7 @@ class TestSmartAppModel(SMTestCaseBase):
             super_run=super_run,
             context_manager_run=context_manager_run,
         )
-        super_run.assert_called_with(payload=message.payload.dict(), user=user)
+        super_run.assert_called_with(payload=message.payload.model_dump(), user=user)
 
     @patch("nlpf_statemachine.kit.context_manager.ContextManager.run")
     @patch("smart_kit.handlers.handle_close_app.HandlerCloseApp.run")

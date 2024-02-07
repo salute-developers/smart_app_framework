@@ -113,7 +113,7 @@ class TestScenarioSimpleEvent(SMAsyncioTestCaseBase):
         assert response[0].name == mock_response.messageName
         assert response[0].request_type is None
         assert response[0].request_data == {}
-        assert response[0].payload == mock_response.payload.dict(exclude_none=True)
+        assert response[0].payload == mock_response.payload.model_dump(exclude_none=True)
 
     @patch("nlpf_statemachine.kit.context_manager.ContextManager.run")
     async def test_run_statemachine_3(self, context_manager_run: MagicMock) -> None:
@@ -139,7 +139,7 @@ class TestScenarioSimpleEvent(SMAsyncioTestCaseBase):
 
         assert response[0].name == mock_response.messageName
         assert response[0].request_type is None
-        assert response[0].request_data == mock_response.request_data.dict()
+        assert response[0].request_data == mock_response.request_data.model_dump()
         assert response[0].payload == {}
 
     @patch("nlpf_statemachine.kit.context_manager.ContextManager.run")

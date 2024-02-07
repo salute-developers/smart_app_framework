@@ -2,9 +2,7 @@
 # Описание модели конфигурации данных для запроса в интеграцию.
 """
 
-from typing import Optional
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class RequestData(BaseModel):
@@ -12,9 +10,9 @@ class RequestData(BaseModel):
     # Данные для запроса в кафку.
     """
 
-    topic_key: Optional[str]
+    topic_key: str | None = Field(default=None)
     """Ключ кафки для запроса"""
-    kafka_replyTopic: Optional[str]
+    kafka_replyTopic: str | None = Field(default=None)
     """Ключ кафки для ответа"""
-    app_callback_id: Optional[str]
+    app_callback_id: str | None = Field(default=None)
     """ID бихейвора"""

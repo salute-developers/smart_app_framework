@@ -1,9 +1,9 @@
 """
 # Описание модели Device.
 """
-from typing import Any, Optional
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .device_capability import DeviceCapabilities
 from .device_features import DeviceFeatures
@@ -14,7 +14,7 @@ class Device(BaseModel):
     # Описание модели Device.
     """
 
-    platformType: Optional[str]
+    platformType: str | None = Field(default=None)
     """
     Операционная система устройства.
 
@@ -23,9 +23,9 @@ class Device(BaseModel):
     * ANDROID;
     * IOS.
     """
-    platformVersion: Optional[str]
+    platformVersion: str | None = Field(default=None)
     """Версия операционной системы."""
-    surface: Optional[str]
+    surface: str | None = Field(default=None)
     """
     Устройство или мобильное приложение, от которого приходит вызов ассистента.
 
@@ -35,17 +35,17 @@ class Device(BaseModel):
     * COMPANION — запрос от приложения Салют;
     * STARGATE — запрос от устройства SberPortal.
     """
-    surfaceVersion: Optional[str]
+    surfaceVersion: str | None = Field(default=None)
     """Версия поверхности."""
-    deviceId: Optional[str]
+    deviceId: str | None = Field(default=None)
     """Идентификатор устройства."""
-    features: Optional[DeviceFeatures]
+    features: DeviceFeatures | None = Field(default=None)
     """Описание функциональности устройства."""
-    capabilities: Optional[DeviceCapabilities]
+    capabilities: DeviceCapabilities | None = Field(default=None)
     """Описание возможностей устройства пользователя."""
-    additionalInfo: Optional[Any]
+    additionalInfo: Any | None = Field(default=None)
     """Дополнительная информация об объекте или устройстве. В настоящий момент не используется."""
-    deviceManufacturer: Optional[str]
+    deviceManufacturer: str | None = Field(default=None)
     """Производитель устройства"""
-    deviceModel: Optional[str]
+    deviceModel: str | None = Field(default=None)
     """Модель устройства"""

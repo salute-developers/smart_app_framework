@@ -7,7 +7,7 @@ from uuid import uuid4
 from pydantic import BaseModel
 
 from core.configs.global_constants import CALLBACK_ID_HEADER
-from nlpf_statemachine.config import DEFAULT_INTEGRATION_BEHAVIOR_ID
+from nlpf_statemachine.config import SMConfig
 from nlpf_statemachine.kit.context_manager import ContextManager
 from nlpf_statemachine.models import (
     AppInfo,
@@ -81,7 +81,7 @@ class TestUtils(TestCase):
         self.context_manager = ContextManager()
 
     def _get_local_context_class(self) -> None:
-        return self.CONTEXT_CLASS.__fields__.get("local").type_
+        return self.CONTEXT_CLASS.model_fields.get("local").annotation
 
     def _create_local_context(self) -> None:
         local_context_class = self._get_local_context_class()
@@ -257,7 +257,7 @@ class TestUtils(TestCase):
     def assert_action_call(self, action, response, message, context, form):
         action.assert_called_with(message=message, context=context, form=form)
         if isinstance(action.return_value.payload, BaseModel):
-            payload = action.return_value.payload.dict()
+            payload = action.return_value.payload.model_dump()
         else:
             payload = action.return_value.payload
         self.assert_response(response=response, message_name=action.return_value.messageName, payload=payload)
@@ -303,7 +303,7 @@ class TestUtils(TestCase):
         :return:
         """
         self.user.behaviors.add.assert_called_with(
-            callback_id=self.user.message.callback_id, behavior_id=DEFAULT_INTEGRATION_BEHAVIOR_ID,
+            callback_id=self.user.message.callback_id, behavior_id=SMConfig.default_integration_behaviour_id,
         )
         self.asserts_not_transaction_end()
         # assert isinstance(response, list)

@@ -2,9 +2,7 @@
 # Описание Payload для основных запросов.
 """
 
-from typing import Any, Dict, Optional, List
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .annotations import Annotations
 from .app_info import AppInfo
@@ -23,19 +21,19 @@ class AssistantPayload(BaseModel):
     # Описание модели AssistantPayload.
     """
 
-    app_info: Optional[AppInfo]
+    app_info: AppInfo | None = Field(default=None)
     """Информация о смартапе."""
-    intent: Optional[str]
+    intent: str | None = Field(default=None)
     """Интент, полученный из предыдущего ответа смартапа"""
-    original_intent: Optional[str]
+    original_intent: str | None = Field(default=None)
     """Исходный интент. Значение поля отличается от значения intent только при монопольном захвате контекста"""
-    meta: Optional[AssistantMeta]
+    meta: AssistantMeta = Field(default_factory=AssistantMeta)
     """Данные о содержимом экрана пользователя."""
-    projectName: Optional[str]
+    projectName: str | None = Field(default=None)
     """Имя смартапа, которое задается при создании проекта и отображается в каталоге приложений."""
-    device: Optional[Device]
+    device: Device | None = Field(default=None)
     """Информация об устройстве пользователя."""
-    new_session: Optional[bool]
+    new_session: bool | None = Field(default=None)
     """
     Указывает на характер запуска смартапа.
 
@@ -49,65 +47,65 @@ class AssistantPayload(BaseModel):
 
     По умолчанию: `false`.
     """
-    character: Optional[Character]
+    character: Character | None = Field(default=None)
     """Информация о текущем персонаже ассистента, который установлен у пользователя."""
-    strategies: Optional[Strategies]
+    strategies: Strategies | None = Field(default=None)
     """Возможные стратегии смартапа."""
-    smartBio: Optional[Dict[str, Any]]
+    smartBio: dict | None = Field(default=None)
     """Данные от биометрии"""
-    contentProvider: Optional[Dict[str, Any]]
+    contentProvider: dict | None = Field(default=None)
     """Проброс payload для звонков вк"""
-    epkId: Optional[str]
+    epkId: str | None = Field(default=None)
     """ЕПК ID"""
-    ufs_info: Optional[Dict[str, Any]]
+    ufs_info: dict | None = Field(default=None)
     """Блок с куками для ЕФС"""
-    applicationId: Optional[str]
+    applicationId: str | None = Field(default=None)
     """Id апликейшена проекта из апп дир"""
-    appversionId: Optional[str]
+    appversionId: str | None = Field(default=None)
     """Id версии проекта из апп дир"""
-    token: Optional[str]
+    token: str | None = Field(default=None)
     """Токен поверхности"""
-    tokenType: Optional[str]
+    tokenType: str | None = Field(default=None)
     """Тип токена"""
-    client_profile: Optional[Dict[str, Any]]
+    client_profile: dict | None = Field(default=None)
     """
     Передается во внутренние аппы и в Axon, если DP удалось получить профиль.
     Профиль обновляется не каждый запрос а N раз в день. Профиль - ЕПК.
     """
-    feature_launcher: Optional[FeatureLauncher]
+    feature_launcher: FeatureLauncher | None = Field(default=None)
     """Коллекция флагов для проведения экспериментов для сервисов и навыков Виртуального Ассистента"""
-    reverseGeocoding: Optional[Dict[str, Any]]
+    reverseGeocoding: dict | None = Field(default=None)
     """Данные от сервиса геокодинга"""
-    legacyEribInfo: Optional[Dict[str, Any]]
+    legacyEribInfo: dict | None = Field(default=None)
     """Поддержка токена ЕРИБ"""
-    dynamic_stuff: Optional[Dict[str, Any]]
+    dynamic_stuff: dict | None = Field(default=None)
     """Динамические данные"""
-    backInfo: Optional[List]
+    backInfo: list | None = Field(default=None)
     """Данные для доступа к брокерским счетам"""
-    permitted_actions: Optional[List]
+    permitted_actions: list | None = Field(default=None)
     """Список согласий этого пользователя которые он дал этому навыку"""
-    additional_info: Optional[Dict[str, Any]]
+    additional_info: dict | None = Field(default=None)
     """Дополнительные данные для запуска приложения"""
-    domain_search: Optional[Dict]
+    domain_search: dict | None = Field(default=None)
     """Результат поиска сущностей по домену"""
-    linkedSmartapp: Optional[Dict]
+    linkedSmartapp: dict | None = Field(default=None)
     """Информация о навыке, который запускает прилинкованный навык в случае если исходный навык недоступен"""
-    last_messages_new: Optional[Dict]
+    last_messages_new: dict | None = Field(default=None)
     """N последних сообщениq от пользователя + интент + ответы ассистента для аксон"""
-    last_messages: Optional[Dict]
+    last_messages: dict | None = Field(default=None)
     """N последних сообщениq от пользователя + интент + ответы ассистента"""
-    dp_first_session: Optional[bool]
+    dp_first_session: bool | None = Field(default=None)
     """
     Флаг, говорящий, является ли это самой первой сессией общения с пользователем
     Передается только в навыки "приветствий"
     """
-    is_first_session: Optional[bool]
+    is_first_session: bool | None = Field(default=None)
     """Флаг первой сессии из VPS. Передается только в навыки "приветствий" """
-    employeeId: Optional[str]
+    employeeId: str | None = Field(default=None)
     """Идентификатор сотрудника. Передается только для внутренних навыков"""
-    employee_profile: Optional[Dict]
+    employee_profile: dict | None = Field(default=None)
     """Профиль сотрудника. Передается только для внутренних навыков и только в канале B2E"""
-    debug_info: Optional[Dict]
+    debug_info: dict | None = Field(default=None)
     """Дебаг информация по сервисам"""
 
 
@@ -127,14 +125,14 @@ class MessageToSkillPayload(AssistantPayload):
 
     message: Message
     """Результат предобработки сообщения."""
-    intent_meta: Optional[Dict]
+    intent_meta: dict | None = Field(default=None)
     """
     Мета данные, полученные от сервиса распознавания интентов.
     Поле будет использовано в будущем. В текущей реализации содержит пустой объект.
     """
-    selected_item: Optional[SelectedItem]
+    selected_item: SelectedItem | None = Field(default=None)
     """Описание элемента экрана, который пользователь назвал при запросе."""
-    annotations: Optional[Annotations]
+    annotations: Annotations | None = Field(default=None)
     """Общие характеристики сообщения пользователя."""
-    asr: Optional[Dict[str, Any]]
+    asr: str | None = Field(default=None)
     """Блок с гипотезами от ASR."""

@@ -1,7 +1,5 @@
 """Модель ответа от ассистента."""
 
-from typing import List, Optional, Union
-
 from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models.enums import ResponseMessageName, TextBubbleExpandPolicy
@@ -129,6 +127,7 @@ class Bubble(BaseModel):
     """
 
     bubble: TextBubble
+    """Набор полей текстового ответа."""
 
 
 class ASRHintsEOUPhraseMatch(BaseModel):
@@ -150,26 +149,26 @@ class ASRHints(BaseModel):
     # Описание модели ASRHints.
     """
 
-    words: List[str] = Field(default_factory=list)
+    words: list[str] = Field(default_factory=list)
     """
     Позволяет использовать список слов или фраз, распознавание которых мы хотим усилить.
     Здесь можно перечислить слова, которые с высокой вероятностью будет произносить пользователь,
     отвечая ассистенту в приложении.
     """
-    enable_letters: Optional[bool]
+    enable_letters: bool | None = Field(default=None)
     """Позволяет включить модель коротких фраз, тем самым улучшить распознавание отдельных букв и коротких слов"""
-    nospeechtimeout: Optional[int]
+    nospeechtimeout: int | None = Field(default=None)
     """
     Меняет интервал ожидания речи пользователя. Возможные значения от 2 до 20 секунд. По умолчанию стоит 7 секунд
     """
-    eou_timeout: Optional[int]
+    eou_timeout: int | None = Field(default=None)
     """
     Меняет настройку системы распознавания конца фразы (End of Utterance --- eou).
     Система закончит распознавать речь, как только от конца фразы, определенного ею, пройдет столько секунд,
     сколько установлено в этом параметре. Возможные значения от 0.5 до 5 секунд.
     По умолчанию распознавание конца фразы срабатывает после 1 секунды.
     """
-    eou_phrase_match: Optional[ASRHintsEOUPhraseMatch]
+    eou_phrase_match: ASRHintsEOUPhraseMatch | None = Field(default=None)
     """
     Использует регулярные выражения при распознавании конца фразы.
     Данный хинт позволяет не прерывать речь пользователя, пока он говорит ожидаемую от него фразу,
@@ -193,7 +192,7 @@ class AssistantResponsePayload(BaseModel):
     Модель для описания payload ответа от ассистента.
     """
 
-    pronounceText: Optional[str]
+    pronounceText: str | None = Field(default=None)
     """
     Текст, который ассистент озвучит пользователю.
 
@@ -201,7 +200,7 @@ class AssistantResponsePayload(BaseModel):
 
     Используйте разметку синтеза речи (тег `audio`), чтобы добавлять звуки в смартап.
     """
-    pronounceTextType: Optional[str]
+    pronounceTextType: str | None = Field(default=None)
     """
     Указывает, что в тексте, который необходимо озвучить (поле pronounceText).
     есть разметка `application/text` или `application/ssml`.
@@ -211,15 +210,15 @@ class AssistantResponsePayload(BaseModel):
     * `application/text`;
     * `application/ssml`.
     """
-    emotion: Optional[Emotion]
+    emotion: Emotion | None = Field(default=None)
     """Эмоция ассистента, которую он показывает с помощью лавашара"""
     auto_listening: bool = Field(default=False)
     """Указывает, что ассистент должен слушать пользователя после выполнения действия, по умолчанию false"""
-    items: List[Union[CanvasAppItem, Bubble]] = Field(default_factory=list)
+    items: list[CanvasAppItem | Bubble] = Field(default_factory=list)
     """Список команд и элементов интерфейса смартапа"""
-    intent: Optional[str]
+    intent: str | None = Field(default=None)
     """Интент, который смартап получит в следующем ответе ассистента"""
-    finished: Optional[bool]
+    finished: bool | None = Field(default=None)
     """
     Сообщает ассистенту о завершении работы смартапа.
 
@@ -233,16 +232,16 @@ class AssistantResponsePayload(BaseModel):
     Для этого требуется передать ассистенту команду close_app с помощью метода `assistant.close()`
     или `window.AssistantHost.close()`, если вы не используете Assistant Client.
     """
-    asr_hints: Optional[ASRHints]
+    asr_hints: ASRHints | None = Field(default=None)
     """Подсказки для сервиса синтеза и распознавания речи."""
-    suggestions: List[Button] = Field(default_factory=list)
+    suggestions: list[Button] = Field(default_factory=list)
     """
     Предложения, которые смартап может сделать пользователю в зависимости от контекста диалога.
     Предложения могут быть представлены в виде кнопок и карточек.
 
     Важно! Предложения носят **информационный характер.** Оформляйте их в виде подсказок, а не кнопок.
     """
-    activate_app_info: Optional[bool]
+    activate_app_info: bool | None = Field(default=None)
     """Флаг, по которому фронт открывает навык или считает что навык открывать не нужно, по умолчанию считается true"""
 
 
@@ -253,7 +252,7 @@ class AssistantResponse(Response):
     Модель ответа от ассистента.
     """
 
-    messageName: str = Field(description="Наименование ответа", default=ResponseMessageName.ANSWER_TO_USER)
+    messageName: str = ResponseMessageName.ANSWER_TO_USER
     """Message Name ответа"""
     payload: AssistantResponsePayload = Field(default_factory=AssistantResponsePayload)
     """Payload ответа"""

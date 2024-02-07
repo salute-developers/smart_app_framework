@@ -44,7 +44,6 @@ USER = CustomUser
 ```
 
 """
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -55,54 +54,40 @@ from .message import BaseMessage
 class LocalContext(BaseModel):
     """Описание локального контекста (в рамках одной транзакции)."""
 
-    init_event: Optional[str] = None
+    init_event: str | None = Field(default=None)
     """Событие, с которого произошёл запуск ContextManager (может быть None, если был голосовой запуск)."""
-
-    base_event: Optional[str] = None
+    base_event: str | None = Field(default=None)
     """Базовое событие, с которого началась транзакция (событие, по которому был запущен первый экшен в транзакции)."""
-
-    base_message: Optional[BaseMessage] = None
+    base_message: BaseMessage | None = Field(default=None)
     """Сообщение, с которого началась транзакция."""
-
-    last_transaction_step_timestamp: Optional[float] = None
+    last_transaction_step_timestamp: float | None = Field(default=None)
     """Timestamp последнего запроса в транзакции."""
-
-    call_history: List[CallHistoryItem] = Field(default_factory=list)
+    call_history: list[CallHistoryItem | None] = Field(default_factory=list)
     """Список вызовов (полезное поле для отладки транзакции)."""
-
-    character_id: Optional[str]
+    character_id: str | None = Field(default=None)
     """Текущий выбранный ассистент."""
-
-    run_isolated_scenario: Optional[bool] = False
+    run_isolated_scenario: bool | None = Field(default=False)
     """Флаг на запущенный изолированный сценарий."""
-
-    isolated_scenario_id: Optional[str] = None
+    isolated_scenario_id: str | None = Field(default=None)
     """Идентификатор запущенного изолированного сценария (если запущен)."""
 
 
 class Context(BaseModel):
     """Описание контекста."""
 
+    id: str | None = Field(default=None)
+    """Идентификатор текущего стейта."""
     local: LocalContext = Field(default_factory=LocalContext)
     """Контекст, живущий в рамках одной транзакции (`LocalContext`)."""
-
-    id: Optional[str] = None
-    """Идентификатор текущего стейта."""
-
-    screen: Optional[str] = None
+    screen: str | None = Field(default=None)
     """Страница, на которой находится пользователь в рамках текущего запроса (если определена)."""
-
-    event: Optional[str] = None
+    event: str | None = Field(default=None)
     """Событие, на которое реагируем в текущем запросе."""
-
-    last_screen: Optional[str] = None
+    last_screen: str | None = Field(default=None)
     """Страница, которая была при предыдущем запросе (обновляется в конце транзакции)."""
-
-    last_event: Optional[str] = None
+    last_event: str | None = Field(default=None)
     """Предыдущее событие."""
-
-    last_response_message_name: Optional[str] = None
+    last_response_message_name: str | None = Field(default=None)
     """Наименования предыдущего ответа."""
-
-    last_intent: Optional[str] = None
+    last_intent: str | None = Field(default=None)
     """Последний пришедший интент от платформы."""

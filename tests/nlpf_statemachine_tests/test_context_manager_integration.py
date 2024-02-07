@@ -4,11 +4,11 @@
 from random import choice
 
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
-from nlpf_statemachine.example.app.sc.models.message import CustomMessageToSkill
+from nlpf_statemachine.example.app.sc.models.message import CustomMessageToSkill, CustomState
 from nlpf_statemachine.example.app.user import ExampleUser
-from nlpf_statemachine.config import TRANSACTION_MESSAGE_NAME_FINISH_LIST
+from nlpf_statemachine.config import SMConfig
 from nlpf_statemachine.kit import Screen
-from nlpf_statemachine.models import AssistantState, IntegrationMessage
+from nlpf_statemachine.models import IntegrationMessage
 from tests.nlpf_statemachine_tests.utils import (
     AnyObj,
     SMAsyncioTestCase,
@@ -46,7 +46,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_screen(screen=self.screen)
         self.message = self.mocks.message_to_skill(
             cls=CustomMessageToSkill,
-            state=AssistantState(screen=self.screen.id),
+            state=CustomState(screen=self.screen.id),
         )
         self.integration_response = IntegrationMessage(messageName=random_string(), payload={})
 
@@ -60,7 +60,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_action(event=action.event, action=action)
         self.core.context_manager.add_classifier(classifier=classifier)
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_on_event_local = action_mock(message_name=message_name)
         action_on_event_and_base_event_local = action_mock(message_name=message_name)
         action_on_event_and_other_base_event_local = action_mock(message_name=message_name)
@@ -151,7 +151,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_action(event=action.event, action=action)
         self.core.context_manager.add_classifier(classifier=classifier)
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_on_event_local = action_mock(message_name=message_name)
         action_on_event_and_other_base_event_local = action_mock(message_name=message_name)
         action_on_event_global = action_mock(message_name=message_name)
@@ -233,7 +233,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_action(event=action.event, action=action)
         self.core.context_manager.add_classifier(classifier=classifier)
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_on_event_and_other_base_event_local = action_mock(message_name=message_name)
         action_on_event_global = action_mock(message_name=message_name)
         action_on_event_and_base_event_global = action_mock(message_name=message_name)
@@ -307,7 +307,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_action(event=action.event, action=action)
         self.core.context_manager.add_classifier(classifier=classifier)
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_on_event_and_other_base_event_local = action_mock(message_name=message_name)
         action_on_event_global = action_mock(message_name=message_name)
         action_on_event_and_other_base_event_global = action_mock(message_name=message_name)
@@ -372,7 +372,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         self.core.context_manager.add_action(event=action.event, action=action)
         self.core.context_manager.add_classifier(classifier=classifier)
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_on_event_and_other_base_event_local = action_mock(message_name=message_name)
         action_on_event_and_other_base_event_global = action_mock(message_name=message_name)
 

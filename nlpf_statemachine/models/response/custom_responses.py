@@ -1,13 +1,11 @@
 """
 # Кастомные модели ответов.
 """
-from typing import Dict, Optional
 
 from pydantic import Field
 
 from nlpf_statemachine.models.enums import IntegrationRequestType, ResponseMessageName
 from nlpf_statemachine.models.message import RequestData
-
 from .base_response import Response
 
 
@@ -18,7 +16,8 @@ class ErrorResponse(Response):
     Модель ответа с ошибкой.
     """
 
-    messageName: str = Field(description="Наименование ответа", default=ResponseMessageName.ERROR)
+    messageName: str = ResponseMessageName.ERROR
+    """Наименование ответа."""
 
 
 class IntegrationResponse(Response):
@@ -28,10 +27,10 @@ class IntegrationResponse(Response):
     Модель интеграционного ответа.
     """
 
-    messageName: str = Field(description="Наименование ответа")
-    request_type: str = Field(description="Способ интеграции", default=IntegrationRequestType.KAFKA)
-    payload: Optional[Dict] = Field(description="Payload ответа")
-    request_data: Optional[RequestData] = Field(description="Конфигурация интеграции.", default_factory=RequestData)
+    request_type: str = IntegrationRequestType.KAFKA
+    """Способ интеграции."""
+    request_data: RequestData | None = Field(default_factory=RequestData)
+    """Конфигурация интеграции."""
 
 
 class NothingFound(Response):
@@ -42,6 +41,7 @@ class NothingFound(Response):
     """
 
     messageName: str = ResponseMessageName.NOTHING_FOUND
+    """Наименование ответа."""
 
 
 class DoNothing(Response):
@@ -52,3 +52,4 @@ class DoNothing(Response):
     """
 
     messageName: str = ResponseMessageName.DO_NOTHING
+    """Наименование ответа."""

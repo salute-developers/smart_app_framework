@@ -1,9 +1,9 @@
 """
 # Описание ItemSelector.
 """
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AssistantViewAction(BaseModel):
@@ -13,9 +13,9 @@ class AssistantViewAction(BaseModel):
     Описания события, которое ожидается к возвращению в веб-приложение.
     """
 
-    type: Optional[str]
+    type: str | None = Field(default=None)
     """Уникальный тип/id действия для обработки в веб-приложении."""
-    payload: Optional[Any]
+    payload: Any | None = Field(default=None)
     """Данные от бэкенда без изменений."""
 
 
@@ -26,19 +26,19 @@ class AssistantVoiceAction(BaseModel):
     Основные события, которые можно вызвать голосом (= UI-элементы).
     """
 
-    number: Optional[int]
+    number: int | None = Field(default=None)
     """Порядковый номер элемента."""
-    id: Optional[str]
+    id: str | None = Field(default=None)
     """Уникальный id элемента."""
-    title: Optional[str]
+    title: str | None = Field(default=None)
     """Ключевая фраза, которая должна приводить к данному действию."""
-    type: Optional[str]
+    type: str | None = Field(default=None)
     """Тип элемента."""
-    paraphrases: Optional[List[str]]
+    paraphrases: list[str] | None = Field(default=None)
     """Фразы-синонимы, которые должны быть расценены как данное действие."""
-    payload: Optional[Dict]
+    payload: dict | None = Field(default=None)
     """Дополнительные данные для бэкенда."""
-    action: Optional[AssistantViewAction]
+    action: AssistantViewAction | None = Field(default=None)
     """Объект, который ожидается к возвращению в веб-приложение."""
 
 
@@ -49,5 +49,5 @@ class ItemSelector(BaseModel):
     Множество объектов, которые можно вызвать голосом.
     """
 
-    items: List[AssistantVoiceAction]
+    items: list[AssistantVoiceAction] | None = Field(default=None)
     """Список элементов."""

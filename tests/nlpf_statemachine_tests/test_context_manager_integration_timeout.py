@@ -4,7 +4,7 @@
 from random import choice
 
 from core.logging.logger_utils import behaviour_log
-from nlpf_statemachine.config import TRANSACTION_MESSAGE_NAME_FINISH_LIST
+from nlpf_statemachine.config import SMConfig
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.user import ExampleUser
 from nlpf_statemachine.kit import Screen
@@ -60,7 +60,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Есть локальный обработчик для таймаута в данной транзакции с указанием base_event.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_base_event_local = action_mock(message_name=message_name)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_request_name_local = action_mock(message_name=message_name)
@@ -144,7 +144,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         """
         # ==== Mocks ====
 
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_request_name_local = action_mock(message_name=message_name)
         action_default_local = action_mock(message_name=message_name)
@@ -219,7 +219,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Есть глобальный обработчик для таймаута в данной транзакции с указанием base_event.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_default_local = action_mock(message_name=message_name)
         action_request_name_and_base_event_global = action_mock(message_name=message_name)
@@ -287,7 +287,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Есть глобальный обработчик для таймаута в данной транзакции для любого base_event.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_default_local = action_mock(message_name=message_name)
         action_request_name_and_other_base_event_global = action_mock(message_name=message_name)
@@ -347,7 +347,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Нет глобальных/локальных обработчиков для таймаута в данной транзакции, но есть локальный дефолтный обработчик.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_default_local = action_mock(message_name=message_name)
         action_request_name_and_other_base_event_global = action_mock(message_name=message_name)
@@ -400,7 +400,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Нет глобальных/локальных обработчиков для таймаута в данной транзакции, но есть глобальный дефолтный обработчик.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_request_name_and_other_base_event_global = action_mock(message_name=message_name)
         action_default_global = action_mock(message_name=message_name)
@@ -447,7 +447,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         Нет глобальных/локальных обработчиков, нет дефолтных обработчиков.
         """
         # ==== Mocks ====
-        message_name = choice(TRANSACTION_MESSAGE_NAME_FINISH_LIST)
+        message_name = choice(SMConfig.transaction_massage_name_finish_list)
         action_request_name_and_other_base_event_local = action_mock(message_name=message_name)
         action_request_name_and_other_base_event_global = action_mock(message_name=message_name)
 

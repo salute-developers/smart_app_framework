@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Type, Union
 
 from core.logging.logger_utils import behaviour_log
 from nlpf_statemachine.const import AssistantAthena, AssistantJoy, AssistantSber
+from nlpf_statemachine.example.app.sc.models.message import CustomCurrentApp, CustomMeta
 from nlpf_statemachine.models import (
     Annotations,
     AppInfo,
@@ -16,6 +17,7 @@ from nlpf_statemachine.models import (
     BaseMessage,
     Character,
     CloseApp,
+    CurrentApp,
     Device,
     LocalTimeout,
     Message,
@@ -65,7 +67,7 @@ class MessageMocks:
             state: Optional[Union[Dict, AssistantState]] = None,
     ) -> AssistantMeta:
         """## Мок объекта AssistantMeta."""
-        current_app_cls = get_field_class(base_obj=cls, field="current_app")
+        current_app_cls = CustomCurrentApp if cls.__name__ == 'CustomMeta' else CurrentApp
         meta = cls(
             current_app=current_app_cls(
                 state=state,
@@ -236,7 +238,7 @@ class MessageMocks:
             messageId=message.messageId,
             sessionId=message.sessionId,
             uuid=message.uuid,
-            payload=message.payload.dict(),
+            payload=message.payload.model_dump(),
         )
 
     def run_app(
@@ -251,7 +253,7 @@ class MessageMocks:
             messageId=message.messageId,
             sessionId=message.sessionId,
             uuid=message.uuid,
-            payload=message.payload.dict(),
+            payload=message.payload.model_dump(),
         )
 
     def close_app(
@@ -266,5 +268,5 @@ class MessageMocks:
             messageId=message.messageId,
             sessionId=message.sessionId,
             uuid=message.uuid,
-            payload=message.payload.dict(),
+            payload=message.payload.model_dump(),
         )

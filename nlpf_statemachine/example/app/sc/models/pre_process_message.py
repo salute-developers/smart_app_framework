@@ -23,7 +23,7 @@ class CustomPreProcessMessage(MessageToSkill):
     В `payload.incoming_message` будет лежать весь пришедший запрос.
     """
 
-    messageName = "CustomPreProcessMessage"
+    messageName: str = "CustomPreProcessMessage"
     """Тип сообщения. Определяет логику обработки события."""
 
     payload: CustomPreProcessMessagePayload

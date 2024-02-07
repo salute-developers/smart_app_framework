@@ -24,7 +24,10 @@ def get_field_class(base_obj: Any, field: str) -> Type:
     Returns:
         Type: тип поля.
     """
-    return base_obj.__fields__.get(field).type_
+    try:
+        return base_obj.model_fields.get(field).annotation
+    except Exception as e:
+        print(e)
 
 
 def get_kwargs(

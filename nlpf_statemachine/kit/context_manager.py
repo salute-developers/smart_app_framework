@@ -11,11 +11,7 @@ from typing import Any, Callable, Dict, Optional, Tuple
 
 from core.logging.logger_utils import behaviour_log
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
-from nlpf_statemachine.config import (
-    DEFAULT_INTEGRATION_BEHAVIOR_ID,
-    TRANSACTION_MESSAGE_NAME_FINISH_LIST,
-    TRANSACTION_TIMEOUT,
-)
+from nlpf_statemachine.config import SMConfig
 from nlpf_statemachine.const import GLOBAL_NODE_NAME
 from nlpf_statemachine.kit.errors import ActionWithNoAnswerError, ActionWithNoValidAnswerError
 from nlpf_statemachine.models import (
@@ -395,7 +391,6 @@ class ContextManager(ScenarioContainer):
             screen (Screen): Экран
             message (MessageToSkill): Тело запроса
             context (Context): Контекст
-            form (Dict): Форма
             text_preprocessing_result (TextPreprocessingResult): Предобработанные данные голосового запроса
             user (SMUser): Пользователь
 
@@ -476,7 +471,7 @@ class ContextManager(ScenarioContainer):
         ## Генерация ID для идентификации транзакции.
         """
         callback_id = user.message.generate_new_callback_id()
-        user.behaviors.add(callback_id=callback_id, behavior_id=DEFAULT_INTEGRATION_BEHAVIOR_ID)
+        user.behaviors.add(callback_id=callback_id, behavior_id=SMConfig.default_integration_behaviour_id)
         request_data.app_callback_id = callback_id
 
     def _set_transaction_timestamp(self, context: Context) -> None:
@@ -561,8 +556,8 @@ class ContextManager(ScenarioContainer):
         """
         ## Проверка существования активной транзакции.
         """
-        if context.local.base_event and context.local.last_transaction_step_timestamp \
-                and self._now() - context.local.last_transaction_step_timestamp < TRANSACTION_TIMEOUT:
+        if (context.local.base_event and context.local.last_transaction_step_timestamp
+                and self._now() - context.local.last_transaction_step_timestamp < SMConfig.transaction_timeout):
             return True
         return False
 
@@ -719,7 +714,7 @@ class ContextManager(ScenarioContainer):
         if isinstance(message, AssistantMessage):
             context.last_intent = message.payload.intent
 
-        if response.messageName in TRANSACTION_MESSAGE_NAME_FINISH_LIST:
+        if response.messageName in SMConfig.transaction_massage_name_finish_list:
             response = self._finish_transaction(response=response, message=message, context=context, user=user)
 
         elif isinstance(response, IntegrationResponse):
@@ -792,7 +787,8 @@ class ContextManager(ScenarioContainer):
             )
             return self._post_process(**kwargs)
 
-    def _default_response(self, event: Optional[str] = None) -> Optional[Response]:
+    @staticmethod
+    def _default_response(event: Optional[str] = None) -> Optional[Response]:
         """
         ## Генерация дефолтного ответа от ContextManager.
 
@@ -988,7 +984,8 @@ class ContextManager(ScenarioContainer):
         )
 
         if response:
-            behaviour_log("ContextManager response.", level="INFO", user=user, params={"sm_response": response.dict()})
+            behaviour_log("ContextManager response.", level="INFO", user=user,
+                          params={"sm_response": response.model_dump()})
         else:
             behaviour_log("ContextManager response is None.", level="INFO", user=user)
 

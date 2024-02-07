@@ -12,8 +12,6 @@ class AssistantMessage(BaseMessage):
     # Описание модели AssistantMessage.
     """
 
-    messageName: str
-    """Тип сообщения. Определяет логику обработки события."""
     payload: AssistantPayload = Field(default_factory=AssistantPayload)
     """
     Каждое сообщение содержит объект payload, наполнение которого зависит от типа сообщения.

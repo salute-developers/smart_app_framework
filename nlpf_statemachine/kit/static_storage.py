@@ -147,7 +147,7 @@ class StaticStorageManager:
         if assistant_answer.answers:
             answer = choice(assistant_answer.answers)
             return self._merge_payloads(assistant_answer, answer)
-        return AssistantResponsePayload(**assistant_answer.dict())
+        return AssistantResponsePayload(**assistant_answer.model_dump())
 
     def _get_assistant_payload(self, data: StaticStorageItem, character_id: Optional[str]) -> \
             Optional[AssistantResponsePayload]:
@@ -160,7 +160,7 @@ class StaticStorageManager:
                 return self._merge_payloads(master=data, updater=self._get_answer(data.sber))
         if data.any:
             return self._merge_payloads(master=data, updater=self._get_answer(data.any))
-        return AssistantResponsePayload(**data.dict())
+        return AssistantResponsePayload(**data.model_dump())
 
     def response(self, code: str, context: Context = None, activate_app_info: bool = True) -> Optional[Response]:
         """

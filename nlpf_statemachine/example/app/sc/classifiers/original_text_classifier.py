@@ -4,11 +4,10 @@
 
 from typing import Dict, Optional
 
+from core.text_preprocessing.constants import NUM_TOKEN
+from nlpf_statemachine.example.const import STATIC_PARAPHRASE
 from nlpf_statemachine.kit import Classifier
 from nlpf_statemachine.models import Context, MessageToSkill, SmartEnum
-
-STATIC_PARAPHRASE = "статичный ответ"
-NUM_TOKEN = "NUM_TOKEN"
 
 
 class Events(SmartEnum):

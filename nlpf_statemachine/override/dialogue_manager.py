@@ -37,7 +37,7 @@ class SMDialogueManager(DialogueManager):
         if isinstance(model, dict):
             return model
         elif isinstance(model, BaseModel):
-            return model.dict(exclude_none=True, by_alias=True)
+            return model.model_dump(exclude_none=True, by_alias=True)
         return {}
 
     def _process_response(self, response: Response) -> Tuple[Dict, Optional[str], Optional[dict]]:

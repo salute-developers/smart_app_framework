@@ -1,7 +1,6 @@
 """
 Информация о смартапе.
 """
-from typing import Optional, Dict, Any
 
 from pydantic import BaseModel, Field
 
@@ -11,23 +10,23 @@ class AppInfo(BaseModel):
     # Описание модели AppInfo.
     """
 
-    projectId: Optional[str]
+    projectId: str | None = Field(default=None)
     """Идентификатор проекта в SmartMarket Studio."""
-    frontendType: Optional[str]
+    frontendType: str | None = Field(default=None)
     """Тип смартапа."""
-    applicationId: Optional[str]
+    applicationId: str | None = Field(default=None)
     """Идентификатор смартапа."""
-    appversionId: Optional[str] = Field(description="Идентификатор опубликованной версии смартапа.")
+    appversionId: str | None = Field(default=None)
     """Идентификатор опубликованной версии смартапа."""
-    frontendEndpoint: Optional[str]
+    frontendEndpoint: str | None = Field(default=None)
     """Ссылка на веб-приложение. Поле актуально для Canvas Apps."""
-    systemName: Optional[str]
+    systemName: str | None = Field(default=None)
     """Более читаемый аналог поля projectId.Не актуален для внешних приложений."""
-    frontendStateId: Optional[str]
+    frontendStateId: str | None = Field(default=None)
     """Объединённое значение полей projectId, applicationId и appversionId."""
-    apkInfo: Optional[Dict[str, Any]]
+    apkInfo: dict | None = Field(default=None)
     """Информация о приложении"""
-    ageLimit: Optional[int]
+    ageLimit: int | None = Field(default=None)
     """Информация о возрастном ограничении"""
-    affiliationType: Optional[str]
+    affiliationType: str | None = Field(default=None)
     """Тип перехода"""

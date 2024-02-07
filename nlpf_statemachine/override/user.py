@@ -131,10 +131,10 @@ class SMUser(User):
             Dict[str, Any]
         """
         result = super(SMUser, self).raw
-        result["context_pd"] = self.context_pd.dict(exclude={"local"}, exclude_none=True)
+        result["context_pd"] = self.context_pd.model_dump(exclude={"local"}, exclude_none=True)
 
         if self.context_pd.local.base_message:
-            self.local_contexts[self.message_pd.messageId] = self.context_pd.local.dict(exclude_none=True)
+            self.local_contexts[self.message_pd.messageId] = self.context_pd.local.model_dump(exclude_none=True)
 
         result["local_contexts"] = self.local_contexts
         return result

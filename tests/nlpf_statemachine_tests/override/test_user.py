@@ -3,9 +3,9 @@
 """
 import json
 from random import randint
-from typing import Optional, Type
+from typing import Type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models import BaseMessage, Context, RequestMessageName
 from nlpf_statemachine.override import SMUser
@@ -31,8 +31,8 @@ class TestUser(SMAsyncioTestCaseBase):
         assert isinstance(user.context_pd, Context)
         assert isinstance(user.message_pd, BaseMessage)
         assert user.message_pd.messageName == message.message_name
-        assert user.message_pd.payload == message.payload
-        assert user.raw.get("context_pd") == Context().dict(exclude={"local"}, exclude_none=True)
+        assert user.message_pd.payload.model_dump() == message.payload
+        assert user.raw.get("context_pd") == Context().model_dump(exclude={"local"}, exclude_none=True)
 
     def test_success_build_not_init(self) -> None:
         """
@@ -48,14 +48,14 @@ class TestUser(SMAsyncioTestCaseBase):
             last_response_message_name=random_string(),
             last_intent=random_string(),
         )
-        user = self.mocks.user(message=message, db_data=json.dumps({"context_pd": context.dict()}))
+        user = self.mocks.user(message=message, db_data=json.dumps({"context_pd": context.model_dump()}))
 
         assert isinstance(user.context_pd, Context)
         assert isinstance(user.message_pd, BaseMessage)
         assert user.message_pd.messageName == message.message_name
-        assert user.message_pd.payload == message.payload
+        assert user.message_pd.payload.model_dump() == message.payload
         assert user.context_pd == context
-        assert user.raw.get("context_pd") == context.dict(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") == context.model_dump(exclude={"local"}, exclude_none=True)
 
     def test_fail_on_model_search(self) -> None:
         """
@@ -85,8 +85,8 @@ class TestUser(SMAsyncioTestCaseBase):
         assert isinstance(user.context_pd, Context)
         assert isinstance(user.message_pd, BaseMessage)
         assert user.message_pd.messageName == message.message_name
-        assert user.message_pd.payload == message.payload
-        assert user.raw.get("context_pd") == Context().dict(exclude={"local"}, exclude_none=True)
+        assert user.message_pd.payload.model_dump() == message.payload
+        assert user.raw.get("context_pd") == Context().model_dump(exclude={"local"}, exclude_none=True)
 
     def test_fail_on_context_model_build(self) -> None:
         """
@@ -105,7 +105,7 @@ class TestUser(SMAsyncioTestCaseBase):
             # Пример переопределение Context с обязательным вложенным полем.
             """
 
-            field: Optional[SomeField]
+            field: SomeField | None = Field(default=None)
 
         class CustomUser(SMUser):
             """
@@ -125,7 +125,7 @@ class TestUser(SMAsyncioTestCaseBase):
         message = self.mocks.smart_app_from_message()
         user = self.mocks.user(message=message, user_cls=CustomUser)
         assert isinstance(user.context_pd, CustomContext)
-        assert user.raw.get("context_pd") == Context().dict(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") == Context().model_dump(exclude={"local"}, exclude_none=True)
 
         user = self.mocks.user(
             message=message,
@@ -137,7 +137,7 @@ class TestUser(SMAsyncioTestCaseBase):
             user_cls=CustomUser,
         )
         assert isinstance(user.context_pd, CustomContext)
-        assert user.raw.get("context_pd") == Context().dict(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") == Context().model_dump(exclude={"local"}, exclude_none=True)
 
         user = self.mocks.user(
             message=message,
@@ -149,7 +149,7 @@ class TestUser(SMAsyncioTestCaseBase):
             user_cls=CustomUser,
         )
         assert isinstance(user.context_pd, CustomContext)
-        assert user.raw.get("context_pd") == Context().dict(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") == Context().model_dump(exclude={"local"}, exclude_none=True)
 
         data = {"field": {"required_field": random_string()}}
         user = self.mocks.user(
@@ -162,5 +162,5 @@ class TestUser(SMAsyncioTestCaseBase):
             user_cls=CustomUser,
         )
         assert isinstance(user.context_pd, CustomContext)
-        assert user.raw.get("context_pd") != Context().dict(exclude={"local"}, exclude_none=True)
-        assert user.raw.get("context_pd") == CustomContext(**data).dict(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") != Context().model_dump(exclude={"local"}, exclude_none=True)
+        assert user.raw.get("context_pd") == CustomContext(**data).model_dump(exclude={"local"}, exclude_none=True)

@@ -1,9 +1,8 @@
 """
 # Описание модели ассистента.
 """
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models.enums import AssistantAppeal, AssistantGender, AssistantId, AssistantName
 
@@ -13,7 +12,7 @@ class Character(BaseModel):
     # Модель ассистента.
     """
 
-    id: Optional[AssistantId]
-    name: Optional[AssistantName]
-    gender: Optional[AssistantGender]
-    appeal: Optional[AssistantAppeal]
+    id: AssistantId | None = Field(default=None)
+    name: AssistantName | None = Field(default=None)
+    gender: AssistantGender | None = Field(default=None)
+    appeal: AssistantAppeal | None = Field(default=None)

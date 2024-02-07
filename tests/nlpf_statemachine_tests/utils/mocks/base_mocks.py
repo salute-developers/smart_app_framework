@@ -30,7 +30,7 @@ class BaseMocks(MessageMocks):
     ) -> SmartAppFromMessage:
         """## Мок объекта SmartAppFromMessage."""
         if not message:
-            message = self.message_to_skill().dict()
+            message = self.message_to_skill().model_dump()
 
         return SmartAppFromMessage(
             value=message,
@@ -64,7 +64,7 @@ class BaseMocks(MessageMocks):
         elif isinstance(message, Dict):
             message = self.smart_app_from_message(message=message, headers=headers)
         elif issubclass(type(message), BaseMessage):
-            message = self.smart_app_from_message(message=message.dict(), headers=headers)
+            message = self.smart_app_from_message(message=message.model_dump(), headers=headers)
         else:
             behaviour_log(f"Wrong type of message in user mock: {type(message)}.", level="ERROR")
 
@@ -91,5 +91,5 @@ class BaseMocks(MessageMocks):
         if isinstance(payload, dict):
             return TextPreprocessingResult(payload.get("message", {}) if payload else {})
         elif isinstance(payload, MessageToSkillPayload):
-            return TextPreprocessingResult(payload.message.dict())
+            return TextPreprocessingResult(payload.message.model_dump())
         return TextPreprocessingResult({})

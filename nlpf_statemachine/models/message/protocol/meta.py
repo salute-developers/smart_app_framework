@@ -3,7 +3,7 @@
 """
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .current_app import CurrentApp
 
@@ -15,11 +15,11 @@ class MetaTime(BaseModel):
     Данные о текущем времени на устройстве пользователя
     """
 
-    timestamp: Optional[int]
+    timestamp: int | None = Field(default=None)
     """Unix-время в миллисекундах."""
-    timezone_id: Optional[str]
+    timezone_id: str | None = Field(default=None)
     """Наименование часового пояса. Пример Europe/Moscow"""
-    timezone_offset_sec: Optional[int]
+    timezone_offset_sec: int | None = Field(default=None)
     """Наименование часового пояса. Пример Europe/Moscow."""
 
 
@@ -30,7 +30,7 @@ class MetaFeature(BaseModel):
     Признака фичи.
     """
 
-    enabled: Optional[bool]
+    enabled: bool | None = Field(default=None)
     """Флаг доступности фичи."""
 
 
@@ -41,9 +41,9 @@ class MetaFeatures(BaseModel):
     Данные о текущем времени на устройстве пользователя
     """
 
-    screen: Optional[MetaFeature]
+    screen: MetaFeature | None = Field(default=None)
     """признак включенного экрана на устройстве."""
-    int_login: Optional[MetaFeature]
+    int_login: MetaFeature | None = Field(default=None)
     """авторизован ли пользователь на устройстве."""
 
 
@@ -52,15 +52,15 @@ class MetaLocation(BaseModel):
     # Описание модели location в meta в запросе.
     """
 
-    accuracy: Optional[float]
+    accuracy: float | None = Field(default=None)
     """Точность"""
-    lat: Optional[float]
+    lat: float | None = Field(default=None)
     """Широта"""
-    lon: Optional[float]
+    lon: float | None = Field(default=None)
     """Долгота"""
-    source: Optional[str]
+    source: str | None = Field(default=None)
     """Источник"""
-    timestamp: Optional[int]
+    timestamp: int | None = Field(default=None)
     """Время"""
 
 
@@ -71,7 +71,7 @@ class AssistantMeta(BaseModel):
     Данные о содержимом экрана пользователя.
     """
 
-    time: Optional[MetaTime]
+    time: MetaTime | None = Field(default=None)
     """
     Данные о текущем времени на устройстве пользователя.
 
@@ -81,33 +81,33 @@ class AssistantMeta(BaseModel):
     timezone_id — строка. Наименование часового пояса. Пример Europe/Moscow.
     timezone_offset_sec — число.
     """
-    features: Optional[MetaFeatures]
+    features: MetaFeatures | None = Field(default=None)
     """Данные о режиме работы устройства."""
-    current_app: Optional[CurrentApp]
+    current_app: CurrentApp | None = Field(default=None)
     """Информация о текущем аппе."""
-    host_meta: Optional[Dict[str, Any]]
+    host_meta: dict | None = Field(default=None)
     """
     Произвольный JSON-объект, который заполняет хост приложение, в которое встроено Assistant SDK.
     Например 2gis, будет заполнять координаты, текущий экран, регион и другие данные, которые доступны в приложении 2gis
     """
-    mobile_sdk_data: Optional[str]
+    mobile_sdk_data: str | None = Field(default=None)
     """Данные для анти-фрода, закодировааные в base64-строку"""
-    network: Optional[Dict[str, Any]]
+    network: dict | None = Field(default=None)
     """Информация о сети"""
-    user_settings: Optional[Dict[str, Any]]
+    user_settings: dict | None = Field(default=None)
     """Пользовательские настройки"""
-    location: Optional[MetaLocation]
+    location: MetaLocation | None = Field(default=None)
     """Данные о расположении устройства"""
-    experimental_flags: Optional[Dict[str, Any]]
+    experimental_flags: dict | None = Field(default=None)
     """Параметры сети"""
-    volume: Optional[Dict[str, Any]]
+    volume: dict | None = Field(default=None)
     """Информация о громкости"""
-    start_audio_recording_source: Optional[str]
+    start_audio_recording_source: str | None = Field(default=None)
     """Откуда был инициирован голосовой запрос, например в приложении 2gis есть две точки входа,
     для разных точек входа тут будет разные значения"""
-    background_apps: Optional[Dict[str, Any]]
+    background_apps: dict | None = Field(default=None)
     """Фоновые приложения"""
-    installed_apps: Optional[Dict[str, Any]]
+    installed_apps: dict | None = Field(default=None)
     """Установленные приложения"""
-    capabilities_state: Optional[Dict[str, Any]]
+    capabilities_state: dict | None = Field(default=None)
     """Стейт внешних устройств"""

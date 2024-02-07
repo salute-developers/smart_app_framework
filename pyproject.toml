@@ -60,7 +60,7 @@ twisted = "22.10.0"
 urllib3 = "1.26.18"
 certifi = "2023.07.22"
 aiokafka = "0.8.1"  # TODO update poetry lock
-pydantic = "1.9.0"
+pydantic = "2.6.0"
 python-decouple = "3.4"
 lazy = "1.5"
 

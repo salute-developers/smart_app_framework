@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models.enums import ResponseMessageName
 from nlpf_statemachine.models.message import AppInfo, ServerAction
-
 from .base_response import Response
 
 

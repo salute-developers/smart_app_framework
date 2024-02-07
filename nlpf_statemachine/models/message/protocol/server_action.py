@@ -3,9 +3,8 @@
 
 (может так же использоваться при запуске)
 """
-from typing import Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .app_info import AppInfo
 
@@ -20,9 +19,9 @@ class ServerAction(BaseModel):
     Действие, которое обрабатывает бэкенд смартапа.
     Значение по умолчанию для запуска: *run_app*.
     """
-    app_info: Optional[AppInfo]
+    app_info: AppInfo | None = Field(default=None)
     """Информация о смартапе."""
-    parameters: Optional[Dict]
+    parameters: dict | None = Field(default=None)
     """
     Любые параметры, которые требуются для запуска смартапа.
     Параметры должны быть представлены в виде валидного JSON-объекта.

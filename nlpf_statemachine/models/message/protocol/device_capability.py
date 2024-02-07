@@ -1,9 +1,8 @@
 """
 # Описание возможностей устройства пользователя.
 """
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DeviceCapability(BaseModel):
@@ -11,7 +10,7 @@ class DeviceCapability(BaseModel):
     # Описание модели DeviceCapability.
     """
 
-    available: Optional[bool]
+    available: bool | None = Field(default=None)
     """Флаг наличия возможностию"""
 
 
@@ -20,9 +19,9 @@ class DeviceCapabilities(BaseModel):
     # Описание модели DeviceCapabilities.
     """
 
-    screen: Optional[DeviceCapability]
+    screen: DeviceCapability | None = Field(default=None)
     """Описание экрана устройства."""
-    mic: Optional[DeviceCapability]
+    mic: DeviceCapability | None = Field(default=None)
     """Описание микрофона устройства."""
-    speak: Optional[DeviceCapability]
+    speak: DeviceCapability | None = Field(default=None)
     """Описание динамиков устройства."""

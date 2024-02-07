@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.logging.logger_utils import behaviour_log
-from nlpf_statemachine.config import DEFAULT_INTEGRATION_BEHAVIOR_ID
+from nlpf_statemachine.config import SMConfig
 from nlpf_statemachine.const import GLOBAL_NODE_NAME
 from nlpf_statemachine.models import (
     Context,
@@ -85,7 +85,7 @@ class SMTestCase(SMTestCaseBase):
         if isinstance(self.response.request_data, dict):
             return self.response.request_data
         elif isinstance(self.response.request_data, BaseModel):
-            return self.response.request_data.dict()
+            return self.response.request_data.model_dump()
         return {}
 
     def init(
@@ -119,7 +119,7 @@ class SMTestCase(SMTestCaseBase):
             if isinstance(context, dict):
                 self.context = self.CONTEXT_CLASS(**context)
             elif isinstance(context, BaseModel):
-                self.context = self.CONTEXT_CLASS(**context.dict())
+                self.context = self.CONTEXT_CLASS(**context.model_dump())
             else:
                 self.context = self.CONTEXT_CLASS()
 
@@ -144,7 +144,7 @@ class SMTestCase(SMTestCaseBase):
         if not request_data:
             return
         if isinstance(request_data, BaseModel):
-            request_data = request_data.dict()
+            request_data = request_data.model_dump()
         for key, value in request_data.items():
             if isinstance(value, str):
                 self._message_headers[key] = value.encode()
@@ -173,7 +173,7 @@ class SMTestCase(SMTestCaseBase):
             self.text_preprocessing_result = self.mocks.text_preprocessing_result(payload=message_dict.get("payload"))
 
         if self.context:
-            db_data = json.dumps({"context_pd": self.context.dict(exclude_none=True)})
+            db_data = json.dumps({"context_pd": self.context.model_dump(exclude_none=True)})
         else:
             db_data = "{}"
             behaviour_log("Method init is not called.", level="WARNING")
@@ -188,7 +188,7 @@ class SMTestCase(SMTestCaseBase):
         if self._add_callback_in_user and self._message_headers.get(CALLBACK_ID_HEADER):
             self.user.behaviors.add(
                 callback_id=self._message_headers.get(CALLBACK_ID_HEADER).decode(),
-                behavior_id=DEFAULT_INTEGRATION_BEHAVIOR_ID,
+                behavior_id=SMConfig.default_integration_behaviour_id,
             )
             self._add_callback_in_user = False
 
@@ -380,7 +380,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         if isinstance(self.response.request_data, dict):
             return self.response.request_data
         elif isinstance(self.response.request_data, BaseModel):
-            return self.response.request_data.dict()
+            return self.response.request_data.model_dump()
         return {}
 
     def init(
@@ -414,7 +414,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
             if isinstance(context, dict):
                 self.context = self.CONTEXT_CLASS(**context)
             elif isinstance(context, BaseModel):
-                self.context = self.CONTEXT_CLASS(**context.dict())
+                self.context = self.CONTEXT_CLASS(**context.model_dump())
             else:
                 self.context = self.CONTEXT_CLASS()
 
@@ -439,7 +439,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         if not request_data:
             return
         if isinstance(request_data, BaseModel):
-            request_data = request_data.dict()
+            request_data = request_data.model_dump()
         for key, value in request_data.items():
             if isinstance(value, str):
                 self._message_headers[key] = value.encode()
@@ -463,12 +463,12 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         Returns:
             None.
         """
-        message_dict = dict(message)
+        message_dict = message.model_dump()
         if message_dict.get("messageName") == RequestMessageName.MESSAGE_TO_SKILL and not text_preprocessing_result:
             self.text_preprocessing_result = self.mocks.text_preprocessing_result(payload=message_dict.get("payload"))
 
         if self.context:
-            db_data = json.dumps({"context_pd": self.context.dict(exclude_none=True)})
+            db_data = json.dumps({"context_pd": self.context.model_dump(exclude_none=True)})
         else:
             db_data = "{}"
             behaviour_log("Method init is not called.", level="WARNING")
@@ -483,7 +483,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         if self._add_callback_in_user and self._message_headers.get(CALLBACK_ID_HEADER):
             self.user.behaviors.add(
                 callback_id=self._message_headers.get(CALLBACK_ID_HEADER).decode(),
-                behavior_id=DEFAULT_INTEGRATION_BEHAVIOR_ID,
+                behavior_id=SMConfig.default_integration_behaviour_id,
             )
             self._add_callback_in_user = False
 
