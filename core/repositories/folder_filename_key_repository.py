@@ -8,9 +8,9 @@ class FolderFilenameKeyRepository(FolderRepository):
         filename_to_data = {}
         for shard in shard_desc:
             shard_data = self._load_item(shard)
-            key = os.path.basename(shard).split(".")[0]
             if shard_data:
-                filename_to_data[key] = shard_data
+                filename_to_data[os.path.relpath(shard, self.path)] = shard_data
+                filename_to_data[os.path.relpath(shard, self.path).split(".")[0]] = shard_data
         return filename_to_data
 
     def fill(self, data):
