@@ -1,0 +1,77 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Run tests
+
+on:
+  push: {}
+
+jobs:
+  lint:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.8"
+        cache: 'poetry'
+    - name: Install dependencies
+      run: poetry install --no-interaction --no-root --all-extras
+    - name: Lint with flake8
+      run: poetry run task lint
+
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+
+    runs-on: ubuntu-20.04
+    name: unittests with py-${{ matrix.python-version }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+    - name: Install dependencies
+      run: poetry install --no-interaction --no-root --all-extras
+    - name: Test with unittest
+      run: poetry run task unit_test
+    - name: Test run_app on HttpMainLoop
+      run: poetry run task runapp_http_test
+    - name: Test run_app on KafkaMainLoop
+      run: poetry run task runapp_kafka_test
+
+  build:
+    needs:
+      - lint
+      - tests
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.8"
+        cache: 'poetry'
+    - name: Install Poetry plugins
+      run: poetry self add "poetry-dynamic-versioning[plugin]"
+    - name: Build for PyPi
+      run: poetry build --format wheel
+    - name: Build for Sber
+      run: |
+        sed -i "s/smart-app-framework/sber-nlp-platform-smart-app-framework/g" pyproject.toml
+        poetry build --format wheel
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        path: dist/*.whl
