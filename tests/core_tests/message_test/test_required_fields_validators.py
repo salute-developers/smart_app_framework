@@ -43,7 +43,7 @@ class TestRequiredFieldsValidator(TestCase):
             "messageName": "OOO",
             "1": 123,
             "2": "str"
-        }, headers=[('test_header', b'result')], validators=[validator_types])
+        }, headers=[('test_header', b'result')], validators=[types_validator])
         self.assertTrue(message.validate())
 
     def test_valid_false(self):
@@ -66,5 +66,5 @@ class TestRequiredFieldsValidator(TestCase):
             "messageName": "OOO",
             "1": {},
             "2": []
-        }, headers=[('test_header', b'result')], validators=[validator_types])
+        }, headers=[('test_header', b'result')], validators=[types_validator])
         self.assertFalse(message.validate())
