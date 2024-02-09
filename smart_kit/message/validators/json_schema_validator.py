@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import Callable, TYPE_CHECKING
 
-import fastjsonschema
+from pathlib import Path
+from typing import Callable, TYPE_CHECKING
 import jsonschema
+from jsonschema.validators import RefResolver
 
 from core.message.message import SmartAppMessage
 from core.logging.logger_utils import log
@@ -16,19 +17,19 @@ class JSONSchemaValidator(BaseMessageValidatorWithResources):
     VALIDATOR_EXCEPTION = jsonschema.ValidationError
 
     def _update_resources(self):
-        schemas = self.resources.get("payload_schema")
-        self._schemas = {k: self._compile_schema(v) for k, v in schemas.items() if '.json' not in k and "/" not in k}
+        self._store = self.resources.get("payload_schema")
+        self._schemas = {Path(k).stem: self._compile_schema(k, v) for k, v in self._store.items()
+                         if len(Path(k).parents) == 1}
 
-    def _compile_schema(self, schema: dict) -> Callable[[dict], None]:
+    def _compile_schema(self, uri: str, schema: dict) -> Callable[[dict], None]:
         cls = jsonschema.validators.validator_for(schema)
         cls.check_schema(schema)
-        instance = cls(schema)
-        instance.resolver.handlers[""] = self._handle_includes
+        instance = cls(schema, resolver=RefResolver(base_uri=uri, referrer=schema,
+                                                    handlers={"": self._handle_includes}))
         return instance.validate
 
     def _handle_includes(self, path):
-        schemas = self.resources.get("payload_schema")
-        return schemas[path]
+        return self._store[path]
 
     def _log(self, exception: VALIDATOR_EXCEPTION, message: SmartAppMessage, level="WARNING"):
         log_params = self._log_params(message)
@@ -40,10 +41,3 @@ class JSONSchemaValidator(BaseMessageValidatorWithResources):
         validator = self._schemas.get(message.message_name)
         if validator:
             validator(message.payload)
-
-
-class FastJSONSchemaValidator(JSONSchemaValidator):
-    VALIDATOR_EXCEPTION = fastjsonschema.JsonSchemaValueException
-
-    def _compile_schema(self, schema: dict) -> Callable[[dict], None]:
-        return fastjsonschema.compile(schema, handlers={"": self._handle_includes})

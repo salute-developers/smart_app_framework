@@ -56,7 +56,6 @@ from core.model.queued_objects.limited_queued_hashable_objects_description impor
 from core.model.registered import registered_factories
 from core.repositories.file_repository import FileRepository
 from core.repositories.folder_repository import FolderRepository
-from core.repositories.folder_filename_key_repository import FolderFilenameKeyRepository
 from core.request.base_request import requests_registered
 from core.request.rest_request import RestRequest
 from core.utils.loader import ordered_json
@@ -98,6 +97,7 @@ from smart_kit.action.http import HTTPRequestAction
 from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.get_to_message import to_messages
 from smart_kit.message.as_is_to_message import AsIsToMessage
+from smart_kit.repositories.payload_schema_repository import PayloadSchemaRepository
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 
 from core.db_adapter.aioredis_sentinel_adapter import AIORedisSentinelAdapter
@@ -133,8 +133,8 @@ class SmartAppResources(BaseConfig):
                            source=source, key="last_action_ids"),
             FolderRepository(self.subfolder_path("bundles"), loader=ordered_json, source=source,
                              key="bundles"),
-            FolderFilenameKeyRepository(self.subfolder_path("payload_schema"), loader=json.loads, source=source,
-                                        key="payload_schema"),
+            PayloadSchemaRepository(self.subfolder_path("payload_schema"), loader=json.loads, source=source,
+                                    key="payload_schema"),
         ]
 
         self.repositories = self.override_repositories(self.repositories)
