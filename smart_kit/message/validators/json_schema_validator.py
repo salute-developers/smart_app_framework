@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING, Optional
 import jsonschema
 from jsonschema.validators import RefResolver
 
 from core.message.message import SmartAppMessage
 from core.logging.logger_utils import log
+from core.message.validators.base_validator import OnException
 from smart_kit.message.validators.base_validator_with_resources import BaseMessageValidatorWithResources
+from smart_kit.resources import SmartAppResources
 
 if TYPE_CHECKING:
     from core.message.from_message import SmartAppFromMessage
@@ -16,10 +18,16 @@ if TYPE_CHECKING:
 class JSONSchemaValidator(BaseMessageValidatorWithResources):
     VALIDATOR_EXCEPTION = jsonschema.ValidationError
 
+    def __init__(self, validator_group: str = "incoming",
+                 resources: Optional[SmartAppResources] = None,
+                 on_exception: OnException = "raise", *args, **kwargs):
+        self._message_type = validator_group if validator_group in ("incoming", "outgoing") else "incoming"
+        super().__init__(resources, on_exception, *args, **kwargs)
+
     def _update_resources(self):
         self._store = self.resources.get("payload_schema")
         self._schemas = {Path(k).stem: self._compile_schema(k, v) for k, v in self._store.items()
-                         if len(Path(k).parents) == 1}
+                         if k.startswith(f"/{self._message_type}/")}
 
     def _compile_schema(self, uri: str, schema: dict) -> Callable[[dict], None]:
         cls = jsonschema.validators.validator_for(schema)
