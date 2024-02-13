@@ -2,6 +2,8 @@
 # Составной идентификатор пользователя.
 """
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -12,16 +14,16 @@ class UUID(BaseModel):
     Составной идентификатор пользователя, от которого пришёл запрос.
     """
 
-    sub: str | None = Field(default=None)
+    sub: Optional[str] = Field(default=None)
     """
     Постоянный идентификатор пользователя, созданный на основе SberID.
     Может отсутствовать, если пользователь не аутентифицирован
     """
-    userId: str | None = Field(default=None)
+    userId: Optional[str] = Field(default=None)
     """Id пользователя."""
-    userChannel: str | None = Field(default=None)
+    userChannel: Optional[str] = Field(default=None)
     """Идентификатор канала коммуникации"""
-    sid: str | None = Field(default=None)
+    sid: Optional[str] = Field(default=None)
     """Сквозной идентификатор пользователя"""
-    uuid_sberid: str | None = Field(default=None)
+    uuid_sberid: Optional[str] = Field(default=None)
     """Единый идентификатор пользователя от СберИд"""

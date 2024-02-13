@@ -2,6 +2,8 @@
 # Базовые модели для интеграций.
 """
 
+from typing import Optional, Dict
+
 from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models.enums import Event
@@ -13,15 +15,15 @@ class IntegrationPayload(BaseModel):
     # Описание модели IntegrationPayload.
     """
 
-    status: str | None = Field(default=None)
+    status: Optional[str] = Field(default=None)
     """Статус интеграции."""
-    errorTitle: str | None = Field(default=None)
+    errorTitle: Optional[str] = Field(default=None)
     """Заголовок ошибки (если есть)."""
-    errorMessage: str | None = Field(default=None)
+    errorMessage: Optional[str] = Field(default=None)
     """Сообщение об ошибке (если есть)."""
-    error: str | None = Field(default=None)
+    error: Optional[str] = Field(default=None)
     """Информация об ошибке (если есть)."""
-    data: dict | None = Field(default=None)
+    data: Optional[Dict] = Field(default=None)
     """Данные, полученные в ответ от интеграции."""
 
 

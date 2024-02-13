@@ -1,7 +1,7 @@
 """
 Описание функциональности устройства.
 """
-
+from typing import Optional, List, Union, Dict
 from pydantic import BaseModel, Field
 
 from nlpf_statemachine.models.enums import DeviceFeaturesAppTypes
@@ -12,7 +12,7 @@ class DeviceFeatures(BaseModel):
     # Описание модели DeviceFeatures.
     """
 
-    appTypes: list[DeviceFeaturesAppTypes | str] | None = Field(default=None)
+    appTypes: Optional[List[Union[DeviceFeaturesAppTypes, str]]] = Field(default=None)
     """
     Типы смартапов, которые поддерживает устройство.
 
@@ -25,5 +25,5 @@ class DeviceFeatures(BaseModel):
     * EMBEDDED_APP
     * ...
     """
-    clientFlags: dict | None = Field(default={})
+    clientFlags: Optional[Dict] = Field(default={})
     """Описание клиентских флагов"""

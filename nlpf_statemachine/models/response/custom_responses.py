@@ -1,7 +1,7 @@
 """
 # Кастомные модели ответов.
 """
-
+from typing import Optional
 from pydantic import Field
 
 from nlpf_statemachine.models.enums import IntegrationRequestType, ResponseMessageName
@@ -29,7 +29,7 @@ class IntegrationResponse(Response):
 
     request_type: str = IntegrationRequestType.KAFKA
     """Способ интеграции."""
-    request_data: RequestData | None = Field(default_factory=RequestData)
+    request_data: Optional[RequestData] = Field(default_factory=RequestData)
     """Конфигурация интеграции."""
 
 

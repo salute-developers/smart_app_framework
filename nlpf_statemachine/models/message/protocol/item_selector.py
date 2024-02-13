@@ -1,7 +1,7 @@
 """
 # Описание ItemSelector.
 """
-from typing import Any
+from typing import Any, Optional, List, Dict
 
 from pydantic import BaseModel, Field
 
@@ -13,9 +13,9 @@ class AssistantViewAction(BaseModel):
     Описания события, которое ожидается к возвращению в веб-приложение.
     """
 
-    type: str | None = Field(default=None)
+    type: Optional[str] = Field(default=None)
     """Уникальный тип/id действия для обработки в веб-приложении."""
-    payload: Any | None = Field(default=None)
+    payload: Optional[Any] = Field(default=None)
     """Данные от бэкенда без изменений."""
 
 
@@ -26,19 +26,19 @@ class AssistantVoiceAction(BaseModel):
     Основные события, которые можно вызвать голосом (= UI-элементы).
     """
 
-    number: int | None = Field(default=None)
+    number: Optional[int] = Field(default=None)
     """Порядковый номер элемента."""
-    id: str | None = Field(default=None)
+    id: Optional[str] = Field(default=None)
     """Уникальный id элемента."""
-    title: str | None = Field(default=None)
+    title: Optional[str] = Field(default=None)
     """Ключевая фраза, которая должна приводить к данному действию."""
-    type: str | None = Field(default=None)
+    type: Optional[str] = Field(default=None)
     """Тип элемента."""
-    paraphrases: list[str] | None = Field(default=None)
+    paraphrases: Optional[List[str]] = Field(default=None)
     """Фразы-синонимы, которые должны быть расценены как данное действие."""
-    payload: dict | None = Field(default=None)
+    payload: Optional[Dict] = Field(default=None)
     """Дополнительные данные для бэкенда."""
-    action: AssistantViewAction | None = Field(default=None)
+    action: Optional[AssistantViewAction] = Field(default=None)
     """Объект, который ожидается к возвращению в веб-приложение."""
 
 
@@ -49,5 +49,5 @@ class ItemSelector(BaseModel):
     Множество объектов, которые можно вызвать голосом.
     """
 
-    items: list[AssistantVoiceAction] | None = Field(default=None)
+    items: Optional[List[AssistantVoiceAction]] = Field(default=None)
     """Список элементов."""

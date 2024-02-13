@@ -8,6 +8,8 @@
 Объект передается всегда и может быть либо пустым, либо содержать все указанные поля.
 """
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -16,11 +18,11 @@ class SelectedItem(BaseModel):
     # Описание модели SelectedItem.
     """
 
-    index: int | None = Field(default=None)
+    index: Optional[int] = Field(default=None)
     """Номер элемента из списка, начиная с 0."""
-    title: str | None = Field(default=None)
+    title: Optional[str] = Field(default=None)
     """Название элемента."""
-    is_query_by_number: bool | None = Field(default=None)
+    is_query_by_number: Optional[bool] = Field(default=None)
     """Указывает выбор элемента по номеру."""
 
     def __bool__(self) -> bool:

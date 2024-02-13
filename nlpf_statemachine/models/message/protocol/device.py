@@ -1,7 +1,7 @@
 """
 # Описание модели Device.
 """
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ class Device(BaseModel):
     # Описание модели Device.
     """
 
-    platformType: str | None = Field(default=None)
+    platformType: Optional[str] = Field(default=None)
     """
     Операционная система устройства.
 
@@ -23,9 +23,9 @@ class Device(BaseModel):
     * ANDROID;
     * IOS.
     """
-    platformVersion: str | None = Field(default=None)
+    platformVersion: Optional[str] = Field(default=None)
     """Версия операционной системы."""
-    surface: str | None = Field(default=None)
+    surface: Optional[str] = Field(default=None)
     """
     Устройство или мобильное приложение, от которого приходит вызов ассистента.
 
@@ -35,17 +35,17 @@ class Device(BaseModel):
     * COMPANION — запрос от приложения Салют;
     * STARGATE — запрос от устройства SberPortal.
     """
-    surfaceVersion: str | None = Field(default=None)
+    surfaceVersion: Optional[str] = Field(default=None)
     """Версия поверхности."""
-    deviceId: str | None = Field(default=None)
+    deviceId: Optional[str] = Field(default=None)
     """Идентификатор устройства."""
-    features: DeviceFeatures | None = Field(default=None)
+    features: Optional[DeviceFeatures] = Field(default=None)
     """Описание функциональности устройства."""
-    capabilities: DeviceCapabilities | None = Field(default=None)
+    capabilities: Optional[DeviceCapabilities] = Field(default=None)
     """Описание возможностей устройства пользователя."""
-    additionalInfo: Any | None = Field(default=None)
+    additionalInfo: Optional[Any] = Field(default=None)
     """Дополнительная информация об объекте или устройстве. В настоящий момент не используется."""
-    deviceManufacturer: str | None = Field(default=None)
+    deviceManufacturer: Optional[str] = Field(default=None)
     """Производитель устройства"""
-    deviceModel: str | None = Field(default=None)
+    deviceModel: Optional[str] = Field(default=None)
     """Модель устройства"""

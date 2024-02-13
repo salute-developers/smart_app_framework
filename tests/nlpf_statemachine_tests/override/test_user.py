@@ -3,7 +3,7 @@
 """
 import json
 from random import randint
-from typing import Type
+from typing import Type, Optional
 
 from pydantic import BaseModel, Field
 
@@ -105,7 +105,7 @@ class TestUser(SMAsyncioTestCaseBase):
             # Пример переопределение Context с обязательным вложенным полем.
             """
 
-            field: SomeField | None = Field(default=None)
+            field: Optional[SomeField] = Field(default=None)
 
         class CustomUser(SMUser):
             """

@@ -1,6 +1,7 @@
 """
 # Результат предобработки.
 """
+from typing import List, Dict, Optional
 
 from pydantic import BaseModel, Field
 
@@ -18,26 +19,26 @@ class Message(BaseModel):
 
     Пример: *"хочу заказать пиццу на девять вечера за пятьсот рублей".*
     """
-    normalized_text: str | None = Field(default=None)
+    normalized_text: Optional[str] = Field(default=None)
     """
     Нормализованный текст, который ввел пользователь.
     Можно использовать для снижения многообразия запросов, например, для аналитики.
 
     Пример: *хотеть заказать пицца на TIME_TIME_TOKEN за MONEY_TOKEN .*
     """
-    entities: dict | None = Field(default=None)
+    entities: Optional[Dict] = Field(default=None)
     """
     Извлеченные из запроса сущности.
 
     [Подробнее тут.](https://developers.sber.ru/docs/ru/salute/brain/entities/ner)
     """
-    asr_normalized_message: str | None = Field(default=None)
+    asr_normalized_message: Optional[str] = Field(default=None)
     """
     Отображаемый на экране текст запроса / нормализованный на этапе ASR запрос.
 
     Пример: *"Хочу заказать пиццу на 9 вечера за 500 ₽".*
     """
-    tokenized_elements_list: list[dict] | None = Field(default=None)
+    tokenized_elements_list: Optional[List[Dict]] = Field(default=None)
     """
     Список токенов в запросе пользователя.
     Содержит грамматический и синтаксический разбор,

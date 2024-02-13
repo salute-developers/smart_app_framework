@@ -1,6 +1,7 @@
 """
 # Описание моделей для StaticStorage.
 """
+from typing import Optional, List, Dict
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +13,7 @@ class AssistantAnswer(AssistantResponsePayload):
     # Описание модели AssistantAnswer.
     """
 
-    answers: list[AssistantResponsePayload]
+    answers: Optional[List[AssistantResponsePayload]]
     """Список ответов."""
 
 
@@ -21,13 +22,13 @@ class StaticStorageItem(AssistantResponsePayload):
     # Описание модели StaticStorageItem.
     """
 
-    joy: AssistantAnswer | None = Field(default=None)
+    joy: Optional[AssistantAnswer] = Field(default=None)
     """Ответы Джой."""
-    sber: AssistantAnswer | None = Field(default=None)
+    sber: Optional[AssistantAnswer] = Field(default=None)
     """Ответы Сбера."""
-    athena: AssistantAnswer | None = Field(default=None)
+    athena: Optional[AssistantAnswer] = Field(default=None)
     """Ответы Афины."""
-    any: AssistantAnswer | None = Field(default=None)
+    any: Optional[AssistantAnswer] = Field(default=None)
     """Дефолтные ответы."""
 
 
@@ -36,5 +37,5 @@ class StaticStorage(BaseModel):
     # Описание модели StaticStorage.
     """
 
-    data: dict[str, StaticStorageItem] = Field(default_factory=dict)
+    data: Dict[str, StaticStorageItem] = Field(default_factory=dict)
     """Словарь ответов ассистентов."""
