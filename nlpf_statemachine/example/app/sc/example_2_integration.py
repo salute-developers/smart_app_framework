@@ -8,13 +8,13 @@ from nlpf_statemachine.example.app.sc.enums.integration_message_names import (
     IntegrationRequestMessageName, IntegrationResponseMessageName,
 )
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
-from nlpf_statemachine.example.app.sc.models.token_service_integration import GetTokenPayload, GetTokenRequest
+from nlpf_statemachine.example.app.sc.models.integration import GetDataPayload, GetDataRequest
 from nlpf_statemachine.kit import Scenario
 from nlpf_statemachine.models import AnswerToUser, AssistantMessage, AssistantResponsePayload, Response
 
 # 1. Определяем необходимые параметры.
 INTEGRATION_TOPIC_KEY = "food_source"
-GET_TOKEN = "GET_TOKEN"
+GET_DATA = "GET_DATA"
 
 # 2. Инициализируем сценарий для глобального сценария и отдельную страницу.
 scenario = Scenario("IntegrationExample")
@@ -24,7 +24,7 @@ scenario = Scenario("IntegrationExample")
 
 
 # 4. Описываем общие методы.
-def get_ihapi_token(message: AssistantMessage) -> GetTokenRequest:
+def get_ihapi_data(message: AssistantMessage) -> GetDataRequest:
     """
     # Метод для генерации запроса в токен-сервис.
 
@@ -32,12 +32,12 @@ def get_ihapi_token(message: AssistantMessage) -> GetTokenRequest:
         message (AssistantMessage): Запрос от ассистента
 
     Returns:
-        GetTokenRequest: Запрос в токен-сервис.
+        GetTokenRequest: Запрос в интеграцию.
     """
-    return GetTokenRequest(
-        payload=GetTokenPayload(
+    return GetDataRequest(
+        payload=GetDataPayload(
             uuid=message.uuid,
-            projectId=message.payload.app_info.projectId,
+            project=message.payload.app_info.projectId,
         ),
         request_data={
             "topic_key": INTEGRATION_TOPIC_KEY,
@@ -46,39 +46,39 @@ def get_ihapi_token(message: AssistantMessage) -> GetTokenRequest:
 
 
 # 5. Добавим обработчики событии и тамйаута.
-@scenario.on_event(event=GET_TOKEN)
-def get_token_action(message: AssistantMessage, context: ExampleContext) -> Response:
+@scenario.on_event(event=GET_DATA)
+def get_data_action(message: AssistantMessage, context: ExampleContext) -> Response:
     r"""
-    # Получение токена от TokenService.
+    # Получение токена от интеграции.
 
-    **Событие:**  `GET_TOKEN`.
+    **Событие:**  `GET_DATA`.
 
     **Базовое событие:** Отсутствует (начинает транзакцию по получению токена).
 
     Интеграция с токен-сервисом происходит через кафку.
 
     ## Возможные следующие шаги транзакции
-    1. Таймаут: `get_token_timeout_action`;
-    2. Успешный ответ от интеграции: `get_token_success_action` \n
-        (событие: `IntegrationResponseMessageName.GENERATE_TOKEN`);
+    1. Таймаут: `get_data_timeout_action`;
+    2. Успешный ответ от интеграции: `get_data_success_action` \n
+        (событие: `IntegrationResponseMessageName.GENERATE_DATA`);
 
     Args:
         message (AssistantMessage): Запрос от ассистента
         context (ExampleContext): Контекст запроса от ассистента
 
     Returns:
-        GetTokenRequest: Запрос на получение токена в токен-сервис.
+        GetTokenRequest: Запрос на получение данны в интеграцию.
     """
     context.local.retry_index = 0
-    return get_ihapi_token(message)
+    return get_ihapi_data(message)
 
 
-@scenario.on_timeout(request_name=IntegrationRequestMessageName.GENERATE_TOKEN)
-def get_token_timeout_action(message: AssistantMessage, context: ExampleContext) -> Response:
+@scenario.on_timeout(request_name=IntegrationRequestMessageName.GENERATE_DATA)
+def get_data_timeout_action(message: AssistantMessage, context: ExampleContext) -> Response:
     """
-    # Таймаут при запросе токена из TokenService.
+    # Таймаут при запросе данных.
 
-    **Событие:**  Таймаут на запрос `IntegrationRequestMessageName.GENERATE_TOKEN`.
+    **Событие:**  Таймаут на запрос `IntegrationRequestMessageName.GENERATE_DATA`.
 
     **Базовое событие:** Любое.
 
@@ -90,28 +90,28 @@ def get_token_timeout_action(message: AssistantMessage, context: ExampleContext)
         context (ExampleContext): Контекст запроса от ассистента
 
     Returns:
-        GetTokenRequest: Запрос на получение токена в токен-сервис.
+        GetTokenRequest: Запрос на получение данных в интеграцию.
         AnswerToUser: Сообщение об ошибке.
     """
     if context.local.retry_index < 1:
         context.local.retry_index += 1
-        return get_ihapi_token(message)
+        return get_ihapi_data(message)
 
     return AnswerToUser(
         payload=AssistantResponsePayload(
-            pronounceText="К сожалению, произошёл таймаут получения данных от токен-сервиса",
+            pronounceText="К сожалению, произошёл таймаут получения данных от интеграции",
         ),
     )
 
 
-@scenario.on_event(event=IntegrationResponseMessageName.GENERATE_TOKEN, base_event=GET_TOKEN)
-def get_token_success_action() -> Response:
+@scenario.on_event(event=IntegrationResponseMessageName.GENERATE_DATA, base_event=GET_DATA)
+def get_data_success_action() -> Response:
     """
-    # Успешный ответа от TokenService в случае GET_TOKEN.
+    # Успешный ответ.
 
-    **Событие:** `IntegrationResponseMessageName.GENERATE_TOKEN`.
+    **Событие:** `IntegrationResponseMessageName.GENERATE_DATA`.
 
-    **Базовое событие:** `ServerAction.GET_TOKEN`.
+    **Базовое событие:** `GET_DATA`.
 
     В случае успешного овтета отдаём пользователю голосовй ответ и заканчиваем транзакцию.
 
@@ -120,6 +120,6 @@ def get_token_success_action() -> Response:
     """
     return AnswerToUser(
         payload=AssistantResponsePayload(
-            pronounceText="Токен получен! Я пришёл от GET_TOKEN",
+            pronounceText="Токен получен! Я пришёл от GET_DATA",
         ),
     )

@@ -15,8 +15,8 @@ class InitCommand(AssistantCommand):
 
     command: str = "INIT"
     """Наименование команды."""
-    token: str
-    """ihapi token."""
+    data: str
+    """data."""
 
 
 class CustomCommand(AssistantCommand):

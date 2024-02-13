@@ -9,7 +9,7 @@ from typing import Dict, List, Type
 from nlpf_statemachine.example.app.sc.enums.integration_message_names import IntegrationResponseMessageName
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.sc.models.message import CustomAssistantMessageServerAction, CustomMessageToSkill
-from nlpf_statemachine.example.app.sc.models.token_service_integration import GetTokenResponse
+from nlpf_statemachine.example.app.sc.models.integration import GetDataResponse
 from nlpf_statemachine.models import BaseMessage, RequestMessageName
 from nlpf_statemachine.override import SMUser
 
@@ -35,7 +35,7 @@ class ExampleUser(SMUser):
         models = super(ExampleUser, self).message_models
         models[RequestMessageName.MESSAGE_TO_SKILL] = [CustomMessageToSkill]
         models[RequestMessageName.SERVER_ACTION] = [CustomAssistantMessageServerAction]
-        models[IntegrationResponseMessageName.GENERATE_TOKEN] = [GetTokenResponse]
+        models[IntegrationResponseMessageName.GENERATE_DATA] = [GetDataResponse]
         return models
 
     @property

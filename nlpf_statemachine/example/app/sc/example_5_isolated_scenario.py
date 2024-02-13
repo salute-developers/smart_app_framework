@@ -12,9 +12,9 @@
 from typing import Optional
 
 from nlpf_statemachine.example.app.sc.enums.integration_message_names import IntegrationResponseMessageName
-from nlpf_statemachine.example.app.sc.example_2_integration import get_ihapi_token
+from nlpf_statemachine.example.app.sc.example_2_integration import get_ihapi_data
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
-from nlpf_statemachine.example.app.sc.models.token_service_integration import GetTokenResponse
+from nlpf_statemachine.example.app.sc.models.integration import GetDataResponse
 from nlpf_statemachine.kit import ConstClassifier, Scenario
 from nlpf_statemachine.models import AssistantMessage, Response
 
@@ -68,11 +68,11 @@ def run_app(message: AssistantMessage, context: ExampleContext) -> Response:
         GetTokenRequest: Запрос на получение токена в токен-сервис.
     """
     context.local.retry_index = 0
-    return get_ihapi_token(message)
+    return get_ihapi_data(message)
 
 
-@scenario.on_event(event=IntegrationResponseMessageName.GENERATE_TOKEN, base_event=RUN_APP)
-def get_token_success_action(message: GetTokenResponse, context: ExampleContext) -> Optional[Response]:
+@scenario.on_event(event=IntegrationResponseMessageName.GENERATE_DATA, base_event=RUN_APP)
+def get_token_success_action(message: GetDataResponse, context: ExampleContext) -> Optional[Response]:
     """
     # Успешный ответа от TokenService в случае RUN_APP.
 

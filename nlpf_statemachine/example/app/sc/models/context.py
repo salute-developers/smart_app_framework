@@ -8,7 +8,7 @@ from typing import Optional
 
 from pydantic import Field
 
-from nlpf_statemachine.example.app.sc.models.token_service_integration import GetTokenResponseData
+from nlpf_statemachine.example.app.sc.models.integration import GetDataResponseData
 from nlpf_statemachine.models import Context, LocalContext
 
 
@@ -20,7 +20,7 @@ class ExampleLocalContext(LocalContext):
     Контекст создаётся при запуске транзакции и уничтожается при его завершении.
     """
 
-    ihapi_token: Optional[GetTokenResponseData] = None
+    data: Optional[GetDataResponseData] = None
     """Токен ihapi."""
     retry_index: Optional[int] = None
     """Количество попыток загрузки данных из интеграции."""

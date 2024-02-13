@@ -62,7 +62,7 @@ def post_process(message: BaseMessage, response: AnswerToUser, context: ExampleC
             items = [
                 generate_item(
                     smart_app_data=InitCommand(
-                        token=context.local.ihapi_token.accessToken,
+                        data=context.local.data.data,
                     )),
             ]
 

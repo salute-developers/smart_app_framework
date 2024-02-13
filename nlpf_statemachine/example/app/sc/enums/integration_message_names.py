@@ -5,10 +5,10 @@ from nlpf_statemachine.models import SmartEnum
 class IntegrationRequestMessageName(SmartEnum):
     """Список наименований запросов интеграцию."""
 
-    GENERATE_TOKEN = "ECOM_GENERATE_TOKEN_REQUEST"
+    GENERATE_DATA = "GENERATE_DATA_REQUEST"
 
 
 class IntegrationResponseMessageName(SmartEnum):
     """Список наименований ответов от интеграции."""
 
-    GENERATE_TOKEN = "ECOM_GENERATE_TOKEN_RESPONSE"
+    GENERATE_DATA = "GENERATE_DATA_RESPONSE"
