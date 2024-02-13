@@ -556,10 +556,8 @@ class ContextManager(ScenarioContainer):
         """
         ## Проверка существования активной транзакции.
         """
-        if (context.local.base_event and context.local.last_transaction_step_timestamp
-                and self._now() - context.local.last_transaction_step_timestamp < SMConfig.transaction_timeout):
-            return True
-        return False
+        return (context.local.base_event and context.local.last_transaction_step_timestamp and
+                (self._now() - context.local.last_transaction_step_timestamp) < SMConfig.transaction_timeout)
 
     # ==== RUN action ====
     async def _run_event(
