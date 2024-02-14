@@ -21,10 +21,10 @@ class Events(SmartEnum):
     3. Ответ для любого ассистента;
     """
 
-    STATIC_STORAGE_EVENT_1 = "STATIC_STORAGE_EVENT_1"
-    STATIC_STORAGE_EVENT_2 = "STATIC_STORAGE_EVENT_2"
-    STATIC_STORAGE_EVENT_3 = "STATIC_STORAGE_EVENT_3"
-    STATIC_STORAGE_EVENT_4 = "STATIC_STORAGE_EVENT_4"
+    GET_DATA = "GET_DATA"
+    CREATE_DATA = "CREATE_DATA"
+    UPDATE_DATA = "UPDATE_DATA"
+    DELETE_DATA = "DELETE_DATA"
 
 
 class OriginalTextClassifier(Classifier):
@@ -53,10 +53,10 @@ class OriginalTextClassifier(Classifier):
                 if token.get("token_type") == NUM_TOKEN:
                     text = token.get("text")
                     if text == "1":
-                        return Events.STATIC_STORAGE_EVENT_1
+                        return Events.GET_DATA
                     elif text == "2":
-                        return Events.STATIC_STORAGE_EVENT_2
+                        return Events.CREATE_DATA
                     elif text == "3":
-                        return Events.STATIC_STORAGE_EVENT_3
+                        return Events.UPDATE_DATA
                     elif text == "4":
-                        return Events.STATIC_STORAGE_EVENT_4
+                        return Events.DELETE_DATA

@@ -26,7 +26,7 @@ scenario.add_classifier(classifier=OriginalTextClassifier())
 
 # 4. Добавим обработчики событии Events.STATIC_STORAGE_EVENT_X.
 #    Ответ сгенерируем из example_storage.
-@scenario.on_event(event=Events.STATIC_STORAGE_EVENT_1)
+@scenario.on_event(event=Events.GET_DATA)
 def example_storage_action_1() -> AnswerToUser:
     """
     ## Кейс 1.
@@ -39,7 +39,7 @@ def example_storage_action_1() -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_1")
 
 
-@scenario.on_event(event=Events.STATIC_STORAGE_EVENT_2)
+@scenario.on_event(event=Events.CREATE_DATA)
 def example_storage_action_2(context: Context) -> AnswerToUser:
     """
     ## Кейс 2.
@@ -53,7 +53,7 @@ def example_storage_action_2(context: Context) -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_2", context=context)
 
 
-@scenario.on_event(event=Events.STATIC_STORAGE_EVENT_3)
+@scenario.on_event(event=Events.UPDATE_DATA)
 def example_storage_action_3(context: Context) -> AnswerToUser:
     """
     ## Кейс 3.
@@ -67,7 +67,7 @@ def example_storage_action_3(context: Context) -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_3", context=context)
 
 
-@scenario.on_event(event=Events.STATIC_STORAGE_EVENT_4)
+@scenario.on_event(event=Events.DELETE_DATA)
 def example_storage_action_4(context: Context) -> AnswerToUser:
     """
     ## Кейс 4.
