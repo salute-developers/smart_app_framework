@@ -13,9 +13,6 @@ from nlpf_statemachine.example.app.sc.example_6_pre_process import scenario as p
 from nlpf_statemachine.example.app.sc.fallback import fallback
 from nlpf_statemachine.example.app.sc.pre_post_process import post_process, pre_process
 from nlpf_statemachine.kit import ContextManager, Form
-from smart_kit.configs import get_app_config
-
-app_config = get_app_config()
 
 behaviour_log("==== ИНИЦИАЛИЗАЦИЯ ContextManager ====")
 
