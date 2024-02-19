@@ -59,7 +59,9 @@ lxml = "4.9.2"
 twisted = "22.10.0"
 urllib3 = "1.26.18"
 certifi = "2023.07.22"
-aiokafka = "0.8.1"  # TODO update poetry lock
+aiokafka = "0.8.1"
+TatSu = "5.8.3"
+lazy = "1.5"
 
 [tool.poetry.extras]
 ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aarch64"]
