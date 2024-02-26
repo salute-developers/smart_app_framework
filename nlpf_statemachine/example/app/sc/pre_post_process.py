@@ -58,7 +58,7 @@ def post_process(message: BaseMessage, response: AnswerToUser, context: ExampleC
         new_session = False
 
     if new_session:
-        if context.local.ihapi_token:
+        if context.local.data:
             items = [
                 generate_item(
                     smart_app_data=InitCommand(

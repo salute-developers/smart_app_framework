@@ -2,12 +2,12 @@
 # Пример изолированного сценария --- запуск аппа.
 
 В данном примере изолированный сценарий НЕ возвращает ответ,
-а получает токен и передаёт управление дальше - в стейт-машину.
+а получает данные и передаёт управление дальше - в стейт-машину.
 
 На запуске аппа необходимо сделать следующее:
 1. Запустить
-1. Пример простой интеграции с TokenService.
-2. Пример run_app, где так же используется интеграция с токен-сервисом.
+1. Пример простой интеграции.
+2. Пример run_app, где так же используется интеграция.
 """
 from typing import Optional
 
@@ -49,41 +49,41 @@ def run_app(message: AssistantMessage, context: ExampleContext) -> Response:
     r"""
     # Запуск приложения.
 
-    **Событие:**  `RUN_APP`.
+    **Событие:** `RUN_APP`.
 
-    **Базовое событие:** Отсутствует (начинает транзакцию по получению токена).
+    **Базовое событие:** Отсутствует (начинает транзакцию по получению данных).
 
-    Интеграция с токен-сервисом происходит через кафку.
+    Интеграция происходит через кафку.
 
     ## Возможные следующие шаги транзакции
-    1. Таймаут: `get_token_timeout_action`;
-    2. Успешный ответ от интеграции: `get_token_success_action` \n
-        (событие: `IntegrationResponseMessageName.GENERATE_TOKEN`);
+    1. Таймаут: `get_data_timeout_action`;
+    2. Успешный ответ от интеграции: `get_data_success_action` \n
+        (событие: `IntegrationResponseMessageName.GENERATE_DATA`);
 
     Args:
         message (AssistantMessage): Запрос от ассистента
         context (ExampleContext): Контекст запроса от ассистента
 
     Returns:
-        GetTokenRequest: Запрос на получение токена в токен-сервис.
+        GetDataRequest: Запрос на получение данных из интеграции.
     """
     context.local.retry_index = 0
     return get_ihapi_data(message)
 
 
 @scenario.on_event(event=IntegrationResponseMessageName.GENERATE_DATA, base_event=RUN_APP)
-def get_token_success_action(message: GetDataResponse, context: ExampleContext) -> Optional[Response]:
+def get_data_success_action(message: GetDataResponse, context: ExampleContext) -> Optional[Response]:
     """
-    # Успешный ответа от TokenService в случае RUN_APP.
+    # Успешный ответа от интеграции в случае RUN_APP.
 
-    **Событие:** `IntegrationResponseMessageName.GENERATE_TOKEN`.
+    **Событие:** `IntegrationResponseMessageName.GENERATE_DATA`.
 
-    **Базовое событие:** `ServerAction.GET_TOKEN`.
+    **Базовое событие:** `RUN_APP`.
 
-    В случае успешного овтета сохраняем токен в контекст и возвращаем управление в стейт-машину.
+    В случае успешного овтета сохраняем данные в контекст и возвращаем управление в стейт-машину.
 
     Returns:
         None.
     """
-    context.local.ihapi_token = message.payload.data
+    context.local.data = message.payload.data
     return

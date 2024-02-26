@@ -21,7 +21,7 @@ class ExampleLocalContext(LocalContext):
     """
 
     data: Optional[GetDataResponseData] = None
-    """Токен ihapi."""
+    """Данные ihapi."""
     retry_index: Optional[int] = None
     """Количество попыток загрузки данных из интеграции."""
 

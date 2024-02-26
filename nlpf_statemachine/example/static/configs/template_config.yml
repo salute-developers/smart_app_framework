@@ -16,12 +16,3 @@ jaeger_config:
     param: true
 monitoring:
   enabled: false
-masking_fields:
-  - token
-  - access_token
-  - refresh_token
-  - epkId
-  - profileId
-  - customer_name
-  - address
-  - clientInfo

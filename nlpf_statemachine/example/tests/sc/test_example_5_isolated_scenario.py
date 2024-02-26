@@ -25,7 +25,7 @@ class TestPostProcessIsolatedScenario(SMTestCase):
 
     def assert_request(self) -> None:
         """
-        # Проверка параметров запроса в токен-сервис.
+        # Проверка параметров запроса в интеграцию.
         """
         assert self.response.messageName == IntegrationRequestMessageName.GENERATE_DATA
         assert self.response.payload.uuid.sub == self.message.uuid.sub
@@ -75,9 +75,9 @@ class TestPostProcessIsolatedScenario(SMTestCase):
 
     async def finish_run_app_success(self) -> None:
         """
-        # Токен-Сервис ответил успешно.
+        # Интеграция ответила успешно.
 
-        В таком случае: транзакция завершается, пользователю возвращается токен.
+        В таком случае: транзакция завершается, пользователю возвращается данные.
         """
         self.call_history_size += 2
         await self.run_context_manager(
@@ -95,7 +95,7 @@ class TestPostProcessIsolatedScenario(SMTestCase):
         assert self.context.last_event == Event.FALLBACK
         assert self.context.last_response_message_name == ResponseMessageName.ANSWER_TO_USER
         assert self.response.debug_info.call_history[-2].event == IntegrationResponseMessageName.GENERATE_DATA
-        assert self.response.debug_info.call_history[-2].action == "RunAppExample.get_token_success_action"
+        assert self.response.debug_info.call_history[-2].action == "RunAppExample.get_data_success_action"
         assert self.response.debug_info.call_history[-2].scenario == "RunAppExample"
 
     async def finish_integration_timeout(self, finished_transaction: bool) -> None:
@@ -159,7 +159,7 @@ class TestPostProcessIsolatedScenario(SMTestCase):
 
     async def test_run_app_timeout_multiple(self) -> None:
         """
-        # Токен-Сервис всегда таймаутит.
+        # Интеграция всегда таймаутит.
 
         Схема: * DP -> Scenario -> Integration -> Scenario (TIMEOUT) -> Integration -> Scenario (TIMEOUT) -> DP *
 

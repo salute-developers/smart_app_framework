@@ -50,7 +50,7 @@ class TestGetData(SMTestCase):
 
     async def start_integration(self) -> None:
         """
-        # Запуск транзакции получения токена.
+        # Запуск транзакции получения данных.
         """
         self.call_history_size += 1
         await self.run_context_manager_init(
@@ -70,9 +70,9 @@ class TestGetData(SMTestCase):
 
     async def finish_integration_success(self) -> None:
         """
-        # Токен-Сервис ответил успешно.
+        # Интеграция ответил успешно.
 
-        В таком случае: транзакция завершается, пользователю возвращается токен.
+        В таком случае: транзакция завершается, пользователю возвращаются данные.
         """
         self.call_history_size += 1
         await self.run_context_manager(
@@ -93,7 +93,7 @@ class TestGetData(SMTestCase):
 
     async def finish_integration_timeout(self, finished_transaction: bool) -> None:
         """
-        # Токен-Сервис ответил таймаутом.
+        # Интеграция ответилв таймаутом.
         """
         self.call_history_size += 1
         await self.run_context_manager(
