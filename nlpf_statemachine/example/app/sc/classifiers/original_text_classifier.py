@@ -19,12 +19,13 @@ class Events(SmartEnum):
     1. Фиксированный ответ на верхнем уровне в static-файле;
     2. Ответ для соответствующего ассистента;
     3. Ответ для любого ассистента;
+    4. Ответ с добавлением простой команды.
     """
 
-    GET_DATA = "GET_DATA"
-    CREATE_DATA = "CREATE_DATA"
-    UPDATE_DATA = "UPDATE_DATA"
-    DELETE_DATA = "DELETE_DATA"
+    SIMPLE_ASSISTANT_ANSWER = "SIMPLE_ASSISTANT_ANSWER"
+    CHOICE_ASSISTANT_ANSWER = "CHOICE_ASSISTANT_ANSWER"
+    ANY_ASSISTANT_ANSWER = "ANY_ASSISTANT_ANSWER"
+    ANSWER_WITH_COMMAND = "ANSWER_WITH_COMMAND"
 
 
 class OriginalTextClassifier(Classifier):
@@ -53,10 +54,10 @@ class OriginalTextClassifier(Classifier):
                 if token.get("token_type") == NUM_TOKEN:
                     text = token.get("text")
                     if text == "1":
-                        return Events.GET_DATA
+                        return Events.SIMPLE_ASSISTANT_ANSWER
                     elif text == "2":
-                        return Events.CREATE_DATA
+                        return Events.CHOICE_ASSISTANT_ANSWER
                     elif text == "3":
-                        return Events.UPDATE_DATA
+                        return Events.ANY_ASSISTANT_ANSWER
                     elif text == "4":
-                        return Events.DELETE_DATA
+                        return Events.ANSWER_WITH_COMMAND

@@ -5,7 +5,7 @@ from nlpf_statemachine.example.app.sc.enums.approve_values import ApproveValues
 from nlpf_statemachine.kit import Filler
 from nlpf_statemachine.models import Context, MessageToSkill
 
-# Определяем фразы, которые хотим использовать для подтвержденияи и отрицания.
+# Определяем фразы, которые хотим использовать для подтверждения и отрицания.
 # Хорошей практикой является определение их в статичных-файлах.
 yes_words = ["да", "подтверждаю", "так точно", "согласен", "подтверждение"]
 no_words = ["нет", "не согласен", "отрицание"]

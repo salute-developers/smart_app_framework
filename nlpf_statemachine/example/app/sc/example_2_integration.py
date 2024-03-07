@@ -11,47 +11,22 @@ from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.sc.models.integration import GetDataPayload, GetDataRequest
 from nlpf_statemachine.kit import Scenario
 from nlpf_statemachine.models import AnswerToUser, AssistantMessage, AssistantResponsePayload, Response
+from nlpf_statemachine.example.app.scenario_utils import get_integration_data
 
 # 1. Определяем необходимые параметры.
-INTEGRATION_TOPIC_KEY = "food_source"
 GET_DATA = "GET_DATA"
 
 # 2. Инициализируем сценарий для глобального сценария и отдельную страницу.
 scenario = Scenario("IntegrationExample")
 
 
-# 3. Добавляем классификаторы.
-
-
-# 4. Описываем общие методы.
-def get_ihapi_data(message: AssistantMessage) -> GetDataRequest:
-    """
-    # Метод для генерации запроса в интеграцию.
-
-    Args:
-        message (AssistantMessage): Запрос от ассистента
-
-    Returns:
-        GetDataRequest: Запрос в интеграцию.
-    """
-    return GetDataRequest(
-        payload=GetDataPayload(
-            uuid=message.uuid,
-            project=message.payload.app_info.projectId,
-        ),
-        request_data={
-            "topic_key": INTEGRATION_TOPIC_KEY,
-        },
-    )
-
-
-# 5. Добавим обработчики событии и тамйаута.
+# 3. Добавляем обработчики событий и таймаута.
 @scenario.on_event(event=GET_DATA)
 def get_data_action(message: AssistantMessage, context: ExampleContext) -> Response:
     r"""
     # Получение данных от интеграции.
 
-    **Событие:**  `GET_DATA`.
+    **Событие:** `GET_DATA`.
 
     **Базовое событие:** Отсутствует (начинает транзакцию по получению данных).
 
@@ -70,7 +45,7 @@ def get_data_action(message: AssistantMessage, context: ExampleContext) -> Respo
         GetDataRequest: Запрос на получение данны в интеграцию.
     """
     context.local.retry_index = 0
-    return get_ihapi_data(message)
+    return get_integration_data(message)
 
 
 @scenario.on_timeout(request_name=IntegrationRequestMessageName.GENERATE_DATA)
@@ -78,7 +53,7 @@ def get_data_timeout_action(message: AssistantMessage, context: ExampleContext) 
     """
     # Таймаут при запросе данных.
 
-    **Событие:**  Таймаут на запрос `IntegrationRequestMessageName.GENERATE_DATA`.
+    **Событие:** Таймаут на запрос `IntegrationRequestMessageName.GENERATE_DATA`.
 
     **Базовое событие:** Любое.
 
@@ -86,7 +61,7 @@ def get_data_timeout_action(message: AssistantMessage, context: ExampleContext) 
     и заканчиваем транзакцию.
 
     Args:
-        message (AssistantMessageИмя): Запрос от ассистента
+        message (AssistantMessage): Запрос от ассистента
         context (ExampleContext): Контекст запроса от ассистента
 
     Returns:
@@ -95,7 +70,7 @@ def get_data_timeout_action(message: AssistantMessage, context: ExampleContext) 
     """
     if context.local.retry_index < 1:
         context.local.retry_index += 1
-        return get_ihapi_data(message)
+        return get_integration_data(message)
 
     return AnswerToUser(
         payload=AssistantResponsePayload(
@@ -113,7 +88,7 @@ def get_data_success_action() -> Response:
 
     **Базовое событие:** `GET_DATA`.
 
-    В случае успешного овтета отдаём пользователю голосовй ответ и заканчиваем транзакцию.
+    В случае успешного ответа отдаём пользователю голосовой ответ и заканчиваем транзакцию.
 
     Returns:
         AnswerToUser: Сообщение об успешном ответе.

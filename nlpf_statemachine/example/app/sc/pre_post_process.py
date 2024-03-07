@@ -11,10 +11,10 @@ from nlpf_statemachine.example.app.sc.models.message import CustomMessageToSkill
 from nlpf_statemachine.example.app.sc.models.pre_process_message import (
     CustomPreProcessMessage, CustomPreProcessMessagePayload,
 )
-from nlpf_statemachine.models import AnswerToUser, BaseMessage, Response
+from nlpf_statemachine.models import AnswerToUser, AssistantMessage, Response
 
 
-def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[BaseMessage]:
+def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[AssistantMessage]:
     """
     ## Pre-процесс.
 
@@ -28,7 +28,7 @@ def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[B
         state (CustomState): State из запроса;
 
     Returns:
-        BaseMessage: изменённое сообщение. (опционально!)
+        AssistantMessage: изменённое сообщение. (опционально!)
     """
     if state and state.replace_message:
         return CustomPreProcessMessage(
@@ -38,14 +38,14 @@ def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[B
         )
 
 
-def post_process(message: BaseMessage, response: AnswerToUser, context: ExampleContext) -> Optional[Response]:
+def post_process(message: AssistantMessage, response: AnswerToUser, context: ExampleContext) -> Optional[Response]:
     """
     ## Post-процесс.
 
     --- процесс при завершении транзакции.
 
     Args:
-        message (BaseMessage): пришедшее сообщение;
+        message (AssistantMessage): пришедшее сообщение;
         response (AnswerToUser): полученный ответ;
         context (ExampleContext): контекст;
 

@@ -27,6 +27,6 @@ class BaseMessage(BaseModel):
     128 bit hex GUID converted to string.
     """
     uuid: Optional[UUID] = Field(default=None)
-    "Составной идентификатор пользователя."
+    """Составной идентификатор пользователя."""
     payload: Optional[Dict] = Field(default={})
     """Коллекция, в которой в зависимости от потребителя и messageName передается дополнительная информация."""

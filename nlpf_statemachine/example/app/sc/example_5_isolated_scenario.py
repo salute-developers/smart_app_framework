@@ -12,7 +12,7 @@
 from typing import Optional
 
 from nlpf_statemachine.example.app.sc.enums.integration_message_names import IntegrationResponseMessageName
-from nlpf_statemachine.example.app.sc.example_2_integration import get_ihapi_data
+from nlpf_statemachine.example.app.scenario_utils import get_integration_data
 from nlpf_statemachine.example.app.sc.models.context import ExampleContext
 from nlpf_statemachine.example.app.sc.models.integration import GetDataResponse
 from nlpf_statemachine.kit import ConstClassifier, Scenario
@@ -26,7 +26,7 @@ scenario = Scenario("RunAppExample")
 scenario.add_classifier(ConstClassifier(value=RUN_APP))
 
 
-# 3. Определим условие на запуск.
+# 3. Определяем условие на запуск.
 def run_app_condition(message: AssistantMessage) -> bool:
     """
     ## Условие на запуск изолированного процесса.
@@ -43,7 +43,7 @@ def run_app_condition(message: AssistantMessage) -> bool:
         return False
 
 
-# 4. Добавим обработчики событии и тамйаута.
+# 4. Добавляем обработчики событий и таймаута.
 @scenario.on_event(event=RUN_APP)
 def run_app(message: AssistantMessage, context: ExampleContext) -> Response:
     r"""
@@ -68,7 +68,7 @@ def run_app(message: AssistantMessage, context: ExampleContext) -> Response:
         GetDataRequest: Запрос на получение данных из интеграции.
     """
     context.local.retry_index = 0
-    return get_ihapi_data(message)
+    return get_integration_data(message)
 
 
 @scenario.on_event(event=IntegrationResponseMessageName.GENERATE_DATA, base_event=RUN_APP)

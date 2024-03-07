@@ -51,7 +51,7 @@ class ExampleStaticStorage(SMTestCase):
 
             # ==== Asserts ====
             self.assert_debug_info(
-                called_event=Events.GET_DATA,
+                called_event=Events.SIMPLE_ASSISTANT_ANSWER,
                 called_action="StaticStorageExample.example_storage_action_1",
                 static_code="EXAMPLE_1",
             )
@@ -95,7 +95,7 @@ class ExampleStaticStorage(SMTestCase):
 
             # ==== Asserts ====
             self.assert_debug_info(
-                called_event=Events.CREATE_DATA,
+                called_event=Events.CHOICE_ASSISTANT_ANSWER,
                 called_action="StaticStorageExample.example_storage_action_2",
                 static_code="EXAMPLE_2",
             )
@@ -147,7 +147,7 @@ class ExampleStaticStorage(SMTestCase):
 
             # ==== Asserts ====
             self.assert_debug_info(
-                called_event=Events.UPDATE_DATA,
+                called_event=Events.ANY_ASSISTANT_ANSWER,
                 called_action="StaticStorageExample.example_storage_action_3",
                 static_code="EXAMPLE_3",
             )
@@ -191,7 +191,7 @@ class ExampleStaticStorage(SMTestCase):
 
             # ==== Asserts ====
             self.assert_debug_info(
-                called_event=Events.DELETE_DATA,
+                called_event=Events.ANSWER_WITH_COMMAND,
                 called_action="StaticStorageExample.example_storage_action_4",
                 static_code="EXAMPLE_4",
             )

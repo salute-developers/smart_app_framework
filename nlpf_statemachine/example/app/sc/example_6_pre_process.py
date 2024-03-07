@@ -16,7 +16,7 @@ scenario = Scenario("PreProcessExample")
 scenario.add_classifier(ConstClassifier(value=EVENT))
 
 
-# 3. Определим условие на запуск.
+# 3. Определяем условие на запуск.
 def pre_process_condition(message: AssistantMessage) -> bool:
     """
     ## Условие на запуск изолированного процесса.
@@ -30,7 +30,7 @@ def pre_process_condition(message: AssistantMessage) -> bool:
     return isinstance(message, CustomPreProcessMessage)
 
 
-# 4. Добавим обработчики событии и тамйаута.
+# 4. Добавляем обработчики событий и таймаута.
 @scenario.on_event(event=EVENT)
 def action(payload: CustomPreProcessMessagePayload) -> Response:
     """

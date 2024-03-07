@@ -30,7 +30,7 @@ from nlpf_statemachine.models import AnswerToUser, AssistantResponsePayload
 from scenarios.scenario_models.field.field_filler_description import ApproveFiller
 from smart_kit.configs import get_app_config
 
-# Создадим форму и добавим на неё соответствующие слоты.
+# 1. Создаём форму и добавляем на неё соответствующие слоты.
 my_form = Form()
 my_form.add_field(
     name="nlpf_approve",
@@ -46,19 +46,19 @@ my_form.add_field(
     filler=CustomApproveFiller(),
 )
 
-# Определим простой классификатор для нашего сценария.
+# 2. Определяем простой классификатор для нашего сценария.
 app_config = get_app_config()
 classifier = IntersectionClassifier(
     filename=f"{app_config.STATIC_PATH}/intents/global.yaml",
 )
 
-# Определим сценарий, используюший данную форму.
+# 3. Определяем сценарий, используюший данную форму.
 scenario = Scenario("FORM_FILLING_SCENARIO")
 scenario.add_form(form=my_form)
 scenario.add_classifier(classifier=classifier)
 
 
-# Определим экшен, который будет обрабатывать значения в слотах.
+# 4. Определяем экшен, который будет обрабатывать значения в слотах.
 @scenario.on_event(event="APPROVE")
 @scenario.on_event(event="REJECT")
 def form_filling_approve_action(form: Dict) -> AnswerToUser:

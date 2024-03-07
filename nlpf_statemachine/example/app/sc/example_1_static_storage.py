@@ -20,13 +20,13 @@ example_storage = StaticStorageManager(
 scenario = Scenario("StaticStorageExample")
 
 # 3. Добавляем классификаторы.
-#    Нас интересует события Events.STATIC_STORAGE_EVENT_X.
+#    Нас интересуют фразы пользователя "Статичный ответ X" (X=1,2,3,4).
 scenario.add_classifier(classifier=OriginalTextClassifier())
 
 
-# 4. Добавим обработчики событии Events.STATIC_STORAGE_EVENT_X.
+# 4. Добавляем обработчики событий Events.STATIC_STORAGE_EVENT_X.
 #    Ответ сгенерируем из example_storage.
-@scenario.on_event(event=Events.GET_DATA)
+@scenario.on_event(event=Events.SIMPLE_ASSISTANT_ANSWER)
 def example_storage_action_1() -> AnswerToUser:
     """
     ## Кейс 1.
@@ -39,7 +39,7 @@ def example_storage_action_1() -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_1")
 
 
-@scenario.on_event(event=Events.CREATE_DATA)
+@scenario.on_event(event=Events.CHOICE_ASSISTANT_ANSWER)
 def example_storage_action_2(context: Context) -> AnswerToUser:
     """
     ## Кейс 2.
@@ -53,12 +53,12 @@ def example_storage_action_2(context: Context) -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_2", context=context)
 
 
-@scenario.on_event(event=Events.UPDATE_DATA)
+@scenario.on_event(event=Events.ANY_ASSISTANT_ANSWER)
 def example_storage_action_3(context: Context) -> AnswerToUser:
     """
     ## Кейс 3.
 
-    ** Ответ выбирается независимо от асситента (с наличием полей на верхних уровнях) **
+    ** Ответ выбирается независимо от ассистента (с наличием полей на верхних уровнях) **
     ** и вариативностью ответов. **
 
     Returns:
@@ -67,7 +67,7 @@ def example_storage_action_3(context: Context) -> AnswerToUser:
     return example_storage.answer_to_user(code="EXAMPLE_3", context=context)
 
 
-@scenario.on_event(event=Events.DELETE_DATA)
+@scenario.on_event(event=Events.ANSWER_WITH_COMMAND)
 def example_storage_action_4(context: Context) -> AnswerToUser:
     """
     ## Кейс 4.

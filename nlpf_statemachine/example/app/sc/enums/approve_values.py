@@ -6,7 +6,7 @@ from nlpf_statemachine.models import SmartEnum
 
 class ApproveValues(SmartEnum):
     """
-    # Возможные значения слота Approve Filler.
+    # Возможные значения слота ApproveFiller.
     """
 
     AGREEMENT = "AGREEMENT"

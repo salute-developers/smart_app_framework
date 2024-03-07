@@ -1,11 +1,11 @@
 """
-# Пример работы с сервер экшенами и командами для фронта.
+# Пример работы с сервер-экшенами и командами для фронта.
 """
 from nlpf_statemachine.example.app.sc.commands import custom_command
 from nlpf_statemachine.kit import Scenario
 from nlpf_statemachine.models import AnswerToUser, ServerAction
 
-# 1. Объявим сервер-экшен, который хотим обработать.
+# 1. Объявляем сервер-экшен, который хотим обработать.
 SERVER_ACTION_ID = "SERVER_ACTION_ID"
 
 
@@ -13,13 +13,13 @@ SERVER_ACTION_ID = "SERVER_ACTION_ID"
 scenario = Scenario("CommandOnServerActionExample")
 
 
-# 3. Добавим обработчик события (сервер-экшена).
+# 3. Добавляем обработчик события (сервер-экшена).
 @scenario.on_event(event=SERVER_ACTION_ID)
 def example_server_action_handler(server_action: ServerAction) -> AnswerToUser:
     """
     # Пример обработки сервер-экшена и генерации команды.
 
-    **Событие:**  `SERVER_ACTION_ID`.
+    **Событие:** `SERVER_ACTION_ID`.
 
     В данном случае транзакция 1-шаговая.
 

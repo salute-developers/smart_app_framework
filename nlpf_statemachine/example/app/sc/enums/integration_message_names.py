@@ -3,7 +3,7 @@ from nlpf_statemachine.models import SmartEnum
 
 
 class IntegrationRequestMessageName(SmartEnum):
-    """Список наименований запросов интеграцию."""
+    """Список наименований запросов в интеграцию."""
 
     GENERATE_DATA = "GENERATE_DATA_REQUEST"
 
