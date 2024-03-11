@@ -1,0 +1,10 @@
+{
+  "base": {
+    "channels": [
+      "B2C",
+      "SBOL",
+      "SUPER_APP"
+    ],
+    "count": 2
+  }
+}

@@ -1,0 +1,35 @@
+---
+template-engine:
+  main:
+    default_topic_key: main_topic
+    publisher:
+      conf:
+#        fill kafka servers address here before use
+        bootstrap.servers: ""
+        topic.metadata.refresh.interval.ms: 100000
+      poll_timeout: 0
+      flush_timeout: 10000
+      partitions_count: 3
+      topic:
+        main_topic: outgoingTopic
+        integration_topic: integrationOutgoingTopic
+    consumer:
+      assign_offset_end: true
+      default_topic_key: main_topic
+      poll_timeout: 0.01
+      topics:
+        main_topic: incomingTopic
+        integration_topic: integrationIncomingTopic
+      conf:
+#        fill kafka servers address here before use
+        bootstrap.servers: ""
+        topic.metadata.refresh.interval.ms: 100000
+        group.id: some_group_id
+        session.timeout.ms: 6000
+        enable.auto.commit: false
+        auto.commit.interval.ms: 1000
+        enable.auto.offset.store: true
+        default.topic.config:
+          auto.offset.reset: latest
+        debug: all
+      internal_log_path: "/tmp"

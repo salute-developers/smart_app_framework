@@ -1,0 +1,104 @@
+[
+    {
+        "text": "статичный",
+        "raw_text": "статичный",
+        "grammem_info": {
+            "case": "nom",
+            "degree": "pos",
+            "gender": "masc",
+            "number": "sing",
+            "raw_gram_info": "case=nom|degree=pos|gender=masc|number=sing",
+            "part_of_speech": "ADJ"
+        },
+        "lemma": "статичный",
+        "is_stop_word": false,
+        "list_of_dependents": [],
+        "dependency_type": "amod",
+        "head": 2
+    },
+    {
+        "text": "ответ",
+        "raw_text": "ответ",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "nom",
+            "gender": "masc",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=nom|gender=masc|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "ответ",
+        "is_stop_word": false,
+        "list_of_dependents": [
+            1
+        ],
+        "dependency_type": "nsubj",
+        "head": 3
+    },
+    {
+        "text": "номер",
+        "raw_text": "номер",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "nom",
+            "gender": "masc",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=nom|gender=masc|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "номер",
+        "is_stop_word": false,
+        "list_of_dependents": [
+            2,
+            4
+        ],
+        "dependency_type": "root",
+        "head": 0
+    },
+    {
+        "text": "3",
+        "raw_text": "3",
+        "lemma": "3",
+        "original_text": "три",
+        "token_type": "NUM_TOKEN",
+        "token_value": {
+            "value": 3,
+            "adjectival_number": false
+        },
+        "list_of_token_types_data": [
+            {
+                "token_type": "NUM_TOKEN",
+                "token_value": {
+                    "value": 3,
+                    "adjectival_number": false
+                }
+            }
+        ],
+        "grammem_info": {
+            "numform": "digit",
+            "raw_gram_info": "numform=digit",
+            "part_of_speech": "NUM"
+        },
+        "is_stop_word": false,
+        "list_of_dependents": [],
+        "dependency_type": "nummod",
+        "head": 3
+    },
+    {
+        "raw_text": ".",
+        "text": ".",
+        "lemma": ".",
+        "token_type": "SENTENCE_ENDPOINT_TOKEN",
+        "token_value": {
+            "value": "."
+        },
+        "list_of_token_types_data": [
+            {
+                "token_type": "SENTENCE_ENDPOINT_TOKEN",
+                "token_value": {
+                    "value": "."
+                }
+            }
+        ]
+    }
+]

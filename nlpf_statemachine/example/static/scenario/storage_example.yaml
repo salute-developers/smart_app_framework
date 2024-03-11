@@ -1,0 +1,92 @@
+EXAMPLE_1:
+  pronounceText: "<speak> Пример простого ответа на верхнем уровне с голосовой разметкой в формате SSML. </speak>"
+  pronounceTextType: "application/ssml"
+  items:
+    - bubble:
+        text: "Пример простого текста для bubble на верхнем уровне."
+  intent: "intent_1"
+  emotion:
+    emotionId: "zhdu_otvet"
+  auto_listening: True
+  asr_hints:
+    words:
+      - один
+      - два
+      - три
+
+
+EXAMPLE_2:
+  pronounceTextType: "application/text"
+
+  joy:
+    emotion:
+      emotionId: "oups"
+    answers:
+      - pronounceText: "<speak> Пример ответа для ассистента Джой #1."
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для ассистента Джой #2. </speak>"
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для ассистента Джой #3. </speak>"
+        pronounceTextType: "application/ssml"
+
+  athena:
+    emotion:
+      emotionId: "igrivost"
+    answers:
+      - pronounceText: "Пример ответа для ассистента Афина #1."
+      - pronounceText: "Пример ответа для ассистента Афина #2."
+      - pronounceText: "Пример ответа для ассистента Афина #3."
+
+  sber:
+    emotion:
+      emotionId: "ok_prinyato"
+    answers:
+      - pronounceText: "Пример ответа для ассистента Сбер #1."
+      - pronounceText: "Пример ответа для ассистента Сбер #2."
+      - pronounceText: "Пример ответа для ассистента Сбер #3."
+
+
+EXAMPLE_3:
+  pronounceTextType: "application/text"
+  emotion:
+    emotionId: "zhdu_otvet"
+  any:
+    emotion:
+      emotionId: "ok_prinyato"
+
+    answers:
+      - pronounceText: "Пример ответа для любого ассистента #1."
+      - pronounceText: "Пример ответа для любого ассистента #2."
+      - pronounceText: "Пример ответа для любого ассистента #3."
+
+  joy:
+    answers:
+      - pronounceText: "<speak> Пример ответа для Джой #1."
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для Джой #2. </speak>"
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для Джой #2. </speak>"
+        pronounceTextType: "application/ssml"
+
+
+EXAMPLE_4:
+  pronounceTextType: "application/text"
+  emotion:
+    emotionId: "zhdu_otvet"
+  any:
+    emotion:
+      emotionId: "ok_prinyato"
+
+    answers:
+      - pronounceText: "Пример ответа для любого ассистента #1."
+      - pronounceText: "Пример ответа для любого ассистента #2."
+      - pronounceText: "Пример ответа для любого ассистента #3."
+
+  joy:
+    answers:
+      - pronounceText: "<speak> Пример ответа для Джой #1."
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для Джой #2. </speak>"
+        pronounceTextType: "application/ssml"
+      - pronounceText: "<speak> Пример ответа для Джой #2. </speak>"
+        pronounceTextType: "application/ssml"

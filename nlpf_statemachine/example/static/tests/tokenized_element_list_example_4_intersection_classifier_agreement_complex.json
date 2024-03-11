@@ -1,0 +1,75 @@
+
+[
+    {
+        "text": "заполнение",
+        "raw_text": "заполнение",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "nom",
+            "gender": "neut",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=nom|gender=neut|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "заполнение",
+        "is_stop_word": false,
+        "list_of_dependents": [
+            2
+        ],
+        "dependency_type": "nsubj",
+        "head": 3
+    },
+    {
+        "text": "формы",
+        "raw_text": "формы",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "gen",
+            "gender": "fem",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=gen|gender=fem|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "форма",
+        "is_stop_word": false,
+        "list_of_dependents": [],
+        "dependency_type": "nmod",
+        "head": 1
+    },
+    {
+        "text": "подтверждение",
+        "raw_text": "подтверждение",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "nom",
+            "gender": "neut",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=nom|gender=neut|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "подтверждение",
+        "is_stop_word": false,
+        "list_of_dependents": [
+            1
+        ],
+        "dependency_type": "root",
+        "head": 0
+    },
+    {
+        "raw_text": ".",
+        "text": ".",
+        "lemma": ".",
+        "token_type": "SENTENCE_ENDPOINT_TOKEN",
+        "token_value": {
+            "value": "."
+        },
+        "list_of_token_types_data": [
+            {
+                "token_type": "SENTENCE_ENDPOINT_TOKEN",
+                "token_value": {
+                    "value": "."
+                }
+            }
+        ]
+    }
+]

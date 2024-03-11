@@ -1,0 +1,38 @@
+[
+    {
+        "text": "отрицание",
+        "raw_text": "отрицание",
+        "grammem_info": {
+            "animacy": "inan",
+            "case": "nom",
+            "gender": "neut",
+            "number": "sing",
+            "raw_gram_info": "animacy=inan|case=nom|gender=neut|number=sing",
+            "part_of_speech": "NOUN"
+        },
+        "lemma": "отрицание",
+        "is_stop_word": false,
+        "list_of_dependents": [
+            1
+        ],
+        "dependency_type": "root",
+        "head": 0
+    },
+    {
+        "raw_text": ".",
+        "text": ".",
+        "lemma": ".",
+        "token_type": "SENTENCE_ENDPOINT_TOKEN",
+        "token_value": {
+            "value": "."
+        },
+        "list_of_token_types_data": [
+            {
+                "token_type": "SENTENCE_ENDPOINT_TOKEN",
+                "token_value": {
+                    "value": "."
+                }
+            }
+        ]
+    }
+]
