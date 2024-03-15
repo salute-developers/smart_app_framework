@@ -145,7 +145,7 @@ class CLInterface(cmd.Cmd):
         masking_fields = self.settings["template_settings"].get("masking_fields")
         message = SmartAppFromMessage(
             raw_message, headers=headers, masking_fields=masking_fields,
-            validators=get_validators_from_settings("from", self.settings, self.app_model)
+            validators=get_validators_from_settings("incoming", self.settings, self.app_model)
         )
         user = self.__user_cls(self.environment.user_id, message, self.user_data, self.settings,
                                self.app_model.scenario_descriptions,

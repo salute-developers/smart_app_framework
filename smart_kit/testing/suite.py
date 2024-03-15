@@ -211,6 +211,9 @@ class TestCase:
 
         callbacks = {}
         app_callback_id = None
+
+        incoming_message_validators = get_validators_from_settings("incoming", self.settings, self.app_model)
+        outgoing_message_validators = get_validators_from_settings("outgoing", self.settings, self.app_model)
         for index, raw_msg in enumerate(self.messages):
             print('Шаг', index)
             if index and self.interactive:
@@ -239,7 +242,7 @@ class TestCase:
 
             message = self.create_message(
                 request, headers=headers,
-                validators=get_validators_from_settings("from", self.settings, self.app_model)
+                validators=incoming_message_validators
             )
 
             if not message.validate():
@@ -255,7 +258,14 @@ class TestCase:
             self.post_setup_user(user)
 
             commands = [command async for command in self.app_model.answer(message, user)]
-            answers = self._generate_answers(user=user, commands=commands, message=message)
+            answers = self._generate_answers(user=user, commands=commands, message=message,
+                                             validators=outgoing_message_validators)
+
+            for answer in answers:
+                if not answer.validate():
+                    print(f"[!] Outgoing message {answer.message_name} validation failed.")
+                    return False
+
             answers.extend(self._generate_history_answers(user, message))
 
             predefined_fields_resp = response.get("predefined_fields")
@@ -285,7 +295,7 @@ class TestCase:
         finally:
             self.finalize()
 
-    def _generate_answers(self, user, commands, message):
+    def _generate_answers(self, user, commands, message, validators):
         answers = []
         commands = commands or []
 
@@ -293,7 +303,7 @@ class TestCase:
 
         for command in commands:
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
-            answer = SmartAppToMessage(command=command, message=message, request=request)
+            answer = SmartAppToMessage(command=command, message=message, request=request, validators=validators)
             answers.append(answer)
         return answers
 
