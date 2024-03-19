@@ -16,7 +16,7 @@ from core.model.factory import build_factory, list_factory, factory
 from core.model.registered import Registered
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
-from core.unified_template.unified_template import UnifiedTemplate
+from core.unified_template.unified_template import UnifiedTemplate, UnifiedTemplateMultiLoader
 from core.utils.stats_timer import StatsTimer
 from scenarios.scenario_models.field.field_filler_description import IntersectionFieldFiller
 from scenarios.user.user_model import User
@@ -208,7 +208,7 @@ class TopicRequirement(Requirement):
 class TemplateRequirement(Requirement):
     def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
         super().__init__(items, id)
-        self._template = UnifiedTemplate(items["template"])
+        self._template = UnifiedTemplateMultiLoader(items["template"])
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
                params: Dict[str, Any] = None) -> bool:

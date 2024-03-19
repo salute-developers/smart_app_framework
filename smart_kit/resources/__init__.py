@@ -19,7 +19,7 @@ from core.basic_models.actions.push_action import (PushAction,
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
-    SDKAnswerToUser
+    SDKAnswerToUser, StringFileUnifiedTemplateAction
 from core.basic_models.actions.variable_actions import ClearVariablesAction, DeleteVariableAction, \
     SetLocalVariableAction, SetVariableAction
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
@@ -308,7 +308,7 @@ class SmartAppResources(BaseConfig):
         actions["self_service_with_state"] = SelfServiceActionWithState
         actions["set_local_variable"] = SetLocalVariableAction
         actions["set_variable"] = SetVariableAction
-        actions["string"] = StringAction
+        actions["string"] = StringFileUnifiedTemplateAction
         actions["push"] = PushAction
         actions["push_authentication"] = PushAuthenticationActionHttp
         actions["push_http"] = PushActionHttp
