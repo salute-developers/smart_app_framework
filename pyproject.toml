@@ -63,6 +63,7 @@ lxml = "4.9.2"
 twisted = "22.10.0"
 urllib3 = "1.26.16"
 certifi = "2023.07.22"
+lazy = "^1.6"
 
 [tool.poetry.extras]
 ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aarch64"]

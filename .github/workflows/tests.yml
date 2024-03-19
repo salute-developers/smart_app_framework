@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.8"
+        python-version: "3.11"
         cache: 'poetry'
     - name: Install dependencies
       run: poetry install --no-interaction --no-root --all-extras
@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11']
 
     runs-on: ubuntu-20.04
     name: unittests with py-${{ matrix.python-version }}
@@ -61,7 +61,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.8"
+        python-version: "3.11"
         cache: 'poetry'
     - name: Install Poetry plugins
       run: poetry self add "poetry-dynamic-versioning[plugin]"

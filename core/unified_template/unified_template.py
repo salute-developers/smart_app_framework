@@ -3,6 +3,7 @@ import logging
 from copy import copy
 import jinja2
 from distutils.util import strtobool
+import os
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
@@ -84,3 +85,27 @@ class UnifiedTemplate:
 
     def __str__(self):
         return str(self.input)
+
+
+class UnifiedTemplateMultiLoader(UnifiedTemplate):
+    """
+    Загружает шаблон jinja из файла или строки
+    Файлы шаблонов jinja должны находиться в директории some-app.static.templates
+    """
+
+    def __init__(self, input):
+        if isinstance(input, dict) and input.get("file"):
+            file_name = input["file"]
+            from smart_kit.configs import get_app_config
+            app_config = get_app_config()
+            templates_dir = os.path.join(app_config.STATIC_PATH, "references/templates")
+            for root, dirs, files in os.walk(templates_dir):
+                if file_name in files:
+                    with open(os.path.join(root, file_name)) as f:
+                        input["template"] = f.read()
+                    super().__init__(input)
+                    return
+            raise Exception(f"Template {file_name} does not exist in templates directory {templates_dir}")
+
+        else:
+            super().__init__(input)
