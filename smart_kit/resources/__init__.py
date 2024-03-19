@@ -311,8 +311,7 @@ class SmartAppResources(BaseConfig):
         actions["self_service_with_state"] = SelfServiceActionWithState
         actions["set_local_variable"] = SetLocalVariableAction
         actions["set_variable"] = SetVariableAction
-        actions["string"] = StringAction
-        actions["string_file_template"] = StringFileUnifiedTemplateAction
+        actions["string"] = StringFileUnifiedTemplateAction
         actions["push"] = PushAction
         actions["push_authentication"] = PushAuthenticationActionHttp
         actions["push_http"] = PushActionHttp
