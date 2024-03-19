@@ -607,7 +607,6 @@ class ActionTest(unittest.IsolatedAsyncioTestCase):
                         'RqUID': '3f68e69e-351b-4e6f-b251-480f0cb08a5d',
                         'Authorization': 'Basic QCE4OUZCLjRENjIuM0E1MS5BOUVCITAwMDEhOTZFNS5'
                                          'BRTg5ITAwMDghQjFBRi5EQjdELjE1ODYuODRGMzpzZWNyZXQ='
-                        # noqa
                     }
             }
         }

@@ -134,7 +134,7 @@ class StringAction(NodeAction):
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
+        # Result command format: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         params = params or {}
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
 
@@ -161,7 +161,6 @@ class StringFileUnifiedTemplateAction(StringAction):
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
                   params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
-        # Example: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         command_params = dict()
         params = copy(params) or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})

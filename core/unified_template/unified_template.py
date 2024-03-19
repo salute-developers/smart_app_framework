@@ -8,7 +8,6 @@ import os
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
 from core.monitoring.monitoring import monitoring
-from core.utils.loader import load_file
 
 UNIFIED_TEMPLATE_TYPE_NAME = "unified_template"
 
@@ -102,7 +101,8 @@ class UnifiedTemplateMultiLoader(UnifiedTemplate):
             templates_dir = os.path.join(app_config.STATIC_PATH, "references/templates")
             for root, dirs, files in os.walk(templates_dir):
                 if file_name in files:
-                    input["template"] = load_file(os.path.join(root, file_name))
+                    with open(os.path.join(root, file_name)) as f:
+                        input["template"] = f.read()
                     super().__init__(input)
                     return
             raise Exception(f"Template {file_name} does not exist in templates directory {templates_dir}")

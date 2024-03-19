@@ -15,9 +15,3 @@ def reverse_json_dict(data):
         for value in values:
             result[value] = key
     return result
-
-
-def load_file(file_path):
-    with open(file_path) as f:
-        file_content = f.read()
-    return file_content

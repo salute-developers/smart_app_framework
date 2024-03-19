@@ -61,13 +61,11 @@
             "command": "ANSWER_TO_USER",
             "nodes": {
               "pronounceText": "Сколько лет ты программируешь на Python?",
-              "items": [
-                {
-                  "bubble": {
-                    "text": "Сколько лет ты программируешь на Python?"
-                  }
-                }
-              ]
+              "items": {
+                "type": "unified_template",
+                "file": "experience_items_template.jinja2",
+                "loader": "json"
+              }
             }
           }
         ],
