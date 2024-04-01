@@ -206,7 +206,6 @@ class MainLoop(BaseMainLoop):
             stats.dump_stats(filename=self.profile_cpu_path)
 
     async def queue_worker(self, worker_id, queue):
-        message_value = None
         last_poll_begin_time = self.loop.time()
         last_mem_log = self.loop.time()
         log(f"-- Starting {worker_id} iter", params={log_const.KEY_NAME: "starting"})
@@ -247,16 +246,14 @@ class MainLoop(BaseMainLoop):
             except KafkaException as kafka_exp:
                 log("kafka error: %(kafka_exp)s.",
                     params={log_const.KEY_NAME: log_const.STARTUP_VALUE,
-                            "kafka_exp": str(kafka_exp),
-                            log_const.REQUEST_VALUE: str(message_value)},
+                            "kafka_exp": str(kafka_exp)},
                     level="ERROR", exc_info=True)
 
             except Exception:
                 monitoring.pod_event(self.app_name, WORKER_EXCEPTION)
                 log("%(class_name)s worker error. Kafka key %(kafka_key)s",
                     params={log_const.KEY_NAME: "worker_exception",
-                            "kafka_key": kafka_key,
-                            log_const.REQUEST_VALUE: str(message_value)},
+                            "kafka_key": kafka_key},
                     level="ERROR", exc_info=True)
                 try:
                     consumer = self.consumers[kafka_key]
@@ -389,7 +386,6 @@ class MainLoop(BaseMainLoop):
                     log_const.KEY_NAME: "waiting_message_timeout",
                     "waiting_message_time": waiting_message_time,
                     "mid": message.incremental_id,
-                    log_const.REQUEST_VALUE: message.as_str,
                 },
                 level=log_level)
         return make_break
@@ -717,8 +713,7 @@ class MainLoop(BaseMainLoop):
                 monitoring.counter_save_collision_tries_left(self.app_name)
         except Exception:
             log("%(class_name)s error.", params={log_const.KEY_NAME: "error_handling_timeout",
-                                                 "class_name": self.__class__.__name__,
-                                                 log_const.REQUEST_VALUE: str(mq_message.value())},
+                                                 "class_name": self.__class__.__name__, },
                 level="ERROR", exc_info=True)
         finally:
             self.concurrent_messages -= 1
