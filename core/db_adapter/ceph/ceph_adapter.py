@@ -13,6 +13,7 @@ from core.monitoring.monitoring import monitoring
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
+
 class CephAdapter(DBAdapter):
     def __init__(self, config):
         self._bucket = None
