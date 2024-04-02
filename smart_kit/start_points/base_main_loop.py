@@ -97,14 +97,12 @@ class BaseMainLoop:
         monitoring.init_metrics(app_name=self.app_name)
 
     async def load_user(self, db_uid, message: SmartAppFromMessage):
-        db_data = None
         load_error = False
         try:
             db_data = await self.db_adapter.get(db_uid)
         except (DBAdapterException, ValueError):
-            log("Failed to get user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                   log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
-            load_error = True
+            log("Failed to get user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION},
+                level="ERROR")
             monitoring.counter_load_error(self.app_name)
             # to skip message when load failed
             raise
@@ -134,8 +132,8 @@ class BaseMainLoop:
                 else:
                     await self.db_adapter.save(db_uid, str_data)
             except (DBAdapterException, ValueError):
-                log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                       log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
+                log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION},
+                    level="ERROR")
                 monitoring.counter_save_error(self.app_name)
             if not no_collisions:
                 monitoring.counter_save_collision(self.app_name)
