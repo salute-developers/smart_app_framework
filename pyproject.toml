@@ -52,7 +52,7 @@ tensorflow = [
 tensorflow-macos = {version = "2.12.0", markers = "sys_platform == 'darwin' and platform_machine == 'arm64'", optional = true}
 tensorflow-aarch64 = {version = "2.12.0", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'", optional = true}
 timeout-decorator = "0.4.1"
-tqdm = "4.64.1"
+tqdm = "4.66.3"
 incremental = "21.3.0"
 freezegun = "1.1.0"
 protobuf = "3.20.3"
