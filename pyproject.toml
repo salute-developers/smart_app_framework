@@ -8,6 +8,7 @@ packages = [
     {include = "core"},
     {include = "scenarios"},
     {include = "smart_kit"},
+    {include = "nlpf_statemachine"},
 ]
 classifiers = [
     "Operating System :: MacOS",
