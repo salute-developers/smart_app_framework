@@ -37,7 +37,7 @@ pymorphy2_dicts = "2.4.393442.3710985"
 python-dateutil = "2.7.3"
 python-json-logger = "0.1.11"
 PyYAML = "6.0.1"
-requests = "2.31.0"
+requests = "2.32.0"
 rusenttokenize = "0.0.5"
 scikit-learn = [
     {version = "1.1.2", python = "<3.11", optional = true},
