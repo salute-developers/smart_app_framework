@@ -46,8 +46,8 @@ class BaseMainLoop:
             self.postprocessor = postprocessor_cls()
             self.db_adapter = self.get_db()
             self.is_work = True
-            self.from_msg_validators = get_validators_from_settings("from", settings, model)
-            self.to_msg_validators = get_validators_from_settings("to", settings, model)
+            self.from_msg_validators = get_validators_from_settings("incoming", settings, model)
+            self.to_msg_validators = get_validators_from_settings("outgoing", settings, model)
 
             template_settings = self.settings["template_settings"]
             save_tries = template_settings.get("user_save_collisions_tries", 0)
