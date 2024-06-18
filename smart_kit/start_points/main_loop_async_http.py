@@ -21,6 +21,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
         self.app = aiohttp.web.Application()
         super().__init__(*args, **kwargs)
         self.app.add_routes([aiohttp.web.route('*', '/health', self.get_health_check)])
+        self.app.add_routes([aiohttp.web.route('*', '/health_db_adapter', self.get_health_db_adapter_check)])
         self.app.add_routes([aiohttp.web.route('*', '/{tail:.*}', self.iterate)])
 
     async def async_init(self):
@@ -170,6 +171,21 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
 
     async def get_health_check(self, request: aiohttp.web.Request):
         status, reason, answer = 200, "OK", "ok"
+        return aiohttp.web.json_response(
+            status=status, reason=reason, data=answer,
+        )
+
+    async def get_health_db_adapter_check(self, request: aiohttp.web.Request):
+        status, reason, answer = 200, "OK", "ok"
+        try:
+            is_alive = await self.db_adapter.is_alive()
+            if not is_alive:
+                status, reason, answer = 500, "ERROR", "db adapter connection error"
+        except NotImplementedError:
+            status, reason, answer = 500, "ERROR", f"Method is not implemented in {type(self.db_adapter)}"
+        except Exception as e:
+            status, reason, answer = 500, "ERROR", str(e)
+
         return aiohttp.web.json_response(
             status=status, reason=reason, data=answer,
         )

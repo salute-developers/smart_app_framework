@@ -88,3 +88,10 @@ class IgniteAdapter(AsyncDBAdapter):
 
     async def _get_counter_name(self):
         return "ignite_async_adapter"
+
+    async def is_alive(self) -> Optional[bool]:
+        try:
+            await self.connect()
+            return True
+        except Exception:
+            log("IgniteAdapter is not alive", level="INFO")
