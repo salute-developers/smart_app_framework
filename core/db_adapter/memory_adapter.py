@@ -2,6 +2,7 @@ from core.db_adapter.db_adapter import AsyncDBAdapter
 from copy import copy
 from cachetools import TTLCache
 from core.db_adapter import error
+from typing import Optional
 
 
 class MemoryAdapter(AsyncDBAdapter):
@@ -49,3 +50,6 @@ class MemoryAdapter(AsyncDBAdapter):
 
     async def _list_dir(self, path):
         pass
+
+    async def is_alive(self) -> Optional[bool]:
+        return True

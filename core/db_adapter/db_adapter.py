@@ -1,5 +1,6 @@
 # coding: utf-8
 import asyncio
+from typing import Optional
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
@@ -90,6 +91,9 @@ class DBAdapter(Rerunable):
 
 class AsyncDBAdapter(DBAdapter):
     IS_ASYNC = True
+
+    async def is_alive(self) -> Optional[bool]:
+        raise NotImplementedError
 
     async def _on_all_tries_fail(self):
         raise
