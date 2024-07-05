@@ -356,8 +356,6 @@ class MainLoop(BaseMainLoop):
             else:
                 answers.append(SmartAppToMessage(self.BAD_ANSWER_COMMAND, message=message, request=request))
 
-            monitoring.counter_outgoing(self.app_name, command.name, answer, user)
-
         return answers
 
     def _get_timeout_from_message(self, orig_message_raw: Dict, callback_id, headers):
@@ -603,6 +601,7 @@ class MainLoop(BaseMainLoop):
         request_params["mq_message"] = mq_message
         request_params["payload"] = answer.value
         request_params["masked_value"] = answer.masked_value
+        monitoring.counter_outgoing(self.app_name, answer.command.name, answer.command, user)
         await request.run(answer.value.encode(), request_params)
         self._log_request(user, request, answer, mq_message)
 
