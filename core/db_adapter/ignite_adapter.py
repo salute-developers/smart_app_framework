@@ -89,9 +89,16 @@ class IgniteAdapter(AsyncDBAdapter):
     async def _get_counter_name(self):
         return "ignite_async_adapter"
 
-    async def is_alive(self) -> Optional[bool]:
-        try:
-            await self.connect()
-            return True
-        except Exception:
-            log("IgniteAdapter is not alive", level="INFO")
+    async def is_alive(self) -> bool:
+        reconnect_count = 0
+        while reconnect_count < 3:
+            try:
+                await self._async_run(self.connect)
+                return True
+            except ReconnectError:
+                log("IgniteAdapter reconnect error, retrying", level="INFO")
+                reconnect_count += 1
+            except Exception:
+                log("IgniteAdapter is not alive", level="INFO")
+                return False
+        return False
