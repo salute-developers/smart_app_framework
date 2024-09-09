@@ -9,6 +9,7 @@ from core.basic_models.actions.command import Command
 from core.configs.global_constants import CALLBACK_ID_HEADER
 from core.logging.logger_utils import log
 from core.message.from_message import SmartAppFromMessage, basic_error_message
+from core.monitoring.monitoring import monitoring
 from core.utils.stats_timer import StatsTimer
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -70,6 +71,7 @@ class BaseHttpMainLoop(BaseMainLoop):
         db_uid = message.db_uid
         with StatsTimer() as load_timer:
             user = self.loop.run_until_complete(self.load_user(db_uid, message))
+        monitoring.sampling_load_time(self.app_name, load_timer.secs)
         stats += "Loading time: {} msecs\n".format(load_timer.msecs)
         with StatsTimer() as script_timer:
             commands = asyncio.get_event_loop().run_until_complete(self.model.answer(message, user))
@@ -81,6 +83,7 @@ class BaseHttpMainLoop(BaseMainLoop):
         stats += "Script time: {} msecs\n".format(script_timer.msecs)
         with StatsTimer() as save_timer:
             self.loop.run_until_complete(self.save_user(db_uid, user, message))
+        monitoring.sampling_save_time(self.app_name, save_timer.secs)
         stats += "Saving time: {} msecs\n".format(save_timer.msecs)
         log(stats, user=user, params={log_const.KEY_NAME: "timings"})
         self.loop.run_until_complete(self.postprocessor.postprocess(user, message))

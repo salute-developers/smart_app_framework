@@ -127,10 +127,12 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
             code = 204
             log(f"OUTGOING DATA: {answer.masked_value} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
+            monitoring.counter_outgoing(self.app_name, answer.command.name, answer.command, user)
             return code, "NO CONTENT", answer
 
         answer_message = SmartAppToMessage(
-            answer, message, request=None, validators=self.to_msg_validators, masking_fields=self.masking_fields)
+            answer, message, request=None, validators=self.to_msg_validators, masking_fields=self.masking_fields
+        )
         if answer_message.validate():
             code = 200
             log_answer = str(answer_message.masked_value).replace("%", "%%")
@@ -144,6 +146,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
                 self.BAD_ANSWER_COMMAND, message=message, request=None, masking_fields=self.masking_fields)
             log(f"OUTGOING DATA: {answer.masked_value} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
+            monitoring.counter_outgoing(self.app_name, answer.command.name, answer.command, user)
             return code, "BAD ANSWER", answer
 
     async def process_message(self, message: SmartAppFromMessage, *args, **kwargs):
@@ -154,6 +157,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
 
         with StatsTimer() as load_timer:
             user = await self.load_user(db_uid, message)
+        monitoring.sampling_load_time(self.app_name, load_timer.secs)
         stats += "Loading time: {} msecs\n".format(load_timer.msecs)
         with StatsTimer() as script_timer:
             commands = await self.model.answer(message, user)
@@ -165,6 +169,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
         stats += "Script time: {} msecs\n".format(script_timer.msecs)
         with StatsTimer() as save_timer:
             await self.save_user(db_uid, user, message)
+        monitoring.sampling_save_time(self.app_name, save_timer.secs)
         stats += "Saving time: {} msecs\n".format(save_timer.msecs)
         log(stats, params={log_const.KEY_NAME: "timings"})
         await self.postprocessor.postprocess(user, message)
