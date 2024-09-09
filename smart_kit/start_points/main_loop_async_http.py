@@ -138,7 +138,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
             log_answer = str(answer_message.masked_value).replace("%", "%%")
             log(f"OUTGOING DATA: {log_answer} with code: {code}",
                 params={log_const.KEY_NAME: "outgoing_policy_message"}, user=user)
-            monitoring.counter_outgoing(self.app_name, answer.command.name, answer.command, user)
+            monitoring.counter_outgoing(self.app_name, answer_message.command.name, answer_message.command, user)
             return code, "OK", answer_message
         else:
             code = 500
