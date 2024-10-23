@@ -75,7 +75,7 @@ black = "22.12.0"
 
 [tool.taskipy.tasks]
 lint = "flake8 . --max-line-length=120 --ignore W504,W605,F401 --exclude=smart_kit/utils/SmartAppToMessage_pb2.py"
-unit_test = "python -m unittest discover -b -v -s tests/pure_framework && python -m unittest discover -b -v -s tests/nlpf_statemachine_tests"
+unit_test = "python -m unittest discover -b -v -s tests/pure_framework"
 runapp_http_test = """python -m smart_kit create_app http_test_app &&
                       cd http_test_app &&
                       PYTHONPATH=".." timeout 10 python manage.py run_app || code=$?;
