@@ -34,7 +34,7 @@ setup(
     packages=find_packages(exclude=[]),
     include_package_data=True,
     install_requires=[
-        "aiohttp==3.7.4",
+        "aiohttp==3.10.5",
         "aioredis==2.0.0",
         "boto==2.49.0",
         "confluent_kafka==1.9.2",
