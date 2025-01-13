@@ -42,7 +42,7 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
         try:
             nltk.data.find("tokenizers/punkt")
         except LookupError:
-            nltk.download("punkt")
+            nltk.download("punkt_tab")
 
         from smart_kit.configs import get_app_config
         app_config = get_app_config()

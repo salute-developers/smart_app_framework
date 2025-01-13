@@ -26,7 +26,7 @@ dill = "0.3.6"
 ics = "0.6"
 Jinja2 = "3.0.3"
 keras = {version = "2.12.0", optional = true}
-nltk = "3.8.1"
+nltk = "3.9.1"
 numpy = "1.23.5"
 objgraph = "3.4.1"
 prometheus-client = "0.11.0"
@@ -71,7 +71,7 @@ ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aar
 flake8 = "6.0.0"
 taskipy = "1.10.3"
 black = "22.12.0"
-pydantic = "2.6.0"
+pydantic = "2.10.3"
 
 [tool.taskipy.tasks]
 lint = "flake8 . --max-line-length=120 --ignore W504,W605,F401 --exclude=smart_kit/utils/SmartAppToMessage_pb2.py"
