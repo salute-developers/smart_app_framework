@@ -10,6 +10,7 @@ from core.message.from_message import SmartAppFromMessage
 from core.utils.exception_handlers import exc_handler
 
 import scenarios.logging.logger_constants as log_const
+from core.utils.utils import current_time_ms
 from scenarios.user.user_model import User
 from smart_kit.handlers.handle_close_app import HandlerCloseApp
 from smart_kit.handlers.handle_take_runtime_permissions import HandlerTakeRuntimePermissions
@@ -79,6 +80,23 @@ class SmartAppModel:
         handler = self.get_handler(message.type)
 
         if not user.load_error:
+            if user.message.has_callback_id():
+                callback_id = user.message.callback_id
+                callback_data = user.variables.get(key=callback_id, default={})
+                if callback_data:
+                    inner_stats = user.variables.get(
+                        key=str(user.message.incremental_id) + "inner_stats",
+                        default=[]
+                    )
+                    user.variables.set(key=str(user.message.incremental_id) + "inner_stats",
+                                       value=inner_stats,
+                                       ttl=60)
+                    inner_stats.append({
+                        "system": callback_data["message_name"],
+                        "inner_stats": user.message.payload.get("stats", []),
+                        "time": callback_data["outgoing_ts"] - current_time_ms(),
+                        "version": user.message.payload.get("stats", {}).get("version"),
+                    })
             commands = await handler.run(message.payload, user)
         else:
             log("Error in loading user data", user, level="ERROR", exc_info=True)

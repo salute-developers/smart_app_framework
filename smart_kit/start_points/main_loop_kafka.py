@@ -5,6 +5,7 @@ import cProfile
 import gc
 import hashlib
 import json
+import os
 import pstats
 import signal
 import time
@@ -340,6 +341,12 @@ class MainLoop(BaseMainLoop):
         commands = combine_commands(commands, user)
 
         for command in commands:
+            command.payload["stats"] = {
+                "system": "app",
+                "time": user.variables.get(key=str(user.message.incremental_id) + "script_time_ms", default=0),
+                "version": os.environ.get("VERSION"),
+                "inner_stats": user.variables.get(key=str(user.message.incremental_id) + "inner_stats", default=[]),
+            }
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
                 "kafka_key": kafka_key,
@@ -503,6 +510,13 @@ class MainLoop(BaseMainLoop):
 
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
+                    user.variables.set(
+                        key=str(user.message.incremental_id) + "script_time_ms",
+                        value=(script_timer.msecs
+                               + user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                                                    default=0)),
+                        ttl=60,
+                    )
 
                     answers = self._generate_answers(user=user, commands=commands, message=message,
                                                      topic_key=topic_key,
@@ -677,7 +691,15 @@ class MainLoop(BaseMainLoop):
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
-                    commands = await self.model.answer(timeout_from_message, user)
+                    with StatsTimer() as script_timer:
+                        commands = await self.model.answer(timeout_from_message, user)
+                    user.variables.set(
+                        key=str(user.message.incremental_id) + "script_time_ms",
+                        value=(script_timer.msecs
+                               + user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                                                    default=0)),
+                        ttl=60,
+                    )
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
                                                      topic_key=topic_key,
