@@ -57,7 +57,7 @@ setup(
         "python-json-logger==0.1.11",
         "PyYAML==5.3",
         "redis==4.1.4",
-        "requests==2.22.0",
+        "requests==2.31.0",
         "rusenttokenize==0.0.5",
         "scikit-learn>=0.24.1",
         "setuptools",
