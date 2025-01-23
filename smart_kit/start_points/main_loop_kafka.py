@@ -512,9 +512,9 @@ class MainLoop(BaseMainLoop):
                         commands = await self.model.answer(message, user)
                     user.variables.set(
                         key=str(user.message.incremental_id) + "script_time_ms",
-                        value=(script_timer.msecs
-                               + user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
-                                                    default=0)),
+                        value=(script_timer.msecs +
+                               user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                                                  default=0)),
                         ttl=60,
                     )
 
@@ -695,9 +695,9 @@ class MainLoop(BaseMainLoop):
                         commands = await self.model.answer(timeout_from_message, user)
                     user.variables.set(
                         key=str(user.message.incremental_id) + "script_time_ms",
-                        value=(script_timer.msecs
-                               + user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
-                                                    default=0)),
+                        value=(script_timer.msecs +
+                               user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                                                  default=0)),
                         ttl=60,
                     )
                     topic_key = self._get_topic_key(mq_message, kafka_key)
