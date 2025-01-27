@@ -32,12 +32,12 @@ class StatsTimer:
             s_key = f"{self._user.message.incremental_id}script_time_ms"
             self._user.variables.set(key=s_key, value=self._user.variables.get(key=s_key, default=0) - user_time)
             self._user.variables.set(key=inner_key, value=self._user.variables.get(key=inner_key, default=[]) +
-                                                      [{
-                                                          "system": self._system,
-                                                          "inner_stats": [],
-                                                          "time": user_time,
-                                                          "version": None,
-                                                      }])
+                                                          [{
+                                                              "system": self._system,
+                                                              "inner_stats": [],
+                                                              "time": user_time,
+                                                              "version": None,
+                                                          }])
 
     def _inner_stats_time_sum(self, inner_stats: list[dict[str, Any]]) -> float:
         result = 0

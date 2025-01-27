@@ -343,9 +343,9 @@ class MainLoop(BaseMainLoop):
         for command in commands:
             command.payload["stats"] = {
                 "system": "app",
-                "time": user.variables.get(key=str(user.message.incremental_id) + "script_time_ms", default=0),
+                "time": user.variables.get(key=f"{user.message.incremental_id}script_time_ms", default=0),
                 "version": os.environ.get("VERSION"),
-                "inner_stats": user.variables.get(key=str(user.message.incremental_id) + "inner_stats", default=[]),
+                "inner_stats": user.variables.get(key=f"{user.message.incremental_id}inner_stats", default=[]),
             }
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
@@ -511,9 +511,9 @@ class MainLoop(BaseMainLoop):
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
                     user.variables.set(
-                        key=str(user.message.incremental_id) + "script_time_ms",
+                        key=f"{user.message.incremental_id}script_time_ms",
                         value=(script_timer.msecs +
-                               user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                               user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
                                                   default=0)),
                         ttl=60,
                     )
@@ -694,9 +694,9 @@ class MainLoop(BaseMainLoop):
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(timeout_from_message, user)
                     user.variables.set(
-                        key=str(user.message.incremental_id) + "script_time_ms",
+                        key=f"{user.message.incremental_id}script_time_ms",
                         value=(script_timer.msecs +
-                               user.variables.get(key=str(user.message.incremental_id) + "script_time_ms",
+                               user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
                                                   default=0)),
                         ttl=60,
                     )
