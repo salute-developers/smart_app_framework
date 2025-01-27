@@ -113,11 +113,14 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
             "time": 100,
             "version": "C-01.001.00",
         })
+        user.variables.get(key="123inner_stats")[-1]["time"] -= 100
         self.assertAlmostEqual(first=user.variables.get(key="123script_time_ms"), second=900, places=-2)
         self.assertIsNone(user.variables.get(key="123inner_stats")[0]["system"])
         self.assertEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["system"], second="custom")
         self.assertEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["inner_stats"], second=[])
-        self.assertAlmostEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["time"], second=100, places=-2)
-        self.assertEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["version"], second="C-01.001.00")
-        self.assertAlmostEqual(first=user.variables.get(key="123inner_stats")[0]["time"], second=100, places=-2)
+        self.assertAlmostEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["time"], second=100,
+                               places=-2)
+        self.assertEqual(first=user.variables.get(key="123inner_stats")[0]["inner_stats"][0]["version"],
+                         second="C-01.001.00")
+        self.assertAlmostEqual(first=user.variables.get(key="123inner_stats")[0]["time"], second=0, places=-2)
         self.assertIsNone(user.variables.get(key="123inner_stats")[0]["version"])
