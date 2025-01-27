@@ -691,7 +691,7 @@ class MainLoop(BaseMainLoop):
                     f"for db_uid {db_uid}. try {save_tries}.",
                     params={log_const.KEY_NAME: "MainLoop",
                             MESSAGE_ID_STR: timeout_from_message.incremental_id})
-                user: User = await self.load_user(db_uid, timeout_from_message)
+                user = await self.load_user(db_uid, timeout_from_message)
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
