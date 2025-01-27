@@ -515,7 +515,7 @@ class MainLoop(BaseMainLoop):
                         value=(script_timer.msecs +
                                user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
                                                   default=0)),
-                        ttl=60,
+                        ttl=20,
                     )
 
                     answers = self._generate_answers(user=user, commands=commands, message=message,
@@ -698,7 +698,7 @@ class MainLoop(BaseMainLoop):
                         value=(script_timer.msecs +
                                user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
                                                   default=0)),
-                        ttl=60,
+                        ttl=20,
                     )
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
