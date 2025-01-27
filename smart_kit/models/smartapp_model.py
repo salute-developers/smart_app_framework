@@ -10,7 +10,6 @@ from core.message.from_message import SmartAppFromMessage
 from core.utils.exception_handlers import exc_handler
 
 import scenarios.logging.logger_constants as log_const
-from core.utils.utils import current_time_ms
 from scenarios.user.user_model import User
 from smart_kit.handlers.handle_close_app import HandlerCloseApp
 from smart_kit.handlers.handle_take_runtime_permissions import HandlerTakeRuntimePermissions
