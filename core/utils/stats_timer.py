@@ -13,8 +13,10 @@ class StatsTimer:
         self._system = system
 
     def __enter__(self):
-        self._inner_stats_count = len(self._user.variables.get(key=f"{self._user.message.incremental_id}inner_stats",
-                                                               default=[]))
+        if self._add_to_inner_stats:
+            self._inner_stats_count = len(self._user.variables.get(
+                key=f"{self._user.message.incremental_id}inner_stats", default=[]
+            ))
         self.start = timeit.default_timer()
         return self
 
