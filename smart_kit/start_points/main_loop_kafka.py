@@ -9,6 +9,7 @@ import os
 import pstats
 import signal
 import time
+import timeit
 import tracemalloc
 from collections import namedtuple
 from functools import lru_cache, cached_property
@@ -27,7 +28,7 @@ from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
-from core.utils.stats_timer import StatsTimer
+from core.utils.stats_timer import StatsTimer, inner_stats_time_sum
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -39,6 +40,7 @@ from smart_kit.start_points.constants import WORKER_EXCEPTION, POD_UP
 
 if TYPE_CHECKING:
     from aiokafka import ConsumerRecord
+    from scenarios.user.user_model import User
 
 
 class LoopStop(RuntimeError):
@@ -508,6 +510,7 @@ class MainLoop(BaseMainLoop):
                                 user=user, level="WARNING")
                         user.local_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
 
+                    self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
                     user.variables.set(
@@ -524,6 +527,7 @@ class MainLoop(BaseMainLoop):
                     monitoring.sampling_script_time(self.app_name, script_timer.secs)
                     stats += "Script time: {} msecs\n".format(script_timer.msecs)
 
+                    self._stats_for_outgoing(user)
                     with StatsTimer() as save_timer:
                         user_save_no_collisions = await self.save_user(db_uid, user, message)
 
@@ -687,10 +691,11 @@ class MainLoop(BaseMainLoop):
                     f"for db_uid {db_uid}. try {save_tries}.",
                     params={log_const.KEY_NAME: "MainLoop",
                             MESSAGE_ID_STR: timeout_from_message.incremental_id})
-                user = await self.load_user(db_uid, timeout_from_message)
+                user: User = await self.load_user(db_uid, timeout_from_message)
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
+                    self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(timeout_from_message, user)
                     user.variables.set(
@@ -705,6 +710,7 @@ class MainLoop(BaseMainLoop):
                                                      topic_key=topic_key,
                                                      kafka_key=kafka_key)
 
+                    self._stats_for_outgoing(user)
                     user_save_ok = await self.save_user(db_uid, user, mq_message)
 
                     if not user_save_ok:
@@ -764,3 +770,32 @@ class MainLoop(BaseMainLoop):
             self.loop.close()
         except RuntimeError:
             raise LoopStop
+
+    def _stats_for_outgoing(self, user: User):
+        for time_left, callback_id in user.behaviors.get_behavior_timeouts():
+            callback = user.behaviors._callbacks.get(callback_id)
+            if callback and not callback.action_params.get("stats_off"):
+                callback.action_params["stats_request_ts"] = timeit.default_timer()
+                callback.action_params["stats_initial_inner_stats_count"] = len(user.variables.get(
+                    key=f"{user.message.incremental_id}inner_stats", default=[]
+                ))
+                callback.action_params.setdefault("stats_system", callback.behavior_id)
+
+    def _stats_for_incoming(self, user: User):
+        callback = user.behaviors._callbacks.get(user.message.callback_id)
+        if callback and not callback.action_params.get("stats_off"):
+            inner_key = f"{user.message.incremental_id}inner_stats"
+            user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
+                user.variables.get(key=inner_key, default=[])[
+                callback.action_params["stats_initial_inner_stats_count"]:]
+            )
+            s_key = f"{user.message.incremental_id}script_time_ms"
+            user.variables.set(key=s_key, value=user.variables.get(key=s_key, default=0) - user_time, ttl=20)
+            user.variables.set(key=inner_key, ttl=20,
+                               value=user.variables.get(key=inner_key, default=[]) +
+                                     [{
+                                         "system": callback.action_params["stats_system"],
+                                         "inner_stats": [],
+                                         "time": user_time,
+                                         "version": None,
+                                     }])

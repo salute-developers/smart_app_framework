@@ -80,22 +80,6 @@ class SmartAppModel:
         handler = self.get_handler(message.type)
 
         if not user.load_error:
-            if user.message.has_callback_id():
-                callback_data = user.variables.get(key=user.message.callback_id, default={})
-                if callback_data:
-                    inner_stats = user.variables.get(
-                        key=f"{user.message.incremental_id}inner_stats",
-                        default=[]
-                    )
-                    user.variables.set(key=f"{user.message.incremental_id}inner_stats",
-                                       value=inner_stats,
-                                       ttl=60)
-                    inner_stats.append({
-                        "system": callback_data["message_name"],
-                        "inner_stats": user.message.payload.get("stats", []),
-                        "time": callback_data["outgoing_ts"] - current_time_ms(),
-                        "version": user.message.payload.get("stats", {}).get("version"),
-                    })
             commands = await handler.run(message.payload, user)
         else:
             log("Error in loading user data", user, level="ERROR", exc_info=True)
