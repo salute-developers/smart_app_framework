@@ -779,7 +779,8 @@ class MainLoop(BaseMainLoop):
                 callback.action_params["stats_initial_inner_stats_count"] = len(user.variables.get(
                     key=f"{user.message.incremental_id}inner_stats", default=[]
                 ))
-                callback.action_params.setdefault("stats_system", callback.behavior_id)
+                callback.action_params.setdefault("to_message_params", {}).setdefault("stats_system",
+                                                                                      callback.behavior_id)
 
     def _stats_for_incoming(self, user: User):
         callback = user.behaviors._callbacks.get(user.message.callback_id)
@@ -794,7 +795,7 @@ class MainLoop(BaseMainLoop):
             user.variables.set(key=inner_key, ttl=20,
                                value=user.variables.get(key=inner_key, default=[]) +
                                      [{
-                                         "system": callback.action_params["stats_system"],
+                                         "system": callback.action_params["to_message_params"]["stats_system"],
                                          "inner_stats": [],
                                          "time": user_time,
                                          "version": None,
