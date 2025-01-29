@@ -28,8 +28,7 @@ class MidVariables(Variables):
         mid = str(self._user.message.incremental_id)
         mid_variable, old_expire_time = self._storage.get(mid, ({}, self.DEFAULT_TTL + time.time()))
         mid_variable[key] = value
-        expire_time = ttl + time.time() if ttl else old_expire_time
-        self._storage[mid] = mid_variable, expire_time
+        self._storage[mid] = mid_variable, ttl + time.time() if ttl else old_expire_time
 
     def delete_mid_variables(self) -> None:
         del self._storage[str(self._user.message.incremental_id)]
