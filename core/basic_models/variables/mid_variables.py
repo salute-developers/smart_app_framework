@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 class MidVariables(Variables):
     def __init__(self, items: dict | None, user: User, savable: bool = True):
         super().__init__(items=items, user=user, savable=savable)
-        self._user = user
         self.DEFAULT_TTL = user.settings["template_settings"].get("vps_waiting_timeout", 20000) / 1000
+        self._user = user
 
     def get(self, key: Any, default: Any = None) -> Any:
         return super().get(key=str(self._user.message.incremental_id), default={}).get(key=key, default=default)
