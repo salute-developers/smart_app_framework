@@ -765,25 +765,25 @@ class MainLoop(BaseMainLoop):
     @staticmethod
     def _stats_for_incoming(user: User):
         if not user.mid_variables.get("request_time"):
-            user.mid_variables.set(key="request_time", value=timeit.default_timer())
+            user.mid_variables.update(key="request_time", value=timeit.default_timer())
         callback = user.behaviors._callbacks.get(user.message.callback_id)
         if callback and not callback.action_params.get("stats_off"):
             user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
                 user.mid_variables.get(key="inner_stats",
                                        default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
             ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
-            user.mid_variables.set(key="inner_stats",
-                                   value=user.mid_variables.get(key="inner_stats", default=[]) +
-                                         [{
-                                             "system": ((None
-                                                         if callback.action_params.get("answer_stats_system_copy_off")
-                                                         else user.message.payload.get("stats", {}).get("system"))
-                                                        or callback.action_params["stats_system"]),
-                                             "inner_stats": ([user.message.payload.get("stats")]
-                                                             if user.message.payload.get("stats") else []),
-                                             "time": user_time,
-                                             "version": user.message.payload.get("stats", {}).get("version"),
-                                         }])
+            user.mid_variables.update(
+                key="inner_stats",
+                value=user.mid_variables.get(key="inner_stats", default=[]) +
+                      [{
+                          "system": ((None if callback.action_params.get("answer_stats_system_copy_off")
+                                      else user.message.payload.get("stats", {}).get("system"))
+                                     or callback.action_params["stats_system"]),
+                          "inner_stats": ([user.message.payload.get("stats")] if user.message.payload.get("stats")
+                                          else []),
+                          "time": user_time,
+                          "version": user.message.payload.get("stats", {}).get("version"),
+                      }])
 
     @staticmethod
     def _stats_for_outgoing(user: User):

@@ -25,7 +25,7 @@ class StatsTimer:
         self.secs = self.end - self.start
         self.msecs = self.secs * 1000
         if self._add_to_inner_stats:
-            self._user.mid_variables.set(
+            self._user.mid_variables.update(
                 key="inner_stats",
                 value=self._user.mid_variables.get(key="inner_stats", default=[]) +
                       [{

@@ -18,12 +18,6 @@ class MidVariables(Variables):
     def get(self, key: Any, default: Any = None) -> Any:
         return super().get(key=str(self._user.message.incremental_id), default={}).get(key=key, default=default)
 
-    def set(self, key: Any, value: Any, ttl: int | None = None) -> None:
-        mid = str(self._user.message.incremental_id)
-        mid_variable = super().get(key=mid, default={})
-        mid_variable[key] = value
-        super().set(key=mid, value=mid_variable, ttl=ttl)
-
     def update(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)
         mid_variable, old_expire_time = self._storage.get(mid, ({}, self.DEFAULT_TTL + time.time()))
@@ -32,3 +26,6 @@ class MidVariables(Variables):
 
     def delete_mid_variables(self) -> None:
         del self._storage[str(self._user.message.incremental_id)]
+
+    def set(self, key, value, ttl=None):
+        raise NotImplemented
