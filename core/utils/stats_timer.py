@@ -14,11 +14,11 @@ class StatsTimer:
         self._system = system
 
     def __enter__(self):
+        self.start = timeit.default_timer()
         if self._add_to_inner_stats:
             self._initial_inner_stats_count = len(self._user.mid_variables.get(
                 key=f"inner_stats", default=[]
             ))
-        self.start = timeit.default_timer()
         return self
 
     def __exit__(self, *args):
