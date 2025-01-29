@@ -11,6 +11,7 @@ class StatsTimer:
         self._add_to_inner_stats = add_to_inner_stats
         self._user = user
         self._system = system
+        self.stats = None
 
     def __enter__(self):
         if self._add_to_inner_stats:
@@ -25,18 +26,17 @@ class StatsTimer:
         self.secs = self.end - self.start
         self.msecs = self.secs * 1000
         if self._add_to_inner_stats:
+            self.stats = {
+                "system": self._system,
+                "inner_stats": [],
+                "time": self.msecs - inner_stats_time_sum(
+                    self._user.mid_variables.get(key="inner_stats", default=[])[self._initial_inner_stats_count:]
+                ),
+                "version": None,
+            }
             self._user.mid_variables.update(
                 key="inner_stats",
-                value=self._user.mid_variables.get(key="inner_stats", default=[]) +
-                      [{
-                          "system": self._system,
-                          "inner_stats": [],
-                          "time": self.msecs - inner_stats_time_sum(
-                              self._user.mid_variables.get(key="inner_stats",
-                                                           default=[])[self._initial_inner_stats_count:]
-                          ),
-                          "version": None,
-                      }]
+                value=self._user.mid_variables.get(key="inner_stats", default=[]) + [self.stats]
             )
 
 
