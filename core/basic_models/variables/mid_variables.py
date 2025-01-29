@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class MidVariables(Variables):
-    def __init__(self, items, user: User, savable: bool = True):
+    def __init__(self, items: dict | None, user: User, savable: bool = True):
         super().__init__(items=items, user=user, savable=savable)
         self._user = user
         self.DEFAULT_TTL = user.settings["template_settings"].get("vps_waiting_timeout", 20000) / 1000
