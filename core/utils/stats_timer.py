@@ -11,7 +11,7 @@ class StatsTimer:
         self._add_to_inner_stats = add_to_inner_stats
         self._user = user
         self._system = system
-        self.stats = None
+        self.stats: dict | None = None
 
     def __enter__(self):
         if self._add_to_inner_stats:
