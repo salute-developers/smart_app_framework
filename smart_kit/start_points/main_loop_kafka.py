@@ -764,7 +764,31 @@ class MainLoop(BaseMainLoop):
         except RuntimeError:
             raise LoopStop
 
-    def _stats_for_outgoing(self, user: User):
+    @staticmethod
+    def _stats_for_incoming(user: User):
+        callback = user.behaviors._callbacks.get(user.message.callback_id)
+        if callback and not callback.action_params.get("stats_off"):
+            user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
+                user.mid_variables.get(key="inner_stats",
+                                       default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
+            ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
+            user.mid_variables.set(key="script_time_ms",
+                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time, ttl=20)
+            user.mid_variables.set(key="inner_stats", ttl=20,
+                                   value=user.mid_variables.get(key="inner_stats", default=[]) +
+                                         [{
+                                             "system": ((None
+                                                         if callback.action_params.get("answer_stats_system_copy_off")
+                                                         else user.message.payload.get("stats", {}).get("system"))
+                                                        or callback.action_params["stats_system"]),
+                                             "inner_stats": ([user.message.payload.get("stats")]
+                                                             if user.message.payload.get("stats") else []),
+                                             "time": user_time,
+                                             "version": user.message.payload.get("stats", {}).get("version"),
+                                         }])
+
+    @staticmethod
+    def _stats_for_outgoing(user: User):
         for time_left, callback_id in user.behaviors.get_behavior_timeouts():
             callback = user.behaviors._callbacks.get(callback_id)
             if callback and not callback.action_params.get("stats_off"):
@@ -773,25 +797,3 @@ class MainLoop(BaseMainLoop):
                     key="inner_stats", default=[]
                 ))
                 callback.action_params.setdefault("stats_system", callback.behavior_id)
-
-    def _stats_for_incoming(self, user: User):
-        callback = user.behaviors._callbacks.get(user.message.callback_id)
-        if callback and not callback.action_params.get("stats_off"):
-            user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
-                user.mid_variables.get(key="inner_stats", default=[])[
-                callback.action_params["stats_initial_inner_stats_count"]:]
-            ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
-            user.mid_variables.set(key="script_time_ms",
-                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time, ttl=20)
-            user.mid_variables.set(key="inner_stats", ttl=20,
-                                   value=user.mid_variables.get(key="inner_stats", default=[]) +
-                                         [{
-                                             "system": ((user.message.payload.get("stats", {}).get("system")
-                                                         if not callback.action_params.get(
-                                                 "answer_stats_system_copy_off")
-                                                         else None) or callback.action_params["stats_system"]),
-                                             "inner_stats": ([user.message.payload.get("stats")]
-                                                             if user.message.payload.get("stats") else []),
-                                             "time": user_time,
-                                             "version": user.message.payload.get("stats", {}).get("version"),
-                                         }])
