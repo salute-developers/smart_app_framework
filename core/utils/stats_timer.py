@@ -42,7 +42,4 @@ class StatsTimer:
 
 
 def inner_stats_time_sum(inner_stats: list[dict[str, Any]]) -> float:
-    result = 0
-    for stat in inner_stats:
-        result += inner_stats_time_sum(stat.get("inner_stats")) + stat["time"]
-    return result
+    return sum(inner_stats_time_sum(stat.get("inner_stats")) + stat["time"] for stat in inner_stats)
