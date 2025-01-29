@@ -8,10 +8,10 @@ if TYPE_CHECKING:
 
 class StatsTimer:
     def __init__(self, add_to_inner_stats: bool = False, user: User | None = None, system: str | None = None):
+        self.stats: dict | None = None
         self._add_to_inner_stats = add_to_inner_stats
         self._user = user
         self._system = system
-        self.stats: dict | None = None
 
     def __enter__(self):
         if self._add_to_inner_stats:
