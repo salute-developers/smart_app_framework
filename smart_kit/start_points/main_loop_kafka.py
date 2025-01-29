@@ -773,8 +773,8 @@ class MainLoop(BaseMainLoop):
                                        default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
             ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
             user.mid_variables.set(key="script_time_ms",
-                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time, ttl=20)
-            user.mid_variables.set(key="inner_stats", ttl=20,
+                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time)
+            user.mid_variables.set(key="inner_stats",
                                    value=user.mid_variables.get(key="inner_stats", default=[]) +
                                          [{
                                              "system": ((None
