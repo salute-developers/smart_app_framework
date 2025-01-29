@@ -334,7 +334,7 @@ class MainLoop(BaseMainLoop):
             finally:
                 self.concurrent_messages -= 1
 
-    def _generate_answers(self, user, commands, message, **kwargs):
+    def _generate_answers(self, user: User, commands, message, **kwargs):
         topic_key = kwargs["topic_key"]
         kafka_key = kwargs["kafka_key"]
         answers = []
@@ -343,13 +343,17 @@ class MainLoop(BaseMainLoop):
         commands = combine_commands(commands, user)
 
         for command in commands:
-            command.payload["stats"] = {
-                "system": user.settings["template_settings"].get("stats_system",
-                                                                 os.environ.get("PWD", "").split("/")[-1]),
-                "time": user.mid_variables.get(key="script_time_ms", default=0),
-                "version": user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
-                "inner_stats": user.mid_variables.get(key="inner_stats", default=[]),
-            }
+            if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
+                    (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
+                command.payload["stats"] = {
+                    "system": user.settings["template_settings"].get("stats_system",
+                                                                     os.environ.get("PWD", "").split("/")[-1]),
+                    "time": (timeit.default_timer() - user.mid_variables.get("request_time") -
+                             inner_stats_time_sum(user.mid_variables.get(key="inner_stats", default=[]))),
+                    "version": user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
+                    "inner_stats": user.mid_variables.get(key="inner_stats", default=[]),
+                }
+                user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
                 "kafka_key": kafka_key,
@@ -445,6 +449,7 @@ class MainLoop(BaseMainLoop):
                     user = await self.load_user(db_uid, message)
                 monitoring.sampling_load_time(self.app_name, load_timer.secs)
                 stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+                self._stats_for_incoming(user)
 
                 # check_message_key
                 message_key = self._get_str_message_key(mq_message.key, incremental_id=message.incremental_id,
@@ -511,12 +516,8 @@ class MainLoop(BaseMainLoop):
                                 user=user, level="WARNING")
                         user.local_vars.set(KAFKA_REPLY_TOPIC, message.headers[KAFKA_REPLY_TOPIC])
 
-                    self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
-                    user.mid_variables.set(key="script_time_ms",
-                                           value=(script_timer.msecs + user.mid_variables.get(key="script_time_ms",
-                                                                                              default=0)))
 
                     answers = self._generate_answers(user=user, commands=commands, message=message,
                                                      topic_key=topic_key,
@@ -689,15 +690,12 @@ class MainLoop(BaseMainLoop):
                     params={log_const.KEY_NAME: "MainLoop",
                             MESSAGE_ID_STR: timeout_from_message.incremental_id})
                 user = await self.load_user(db_uid, timeout_from_message)
+                self._stats_for_incoming(user)
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
-                    self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(timeout_from_message, user)
-                    user.mid_variables.set(key="script_time_ms",
-                                           value=(script_timer.msecs +
-                                                  user.mid_variables.get(key="script_time_ms", default=0)))
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
                                                      topic_key=topic_key,
@@ -766,14 +764,14 @@ class MainLoop(BaseMainLoop):
 
     @staticmethod
     def _stats_for_incoming(user: User):
+        if not user.mid_variables.get("request_time"):
+            user.mid_variables.set(key="request_time", value=timeit.default_timer())
         callback = user.behaviors._callbacks.get(user.message.callback_id)
         if callback and not callback.action_params.get("stats_off"):
             user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
                 user.mid_variables.get(key="inner_stats",
                                        default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
             ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
-            user.mid_variables.set(key="script_time_ms",
-                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time)
             user.mid_variables.set(key="inner_stats",
                                    value=user.mid_variables.get(key="inner_stats", default=[]) +
                                          [{

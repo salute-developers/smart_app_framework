@@ -25,20 +25,18 @@ class StatsTimer:
         self.secs = self.end - self.start
         self.msecs = self.secs * 1000
         if self._add_to_inner_stats:
-            user_time = self.msecs - inner_stats_time_sum(
-                self._user.mid_variables.get(key="inner_stats", default=[])[self._initial_inner_stats_count:]
-            )
-            self._user.mid_variables.set(key="script_time_ms",
-                                         value=(self._user.mid_variables.get(key="script_time_ms", default=0) -
-                                                user_time))
-            self._user.mid_variables.set(key="inner_stats",
-                                         value=self._user.mid_variables.get(key="inner_stats", default=[]) +
-                                               [{
-                                                   "system": self._system,
-                                                   "inner_stats": [],
-                                                   "time": user_time,
-                                                   "version": None,
-                                               }])
+            self._user.mid_variables.set(
+                key="inner_stats",
+                value=self._user.mid_variables.get(key="inner_stats", default=[]) +
+                      [{
+                          "system": self._system,
+                          "inner_stats": [],
+                          "time": self.msecs - inner_stats_time_sum(
+                              self._user.mid_variables.get(key="inner_stats",
+                                                           default=[])[self._initial_inner_stats_count:]
+                          ),
+                          "version": None,
+                      }])
 
 
 def inner_stats_time_sum(inner_stats: list[dict[str, Any]]) -> float:

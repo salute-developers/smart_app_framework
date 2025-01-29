@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import Mock
 
 from core.basic_models.variables.mid_variables import MidVariables
-from core.utils.stats_timer import StatsTimer
+from core.utils.stats_timer import StatsTimer, inner_stats_time_sum
 
 
 class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
@@ -15,17 +15,16 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user.message = Mock(incremental_id=123)
         with StatsTimer(user=user):
             time.sleep(0.1)
-        self.assertIsNone(user.mid_variables.get(key="script_time_ms"))
         self.assertIsNone(user.mid_variables.get(key="inner_stats"))
 
     def test_single_inner_stats(self):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        user.mid_variables.set(key="script_time_ms", value=1000)
         with StatsTimer(add_to_inner_stats=True, user=user):
             time.sleep(0.1)
-        self.assertAlmostEqual(first=user.mid_variables.get(key="script_time_ms"), second=900, places=-2)
+        self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
+                               places=-2)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[0]["system"])
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0]["time"], second=100, places=-2)
@@ -42,7 +41,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user.mid_variables.get(key="inner_stats")[-1]["version"] = "1337"
         with StatsTimer(add_to_inner_stats=True, user=user):
             time.sleep(0.1)
-        self.assertAlmostEqual(first=user.mid_variables.get(key="script_time_ms"), second=-200, places=-2)
+        self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=200,
+                               places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["system"], second="test_sys")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0]["time"], second=100, places=-2)
@@ -65,7 +65,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
             user.mid_variables.get(key="inner_stats")[-1]["version"] = "123"
             time.sleep(0.1)
         user.mid_variables.get(key="inner_stats")[-1]["version"] = "1337"
-        self.assertAlmostEqual(first=user.mid_variables.get(key="script_time_ms"), second=-200, places=-2)
+        self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=200,
+                               places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["system"], second="inner_sys")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0]["time"], second=100, places=-2)
@@ -90,7 +91,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         second = asyncio.create_task(coro(num=2, duration=0.2, version="123"))
         await first
         await second
-        self.assertAlmostEqual(first=user.mid_variables.get(key="script_time_ms"), second=-200, places=-2)
+        self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=200,
+                               places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["system"], second="test_sys1")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0]["time"], second=100, places=-2)
@@ -104,7 +106,6 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        user.mid_variables.set(key="script_time_ms", value=1000)
         with StatsTimer(add_to_inner_stats=True, user=user):
             time.sleep(0.1)
         user.mid_variables.get(key="inner_stats")[-1]["inner_stats"].append({
@@ -114,7 +115,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
             "version": "C-01.001.00",
         })
         user.mid_variables.get(key="inner_stats")[-1]["time"] -= 100
-        self.assertAlmostEqual(first=user.mid_variables.get(key="script_time_ms"), second=900, places=-2)
+        self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
+                               places=-2)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[0]["system"])
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0]["inner_stats"][0]["system"],
                          second="custom")
