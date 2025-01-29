@@ -28,7 +28,7 @@ from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
-from core.utils.stats_timer import StatsTimer, inner_stats_time_sum
+from core.utils.stats_timer import StatsTimer, inner_stats_time_sum, Stats
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -345,14 +345,13 @@ class MainLoop(BaseMainLoop):
         for command in commands:
             if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
                     (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
-                command.payload["stats"] = {
-                    "system": user.settings["template_settings"].get("stats_system",
-                                                                     os.environ.get("PWD", "").split("/")[-1]),
-                    "time": (timeit.default_timer() - user.mid_variables.get("request_time") -
-                             inner_stats_time_sum(user.mid_variables.get(key="inner_stats", default=[]))),
-                    "version": user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
-                    "inner_stats": user.mid_variables.get(key="inner_stats", default=[]),
-                }
+                command.payload["stats"] = Stats(
+                    system=user.settings["template_settings"].get("stats_system",
+                                                                  os.environ.get("PWD", "").split("/")[-1]),
+                    time=timeit.default_timer() - user.mid_variables.get("request_time"),
+                    version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
+                    inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
+                ).toJSON()
                 user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
@@ -775,15 +774,13 @@ class MainLoop(BaseMainLoop):
             user.mid_variables.update(
                 key="inner_stats",
                 value=user.mid_variables.get(key="inner_stats", default=[]) +
-                      [{
-                          "system": ((None if callback.action_params.get("answer_stats_system_copy_off")
+                      [Stats(system=((None if callback.action_params.get("answer_stats_system_copy_off")
                                       else user.message.payload.get("stats", {}).get("system"))
                                      or callback.action_params["stats_system"]),
-                          "inner_stats": ([user.message.payload.get("stats")] if user.message.payload.get("stats")
+                             inner_stats=([user.message.payload.get("stats")] if user.message.payload.get("stats")
                                           else []),
-                          "time": user_time,
-                          "version": user.message.payload.get("stats", {}).get("version"),
-                      }])
+                             time=user_time,
+                             version=user.message.payload.get("stats", {}).get("version"))])
 
     @staticmethod
     def _stats_for_outgoing(user: User):
