@@ -344,11 +344,9 @@ class MainLoop(BaseMainLoop):
 
         for command in commands:
             command.payload["stats"] = {
-                "system": (user.settings["template_settings"].get("stats_system")
-                           or os.environ.get("PWD").split("/")[-1]),
+                "system": user.settings["template_settings"].get("stats_system", os.environ.get("PWD").split("/")[-1]),
                 "time": user.variables.get(key=f"{user.message.incremental_id}script_time_ms", default=0),
-                "version": (user.settings["template_settings"].get("stats_version")
-                            or os.environ.get("VERSION")),
+                "version": user.settings["template_settings"].get("stats_version", os.environ.get("VERSION")),
                 "inner_stats": user.variables.get(key=f"{user.message.incremental_id}inner_stats", default=[]),
             }
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
