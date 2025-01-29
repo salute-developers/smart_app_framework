@@ -788,14 +788,17 @@ class MainLoop(BaseMainLoop):
             user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
                 user.variables.get(key=inner_key, default=[])[
                 callback.action_params["stats_initial_inner_stats_count"]:]
-            )
+            ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
             s_key = f"{user.message.incremental_id}script_time_ms"
             user.variables.set(key=s_key, value=user.variables.get(key=s_key, default=0) - user_time, ttl=20)
             user.variables.set(key=inner_key, ttl=20,
                                value=user.variables.get(key=inner_key, default=[]) +
                                      [{
-                                         "system": callback.action_params["stats_system"],
-                                         "inner_stats": [],
+                                         "system": ((user.message.payload.get("stats", {}).get("system")
+                                                     if not callback.action_params.get("answer_stats_system_copy_off")
+                                                     else None) or callback.action_params["stats_system"]),
+                                         "inner_stats": ([user.message.payload.get("stats")]
+                                                         if user.message.payload.get("stats") else []),
                                          "time": user_time,
-                                         "version": None,
+                                         "version": user.message.payload.get("stats", {}).get("version"),
                                      }])
