@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from core.basic_models.variables.variables import Variables
 
@@ -11,20 +11,20 @@ if TYPE_CHECKING:
 
 class MidVariables(Variables):
     def __init__(self, items, user: User, savable: bool = True):
-        super().__init__(items, user, savable)
+        super().__init__(items=items, user=user, savable=savable)
         self._user = user
         self.DEFAULT_TTL = user.settings["template_settings"].get("vps_waiting_timeout", 20000) / 1000
 
-    def get(self, key, default=None):
+    def get(self, key: Any, default: Any = None):
         return super().get(str(self._user.message.incremental_id), {}).get(key, default)
 
-    def set(self, key, value, ttl=None) -> None:
+    def set(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)
         mid_variable = super().get(mid, {})
         mid_variable[key] = value
         super().set(mid, mid_variable, ttl)
 
-    def update(self, key, value, ttl=None) -> None:
+    def update(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)
         mid_variable, old_expire_time = self._storage.get(mid, ({}, self.DEFAULT_TTL + time.time()))
         mid_variable[key] = value
