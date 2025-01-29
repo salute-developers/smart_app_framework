@@ -36,7 +36,8 @@ class StatsTimer:
                                                            default=[])[self._initial_inner_stats_count:]
                           ),
                           "version": None,
-                      }])
+                      }]
+            )
 
 
 def inner_stats_time_sum(inner_stats: list[dict[str, Any]]) -> float:
