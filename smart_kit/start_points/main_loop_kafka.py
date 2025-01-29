@@ -694,8 +694,7 @@ class MainLoop(BaseMainLoop):
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
-                    with StatsTimer() as script_timer:
-                        commands = await self.model.answer(timeout_from_message, user)
+                    commands = await self.model.answer(timeout_from_message, user)
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
                                                      topic_key=topic_key,
