@@ -345,13 +345,14 @@ class MainLoop(BaseMainLoop):
         for command in commands:
             if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
                     (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
-                command.payload["stats"] = Stats(
-                    system=user.settings["template_settings"].get("stats_system",
-                                                                  os.environ.get("PWD", "").split("/")[-1]),
-                    time=timeit.default_timer() - user.mid_variables.get("request_time"),
-                    version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
-                    inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
-                ).toJSON()
+                if user.settings["template_settings"].get("stats_on"):
+                    command.payload["stats"] = Stats(
+                        system=user.settings["template_settings"].get("stats_system",
+                                                                      os.environ.get("PWD", "").split("/")[-1]),
+                        time=timeit.default_timer() - user.mid_variables.get("request_time"),
+                        version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
+                        inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
+                    ).toJSON()
                 user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
