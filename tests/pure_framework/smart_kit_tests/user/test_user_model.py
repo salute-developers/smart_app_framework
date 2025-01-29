@@ -15,7 +15,7 @@ class UserTest2(unittest.TestCase):
         self.test_id = 11
         self.test_message = PicklableMock()
         self.test_message.incremental_id = 123
-        self.test_values = {11: "any val"}
+        self.test_values = {11: "any val", "template_settings": {}}
         history = PicklableMock()
         history.enabled = True
         self.test_descriptions = {"forms": {}, "last_scenarios": [11], "scenarios": [self.test_scenario1],
@@ -37,7 +37,7 @@ class UserTest2(unittest.TestCase):
     def test_smart_app_user_fields(self):
         obj1 = user_model.User(self.test_id, self.test_message, None, self.test_values, self.test_descriptions,
                                self.test_parametrizer_cls)
-        self.assertEqual(len(obj1.fields), 15)
+        self.assertEqual(len(obj1.fields), 16)
         self.assertTrue(isinstance(obj1.fields[0], Field))
 
     def test_smart_app_user_parametrizer(self):

@@ -346,9 +346,9 @@ class MainLoop(BaseMainLoop):
             command.payload["stats"] = {
                 "system": user.settings["template_settings"].get("stats_system",
                                                                  os.environ.get("PWD", "").split("/")[-1]),
-                "time": user.variables.get(key=f"{user.message.incremental_id}script_time_ms", default=0),
+                "time": user.mid_variables.get(key="script_time_ms", default=0),
                 "version": user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
-                "inner_stats": user.variables.get(key=f"{user.message.incremental_id}inner_stats", default=[]),
+                "inner_stats": user.mid_variables.get(key="inner_stats", default=[]),
             }
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
@@ -514,13 +514,9 @@ class MainLoop(BaseMainLoop):
                     self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(message, user)
-                    user.variables.set(
-                        key=f"{user.message.incremental_id}script_time_ms",
-                        value=(script_timer.msecs +
-                               user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
-                                                  default=0)),
-                        ttl=20,
-                    )
+                    user.mid_variables.set(key="script_time_ms",
+                                           value=(script_timer.msecs + user.mid_variables.get(key="script_time_ms",
+                                                                                              default=0)))
 
                     answers = self._generate_answers(user=user, commands=commands, message=message,
                                                      topic_key=topic_key,
@@ -699,13 +695,9 @@ class MainLoop(BaseMainLoop):
                     self._stats_for_incoming(user)
                     with StatsTimer() as script_timer:
                         commands = await self.model.answer(timeout_from_message, user)
-                    user.variables.set(
-                        key=f"{user.message.incremental_id}script_time_ms",
-                        value=(script_timer.msecs +
-                               user.variables.get(key=f"{user.message.incremental_id}script_time_ms",
-                                                  default=0)),
-                        ttl=20,
-                    )
+                    user.mid_variables.set(key="script_time_ms",
+                                           value=(script_timer.msecs +
+                                                  user.mid_variables.get(key="script_time_ms", default=0)))
                     topic_key = self._get_topic_key(mq_message, kafka_key)
                     answers = self._generate_answers(user=user, commands=commands, message=timeout_from_message,
                                                      topic_key=topic_key,
@@ -777,29 +769,29 @@ class MainLoop(BaseMainLoop):
             callback = user.behaviors._callbacks.get(callback_id)
             if callback and not callback.action_params.get("stats_off"):
                 callback.action_params["stats_request_ts"] = timeit.default_timer()
-                callback.action_params["stats_initial_inner_stats_count"] = len(user.variables.get(
-                    key=f"{user.message.incremental_id}inner_stats", default=[]
+                callback.action_params["stats_initial_inner_stats_count"] = len(user.mid_variables.get(
+                    key="inner_stats", default=[]
                 ))
                 callback.action_params.setdefault("stats_system", callback.behavior_id)
 
     def _stats_for_incoming(self, user: User):
         callback = user.behaviors._callbacks.get(user.message.callback_id)
         if callback and not callback.action_params.get("stats_off"):
-            inner_key = f"{user.message.incremental_id}inner_stats"
             user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
-                user.variables.get(key=inner_key, default=[])[
+                user.mid_variables.get(key="inner_stats", default=[])[
                 callback.action_params["stats_initial_inner_stats_count"]:]
             ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
-            s_key = f"{user.message.incremental_id}script_time_ms"
-            user.variables.set(key=s_key, value=user.variables.get(key=s_key, default=0) - user_time, ttl=20)
-            user.variables.set(key=inner_key, ttl=20,
-                               value=user.variables.get(key=inner_key, default=[]) +
-                                     [{
-                                         "system": ((user.message.payload.get("stats", {}).get("system")
-                                                     if not callback.action_params.get("answer_stats_system_copy_off")
-                                                     else None) or callback.action_params["stats_system"]),
-                                         "inner_stats": ([user.message.payload.get("stats")]
-                                                         if user.message.payload.get("stats") else []),
-                                         "time": user_time,
-                                         "version": user.message.payload.get("stats", {}).get("version"),
-                                     }])
+            user.mid_variables.set(key="script_time_ms",
+                                   value=user.mid_variables.get(key="script_time_ms", default=0) - user_time, ttl=20)
+            user.mid_variables.set(key="inner_stats", ttl=20,
+                                   value=user.mid_variables.get(key="inner_stats", default=[]) +
+                                         [{
+                                             "system": ((user.message.payload.get("stats", {}).get("system")
+                                                         if not callback.action_params.get(
+                                                 "answer_stats_system_copy_off")
+                                                         else None) or callback.action_params["stats_system"]),
+                                             "inner_stats": ([user.message.payload.get("stats")]
+                                                             if user.message.payload.get("stats") else []),
+                                             "time": user_time,
+                                             "version": user.message.payload.get("stats", {}).get("version"),
+                                         }])
