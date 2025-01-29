@@ -7,15 +7,14 @@ if TYPE_CHECKING:
 
 
 class StatsTimer:
-    def __init__(self, add_to_inner_stats: bool = False, user: User | None = None, system: str | None = None):
+    def __init__(self, system: str | None = None, user: User | None = None):
         self.stats: Stats | None = None
-        self._add_to_inner_stats = add_to_inner_stats
-        self._user = user
         self._system = system
+        self._user = user
 
     def __enter__(self):
         self.start = timeit.default_timer()
-        if self._add_to_inner_stats:
+        if self._system:
             self._initial_inner_stats_count = len(self._user.mid_variables.get(
                 key=f"inner_stats", default=[]
             ))
@@ -25,7 +24,7 @@ class StatsTimer:
         self.end = timeit.default_timer()
         self.secs = self.end - self.start
         self.msecs = self.secs * 1000
-        if self._add_to_inner_stats:
+        if self._system:
             self.stats = Stats(system=self._system, time=self.msecs - inner_stats_time_sum(
                 self._user.mid_variables.get(key="inner_stats", default=[])[self._initial_inner_stats_count:]
             ))
@@ -36,7 +35,7 @@ class StatsTimer:
 
 
 class Stats:
-    def __init__(self, time: float, system: str | None = None, version: str | None = None,
+    def __init__(self, time: float, system: str, version: str | None = None,
                  inner_stats: list[Stats] | None = None):
         self.system = system
         self.version = version

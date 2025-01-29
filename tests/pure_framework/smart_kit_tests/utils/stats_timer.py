@@ -21,11 +21,11 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        with StatsTimer(add_to_inner_stats=True, user=user):
+        with StatsTimer(system="a", user=user):
             time.sleep(0.1)
         self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
                                places=-2)
-        self.assertIsNone(user.mid_variables.get(key="inner_stats")[0].system)
+        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].system, second="a")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].time, second=100, places=-2)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[0].version)
@@ -35,10 +35,10 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        with StatsTimer(add_to_inner_stats=True, user=user, system="test_sys") as timer:
+        with StatsTimer(system="test_sys", user=user) as timer:
             time.sleep(0.1)
         timer.stats.version = "1337"
-        with StatsTimer(add_to_inner_stats=True, user=user):
+        with StatsTimer(system="test_sys2", user=user):
             time.sleep(0.1)
         self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=200,
                                places=-2)
@@ -56,8 +56,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        with StatsTimer(add_to_inner_stats=True, user=user, system="test_sys") as timer:
-            with StatsTimer(add_to_inner_stats=True, user=user, system="inner_sys") as timer2:
+        with StatsTimer(system="test_sys", user=user) as timer:
+            with StatsTimer(system="inner_sys", user=user) as timer2:
                 time.sleep(0.1)
             timer2.stats.version = "123"
             time.sleep(0.1)
@@ -80,7 +80,7 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user.message = Mock(incremental_id=123)
 
         async def coro(num: int, duration: float, version: str):
-            with StatsTimer(add_to_inner_stats=True, user=user, system=f"test_sys{num}") as timer:
+            with StatsTimer(system=f"test_sys{num}", user=user) as timer:
                 await asyncio.sleep(duration)
             timer.stats.version = version
 
@@ -103,16 +103,18 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user = Mock()
         user.mid_variables = MidVariables(None, None)
         user.message = Mock(incremental_id=123)
-        with StatsTimer(add_to_inner_stats=True, user=user) as timer:
+        with StatsTimer(system="a", user=user) as timer:
             time.sleep(0.1)
         timer.stats.set_inner_stats([Stats(system="custom", inner_stats=[], time=100, version="C-01.001.00")])
         self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
                                places=-2)
-        self.assertIsNone(user.mid_variables.get(key="inner_stats")[0].system)
+        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].system, second="a")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].system,
                          second="custom")
-        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["inner_stats"], second=[])
-        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].time, second=100,
+        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["inner_stats"],
+                         second=[])
+        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].time,
+                               second=100,
                                places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].version,
                          second="C-01.001.00")
