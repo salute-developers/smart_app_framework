@@ -16,13 +16,13 @@ class MidVariables(Variables):
         self.DEFAULT_TTL = user.settings["template_settings"].get("vps_waiting_timeout", 20000) / 1000
 
     def get(self, key: Any, default: Any = None):
-        return super().get(str(self._user.message.incremental_id), {}).get(key, default)
+        return super().get(key=str(self._user.message.incremental_id), default={}).get(key=key, default=default)
 
     def set(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)
-        mid_variable = super().get(mid, {})
+        mid_variable = super().get(key=mid, default={})
         mid_variable[key] = value
-        super().set(mid, mid_variable, ttl)
+        super().set(key=mid, value=mid_variable, ttl=ttl)
 
     def update(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)
