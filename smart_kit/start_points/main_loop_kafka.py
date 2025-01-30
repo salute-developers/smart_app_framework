@@ -349,7 +349,7 @@ class MainLoop(BaseMainLoop):
                     command.payload["stats"] = Stats(
                         system=user.settings["template_settings"].get("stats_system",
                                                                       os.environ.get("PWD", "").split("/")[-1]),
-                        time=timeit.default_timer() - user.mid_variables.get("request_time"),
+                        time=(timeit.default_timer() - user.mid_variables.get("request_time")) * 1000,
                         version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
                         inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
                         optional=user.mid_variables.get(key="stats_optional"),
@@ -770,9 +770,11 @@ class MainLoop(BaseMainLoop):
             user.mid_variables.update(key="request_time", value=timeit.default_timer())
         callback = user.behaviors._callbacks.get(user.message.callback_id)
         if callback and not callback.action_params.get("stats_off"):
-            user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
-                user.mid_variables.get(key="inner_stats",
-                                       default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
+            user_time = (
+                    (timeit.default_timer() - callback.action_params["stats_request_ts"]) * 1000 -
+                    inner_stats_time_sum(user.mid_variables.get(
+                        key="inner_stats", default=[]
+                    )[callback.action_params["stats_initial_inner_stats_count"]:])
             )
             user.mid_variables.update(
                 key="inner_stats",
