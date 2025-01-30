@@ -36,7 +36,8 @@ class StatsTimer:
 
 class Stats:
     def __init__(self, time: float, system: str | None = None, version: str | None = None,
-                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None, optional: dict | None = None, **kwargs):
+                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None, optional: dict | None = None,
+                 time_is_final: bool = False, **kwargs):
         self.system = system
         self.version = version
         self.optional = optional
@@ -45,14 +46,15 @@ class Stats:
         if inner_stats:
             self._inner_stats = ([Stats(**stats) for stats in inner_stats] if isinstance(inner_stats[0], dict)
                                  else inner_stats)
+        self.time_is_final = time_is_final
         self._inner_stats_time_sum = None
 
     @property
     def time(self) -> float:
-        return self._time - self.inner_stats_time_sum
+        return self._time - (0 if self.time_is_final else self.inner_stats_time_sum)
 
     def add_inner_stats(self, stats: dict[str, Any], copy_system: bool = True, copy_version: bool = True) -> None:
-        self._inner_stats = [Stats(**stats)]
+        self._inner_stats = [Stats(**stats, time_is_final=True)]
         self._inner_stats_time_sum = None
         self.system = (stats.get("system") if copy_system else None) or self.system
         self.version = (stats.get("version") if copy_version else None) or self.version
