@@ -39,8 +39,8 @@ class Stats:
                  inner_stats: list[Stats] | None = None):
         self.system = system
         self.version = version
-        self._inner_stats: list[Stats] = inner_stats or []
         self._time = time
+        self._inner_stats: list[Stats] = inner_stats or []
         self._inner_stats_time_sum = None
 
     @property
@@ -60,9 +60,9 @@ class Stats:
     def toJSON(self) -> dict[str, Any]:
         return {
             "system": self.system,
-            "inner_stats": [stat.toJSON() for stat in self._inner_stats],
-            "time": self.time,
             "version": self.version,
+            "time": self.time,
+            "inner_stats": [stat.toJSON() for stat in self._inner_stats],
         }
 
 
