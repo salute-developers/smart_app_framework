@@ -352,7 +352,7 @@ class MainLoop(BaseMainLoop):
                         time=timeit.default_timer() - user.mid_variables.get("request_time"),
                         version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
                         inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
-                        optional=user.mid_variables.get(key="stats_optinal"),
+                        optional=user.mid_variables.get(key="stats_optional"),
                     ).toJSON()
                 user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
