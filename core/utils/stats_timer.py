@@ -16,7 +16,7 @@ class StatsTimer:
         self.start = timeit.default_timer()
         if self._system:
             self._initial_inner_stats_count = len(self._user.mid_variables.get(
-                key=f"inner_stats", default=[]
+                key="inner_stats", default=[]
             ))
         return self
 

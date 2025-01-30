@@ -28,4 +28,4 @@ class MidVariables(Variables):
         del self._storage[str(self._user.message.incremental_id)]
 
     def set(self, key, value, ttl=None):
-        raise NotImplemented
+        raise NotImplementedError
