@@ -345,7 +345,7 @@ class MainLoop(BaseMainLoop):
         for command in commands:
             if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
                     (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
-                if user.settings["template_settings"].get("stats_on"):
+                if not user.settings["template_settings"].get("stats_off"):
                     command.payload["stats"] = Stats(
                         system=user.settings["template_settings"].get("stats_system",
                                                                       os.environ.get("PWD", "").split("/")[-1]),
