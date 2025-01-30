@@ -43,7 +43,8 @@ class Stats:
         self._time = time
         self._inner_stats: list[Stats] = []
         if inner_stats:
-            self._inner_stats = [Stats(**stats) for stats in inner_stats] if inner_stats[0] is dict else inner_stats
+            self._inner_stats = ([Stats(**stats) for stats in inner_stats] if isinstance(inner_stats[0], dict)
+                                 else inner_stats)
         self._inner_stats_time_sum = None
 
     @property
