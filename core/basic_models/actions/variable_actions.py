@@ -1,6 +1,7 @@
+from __future__ import annotations
 import collections
 import json
-from typing import Optional, Dict, Any, Union, List
+from typing import Optional, Dict, Any, Union, List, TYPE_CHECKING, AsyncGenerator
 
 from jinja2 import exceptions as jexcept
 
@@ -10,6 +11,9 @@ from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 from core.model.base_user import BaseUser
 from core.text_preprocessing.base import BaseTextPreprocessingResult
 from core.unified_template.unified_template import UnifiedTemplate
+
+if TYPE_CHECKING:
+    from scenarios.user.user_model import User
 
 
 class BaseSetVariableAction(Action):
@@ -99,3 +103,17 @@ class ClearVariablesAction(Action):
 class SetLocalVariableAction(BaseSetVariableAction):
     def _set(self, user, value):
         user.local_vars.set(self.key, value)
+
+
+class SetMidVariableAction(BaseSetVariableAction):
+    async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
+                  params: dict[str, str | float | int] | None = None) -> List[Command]:
+        try:
+            value = self.template.render({**(params or {}), **user.parametrizer.collect(text_preprocessing_result)})
+        except Exception:
+            value = None
+        self._set(user, self.loaders[self.loader](value) if self.loader and value else value)
+        return []
+
+    def _set(self, user: User, value: Any) -> None:
+        user.mid_variables.update(self.key, value)

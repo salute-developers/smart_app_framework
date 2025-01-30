@@ -21,7 +21,7 @@ from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPer
 from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
     SDKAnswerToUser, StringFileUnifiedTemplateAction
 from core.basic_models.actions.variable_actions import ClearVariablesAction, DeleteVariableAction, \
-    SetLocalVariableAction, SetVariableAction
+    SetLocalVariableAction, SetVariableAction, SetMidVariableAction
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
     ItemCard, PronounceText, SuggestText, SuggestDeepLink, RawItem
 from core.basic_models.classifiers.basic_classifiers import classifiers, classifier_factory, Classifier, \
@@ -307,6 +307,7 @@ class SmartAppResources(BaseConfig):
         actions["sdk_answer_to_user"] = SDKAnswerToUser
         actions["self_service_with_state"] = SelfServiceActionWithState
         actions["set_local_variable"] = SetLocalVariableAction
+        actions["set_mid_variable"] = SetMidVariableAction
         actions["set_variable"] = SetVariableAction
         actions["string"] = StringFileUnifiedTemplateAction
         actions["push"] = PushAction
