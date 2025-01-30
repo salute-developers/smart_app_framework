@@ -35,10 +35,11 @@ class StatsTimer:
 
 
 class Stats:
-    def __init__(self, time: float, system: str, version: str | None = None,
-                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None):
+    def __init__(self, time: float, system: str | None = None, version: str | None = None,
+                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None, optional: dict | None = None, **kwargs):
         self.system = system
         self.version = version
+        self.optional = optional
         self._time = time
         self._inner_stats: list[Stats] = []
         if inner_stats:
@@ -49,9 +50,11 @@ class Stats:
     def time(self) -> float:
         return self._time - self.inner_stats_time_sum
 
-    def add_inner_stats(self, stats: dict[str, Any]) -> None:
+    def add_inner_stats(self, stats: dict[str, Any], copy_system: bool = True, copy_version: bool = True) -> None:
         self._inner_stats = [Stats(**stats)]
         self._inner_stats_time_sum = None
+        self.system = (stats.get("system") if copy_system else None) or self.system
+        self.version = (stats.get("version") if copy_version else None) or self.version
 
     @property
     def inner_stats_time_sum(self) -> float:
@@ -65,6 +68,7 @@ class Stats:
             "version": self.version,
             "time": self.time,
             "inner_stats": [stats.toJSON() for stats in self._inner_stats],
+            "optional": self.optional,
         }
 
 
