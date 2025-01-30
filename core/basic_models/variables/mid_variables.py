@@ -16,7 +16,7 @@ class MidVariables(Variables):
         self._user = user
 
     def get(self, key: Any, default: Any = None) -> Any:
-        return super().get(key=str(self._user.message.incremental_id), default={}).get(key=key, default=default)
+        return super().get(key=str(self._user.message.incremental_id), default={}).get(key, default)
 
     def update(self, key: Any, value: Any, ttl: int | None = None) -> None:
         mid = str(self._user.message.incremental_id)

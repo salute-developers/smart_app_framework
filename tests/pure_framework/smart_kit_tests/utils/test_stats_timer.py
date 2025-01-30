@@ -10,16 +10,16 @@ from core.utils.stats_timer import StatsTimer, inner_stats_time_sum, Stats
 
 class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
     def test_no_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
         with StatsTimer(user=user):
             time.sleep(0.1)
         self.assertIsNone(user.mid_variables.get(key="inner_stats"))
 
     def test_single_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
         with StatsTimer(system="a", user=user):
             time.sleep(0.1)
@@ -32,8 +32,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=len(user.mid_variables.get(key="inner_stats")), second=1)
 
     def test_consequent_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
         with StatsTimer(system="test_sys", user=user) as timer:
             time.sleep(0.1)
@@ -46,15 +46,15 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].time, second=100, places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].version, second="1337")
-        self.assertIsNone(user.mid_variables.get(key="inner_stats")[1].system)
+        self.assertEqual(user.mid_variables.get(key="inner_stats")[1].system, "test_sys2")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[1].time, second=100, places=-2)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[1].version)
         self.assertEqual(first=len(user.mid_variables.get(key="inner_stats")), second=2)
 
     def test_nested_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
         with StatsTimer(system="test_sys", user=user) as timer:
             with StatsTimer(system="inner_sys", user=user) as timer2:
@@ -75,8 +75,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=len(user.mid_variables.get(key="inner_stats")), second=2)
 
     async def test_overlapping_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
 
         async def coro(num: int, duration: float, version: str):
@@ -100,8 +100,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].version, second="123")
 
     def test_custom_inner_inner_stats(self):
-        user = Mock()
-        user.mid_variables = MidVariables(None, None)
+        user = Mock(settings={"template_settings": {}})
+        user.mid_variables = MidVariables(items=None, user=user)
         user.message = Mock(incremental_id=123)
         with StatsTimer(system="a", user=user) as timer:
             time.sleep(0.1)
@@ -109,14 +109,14 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
                                places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].system, second="a")
-        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].system,
+        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["system"],
                          second="custom")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["inner_stats"],
                          second=[])
-        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].time,
+        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["time"],
                                second=100,
                                places=-2)
-        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0].version,
+        self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"][0]["version"],
                          second="C-01.001.00")
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].time, second=0, places=-2)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[0].version)
