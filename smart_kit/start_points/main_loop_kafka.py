@@ -772,7 +772,7 @@ class MainLoop(BaseMainLoop):
             user_time = timeit.default_timer() - callback.action_params["stats_request_ts"] - inner_stats_time_sum(
                 user.mid_variables.get(key="inner_stats",
                                        default=[])[callback.action_params["stats_initial_inner_stats_count"]:]
-            ) - inner_stats_time_sum([user.message.payload.get("stats")] if user.message.payload.get("stats") else [])
+            )
             user.mid_variables.update(
                 key="inner_stats",
                 value=user.mid_variables.get(key="inner_stats", default=[]) +
