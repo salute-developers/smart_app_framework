@@ -645,6 +645,8 @@ class MainLoop(BaseMainLoop):
 
     def save_behavior_timeouts(self, user, mq_message: ConsumerRecord, kafka_key):
         for i, (expire_time_us, callback_id) in enumerate(user.behaviors.get_behavior_timeouts()):
+            if callback_id in self._timers:
+                continue
             # TODO: remove "- time()" when framework will be modified to asyncio only
             # если колбеков много, разносим их на 1 секунду друг от друга во избежание коллизий
             when = expire_time_us - time.time() + i
@@ -782,9 +784,10 @@ class MainLoop(BaseMainLoop):
                              time=user_time,
                              version=user.message.payload.get("stats", {}).get("version"))])
 
-    @staticmethod
-    def _stats_for_outgoing(user: User):
+    def _stats_for_outgoing(self, user: User):
         for time_left, callback_id in user.behaviors.get_behavior_timeouts():
+            if callback_id in self._timers:
+                continue
             callback = user.behaviors._callbacks.get(callback_id)
             if callback and not callback.action_params.get("stats_off"):
                 callback.action_params["stats_request_ts"] = timeit.default_timer()
