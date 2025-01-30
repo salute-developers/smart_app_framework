@@ -105,7 +105,7 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         user.message = Mock(incremental_id=123)
         with StatsTimer(system="a", user=user) as timer:
             time.sleep(0.1)
-        timer.stats.set_inner_stats([Stats(system="custom", inner_stats=[], time=100, version="C-01.001.00")])
+        timer.stats.add_inner_stats({"system": "custom", "inner_stats": [], "time": 100, "version": "C-01.001.00"})
         self.assertAlmostEqual(first=inner_stats_time_sum(user.mid_variables.get(key="inner_stats")), second=100,
                                places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].system, second="a")

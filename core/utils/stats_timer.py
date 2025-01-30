@@ -36,19 +36,21 @@ class StatsTimer:
 
 class Stats:
     def __init__(self, time: float, system: str, version: str | None = None,
-                 inner_stats: list[Stats] | None = None):
+                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None):
         self.system = system
         self.version = version
         self._time = time
-        self._inner_stats: list[Stats] = inner_stats or []
+        self._inner_stats: list[Stats] = []
+        if inner_stats:
+            self._inner_stats = [Stats(**stats) for stats in inner_stats] if inner_stats[0] is dict else inner_stats
         self._inner_stats_time_sum = None
 
     @property
     def time(self) -> float:
         return self._time - self.inner_stats_time_sum
 
-    def set_inner_stats(self, inner_stats: list[Stats]) -> None:
-        self._inner_stats = inner_stats
+    def add_inner_stats(self, stats: dict[str, Any]) -> None:
+        self._inner_stats = [Stats(**stats)]
         self._inner_stats_time_sum = None
 
     @property
@@ -62,9 +64,9 @@ class Stats:
             "system": self.system,
             "version": self.version,
             "time": self.time,
-            "inner_stats": [stat.toJSON() for stat in self._inner_stats],
+            "inner_stats": [stats.toJSON() for stats in self._inner_stats],
         }
 
 
 def inner_stats_time_sum(inner_stats: list[Stats]) -> float:
-    return sum(stat.time + stat.inner_stats_time_sum for stat in inner_stats)
+    return sum(stats.time + stats.inner_stats_time_sum for stats in inner_stats)
