@@ -9,7 +9,6 @@ import os
 import pstats
 import signal
 import time
-import timeit
 import tracemalloc
 from collections import namedtuple
 from functools import lru_cache, cached_property
