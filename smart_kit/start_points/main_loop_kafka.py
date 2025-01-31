@@ -28,7 +28,7 @@ from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
-from core.utils.stats_timer import StatsTimer, inner_stats_time_sum, Stats
+from core.utils.stats_timer import StatsTimer, Stats
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
