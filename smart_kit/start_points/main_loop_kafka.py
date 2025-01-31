@@ -346,13 +346,16 @@ class MainLoop(BaseMainLoop):
             if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
                     (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
                 if not user.settings["template_settings"].get("stats_off"):
+                    finish_ts = time.time()
                     command.payload["stats"] = Stats(
                         system=user.settings["template_settings"].get("stats_system",
                                                                       os.environ.get("PWD", "").split("/")[-1]),
-                        time=(timeit.default_timer() - user.mid_variables.get("request_time")) * 1000,
+                        time=(finish_ts - user.mid_variables.get("request_ts")) * 1000,
                         version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
                         inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
                         optional=user.mid_variables.get(key="stats_optional"),
+                        start_ts=user.mid_variables.get("request_ts"),
+                        finish_ts=finish_ts,
                     ).toJSON()
                 user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
@@ -766,16 +769,11 @@ class MainLoop(BaseMainLoop):
 
     @staticmethod
     def _stats_for_incoming(user: User):
-        if not user.mid_variables.get("request_time"):
-            user.mid_variables.update(key="request_time", value=timeit.default_timer())
+        if not user.mid_variables.get("request_ts"):
+            user.mid_variables.update(key="request_ts", value=time.time())
         callback = user.behaviors._callbacks.get(user.message.callback_id)
         if callback and not callback.action_params.get("stats_off"):
-            user_time = (
-                (timeit.default_timer() - callback.action_params["stats_request_ts"]) * 1000 -
-                inner_stats_time_sum(user.mid_variables.get(
-                    key="inner_stats", default=[]
-                )[callback.action_params["stats_initial_inner_stats_count"]:])
-            )
+            finish_ts = time.time()
             user.mid_variables.update(
                 key="inner_stats",
                 value=user.mid_variables.get(key="inner_stats", default=[]) + [
@@ -784,8 +782,10 @@ class MainLoop(BaseMainLoop):
                                   callback.action_params["stats_system"]),
                           inner_stats=([user.message.payload.get("stats")] if user.message.payload.get("stats")
                                        else []),
-                          time=user_time,
-                          version=user.message.payload.get("stats", {}).get("version"))
+                          time=(finish_ts - callback.action_params["stats_request_ts"]) * 1000,
+                          version=user.message.payload.get("stats", {}).get("version"),
+                          start_ts=callback.action_params["stats_request_ts"],
+                          finish_ts=finish_ts),
                 ]
             )
 
@@ -795,7 +795,7 @@ class MainLoop(BaseMainLoop):
                 continue
             callback = user.behaviors._callbacks.get(callback_id)
             if callback and not callback.action_params.get("stats_off"):
-                callback.action_params["stats_request_ts"] = timeit.default_timer()
+                callback.action_params["stats_request_ts"] = time.time()
                 callback.action_params["stats_initial_inner_stats_count"] = len(user.mid_variables.get(
                     key="inner_stats", default=[]
                 ))
