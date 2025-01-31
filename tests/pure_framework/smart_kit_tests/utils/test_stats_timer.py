@@ -26,8 +26,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].system, second="a")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[0].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].time, second=100, places=-2)
-        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[0].finish_ts -
-                                     user.mid_variables.get(key="inner_stats")[0].start_ts, second=0.1, places=1)
+        self.assertAlmostEqual(first=(user.mid_variables.get(key="inner_stats")[0].finish_ts -
+                                      user.mid_variables.get(key="inner_stats")[0].start_ts), second=0.1, places=1)
         self.assertIsNone(user.mid_variables.get(key="inner_stats")[0].version)
         self.assertEqual(first=len(user.mid_variables.get(key="inner_stats")), second=1)
 
@@ -67,8 +67,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].system, second="test_sys")
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[1].time, second=200, places=-2)
-        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[1].finish_ts -
-                                     user.mid_variables.get(key="inner_stats")[1].start_ts, second=0.2, places=1)
+        self.assertAlmostEqual(first=(user.mid_variables.get(key="inner_stats")[1].finish_ts -
+                                      user.mid_variables.get(key="inner_stats")[1].start_ts), second=0.2, places=1)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].version, second="1337")
         self.assertEqual(first=len(user.mid_variables.get(key="inner_stats")), second=2)
 
@@ -94,8 +94,8 @@ class StatsTimerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].toJSON()["inner_stats"], second=[])
         self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[1].time, second=200, places=-2)
         self.assertEqual(first=user.mid_variables.get(key="inner_stats")[1].version, second="123")
-        self.assertAlmostEqual(first=user.mid_variables.get(key="inner_stats")[1].finish_ts -
-                                     user.mid_variables.get(key="inner_stats")[1].start_ts, second=0.2, places=1)
+        self.assertAlmostEqual(first=(user.mid_variables.get(key="inner_stats")[1].finish_ts -
+                                      user.mid_variables.get(key="inner_stats")[1].start_ts), second=0.2, places=1)
 
     def test_custom_inner_inner_stats(self):
         user = Mock(settings={"template_settings": {}})
