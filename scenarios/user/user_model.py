@@ -1,6 +1,7 @@
 import json
 from functools import cached_property
 
+from core.basic_models.variables.mid_variables import MidVariables
 from core.logging.logger_utils import log
 from core.model.field import Field
 from core.model.base_user import BaseUser
@@ -26,6 +27,7 @@ class User(BaseUser):
     preprocessing_messages_for_scenarios: PreprocessingScenariosMessages
     behaviors: Behaviors
     history: History
+    mid_variables: MidVariables
 
     def __init__(self, id, message, db_data, settings, descriptions, parametrizer_cls, load_error=False):
         self.settings = settings
@@ -61,7 +63,8 @@ class User(BaseUser):
                                        self.descriptions["preprocessing_messages_for_scenarios"]),
                                  Field("behaviors", Behaviors, self.descriptions["behaviors"]),
                                  Field("history", History, self.descriptions["history"]),
-                                 Field("gender_selector", ReplySelector)]
+                                 Field("gender_selector", ReplySelector),
+                                 Field("mid_variables", MidVariables)]
 
     @cached_property
     def parametrizer(self):

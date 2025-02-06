@@ -5,6 +5,7 @@ import cProfile
 import gc
 import hashlib
 import json
+import os
 import pstats
 import signal
 import time
@@ -26,7 +27,7 @@ from core.mq.kafka.kafka_consumer import KafkaConsumer
 from core.mq.kafka.kafka_publisher import KafkaPublisher
 from core.utils.memstats import get_top_malloc
 from core.utils.pickle_copy import pickle_deepcopy
-from core.utils.stats_timer import StatsTimer
+from core.utils.stats_timer import StatsTimer, Stats
 from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
@@ -38,6 +39,7 @@ from smart_kit.start_points.constants import WORKER_EXCEPTION, POD_UP
 
 if TYPE_CHECKING:
     from aiokafka import ConsumerRecord
+    from scenarios.user.user_model import User
 
 
 class LoopStop(RuntimeError):
@@ -331,7 +333,7 @@ class MainLoop(BaseMainLoop):
             finally:
                 self.concurrent_messages -= 1
 
-    def _generate_answers(self, user, commands, message, **kwargs):
+    def _generate_answers(self, user: User, commands, message, **kwargs):
         topic_key = kwargs["topic_key"]
         kafka_key = kwargs["kafka_key"]
         answers = []
@@ -340,6 +342,21 @@ class MainLoop(BaseMainLoop):
         commands = combine_commands(commands, user)
 
         for command in commands:
+            if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
+                    (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
+                if not user.settings["template_settings"].get("stats_off"):
+                    finish_ts = time.time()
+                    command.payload["stats"] = Stats(
+                        system=user.settings["template_settings"].get("stats_system",
+                                                                      os.environ.get("PWD", "").split("/")[-1]),
+                        time=(finish_ts - user.mid_variables.get("request_ts")) * 1000,
+                        version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
+                        inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
+                        optional=user.mid_variables.get(key="stats_optional"),
+                        start_ts=user.mid_variables.get("request_ts"),
+                        finish_ts=finish_ts,
+                    ).toJSON()
+                user.mid_variables.delete_mid_variables()
             request = SmartKitKafkaRequest(id=None, items=command.request_data)
             request.update_empty_items({
                 "kafka_key": kafka_key,
@@ -435,6 +452,7 @@ class MainLoop(BaseMainLoop):
                     user = await self.load_user(db_uid, message)
                 monitoring.sampling_load_time(self.app_name, load_timer.secs)
                 stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+                self._stats_for_incoming(user)
 
                 # check_message_key
                 message_key = self._get_str_message_key(mq_message.key, incremental_id=message.incremental_id,
@@ -510,6 +528,7 @@ class MainLoop(BaseMainLoop):
                     monitoring.sampling_script_time(self.app_name, script_timer.secs)
                     stats += "Script time: {} msecs\n".format(script_timer.msecs)
 
+                    self._stats_for_outgoing(user)
                     with StatsTimer() as save_timer:
                         user_save_no_collisions = await self.save_user(db_uid, user, message)
 
@@ -629,6 +648,8 @@ class MainLoop(BaseMainLoop):
 
     def save_behavior_timeouts(self, user, mq_message: ConsumerRecord, kafka_key):
         for i, (expire_time_us, callback_id) in enumerate(user.behaviors.get_behavior_timeouts()):
+            if callback_id in self._timers:
+                continue
             # TODO: remove "- time()" when framework will be modified to asyncio only
             # если колбеков много, разносим их на 1 секунду друг от друга во избежание коллизий
             when = expire_time_us - time.time() + i
@@ -674,6 +695,7 @@ class MainLoop(BaseMainLoop):
                     params={log_const.KEY_NAME: "MainLoop",
                             MESSAGE_ID_STR: timeout_from_message.incremental_id})
                 user = await self.load_user(db_uid, timeout_from_message)
+                self._stats_for_incoming(user)
 
                 if user.behaviors.has_callback(callback_id):
                     callback_found = True
@@ -683,6 +705,7 @@ class MainLoop(BaseMainLoop):
                                                      topic_key=topic_key,
                                                      kafka_key=kafka_key)
 
+                    self._stats_for_outgoing(user)
                     user_save_ok = await self.save_user(db_uid, user, mq_message)
 
                     if not user_save_ok:
@@ -742,3 +765,37 @@ class MainLoop(BaseMainLoop):
             self.loop.close()
         except RuntimeError:
             raise LoopStop
+
+    @staticmethod
+    def _stats_for_incoming(user: User):
+        if not user.mid_variables.get("request_ts"):
+            user.mid_variables.update(key="request_ts", value=time.time())
+        callback = user.behaviors._callbacks.get(user.message.callback_id)
+        if callback and not callback.action_params.get("stats_off"):
+            finish_ts = time.time()
+            user.mid_variables.update(
+                key="inner_stats",
+                value=user.mid_variables.get(key="inner_stats", default=[]) + [
+                    Stats(system=((None if callback.action_params.get("answer_stats_system_copy_off")
+                                   else user.message.payload.get("stats", {}).get("system")) or
+                                  callback.action_params["stats_system"]),
+                          inner_stats=([user.message.payload.get("stats")] if user.message.payload.get("stats")
+                                       else []),
+                          time=(finish_ts - callback.action_params["stats_request_ts"]) * 1000,
+                          version=user.message.payload.get("stats", {}).get("version"),
+                          start_ts=callback.action_params["stats_request_ts"],
+                          finish_ts=finish_ts),
+                ]
+            )
+
+    def _stats_for_outgoing(self, user: User):
+        for time_left, callback_id in user.behaviors.get_behavior_timeouts():
+            if callback_id in self._timers:
+                continue
+            callback = user.behaviors._callbacks.get(callback_id)
+            if callback and not callback.action_params.get("stats_off"):
+                callback.action_params["stats_request_ts"] = time.time()
+                callback.action_params["stats_initial_inner_stats_count"] = len(user.mid_variables.get(
+                    key="inner_stats", default=[]
+                ))
+                callback.action_params.setdefault("stats_system", callback.behavior_id)
