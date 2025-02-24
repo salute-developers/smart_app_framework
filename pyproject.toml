@@ -31,7 +31,7 @@ numpy = "1.23.5"
 objgraph = "3.4.1"
 prometheus-client = "0.11.0"
 psutil = "5.9.4"
-pyignite = "0.5.2"
+pyignite = "0.6.1"
 pymorphy2 = "0.8"
 pymorphy2_dicts = "2.4.393442.3710985"
 python-dateutil = "2.7.3"
@@ -63,6 +63,7 @@ aiokafka = "0.8.1"
 TatSu = "5.8.3"
 python-decouple = "3.4"
 lazy = "1.5"
+kafka-python = "2.0.2"
 
 [tool.poetry.extras]
 ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aarch64"]
