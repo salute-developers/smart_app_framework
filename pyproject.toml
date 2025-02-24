@@ -63,6 +63,7 @@ aiokafka = "0.8.1"
 TatSu = "5.8.3"
 python-decouple = "3.4"
 lazy = "1.5"
+kafka-python = "2.0.2"
 
 [tool.poetry.extras]
 ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aarch64"]
