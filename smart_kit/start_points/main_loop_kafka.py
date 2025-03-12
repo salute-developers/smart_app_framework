@@ -799,3 +799,8 @@ class MainLoop(BaseMainLoop):
                     key="inner_stats", default=[]
                 ))
                 callback.action_params.setdefault("stats_system", callback.behavior_id)
+        user.mid_variables.update(
+            key="inner_stats",
+            value=[stats if isinstance(stats, dict) else stats.toJSON()
+                   for stats in user.mid_variables.get(key="inner_stats", default=[])]
+        )
