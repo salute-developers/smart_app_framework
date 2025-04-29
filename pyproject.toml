@@ -37,7 +37,7 @@ pymorphy2_dicts = "2.4.393442.3710985"
 python-dateutil = "2.7.3"
 python-json-logger = "0.1.11"
 PyYAML = "6.0.1"
-requests = "2.31.0"
+requests = ">=2.32.2"
 rusenttokenize = "0.0.5"
 scikit-learn = [
     {version = "1.1.2", python = "<3.11", optional = true},
@@ -52,13 +52,13 @@ tensorflow = [
 tensorflow-macos = {version = "2.12.0", markers = "sys_platform == 'darwin' and platform_machine == 'arm64'", optional = true}
 tensorflow-aarch64 = {version = "2.12.0", markers = "sys_platform == 'linux' and platform_machine == 'aarch64'", optional = true}
 timeout-decorator = "0.4.1"
-tqdm = "4.64.1"
+tqdm = ">=4.66.3"
 freezegun = "1.1.0"
 protobuf = "3.20.3"
 lxml = "4.9.2"
 twisted = "24.11.0"
 urllib3 = "1.26.18"
-certifi = "2023.07.22"
+certifi = ">=2024.7.4"
 aiokafka = "0.8.1"
 TatSu = "5.8.3"
 python-decouple = "3.4"
