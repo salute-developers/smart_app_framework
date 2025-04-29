@@ -779,8 +779,7 @@ class MainLoop(BaseMainLoop):
                     Stats(system=((None if callback.action_params.get("answer_stats_system_copy_off")
                                    else user.message.payload.get("stats", {}).get("system")) or
                                   callback.action_params["stats_system"]),
-                          inner_stats=([user.message.payload.get("stats")] if user.message.payload.get("stats")
-                                       else []),
+                          inner_stats=([s] if (s := user.message.payload.get("stats")) else []),
                           time=(finish_ts - callback.action_params["stats_request_ts"]) * 1000,
                           version=user.message.payload.get("stats", {}).get("version"),
                           start_ts=callback.action_params["stats_request_ts"],
