@@ -1,6 +1,5 @@
 import asyncio
 import json
-import typing
 from functools import cached_property
 
 import aiohttp
@@ -12,6 +11,7 @@ from core.logging.logger_utils import log
 from core.message.from_message import SmartAppFromMessage
 from core.monitoring.monitoring import monitoring
 from core.utils.stats_timer import StatsTimer
+from scenarios.user.user_model import User
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.start_points.main_loop_http import BaseHttpMainLoop
 
@@ -41,7 +41,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
     def masking_fields(self):
         return self.settings["template_settings"].get("masking_fields")
 
-    async def load_user(self, db_uid, message):
+    async def _load_user(self, db_uid: str, message: SmartAppFromMessage) -> User:
         db_data = None
         load_error = False
         try:
@@ -54,51 +54,42 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
                                                    log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
             load_error = True
             monitoring.counter_load_error(self.app_name)
-        return self.user_cls(
-            message.uid,
-            message=message,
-            db_data=db_data,
-            settings=self.settings,
-            descriptions=self.model.scenario_descriptions,
-            parametrizer_cls=self.parametrizer_cls,
-            load_error=load_error
-        )
+        return self.get_user(message, db_data, load_error)
 
-    async def save_user(self, db_uid, user, message):
-        no_collisions = True
+    async def _save_user(self, db_uid, user, message):
         if user.do_not_save:
-            log("User %(uid)s will not saved", user=user, params={"uid": user.id,
-                                                                  log_const.KEY_NAME: "user_will_not_saved"})
-        else:
+            log("User %(uid)s will not be saved", user=user,
+                params={"uid": user.id, log_const.KEY_NAME: "user_will_not_saved"})
+            return True
 
-            no_collisions = True
-            try:
-                str_data = user.raw_str
+        no_collisions = True
+        try:
+            str_data = user.raw_str
 
-                if self.db_adapter.IS_ASYNC:
-                    if user.initial_db_data and self.user_save_check_for_collisions:
-                        no_collisions = await self.db_adapter.replace_if_equals(
-                            db_uid,
-                            sample=user.initial_db_data,
-                            data=str_data
-                        )
-                    else:
-                        await self.db_adapter.save(db_uid, str_data)
+            if self.db_adapter.IS_ASYNC:
+                if user.initial_db_data and self.user_save_check_for_collisions:
+                    no_collisions = await self.db_adapter.replace_if_equals(
+                        db_uid,
+                        sample=user.initial_db_data,
+                        data=str_data
+                    )
                 else:
-                    if user.initial_db_data and self.user_save_check_for_collisions:
-                        no_collisions = await self.db_adapter.replace_if_equals(
-                            db_uid,
-                            sample=user.initial_db_data,
-                            data=str_data
-                        )
-                    else:
-                        await self.db_adapter.save(db_uid, str_data)
-            except (DBAdapterException, ValueError):
-                log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
-                                                       log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
-                monitoring.counter_save_error(self.app_name)
-            if not no_collisions:
-                monitoring.counter_save_collision(self.app_name)
+                    await self.db_adapter.save(db_uid, str_data)
+            else:
+                if user.initial_db_data and self.user_save_check_for_collisions:
+                    no_collisions = await self.db_adapter.replace_if_equals(
+                        db_uid,
+                        sample=user.initial_db_data,
+                        data=str_data
+                    )
+                else:
+                    await self.db_adapter.save(db_uid, str_data)
+        except (DBAdapterException, ValueError):
+            log("Failed to set user data", params={log_const.KEY_NAME: log_const.FAILED_DB_INTERACTION,
+                                                   log_const.REQUEST_VALUE: message.as_str}, level="ERROR")
+            monitoring.counter_save_error(self.app_name)
+        if not no_collisions:
+            monitoring.counter_save_collision(self.app_name)
         return no_collisions
 
     def run(self):
@@ -111,7 +102,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
     def stop(self, signum, frame):
         pass
 
-    async def handle_message(self, message: SmartAppFromMessage) -> typing.Tuple[int, str, SmartAppToMessage]:
+    async def handle_message(self, message: SmartAppFromMessage) -> tuple[int, str, SmartAppToMessage]:
         if not message.validate():
             answer = SmartAppToMessage(
                 self.BAD_REQUEST_COMMAND, message=message, request=None, masking_fields=self.masking_fields)

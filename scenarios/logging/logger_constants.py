@@ -57,10 +57,10 @@ LAST_HOSTNAME = "last_hostname"
 CHECK_HOSTNAME = "check_hostname"
 
 NORMALIZE_INTENT_VALUE = "normalize_intent"
-SKIPPED_INTENT_VALUE = 'skipped_intent'
-INVALID_INTENT_VALUE = 'invalid_intent'
-CONTAINER_NAME_VALUE = 'container_name'
-CONTAINER_REQUIREMENT_CHECK_VALUE = 'container_requirement_check_value'
+SKIPPED_INTENT_VALUE = "skipped_intent"
+INVALID_INTENT_VALUE = "invalid_intent"
+CONTAINER_NAME_VALUE = "container_name"
+CONTAINER_REQUIREMENT_CHECK_VALUE = "container_requirement_check_value"
 
 
 AB_GROUPS_MESSAGE = "%(key_name)s=%(ab_groups)s"
@@ -70,7 +70,7 @@ LAST_SCENARIO_MESSAGE = "Dialog manager run chosen scenario info: %(key_name)s=%
 DIALOG_SCENARIO_MESSAGE = "Dialog manager run last scenario info: %(key_name)s=%(chosen_scenario)s, " \
                           "distance=%(distance)s, scenario_description=%(scenario_description)s, " \
                           "root_id=%(root_id)s"
-INVALID_INTENT_MESSAGE = 'Invalid intent, intent=%(intent_id)s'
+INVALID_INTENT_MESSAGE = "Invalid intent, intent=%(intent_id)s"
 CLASSIFIER_MESSAGE = "classifier: %(classifier_name)s, result: %(result)s, " \
                      "weights: %(score)s, time: %(time)s ms"
 CHOSEN_SCENARIO_MESSAGE = "%(key_name)s=%(chosen_scenario)s"
@@ -88,8 +88,8 @@ DIALOG_ERROR_MESSAGE = "%(key_name)s=%(dialog_error)s"
 FILLER_RESULT_MESSAGE = "%(key_name)s=%(filler_result)s"
 CHOSEN_NODE_ID_MESSAGE = "%(key_name)s=%(chosen_node_id)s"
 SKIPPED_INTENT_MESSAGE = "Skipped intent %(intent_id)s, scenario is not available"
-CONTAINER_REQUIREMENT_CHECK_MESSAGE = 'Classifier container requirement check: result: ' \
-                                      '%(requirement_check)s, container: %(container_name)s'
+CONTAINER_REQUIREMENT_CHECK_MESSAGE = "Classifier container requirement check: result: " \
+                                      "%(requirement_check)s, container: %(container_name)s"
 MESSAGE_ID = "message_id"
 
 CALLBACK_ID_HEADER = "app_callback_id"

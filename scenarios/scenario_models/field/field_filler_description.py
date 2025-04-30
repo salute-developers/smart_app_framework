@@ -48,7 +48,7 @@ class FieldFillerDescription:
         }
 
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-                params: Dict[str, Any] = None) -> None:
+                params: Dict[str, Any] = None) -> Any:
         return None
 
     def on_extract_error(self, text_preprocessing_result, user, params=None):
