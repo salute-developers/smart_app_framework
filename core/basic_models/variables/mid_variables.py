@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 from core.basic_models.variables.variables import Variables
@@ -16,16 +17,19 @@ class MidVariables(Variables):
         self._user = user
 
     def get(self, key: Any, default: Any = None) -> Any:
-        return super().get(key=str(self._user.message.incremental_id), default={}).get(key, default)
+        return super().get(key=self._mid, default={}).get(key, default)
 
     def update(self, key: Any, value: Any, ttl: int | None = None) -> None:
-        mid = str(self._user.message.incremental_id)
-        mid_variable, old_expire_time = self._storage.get(mid, ({}, self.DEFAULT_TTL + time.time()))
+        mid_variable, old_expire_time = self._storage.get(self._mid, ({}, self.DEFAULT_TTL + time.time()))
         mid_variable[key] = value
-        self._storage[mid] = mid_variable, ttl + time.time() if ttl else old_expire_time
+        self._storage[self._mid] = mid_variable, ttl + time.time() if ttl else old_expire_time
 
     def delete_mid_variables(self) -> None:
-        del self._storage[str(self._user.message.incremental_id)]
+        self._storage.pop(self._mid, None)
 
     def set(self, key, value, ttl=None):
         raise NotImplementedError
+
+    @cached_property
+    def _mid(self) -> str:
+        return str(self._user.message.incremental_id)

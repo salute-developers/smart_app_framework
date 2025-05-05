@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 import timeit
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -36,17 +37,17 @@ class StatsTimer:
 class Stats:
     def __init__(self, start_ts: float | None = None, finish_ts: float | None = None, time: float | None = None,
                  system: str | None = None, version: str | None = None,
-                 inner_stats: list[dict[str, Any]] | list[Stats] | None = None, optional: dict | None = None, **kwargs):
+                 inner_stats: Iterable[Stats | dict[str, Any]] = (), optional: dict | None = None, **kwargs):
         self.system = system
         self.version = version
         self.optional = optional
         self.start_ts = start_ts
         self.finish_ts = finish_ts
         self.time = time or ((start_ts - finish_ts) if start_ts and finish_ts else None)
-        self._inner_stats: list[Stats] = []
-        if inner_stats:
-            self._inner_stats = ([Stats(**stats) for stats in inner_stats] if isinstance(inner_stats[0], dict)
-                                 else inner_stats)
+        self._inner_stats: list[Stats] = [
+            stats if isinstance(stats, Stats) else Stats(**stats)
+            for stats in inner_stats
+        ]
 
     def add_inner_stats(self, stats: dict[str, Any], copy_system: bool = True, copy_version: bool = True) -> None:
         self._inner_stats = [Stats(**stats)]
