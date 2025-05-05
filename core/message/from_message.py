@@ -162,7 +162,9 @@ class SmartAppFromMessage:
 
     # database user_id
     @property
-    def db_uid(self) -> str:
+    def db_uid(self) -> Optional[str]:
+        if self.uid is None or self.channel is None:
+            return None
         return "{}_{}".format(self.uid, self.channel)
 
     @property
@@ -244,7 +246,6 @@ class SmartAppFromMessage:
     def has_callback_id(self):
         return self._callback_id is not None or self.headers.get(self._callback_id_header_name) is not None
 
-    # noinspection PyMethodMayBeStatic
     def generate_new_callback_id(self) -> str:
         from smart_kit.start_points.main_loop_http import HttpMainLoop
         if issubclass(get_app_config().MAIN_LOOP, HttpMainLoop):
