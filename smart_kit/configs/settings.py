@@ -10,6 +10,7 @@ from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
 from core.db_adapter.os_adapter import OSAdapter
 from core.repositories.file_repository import UpdatableFileRepository, FileRepository
+from core.repositories.secret_file_repository import SecretUpdatableFileRepository
 from core.utils.singleton import SingletonOneInstance
 
 
@@ -47,8 +48,11 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
 
     def _load_base_repositories(self) -> List[FileRepository]:
         """Load base repositories with service settings"""
-        template_settings_repo = UpdatableFileRepository(
-            self.subfolder_path("template_config.yml"), loader=yaml.safe_load, key="template_settings")
+        template_settings_repo = SecretUpdatableFileRepository(
+            filename=self.subfolder_path("template_config.yml"),
+            secret_filename=self.subfolder_secret_path("template_config.yml"),
+            loader=yaml.safe_load,
+            key="template_settings")
         template_settings_repo.load()
 
         use_secrets_path_for_kafka: bool = template_settings_repo.data.get("kafka_use_secrets_path", True)
