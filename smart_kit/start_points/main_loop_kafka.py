@@ -352,7 +352,7 @@ class MainLoop(BaseMainLoop):
                         time=(finish_ts - user.mid_variables.get("request_ts")) * 1000,
                         version=user.settings["template_settings"].get("stats_version", os.environ.get("VERSION", "")),
                         inner_stats=user.mid_variables.get(key="inner_stats", default=[]),
-                        optional=user.mid_variables.get(key="stats_optional"),
+                        optional=user.mid_variables.get(key="stats_optional", default={}),
                         start_ts=user.mid_variables.get("request_ts"),
                         finish_ts=finish_ts,
                     ).toJSON()
