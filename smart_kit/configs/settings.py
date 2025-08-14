@@ -2,16 +2,54 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import Optional, Any, Union, List
+from io import StringIO
+from typing import Any, Union, List, Self
 
 import yaml
 
 from core.configs.base_config import BaseConfig
 from core.db_adapter.ceph.ceph_adapter import CephAdapter
+from core.db_adapter.db_adapter import DBAdapter
 from core.db_adapter.os_adapter import OSAdapter
 from core.repositories.file_repository import UpdatableFileRepository, FileRepository
 from core.repositories.secret_file_repository import SecretUpdatableFileRepository
 from core.utils.singleton import SingletonOneInstance
+from smart_kit.configs import get_app_config
+
+
+class DPVersion:
+    def __init__(self, code_version: str | None, separate_static=False, static_version: str = None):
+        self.code_version = code_version
+        self.separate_static = separate_static
+        self.static_version = static_version
+
+    def __str__(self):
+        if self.separate_static:
+            return f"Версия кода: {self.code_version or 'UNKNOWN'}; Версия статиков: {self.static_version or 'UNKNOWN'}"
+        return self.code_version or "UNKNOWN"
+
+    @classmethod
+    def from_env_and_source(cls, source: DBAdapter) -> Self:
+        code_version = os.getenv("VERSION", default=0)
+        attrs = {"code_version": code_version}
+        if isinstance(source, CephAdapter):
+            attrs["separate_static"] = True
+            try:
+                static_version = cls._get_version_from_ceph(source)
+                attrs["static_version"] = static_version
+            except FileNotFoundError:
+                pass
+        return cls(**attrs)
+
+    @staticmethod
+    def _get_version_from_ceph(source: CephAdapter) -> str:
+        path = os.path.join(get_app_config().REFERENCES_PATH, "BUILD.txt")
+        if not source.path_exists(path):
+            raise FileNotFoundError(f"{path} file not found in ceph")
+        with source.open(path, "r") as f:
+            f: StringIO
+            version = f.readline()
+        return version
 
 
 class Settings(BaseConfig, metaclass=SingletonOneInstance):
@@ -29,6 +67,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
         self.repositories = self._load_base_repositories()
         self.repositories = self.override_repositories(self.repositories)
         self.init()
+        self.version = DPVersion.from_env_and_source(self.get_source())
 
     def init(self):
         super().init()

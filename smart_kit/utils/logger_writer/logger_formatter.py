@@ -57,6 +57,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         log_record["application"] = self.APPLICATION_NAME
         if settings := Settings.get_instance():
             log_record["environment"] = settings.get("template_settings").get("environment")
+            log_record["static_version"] = settings.version.static_version
         if isinstance(record.args, dict):
             log_record["args"] = self._check_fields(record.args)
 
