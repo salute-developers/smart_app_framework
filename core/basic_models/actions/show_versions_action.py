@@ -2,10 +2,7 @@ import re
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from dataclasses import field
-from typing import Any
-from typing import NotRequired
-from typing import Self
-from typing import TypedDict
+from typing import Any, List, Dict, Optional
 
 import core.logging.logger_constants as log_const
 from core.basic_models.actions.basic_actions import Action
@@ -15,12 +12,7 @@ from core.text_preprocessing.base import BaseTextPreprocessingResult
 from scenarios.user.user_model import User
 
 
-class _ServiceVersionMetadata(TypedDict):
-    name: str
-    pronounce_as: NotRequired[str]
-
-
-_VersionType = str | None
+_VersionType = Optional[str]
 
 
 @dataclass
@@ -29,7 +21,7 @@ class ServiceVersions:
     dp_static_version: _VersionType = field(metadata={"name": "Dialog Policy static"})
 
     @classmethod
-    def init_from_user(cls, user: User) -> Self:
+    def init_from_user(cls, user: User) -> "ServiceVersions":
         return cls(
             dp_code_version=user.settings.version.code_version,
             dp_static_version=user.settings.version.static_version,
@@ -45,10 +37,10 @@ class ShowVersionsAction(Action):
     }
 
     async def run(
-            self,
-            user: User,
-            text_preprocessing_result: BaseTextPreprocessingResult,
-            params: dict[str, Any] | None = None,
+        self,
+        user: User,
+        text_preprocessing_result: BaseTextPreprocessingResult,
+        params: Optional[Dict[str, Any]] = None,
     ) -> AsyncGenerator[Command, None]:
         params = {**(params or {}), **user.parametrizer.collect(text_preprocessing_result)}
 
@@ -74,7 +66,7 @@ class ShowVersionsAction(Action):
         )
 
     @staticmethod
-    def _get_items(versions: ServiceVersions) -> list[dict[str, dict[str, str]]]:
+    def _get_items(versions: ServiceVersions) -> List[Dict[str, Dict[str, str]]]:
         parts = [
             f"**Dialog Policy**\nкод: {versions.dp_code_version}\nстатики: {versions.dp_static_version}\n\n",
         ]
@@ -102,6 +94,6 @@ class ShowVersionsAction(Action):
             return "bad format"
         ssml_groups = [f'<say-as interpret-as="digits">{gr}</say-as>' for gr in match.groups()]
         return (
-                '<say-as interpret-as="characters">D</say-as>-'
-                + f"{ssml_groups[0]}.{ssml_groups[1]}.{ssml_groups[2]}-{ssml_groups[3]}"
+            '<say-as interpret-as="characters">D</say-as>-' +
+            f"{ssml_groups[0]}.{ssml_groups[1]}.{ssml_groups[2]}-{ssml_groups[3]}"
         )

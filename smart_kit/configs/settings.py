@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 from io import StringIO
-from typing import Any, Union, List, Self
+from typing import Any, Union, List, Optional
 
 import yaml
 
@@ -18,7 +18,7 @@ from smart_kit.configs import get_app_config
 
 
 class DPVersion:
-    def __init__(self, code_version: str | None, separate_static=False, static_version: str = None):
+    def __init__(self, code_version: Optional[str], separate_static=False, static_version: Optional[str] = None):
         self.code_version = code_version
         self.separate_static = separate_static
         self.static_version = static_version
@@ -29,7 +29,7 @@ class DPVersion:
         return self.code_version or "UNKNOWN"
 
     @classmethod
-    def from_env_and_source(cls, source: DBAdapter) -> Self:
+    def from_env_and_source(cls, source: DBAdapter) -> "DPVersion":
         code_version = os.getenv("VERSION", default=0)
         attrs = {"code_version": code_version}
         if isinstance(source, CephAdapter):
@@ -77,7 +77,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
                 if isinstance(repo, UpdatableFileRepository):
                     repo.update_cooldown = update_time
 
-    def override_repositories(self, repositories: list):
+    def override_repositories(self, repositories: List):
         """
         Метод предназначен для переопределения репозиториев в дочерних классах.
         :param repositories: Список репозиториев родителя
