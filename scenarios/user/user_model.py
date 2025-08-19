@@ -77,3 +77,4 @@ class User(BaseUser):
         self.last_fields.expire()
         self.last_scenarios.expire()
         self.history.expire()
+        self.mid_variables.expire()
