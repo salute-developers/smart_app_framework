@@ -98,8 +98,11 @@ class BaseMainLoop:
 
     async def load_user(self, db_uid: Optional[str], message: SmartAppFromMessage) -> User:
         if db_uid is None:
-            log("Failed to load user data as db_uid is None. Will use empty user.", level="ERROR")
-            return self.get_user(message, db_data=None, load_error=True)
+            ignore_empty_user_error = self.settings["template_settings"].get("ignore_empty_user_error", False)
+            level = "WARNING" if ignore_empty_user_error else "ERROR"
+            log("Failed to load user data as db_uid is None. Will use empty user.", level=level,
+                params={"message_id": message.incremental_id})
+            return self.get_user(message, db_data=None, load_error=not ignore_empty_user_error)
         return await self._load_user(db_uid, message)
 
     async def _load_user(self, db_uid: str, message: SmartAppFromMessage) -> User:
