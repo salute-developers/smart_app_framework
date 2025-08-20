@@ -412,7 +412,7 @@ class MainLoop(BaseMainLoop):
                     log_const.KEY_NAME: "waiting_message_timeout",
                     "waiting_message_time": waiting_message_time,
                     "mid": message.incremental_id,
-                    log_const.REQUEST_VALUE: message.as_str,
+                    log_const.REQUEST_VALUE: message.masked_value,
                 },
                 level=log_level)
         return make_break
