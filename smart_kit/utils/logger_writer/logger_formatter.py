@@ -19,14 +19,14 @@ def to_num(s):
 
 TYPES = {
     "str": str,
-    "dict": dict,
+    "dict": Dict,
     "int": Number,
     "bool": bool,
 }
 
 TYPE_CASTS = {
     "str": str,
-    "dict": dict,
+    "dict": Dict,
     "int": to_num,
     "bool": bool,
 }
@@ -43,7 +43,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
     APPLICATION_NAME = "NA"
 
     def __init__(self, *args, **kwargs):
-        self.fields_type: dict = kwargs.pop("fields_type", None)
+        self.fields_type: Dict = kwargs.pop("fields_type", None)
         super().__init__(*args, **kwargs)
 
     def add_fields(self, log_record, record, message_dict):
@@ -57,10 +57,11 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         log_record["application"] = self.APPLICATION_NAME
         if settings := Settings.get_instance():
             log_record["environment"] = settings.get("template_settings").get("environment")
+            log_record["static_version"] = settings.version.static_version
         if isinstance(record.args, dict):
             log_record["args"] = self._check_fields(record.args)
 
-    def _check_fields(self, record_args: Dict[str, Any], types: Optional[Dict[str, dict]] = None):
+    def _check_fields(self, record_args: Dict[str, Any], types: Optional[Dict[str, Dict]] = None):
         if types is None:
             types = self.fields_type
         if types is None:
