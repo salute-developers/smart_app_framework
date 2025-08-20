@@ -504,8 +504,8 @@ class MainLoop(BaseMainLoop):
                                 MESSAGE_ID_STR: message.incremental_id},
                         user=user)
 
-                    if KAFKA_REPLY_TOPIC in message.headers and \
-                            message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]:
+                    if (KAFKA_REPLY_TOPIC in message.headers and
+                            message.message_name in [RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP]):
                         if user.local_vars.get(KAFKA_REPLY_TOPIC):
                             log("MainLoop.iterate: kafka_replyTopic collision(got saved in local_vars)",
                                 params={log_const.KEY_NAME: "ignite_collision",
@@ -798,8 +798,10 @@ class MainLoop(BaseMainLoop):
                     key="inner_stats", default=[]
                 ))
                 callback.action_params.setdefault("stats_system", callback.behavior_id)
-        user.mid_variables.update(
-            key="inner_stats",
-            value=[stats if isinstance(stats, dict) else stats.toJSON()
-                   for stats in user.mid_variables.get(key="inner_stats", default=[])]
-        )
+
+        serialized_inner_stats = [
+            stats if isinstance(stats, dict) else stats.toJSON()
+            for stats in user.mid_variables.get(key="inner_stats", default=[])
+        ]
+        if serialized_inner_stats:
+            user.mid_variables.update(key="inner_stats", value=serialized_inner_stats)
