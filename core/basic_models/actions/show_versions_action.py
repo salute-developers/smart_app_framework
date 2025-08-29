@@ -17,14 +17,14 @@ _VersionType = Optional[str]
 
 @dataclass
 class ServiceVersions:
-    dp_code_version: _VersionType = field(metadata={"name": "Dialog Policy code"})
-    dp_static_version: _VersionType = field(metadata={"name": "Dialog Policy static"})
+    code_version: _VersionType = field(metadata={"name": "Code version"})
+    static_version: _VersionType = field(metadata={"name": "Static version"})
 
     @classmethod
     def init_from_user(cls, user: User) -> "ServiceVersions":
         return cls(
-            dp_code_version=user.settings.version.code_version,
-            dp_static_version=user.settings.version.static_version,
+            code_version=user.settings.version.code_version,
+            static_version=user.settings.version.static_version,
         )
 
 
@@ -68,20 +68,20 @@ class ShowVersionsAction(Action):
     @staticmethod
     def _get_items(versions: ServiceVersions) -> List[Dict[str, Dict[str, str]]]:
         parts = [
-            f"**Dialog Policy**\nкод: {versions.dp_code_version}\nстатики: {versions.dp_static_version}\n\n",
+            f"**Версии**\nкод: {versions.code_version}\nстатики: {versions.static_version}\n\n",
         ]
         text = "".join(parts)
         text = text.strip()
         return [{"bubble": {"text": text, "markdown": True}}]
 
     def _get_pronounce_text(self, versions: ServiceVersions) -> str:
-        dp_code_ssml = self._version_to_ssml(versions.dp_code_version or "")
-        dp_static_ssml = self._version_to_ssml(versions.dp_static_version or "")
+        code_ssml = self._version_to_ssml(versions.code_version or "")
+        static_ssml = self._version_to_ssml(versions.static_version or "")
 
         parts = [
             "<speak>",
-            f'Dialog Policy: <break time="200ms"/> версия кода <break time="400ms"/> {dp_code_ssml};',
-            f'Dialog Policy: <break time="200ms"/> версия статиков <break time="400ms"/> {dp_static_ssml};',
+            f'Версия кода <break time="400ms"/> {code_ssml};',
+            f'Версия статиков <break time="400ms"/> {static_ssml};',
             "</speak>",
         ]
         return "\n".join(parts)

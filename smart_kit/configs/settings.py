@@ -17,7 +17,7 @@ from core.utils.singleton import SingletonOneInstance
 from smart_kit.configs import get_app_config
 
 
-class DPVersion:
+class Version:
     def __init__(self, code_version: Optional[str], separate_static=False, static_version: Optional[str] = None):
         self.code_version = code_version
         self.separate_static = separate_static
@@ -29,7 +29,7 @@ class DPVersion:
         return self.code_version or "UNKNOWN"
 
     @classmethod
-    def from_env_and_source(cls, source: DBAdapter) -> "DPVersion":
+    def from_env_and_source(cls, source: DBAdapter) -> "Version":
         code_version = os.getenv("VERSION", default=0)
         attrs = {"code_version": code_version}
         if isinstance(source, CephAdapter):
@@ -67,7 +67,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
         self.repositories = self._load_base_repositories()
         self.repositories = self.override_repositories(self.repositories)
         self.init()
-        self.version = DPVersion.from_env_and_source(self.get_source())
+        self.version = Version.from_env_and_source(self.get_source())
 
     def init(self):
         super().init()
