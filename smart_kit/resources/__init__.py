@@ -16,7 +16,6 @@ from core.basic_models.actions.push_action import (PushAction,
                                                    PushAuthenticationActionHttp,
                                                    PUSH_NOTIFY,
                                                    GetRuntimePermissionsAction)
-from core.basic_models.actions.show_versions_action import ShowVersionsAction
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
 from core.basic_models.actions.string_actions import AfinaAnswerAction, SDKAnswer, SDKAnswerToUser, \
@@ -310,7 +309,6 @@ class SmartAppResources(BaseConfig):
         actions["set_local_variable"] = SetLocalVariableAction
         actions["set_mid_variable"] = SetMidVariableAction
         actions["set_variable"] = SetVariableAction
-        actions["show_versions"] = ShowVersionsAction
         actions["string"] = StringFileUnifiedTemplateAction
         actions["push"] = PushAction
         actions["push_authentication"] = PushAuthenticationActionHttp
