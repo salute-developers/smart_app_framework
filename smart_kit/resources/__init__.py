@@ -18,8 +18,8 @@ from core.basic_models.actions.push_action import (PushAction,
                                                    GetRuntimePermissionsAction)
 from core.basic_models.actions.smartpay import SmartPayCreateAction, SmartPayPerformAction, SmartPayGetStatusAction, \
     SmartPayConfirmAction, SmartPayDeleteAction, SmartPayRefundAction
-from core.basic_models.actions.string_actions import StringAction, AfinaAnswerAction, SDKAnswer, \
-    SDKAnswerToUser, StringFileUnifiedTemplateAction
+from core.basic_models.actions.string_actions import AfinaAnswerAction, SDKAnswer, SDKAnswerToUser, \
+    StringFileUnifiedTemplateAction
 from core.basic_models.actions.variable_actions import ClearVariablesAction, DeleteVariableAction, \
     SetLocalVariableAction, SetVariableAction, SetMidVariableAction
 from core.basic_models.answer_items.answer_items import items_factory, SdkAnswerItem, answer_items, BubbleText, \
