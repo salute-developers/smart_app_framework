@@ -58,7 +58,7 @@ def wrap_datetime(day, month, year, hour, minute, utc_offset=0):
     return datetime_ + datetime.timedelta(seconds=utc_offset)
 
 
-@jinja2.environmentfilter
+@jinja2.pass_environment
 def co_sort(
         environment, value, reverse=False, attribute=None, order=None,
 ):
