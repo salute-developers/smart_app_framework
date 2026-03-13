@@ -11,7 +11,7 @@ from core.monitoring.monitoring import monitoring
 class AIORedisAdapter(AsyncDBAdapter):
     def __init__(self, config=None):
         super().__init__(config)
-        self.aioredis = importlib.import_module("redis", "asyncio")
+        self.aioredis = importlib.import_module("redis.asyncio")
         redis_type = self.aioredis.Redis
         self._redis: Optional[redis_type] = None
 
@@ -36,8 +36,8 @@ class AIORedisAdapter(AsyncDBAdapter):
         return await self._async_run(self._path_exists, path)
 
     async def connect(self):
-        print("Here is the content of REDIS_CONFIG:", self.config)
-        print("Connecting to a single redis server")
+        log(f"Here is the content of REDIS_CONFIG", params={"config": self.config}, level="DEBUG")
+        log("Connecting to a single redis server")
         config = copy.deepcopy(self.config)
         redis_url = config.pop("redis", None)
         if not isinstance(redis_url, str):

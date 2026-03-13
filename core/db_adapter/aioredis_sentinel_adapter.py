@@ -11,7 +11,7 @@ from core.monitoring.monitoring import monitoring
 class AIORedisSentinelAdapter(AsyncDBAdapter):
     def __init__(self, config=None):
         super().__init__(config)
-        self.aioredis = importlib.import_module("redis", "asyncio")
+        self.aioredis = importlib.import_module("redis.asyncio")
         sentinel_type = self.aioredis.sentinel.Sentinel
         self._sentinel: typing.Optional[sentinel_type] = None
         self.service_name = None
@@ -38,9 +38,8 @@ class AIORedisSentinelAdapter(AsyncDBAdapter):
         return await self._async_run(self._path_exists, path)
 
     async def connect(self):
-
         config = copy.deepcopy(self.config)
-        print("Here is the content of REDIS_CONFIG:", config)
+        log(f"Here is the content of REDIS_CONFIG", params={"config": config}, level="DEBUG")
         if not isinstance(config, dict):
             raise ValueError("REDIS_CONFIG should be a mapping")
         sentinels = config.pop("sentinels", None)
