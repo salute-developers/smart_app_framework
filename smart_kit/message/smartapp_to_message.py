@@ -56,7 +56,6 @@ class SmartAppToMessage:
         fields.update(self.root_nodes)
         return fields
 
-
     @cached_property
     def masked_value(self):
         mask_numbers_flag = settings.Settings()["template_settings"].get("mask_numbers", False)
@@ -64,7 +63,6 @@ class SmartAppToMessage:
             masking(self.as_dict, self.masking_fields)
         if self.command.loader == "json.dumps":
             return json.dumps(masked_data, ensure_ascii=False)
-
 
     @cached_property
     def value(self):
