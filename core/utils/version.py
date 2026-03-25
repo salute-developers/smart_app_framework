@@ -1,13 +1,13 @@
 from typing import Optional
 
-import pkg_resources
+import importlib.metadata
 
 
-def _get_distribution_safe(name: str) -> Optional[pkg_resources.DistInfoDistribution]:
+def _get_distribution_safe(name: str) -> Optional[importlib.metadata.Distribution]:
     try:
-        distribution = pkg_resources.get_distribution(name)
+        distribution = importlib.metadata.distribution(name)
         return distribution
-    except pkg_resources.DistributionNotFound:
+    except importlib.metadata.PackageNotFoundError:
         return None
 
 
