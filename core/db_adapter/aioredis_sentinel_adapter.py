@@ -39,7 +39,7 @@ class AIORedisSentinelAdapter(AsyncDBAdapter):
 
     async def connect(self):
         config = copy.deepcopy(self.config)
-        log(f"Here is the content of REDIS_CONFIG", params={"config": config}, level="DEBUG")
+        log("Here is the content of REDIS_CONFIG", params={"config": config}, level="DEBUG")
         if not isinstance(config, dict):
             raise ValueError("REDIS_CONFIG should be a mapping")
         sentinels = config.pop("sentinels", None)

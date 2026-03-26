@@ -140,6 +140,7 @@ ____
 
 ```shell
 python -m unittest discover -s tests -v
+poetry run task lint
 ```
 
 # Обратная связь

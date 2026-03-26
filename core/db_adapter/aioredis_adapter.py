@@ -36,7 +36,7 @@ class AIORedisAdapter(AsyncDBAdapter):
         return await self._async_run(self._path_exists, path)
 
     async def connect(self):
-        log(f"Here is the content of REDIS_CONFIG", params={"config": self.config}, level="DEBUG")
+        log("Here is the content of REDIS_CONFIG", params={"config": self.config}, level="DEBUG")
         log("Connecting to a single redis server")
         config = copy.deepcopy(self.config)
         redis_url = config.pop("redis", None)
