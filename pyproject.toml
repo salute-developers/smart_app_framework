@@ -70,7 +70,7 @@ ml = ["keras", "scikit-learn", "tensorflow", "tensorflow-macos", "tensorflow-aar
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.0.0"
 taskipy = "1.10.3"
-black = "22.12.0"
+black = "26.3.1"
 pydantic = "2.10.3"
 
 [tool.taskipy.tasks]
