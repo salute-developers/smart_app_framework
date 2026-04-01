@@ -3704,4 +3704,4 @@ ml = ["keras", "scikit-learn", "scikit-learn", "tensorflow", "tensorflow", "tens
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "0cc25940712c6c6b14d0fee67d7a859e718246eb8a1e45739153f642c7f1477e"
+content-hash = "458b167d4304d666289b91435845d18eb2868419516295e3b2b7277d71ca7e44"
