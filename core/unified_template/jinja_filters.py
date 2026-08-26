@@ -37,7 +37,7 @@ def add_timedelta(date_time, *args, **kwargs):
 def okko_sec2text(s):
     h = int(s / 3600)
     m = int((s - h * 3600) / 60)
-    return "{} ч {} мин".format(h, m) if h else "{} мин".format(m)
+    return f"{h} ч {m} мин" if h else f"{m} мин"
 
 
 def generate_ics(date):

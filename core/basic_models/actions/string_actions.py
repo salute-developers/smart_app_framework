@@ -1,10 +1,10 @@
-# coding: utf-8
-import asyncio
+from __future__ import annotations
+
 import random
 from copy import copy
 from functools import cached_property
 from itertools import chain
-from typing import Union, Dict, List, Any, Optional, Tuple, TypeVar, Type
+from typing import Any, TypeVar
 from lazy import lazy
 from scenarios.user.user_model import User
 
@@ -28,27 +28,27 @@ class NodeAction(CommandAction):
     "support_templates".
 
     """
-    version: Optional[int]
+    version: int | None
     command: str
-    nodes: Dict[str, List[List[str]]]
-    support_templates: Dict[str, Any]
+    nodes: dict[str, list[list[str]]]
+    support_templates: dict[str, Any]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(NodeAction, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         items = items or {}
         self._nodes = items.get("nodes") or {}
         self._support_templates = items.get("support_templates") or {}
         self.no_empty_nodes = items.get("no_empty_nodes", False)
 
     @cached_property
-    def nodes(self) -> Dict[str, Union[str, T]]:
+    def nodes(self) -> dict[str, str | T]:
         return {k: self._get_template_tree(t) for k, t in self._nodes.items()}
 
     @cached_property
-    def support_templates(self) -> Dict[str, Union[str, T]]:
+    def support_templates(self) -> dict[str, str | T]:
         return {k: self._get_template_tree(t) for k, t in self._support_templates.items()}
 
-    def _get_template_tree(self, value: Union[str, T]) -> T:
+    def _get_template_tree(self, value: str | T) -> T:
         is_dict_unified_template = isinstance(value, dict) and value.get("type") == UNIFIED_TEMPLATE_TYPE_NAME
         if isinstance(value, str) or is_dict_unified_template:
             result = UnifiedTemplate(value)
@@ -64,14 +64,14 @@ class NodeAction(CommandAction):
             result = value
         return result
 
-    def _get_rendered_tree(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
+    def _get_rendered_tree(self, value: T, params: dict, no_empty=False) -> str | dict | list:
         params = copy(params)
         for support_key, support_template in self.support_templates.items():
             params[support_key] = support_template.render(params)
         return self._get_rendered_tree_recursive(value, params, no_empty=no_empty)
 
-    def _get_rendered_tree_recursive(self, value: T, params: Dict, no_empty=False) -> Union[str, Dict, List]:
-        value_type: Type[T] = type(value)
+    def _get_rendered_tree_recursive(self, value: T, params: dict, no_empty=False) -> str | dict | list:
+        value_type: type[T] = type(value)
         if value_type is dict:
             result = {}
             for inner_key, inner_value in value.items():
@@ -91,7 +91,7 @@ class NodeAction(CommandAction):
         return result
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         raise NotImplementedError
 
 
@@ -116,11 +116,11 @@ class StringAction(NodeAction):
     }
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(StringAction, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
 
     def _generate_command_context(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Dict:
+                                  params: dict[str, str | float | int] | None = None) -> dict:
         command_params = dict()
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
@@ -133,7 +133,7 @@ class StringAction(NodeAction):
         return command_params
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         # Result command format: Command("ANSWER_TO_USER", {"answer": {"key1": "string1", "keyN": "stringN"}})
         params = params or {}
         command_params = self._generate_command_context(user, text_preprocessing_result, params)
@@ -160,7 +160,7 @@ class StringFileUnifiedTemplateAction(StringAction):
             return {k: self._get_template_tree(t) for k, t in self._nodes.items()}
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         command_params = dict()
         params = copy(params) or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
@@ -230,12 +230,12 @@ class AfinaAnswerAction(NodeAction):
     [command1(pronounceText)]
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(AfinaAnswerAction, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.command: str = ANSWER_TO_USER
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         answer_params = dict()
         result = []
@@ -308,8 +308,8 @@ class SDKAnswer(NodeAction):
     RANDOM_PATH = [['items', INDEX_WILDCARD, 'bubble', 'text'], ['pronounceText'],
                    ['suggestions', 'buttons', INDEX_WILDCARD, 'title']]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SDKAnswer, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.command: str = ANSWER_TO_USER
         if self._nodes == {}:
             self._nodes = {i: items.get(i) for i in items if
@@ -318,7 +318,7 @@ class SDKAnswer(NodeAction):
     # функция идет по RANDOM_PATH, числа в нем считает индексами массива,
     # INDEX_WILDCARD - произвольным индексом массива, прочее - ключами словаря
     # в конце пути предполагается непустой массив
-    def get_by_path(self, input_dict: Union[list, dict], nested_key: List[str]) -> List[Tuple[Union[list, dict], str]]:
+    def get_by_path(self, input_dict: list | dict, nested_key: list[str]) -> list[tuple[list | dict, str]]:
         internal_dict_value = input_dict
         for ik, k in enumerate(nested_key):
             last_dict = internal_dict_value
@@ -334,7 +334,7 @@ class SDKAnswer(NodeAction):
                 return []
         return [(last_dict, k)]
 
-    def do_random(self, input_dict: Union[list, dict]):
+    def do_random(self, input_dict: list | dict):
         dicts = list(chain.from_iterable([self.get_by_path(input_dict, j) for j in self.RANDOM_PATH]))
         max_length = max(map(lambda x: len(x[0][x[1]]), dicts))
         random_index = random.randrange(max_length)
@@ -342,7 +342,7 @@ class SDKAnswer(NodeAction):
             d[k] = d[k][random_index % len(d[k])]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         rendered = self._get_rendered_tree(self.nodes, params, self.no_empty_nodes)
@@ -466,8 +466,8 @@ class SDKAnswerToUser(NodeAction):
     COMMAND = "command"
     ROOT = "root"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SDKAnswerToUser, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.command: str = ANSWER_TO_USER
         self._nodes[self.STATIC] = items.get(self.STATIC, {})
         self._nodes[self.RANDOM_CHOICE] = items.get(self.RANDOM_CHOICE, {})
@@ -478,9 +478,9 @@ class SDKAnswerToUser(NodeAction):
         self._suggests_template = items.get(self.SUGGESTIONS_TEMPLATE)
         self._root = items.get(self.ROOT, {})
 
-        self.items: List[SdkAnswerItem] = self.build_items()
-        self.suggests: List[SdkAnswerItem] = self.build_suggests()
-        self.root: List[SdkAnswerItem] = self.build_root()
+        self.items: list[SdkAnswerItem] = self.build_items()
+        self.suggests: list[SdkAnswerItem] = self.build_suggests()
+        self.root: list[SdkAnswerItem] = self.build_root()
 
     @list_factory(SdkAnswerItem)
     def build_items(self):
@@ -495,7 +495,7 @@ class SDKAnswerToUser(NodeAction):
         return self._root
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
 
         result = []
         params = user.parametrizer.collect(text_preprocessing_result, filter_params={self.COMMAND: self.command})

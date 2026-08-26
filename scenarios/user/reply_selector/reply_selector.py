@@ -1,5 +1,5 @@
 import random
-from typing import Dict, Any
+from typing import Any
 
 from core.model.base_user import BaseUser as User
 from core.unified_template.unified_template import UnifiedTemplate
@@ -14,7 +14,7 @@ class ReplySelector:
         else:
             return "female"
 
-    def __init__(self, items: Dict[str, Any], user: User):
+    def __init__(self, items: dict[str, Any], user: User):
         self._bundles: dict = user.descriptions["bundles"]
         self._user_gender: str = str(user.message.payload.get("client_profile", {}).get("gender") or "")
         self.user_gender: str = self.get_user_gender()

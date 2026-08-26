@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import functools
-from typing import Optional
 
 
-def fallback_if_none(fallback_result_value=None, fallback_result_attr: Optional[str] = None):
+def fallback_if_none(fallback_result_value=None, fallback_result_attr: str | None = None):
     """ Parametrized function decorator that returns value if original function has returned None.
     Fallback value could be specified explicitly or specified by attribute name (for class methods).
     If fallback value cannot be resolved - an exception is thrown.

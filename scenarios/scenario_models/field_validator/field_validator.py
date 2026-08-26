@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from core.basic_models.actions.basic_actions import Action
 from core.model.factory import factory, list_factory
 from scenarios.scenario_models.field_requirements.field_requirements import FieldRequirement

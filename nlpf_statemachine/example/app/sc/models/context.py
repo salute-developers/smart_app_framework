@@ -4,7 +4,7 @@
 В рамках написания своего сценария можно переопределить как сам контекст, так и любой вложенный в него объект.
 Но крайне не рекомендуется переопределять и изменять базовые поля модели Context.
 """
-from typing import Optional
+from __future__ import annotations
 
 from pydantic import Field
 
@@ -20,9 +20,9 @@ class ExampleLocalContext(LocalContext):
     Контекст создаётся при запуске транзакции и уничтожается при его завершении.
     """
 
-    data: Optional[GetDataResponseData] = None
+    data: GetDataResponseData | None = None
     """Данные ihapi."""
-    retry_index: Optional[int] = None
+    retry_index: int | None = None
     """Количество попыток загрузки данных из интеграции."""
 
 

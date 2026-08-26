@@ -30,7 +30,7 @@ class Text2Num:
     def __init__(self, text2num_dict_provider, black_list):
         self.text2num_dict_provider = text2num_dict_provider or {}
         self.black_list = set(black_list or [])
-        self._regex_ending = re.compile("-[а-яё]{1,3}(\s|$)")
+        self._regex_ending = re.compile(r"-[а-яё]{1,3}(\s|$)")
         self._multiplier_numbers = [1e1, 1e2, 1e3, 1e6, 1e9, 1e12, 1e15, 1e18, 12]
         self._ordinal_number_endings = {"ий", "ый"}
 
@@ -177,7 +177,7 @@ class NumbersUnionAfterSTT:
 
     def __init__(self, text2num_dict_provider):
         self.text2num_dict_provider = text2num_dict_provider or {}
-        self._regex_ending = re.compile("-[а-яё]{1,3}(\s|$)")
+        self._regex_ending = re.compile(r"-[а-яё]{1,3}(\s|$)")
         self._multiplier_numbers = [1e3, 1e6, 1e9, 1e12, 1e15, 1e18]
         self._ordinal_number_endings = {"ий", "ый"}
 

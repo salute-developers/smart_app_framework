@@ -29,7 +29,7 @@ class TestScenarioWithScreen(SMAsyncioTestCase):
         """
         ## Конфигурация базовых параметров перед запуском тестов.
         """
-        super(TestScenarioWithScreen, self).setUp()
+        super().setUp()
         self.context_manager = ContextManager()
         self.context = Context()
 

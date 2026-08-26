@@ -1,7 +1,7 @@
-# coding: utf-8
+from __future__ import annotations
+
 import random
 from concurrent.futures._base import CancelledError
-from typing import Optional
 
 import pyignite
 from pyignite import AioClient
@@ -16,7 +16,7 @@ from core.monitoring.monitoring import monitoring
 
 
 class IgniteAdapter(AsyncDBAdapter):
-    _client: Optional[AioClient]
+    _client: AioClient | None
     _cache = AioCache
 
     def __init__(self, config):
@@ -26,7 +26,7 @@ class IgniteAdapter(AsyncDBAdapter):
             random.shuffle(self._url)
         self._cache_name = config["cache_name"]
         self._cache = None
-        super(IgniteAdapter, self).__init__(config)
+        super().__init__(config)
 
     async def _open(self, filename, *args, **kwargs):
         pass

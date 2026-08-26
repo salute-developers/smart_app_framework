@@ -1,5 +1,5 @@
 """Описание моделей для интеграции."""
-from typing import Optional
+from __future__ import annotations
 
 from pydantic import BaseModel
 
@@ -39,7 +39,7 @@ class GetDataResponseData(BaseModel):
 class GetDataResponsePayload(IntegrationPayload):
     """Описание payload ответа от интеграции."""
 
-    data: Optional[GetDataResponseData]
+    data: GetDataResponseData | None
     """Данные."""
 
 

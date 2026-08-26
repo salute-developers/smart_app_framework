@@ -1,4 +1,3 @@
-# coding: utf-8
 from scenarios.scenario_models.field.field import field_model_factory
 from scenarios.scenario_models.field.fields import Fields
 

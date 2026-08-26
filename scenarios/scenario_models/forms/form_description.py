@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from core.model.factory import ordered_dict_factory, build_factory
 from core.model.registered import Registered
 from scenarios.scenario_models.field.field_descriptions.basic_field_description import BasicFieldDescription
@@ -22,7 +20,7 @@ class BaseFormDescription:
 
 class FormDescription(BaseFormDescription):
     def __init__(self, items, id):
-        super(FormDescription, self).__init__(items, id)
+        super().__init__(items, id)
         self._fields = items["fields"]
         self.fields = self.build_fields()
 
@@ -33,7 +31,7 @@ class FormDescription(BaseFormDescription):
 
 class CompositeFormDescription(BaseFormDescription):
     def __init__(self, items, id):
-        super(CompositeFormDescription, self).__init__(items, id)
+        super().__init__(items, id)
         self._forms = items["forms"]
         self.forms = self.build_forms()
 

@@ -1,6 +1,3 @@
-# coding: utf-8
-
-
 class LazyItems:
     def __init__(self, items, descriptions, user, factory):
         self._descriptions = descriptions

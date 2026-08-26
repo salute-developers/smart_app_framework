@@ -1,4 +1,4 @@
-from typing import List, Any, Dict
+from typing import Any
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -15,7 +15,7 @@ class HandlerCloseApp(HandlerBase):
         super().__init__(app_name)
         self._clear_current_scenario = ClearCurrentScenarioAction()
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: dict[str, Any], user: User) -> list[Command]:
         commands = await super().run(payload, user)
         text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
         params = {

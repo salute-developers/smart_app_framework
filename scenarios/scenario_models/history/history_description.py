@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import cached_property
 from typing import Union
 
@@ -7,7 +9,7 @@ from scenarios.scenario_models.history import EventFormatter
 
 class HistoryDescription:
     enabled: bool
-    event_expiration_delay: Union[int, float]
+    event_expiration_delay: int | float
 
     EVENT_EXPIRATION_DELAY = 60
 

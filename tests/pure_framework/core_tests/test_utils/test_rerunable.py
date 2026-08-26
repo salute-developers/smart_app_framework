@@ -19,7 +19,7 @@ class CustomException(Exception):
 
 class RerunableOne(Rerunable):
     def __init__(self, try_count):
-        super(RerunableOne, self).__init__({"try_count": try_count})
+        super().__init__({"try_count": try_count})
         self._on_prepare_mock = PicklableMock()
 
     @property

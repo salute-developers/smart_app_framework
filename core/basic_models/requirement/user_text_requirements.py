@@ -1,6 +1,8 @@
 """Requirements на текст запроса пользователя."""
 
-from typing import Optional, Dict, Any
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.requirement.basic_requirements import Requirement, ComparisonRequirement
 from core.logging.logger_utils import log
@@ -14,12 +16,12 @@ class AnySubstringInLoweredTextRequirement(Requirement):
     в оригинальном тексте в нижнем регистре, иначе - False.
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.substrings = self.items["substrings"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         lowered_text = text_preprocessing_result.lower() if isinstance(text_preprocessing_result, str) \
             else text_preprocessing_result.raw["original_text"].lower()
         return any(s.lower() in lowered_text for s in self.substrings)
@@ -27,7 +29,7 @@ class AnySubstringInLoweredTextRequirement(Requirement):
 
 class NormalizedInputWordsRequirement(Requirement):
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
 
         # Получаем используемый нормализатор из конфига аппа
@@ -37,10 +39,10 @@ class NormalizedInputWordsRequirement(Requirement):
 
         # Нормализуем входные слова из условия
         self.input_words = set(items["input_words"])
-        self.normalized_input_words = set([
+        self.normalized_input_words = {
             norm_res["normalized_text"].replace(".", "").strip()
             for norm_res in self.normalizer.normalize_sequence(list(self.input_words))
-        ])
+        }
 
 
 class IntersectionWithTokensSetRequirement(NormalizedInputWordsRequirement):
@@ -50,11 +52,11 @@ class IntersectionWithTokensSetRequirement(NormalizedInputWordsRequirement):
     """
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
-        words_normalized_set = set([
+              params: dict[str, Any] = None) -> bool:
+        words_normalized_set = {
             token["lemma"] for token in text_preprocessing_result.raw["tokenized_elements_list_pymorphy"]
             if not token.get("token_type") == "SENTENCE_ENDPOINT_TOKEN"
-        ])
+        }
         result = bool(self.normalized_input_words.intersection(words_normalized_set))
         if result:
             params = self._log_params()
@@ -72,7 +74,7 @@ class NormalizedTextInSetRequirement(NormalizedInputWordsRequirement):
     """
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         normalized_text = text_preprocessing_result.raw["normalized_text"].replace(".", "").strip()
         result = normalized_text in self.normalized_input_words
         if result:
@@ -91,11 +93,11 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
     Строго говоря, считается кол-во токенов, имеющих token_type = "PHONE_NUMBER_TOKEN".
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         len_phone_number_token = len(text_preprocessing_result.get_token_values_by_type("PHONE_NUMBER_TOKEN"))
         result = self.operator.compare(len_phone_number_token)
         if result:
@@ -109,12 +111,12 @@ class PhoneNumberNumberRequirement(ComparisonRequirement):
 class NumInRangeRequirement(Requirement):
     """Условие возвращает True, если число находится в заданном диапазоне, иначе - False."""
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.min_num = float(items["min_num"])
         self.max_num = float(items["max_num"])
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         num = float(text_preprocessing_result.num_token_values)
         return self.min_num <= num <= self.max_num if num else False

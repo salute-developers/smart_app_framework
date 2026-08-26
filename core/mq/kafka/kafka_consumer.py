@@ -1,4 +1,3 @@
-# coding: utf-8
 from __future__ import annotations
 
 import logging
@@ -19,12 +18,13 @@ from core.mq.kafka.consumer_rebalance_listener import CoreConsumerRebalanceListe
 
 if TYPE_CHECKING:
     from aiokafka import ConsumerRecord
-    from typing import Optional, Callable, Iterable, AsyncGenerator, Any, Dict, List
+    from typing import Any
+    from collections.abc import Callable, Iterable, AsyncGenerator
     from asyncio import AbstractEventLoop
 
 
 class KafkaConsumer(BaseKafkaConsumer):
-    def __init__(self, config: Dict[str, Any], loop: AbstractEventLoop):
+    def __init__(self, config: dict[str, Any], loop: AbstractEventLoop):
         self._config = config["consumer"]
         self.assign_offset_end = self._config.get("assign_offset_end", False)
         conf = self._config["conf"]
@@ -37,12 +37,12 @@ class KafkaConsumer(BaseKafkaConsumer):
             debug_logger = logging.getLogger("debug_consumer")  # TODO add debug logger to _consumer events
             timestamp = time.strftime("_%d%m%Y_")
             debug_logger.addHandler(logging.FileHandler(
-                "{}/kafka_consumer_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())
+                f"{internal_log_path}/kafka_consumer_debug{timestamp}{os.getpid()}.log"
             ))
         self._consumer = AIOKafkaConsumer(**conf, loop=loop)
         loop.run_until_complete(self._consumer.start())
 
-    def on_assign_log(self, consumer: AIOKafkaConsumer, partitions: List[TopicPartition]) -> None:
+    def on_assign_log(self, consumer: AIOKafkaConsumer, partitions: list[TopicPartition]) -> None:
         log_level = "WARNING"
         params = {
             "partitions": str(list([str(partition) for partition in partitions or []])),
@@ -51,7 +51,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         }
         log("KafkaConsumer.subscribe<on_assign>: assign %(partitions)s %(log_level)s", params=params, level=log_level)
 
-    def subscribe(self, topics: Optional[Iterable[str]] = None) -> None:
+    def subscribe(self, topics: Iterable[str] | None = None) -> None:
         topics = list(set(topics or list(self._config["topics"].values())))
 
         params = {
@@ -70,11 +70,11 @@ class KafkaConsumer(BaseKafkaConsumer):
     def unsubscribe(self) -> None:
         self._consumer.unsubscribe()
 
-    async def poll(self) -> Optional[ConsumerRecord]:
+    async def poll(self) -> ConsumerRecord | None:
         msg = await self._consumer.getone()
         return self._process_message(msg)
 
-    async def consume(self, num_messages: int = 1) -> AsyncGenerator[Optional[ConsumerRecord], None]:
+    async def consume(self, num_messages: int = 1) -> AsyncGenerator[ConsumerRecord | None]:
         timeout_ms = self._config["poll_timeout"] * 1000
         messages = await self._consumer.getmany(max_records=num_messages, timeout_ms=timeout_ms)
         for partition_messages in messages.values():
@@ -104,7 +104,7 @@ class KafkaConsumer(BaseKafkaConsumer):
         monitoring.got_counter("kafka_consumer_exception")
 
     # noinspection PyMethodMayBeStatic
-    def _process_message(self, msg: ConsumerRecord) -> Optional[ConsumerRecord]:
+    def _process_message(self, msg: ConsumerRecord) -> ConsumerRecord | None:
         if msg.value:
             if msg.headers is None:
                 msg.headers = list()
@@ -114,13 +114,13 @@ class KafkaConsumer(BaseKafkaConsumer):
         await self._consumer.stop()
         log(f"consumer to topics {self._config['topics']} closed.")
 
-    def _setup_ssl(self, conf: Dict[str, Any], ssl_config: Optional[Dict[str, Any]] = None) -> None:
+    def _setup_ssl(self, conf: dict[str, Any], ssl_config: dict[str, Any] | None = None) -> None:
         if ssl_config:
             context = create_ssl_context(**ssl_config)
             conf["security_protocol"] = "SSL"
             conf["ssl_context"] = context
 
-    def _update_old_config(self, conf: Dict[str, Any]) -> None:
+    def _update_old_config(self, conf: dict[str, Any]) -> None:
         if "default.topic.config" in conf:
             conf.update(conf["default.topic.config"])
             del conf["default.topic.config"]

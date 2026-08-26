@@ -1,7 +1,7 @@
 from __future__ import annotations
 import collections
 import json
-from typing import Optional, Dict, Any, Union, List, TYPE_CHECKING, AsyncGenerator
+from typing import Any, TYPE_CHECKING
 
 from jinja2 import exceptions as jexcept
 
@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 
 class BaseSetVariableAction(Action):
     key: str
-    loader: Optional[str]
+    loader: str | None
     loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
-    value: Union[str, Dict]
+    value: str | dict
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.key: str = items["key"]
         self.loader = items.get('loader')
@@ -33,7 +33,7 @@ class BaseSetVariableAction(Action):
         raise NotImplementedError
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         commands = []
         params = user.parametrizer.collect(text_preprocessing_result)
         try:
@@ -56,15 +56,15 @@ class BaseSetVariableAction(Action):
 
 
 class SetVariableAction(BaseSetVariableAction):
-    version: Optional[int]
+    version: int | None
     parametrizer: BasicParametrizer
-    loader: Optional[str]
+    loader: str | None
     key: str
     loaders = collections.defaultdict(str, {"json": json.loads, "float": float, "int": int})
     ttl: int
-    value: Union[str, Dict]
+    value: str | dict
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.ttl: int = items.get("ttl")
 
@@ -73,28 +73,28 @@ class SetVariableAction(BaseSetVariableAction):
 
 
 class DeleteVariableAction(Action):
-    version: Optional[int]
+    version: int | None
     key: str
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.key: str = items["key"]
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         commands = []
         user.variables.delete(self.key)
         return commands
 
 
 class ClearVariablesAction(Action):
-    version: Optional[int]
+    version: int | None
 
-    def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any] = None, id: str | None = None):
         super().__init__(items, id)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         commands = []
         user.variables.clear()
         return commands
@@ -107,7 +107,7 @@ class SetLocalVariableAction(BaseSetVariableAction):
 
 class SetMidVariableAction(BaseSetVariableAction):
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: dict[str, str | float | int] | None = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         try:
             value = self.template.render({**(params or {}), **user.parametrizer.collect(text_preprocessing_result)})
         except Exception:

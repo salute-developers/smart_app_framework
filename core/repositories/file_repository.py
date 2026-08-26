@@ -9,7 +9,7 @@ from core.logging.logger_utils import log
 
 class FileRepository(ItemsRepository):
     def __init__(self, filename, loader, source=None, save_target=None, saver=None, *args, **kwargs):
-        super(FileRepository, self).__init__(source=source, *args, **kwargs)
+        super().__init__(source=source, *args, **kwargs)
         self.filename = filename
         self.loader = loader
         self.saver = saver
@@ -31,7 +31,7 @@ class FileRepository(ItemsRepository):
             }
             log("FileRepository.load loading failed with file %(error_repository_path)s",
                 params=params, level="WARNING")
-        super(FileRepository, self).load()
+        super().load()
 
     def save(self, save_parameters):
         with self.source.open(self.save_target, 'wb') as stream:

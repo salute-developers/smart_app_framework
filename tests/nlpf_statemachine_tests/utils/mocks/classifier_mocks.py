@@ -1,11 +1,12 @@
 """
 # Локальные утилиты для тестов.
 """
-from typing import Optional
+from __future__ import annotations
+
 from unittest.mock import MagicMock
 
 
-def classifier_mock(run_mock: Optional[str] = None, run_legacy_mock: Optional[str] = None) -> MagicMock:
+def classifier_mock(run_mock: str | None = None, run_legacy_mock: str | None = None) -> MagicMock:
     """
     ## Генерация классификатора.
 

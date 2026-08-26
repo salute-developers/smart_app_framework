@@ -1,4 +1,4 @@
-from typing import Sequence, List
+from collections.abc import Sequence
 
 from smart_kit.utils.cache import Cache
 
@@ -16,7 +16,7 @@ class BaseTextNormalizer:
     def with_cache(self, *args, **kwargs) -> 'BaseTextNormalizer':
         raise NotImplementedError
 
-    def normalize_sequence(self, texts: Sequence, batch_size) -> List:
+    def normalize_sequence(self, texts: Sequence, batch_size) -> list:
         raise NotImplementedError
 
     def __call__(self, text: str):

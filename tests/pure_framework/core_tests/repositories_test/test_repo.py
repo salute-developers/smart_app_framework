@@ -22,16 +22,16 @@ class MockDescriptionItem:
 
 class MockBaseRepository(BaseRepository):
     def __init__(self):
-        super(MockBaseRepository, self).__init__(MockDescriptionItem)
+        super().__init__(MockDescriptionItem)
 
     def load(self):
         self.fill({"test": {"value": 1}})
-        super(MockBaseRepository, self).load()
+        super().load()
 
 
 class MockShardRepository(ShardRepository):
     def __init__(self):
-        super(MockShardRepository, self).__init__(MockSource, ordered_json)
+        super().__init__(MockSource, ordered_json)
 
 
 class MockSource:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import importlib
 import typing
@@ -13,7 +15,7 @@ class AIORedisSentinelAdapter(AsyncDBAdapter):
         super().__init__(config)
         self.aioredis = importlib.import_module("redis.asyncio")
         sentinel_type = self.aioredis.sentinel.Sentinel
-        self._sentinel: typing.Optional[sentinel_type] = None
+        self._sentinel: sentinel_type | None = None
         self.service_name = None
         self.socket_timeout = None
 

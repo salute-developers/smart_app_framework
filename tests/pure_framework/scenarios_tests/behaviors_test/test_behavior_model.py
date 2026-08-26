@@ -1,4 +1,3 @@
-# coding: utf-8
 import socket
 import unittest
 from collections import OrderedDict

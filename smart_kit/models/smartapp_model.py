@@ -1,7 +1,5 @@
-# coding: utf-8
 import sys
 import traceback
-from typing import List, Optional
 
 from core.basic_models.actions.command import Command
 from core.descriptions.descriptions import Descriptions
@@ -73,7 +71,7 @@ class SmartAppModel:
         })
 
     @exc_handler(on_error_obj_method_name="on_answer_error")
-    async def answer(self, message: SmartAppFromMessage, user: User) -> Optional[List[Command]]:
+    async def answer(self, message: SmartAppFromMessage, user: User) -> list[Command] | None:
         user.expire()
         user.message_vars.clear()
         handler = self.get_handler(message.type)

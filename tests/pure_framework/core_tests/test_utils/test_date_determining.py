@@ -1,9 +1,10 @@
 """
 Модуль для модульного тестирования работы period_determiner
 """
+from __future__ import annotations
+
 import unittest
 from datetime import datetime, timedelta
-from typing import Optional
 
 from freezegun import freeze_time
 from core.utils.period_determiner import ERROR_VALUE
@@ -98,7 +99,7 @@ class TestDateDetermining(unittest.TestCase):
             year = current_date.year
 
         self.assertEqual(result, (
-            '01.{}.{}'.format(str(month).zfill(2), year),
+            f'01.{str(month).zfill(2)}.{year}',
             current_date.strftime('%d.%m.%Y')
         ))
 
@@ -151,8 +152,8 @@ class TestDateDetermining(unittest.TestCase):
             '28.01'
         ]
         result = period_determiner(words_to_process)
-        self.assertEqual(result, ('28.01.{}'.format(current_date.year),
-                                  '28.01.{}'.format(current_date.year)))
+        self.assertEqual(result, (f'28.01.{current_date.year}',
+                                  f'28.01.{current_date.year}'))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_10(self):
@@ -223,8 +224,8 @@ class TestDateDetermining(unittest.TestCase):
             'март'
         ]
         result = period_determiner(words_to_process)
-        self.assertEqual(result, ('01.03.{}'.format(current_date.year),
-                                  '31.03.{}'.format(current_date.year)))
+        self.assertEqual(result, (f'01.03.{current_date.year}',
+                                  f'31.03.{current_date.year}'))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_16(self):
@@ -259,8 +260,8 @@ class TestDateDetermining(unittest.TestCase):
             'марта',
         ]
         result = period_determiner(words_to_process)
-        self.assertEqual(result, ('28.03.{}'.format(current_date.year),
-                                  '28.03.{}'.format(current_date.year)))
+        self.assertEqual(result, (f'28.03.{current_date.year}',
+                                  f'28.03.{current_date.year}'))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_19(self):
@@ -341,8 +342,8 @@ class TestDateDetermining(unittest.TestCase):
             'января'
         ]
         result = period_determiner(words_to_process)
-        self.assertEqual(result, ('02.01.{}'.format(current_date.year),
-                                  '17.01.{}'.format(current_date.year)))
+        self.assertEqual(result, (f'02.01.{current_date.year}',
+                                  f'17.01.{current_date.year}'))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_24(self):
@@ -448,7 +449,7 @@ class TestDateDetermining(unittest.TestCase):
             day=1
         )
 
-        d2: Optional[datetime] = None
+        d2: datetime | None = None
         if qvartal_nomer == 4:
             d2 = datetime(
                 year=current_date.year + 1,
@@ -477,8 +478,8 @@ class TestDateDetermining(unittest.TestCase):
             '8.1'
         ]
         result = period_determiner(words_to_process)
-        self.assertEqual(result, ('08.01.{}'.format(current_date.year),
-                                  '08.01.{}'.format(current_date.year)))
+        self.assertEqual(result, (f'08.01.{current_date.year}',
+                                  f'08.01.{current_date.year}'))
 
     @freeze_time('2021-11-23')
     def test_period_determiner_31(self):

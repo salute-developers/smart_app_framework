@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Any
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
@@ -21,7 +21,7 @@ class HandlerText(HandlerBase):
             f"{self.__class__.__name__}.__init__ finished.", params={log_const.KEY_NAME: log_const.STARTUP_VALUE}
         )
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: dict[str, Any], user: User) -> list[Command]:
         commands = await super().run(payload, user)
 
         text_preprocessing_result = TextPreprocessingResult.from_payload(payload)
@@ -35,6 +35,6 @@ class HandlerText(HandlerBase):
         commands.extend(await self._handle_base(text_preprocessing_result, user))
         return commands
 
-    async def _handle_base(self, text_preprocessing_result: TextPreprocessingResult, user: User) -> List[Command]:
+    async def _handle_base(self, text_preprocessing_result: TextPreprocessingResult, user: User) -> list[Command]:
         answer, is_answer_found = await self.dialogue_manager.run(text_preprocessing_result, user)
         return answer or []

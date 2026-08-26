@@ -1,4 +1,3 @@
-# coding: utf-8
 import unittest
 
 from smart_kit.management import base

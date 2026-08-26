@@ -6,7 +6,7 @@ from core.repositories.shard_repository import ShardRepository
 class FolderRepository(ShardRepository):
 
     def __init__(self, path, loader, source=None, *args, **kwargs):
-        super(FolderRepository, self).__init__(path, loader, source, *args, **kwargs)
+        super().__init__(path, loader, source, *args, **kwargs)
 
     def _load_item(self, name):
         try:
@@ -36,7 +36,7 @@ class FolderRepository(ShardRepository):
     def load(self):
         shard_desc = self.get_shard_desc()
         self.fill(self._form_file_upload_map(shard_desc))
-        super(FolderRepository, self).load()
+        super().load()
 
     def load_in_parts(self, count):
         self.clear()
@@ -48,7 +48,7 @@ class FolderRepository(ShardRepository):
                 params={"current_count": i + len(desc_slice),
                         "all_count": len(shard_desc)},
                 level="WARNING")
-            super(FolderRepository, self).load()
+            super().load()
 
     def get_shard_desc(self):
         shard_desc = self.source.list_dir(self.path)

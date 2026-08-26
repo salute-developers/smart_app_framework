@@ -1,4 +1,3 @@
-# coding: utf-8
 import unittest
 
 from core.basic_models.operators.operators import MoreOperator, \

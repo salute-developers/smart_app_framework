@@ -102,7 +102,7 @@ from core.db_adapter.aioredis_sentinel_adapter import AIORedisSentinelAdapter
 
 class SmartAppResources(BaseConfig):
     def __init__(self, source, references_path, settings):
-        super(SmartAppResources, self).__init__(source=source)
+        super().__init__(source=source)
         self.references_path = references_path
         self.repositories = [
             FolderRepository(self.subfolder_path("forms"), loader=ordered_json, source=source,
@@ -150,7 +150,7 @@ class SmartAppResources(BaseConfig):
         return repositories
 
     def init(self):
-        super(SmartAppResources, self).init()
+        super().init()
         self.init_factories()
         self.init_field_filler_description()
         self.init_scenarios()

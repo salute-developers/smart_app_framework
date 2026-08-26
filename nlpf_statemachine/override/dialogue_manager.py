@@ -1,7 +1,7 @@
 """
 # Переопределение NLPF DialogueManager.
 """
-from typing import Dict, List, Optional, Tuple, Union
+from __future__ import annotations
 
 from pydantic import BaseModel
 
@@ -20,19 +20,19 @@ class SMDialogueManager(DialogueManager):
     """
 
     def __init__(self, scenario_descriptions: Descriptions, app_name: str, **kwargs) -> None:
-        super(SMDialogueManager, self).__init__(scenario_descriptions, app_name, **kwargs)
+        super().__init__(scenario_descriptions, app_name, **kwargs)
         self.state_machine_context_manager = scenario_descriptions[STATE_MACHINE_REPOSITORY_NAME]
 
     @staticmethod
-    def _to_dict(model: Union[BaseModel, Dict]) -> Dict:
+    def _to_dict(model: BaseModel | dict) -> dict:
         """
         # Перевод параметров в dict.
 
         Args:
-            model (Union[BaseModel, Dict]): Параметры в виде dict или pydantic модели.
+            model (BaseModel | dict): Параметры в виде dict или pydantic модели.
 
         Returns:
-            Dict: Параметры в виде словаря
+            dict: Параметры в виде словаря
         """
         if isinstance(model, dict):
             return model
@@ -40,15 +40,12 @@ class SMDialogueManager(DialogueManager):
             return model.model_dump(exclude_none=True, by_alias=True)
         return {}
 
-    def _process_response(self, response: Response) -> Tuple[Dict, Optional[str], Optional[dict]]:
+    def _process_response(self, response: Response) -> tuple[dict, str | None, dict | None]:
         """
         # Формирование параметров ответа pydantic объекта Response.
 
         Args:
-            response (Response): ответ от ContextManager.
-
-        Returns:
-            Tuple[Dict, Optional[str], Optional[dict]]
+            response: ответ от ContextManager.
         """
         request_type = response.request_type if response.request_type else None
         request_data = self._to_dict(response.request_data)
@@ -57,7 +54,7 @@ class SMDialogueManager(DialogueManager):
 
     async def run_scenario(
             self, scen_id: str, text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> List[Command]:
+    ) -> list[Command]:
         """
         # Запуск сценария.
 
@@ -69,30 +66,27 @@ class SMDialogueManager(DialogueManager):
             user (SMUser): NLPF User;
 
         Returns:
-            List[Command]
+            list[Command]
         """
         answer = await self.run_statemachine(
             event=None, text_preprocessing_result=text_preprocessing_result, user=user,
         )
         if not answer:
-            answer = await super(SMDialogueManager, self).run_scenario(
+            answer = await super().run_scenario(
                 scen_id=scen_id, text_preprocessing_result=text_preprocessing_result, user=user,
             )
         return answer
 
     async def run_statemachine(
             self, event: str = None, text_preprocessing_result: TextPreprocessingResult = None, user: SMUser = None,
-    ) -> Optional[List[Command]]:
+    ) -> list[Command] | None:
         """
         # Запуск стейт-машины (контекст-менеджера).
 
         Args:
-            event (str): событие;
-            text_preprocessing_result (TextPreprocessingResult): NLPF TextPreprocessingResult;
-            user (SMUser): NLPF User;
-
-        Returns:
-            Optional[List[Command]]
+            event: событие;
+            text_preprocessing_result: NLPF TextPreprocessingResult;
+            user: NLPF User;
         """
         context_manager = self.state_machine_context_manager.get(CONTEXT_MANAGER_ID)
         response = await context_manager.run(

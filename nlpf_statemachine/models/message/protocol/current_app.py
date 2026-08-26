@@ -1,7 +1,7 @@
 """
 # Описание модели CurrentApp.
 """
-from typing import Optional
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -18,8 +18,8 @@ class AssistantState(BaseModel):
     *Данный класс необходимо переопределять в конкретных приложениях.*
     """
 
-    screen: Optional[str] = Field(default=None)
-    item_selector: Optional[ItemSelector] = Field(default=None)
+    screen: str | None = Field(default=None)
+    item_selector: ItemSelector | None = Field(default=None)
 
 
 class CurrentApp(BaseModel):
@@ -27,5 +27,5 @@ class CurrentApp(BaseModel):
     # Описание модели CurrentApp.
     """
 
-    app_info: Optional[AppInfo] = Field(default=None)
-    state: Optional[AssistantState] = Field(default=None)
+    app_info: AppInfo | None = Field(default=None)
+    state: AssistantState | None = Field(default=None)

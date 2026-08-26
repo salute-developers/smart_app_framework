@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from core.db_adapter.os_adapter import OSAdapter
 from core.logging.logger_utils import log
 import core.logging.logger_constants as log_const

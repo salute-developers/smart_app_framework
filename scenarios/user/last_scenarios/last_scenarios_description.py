@@ -1,4 +1,3 @@
-# coding: utf-8
 from functools import cached_property
 
 from core.basic_models.requirement.basic_requirements import Requirement

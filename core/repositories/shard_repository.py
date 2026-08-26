@@ -5,7 +5,7 @@ from core.repositories.base_repository import BaseRepository
 class ShardRepository(BaseRepository):
 
     def __init__(self, path, loader, source=None, *args, **kwargs):
-        super(ShardRepository, self).__init__(source=source, *args, **kwargs)
+        super().__init__(source=source, *args, **kwargs)
         self.path = path
         self.loader = loader
 
@@ -31,7 +31,7 @@ class ShardRepository(BaseRepository):
         return t
 
     def load(self):
-        super(ShardRepository, self).load()
+        super().load()
 
     def fill(self, data):
         res = None

@@ -1,13 +1,15 @@
 """
 # Генераторы команд.
 """
-from typing import Dict, Union
+from __future__ import annotations
+
+from typing import Union
 
 from nlpf_statemachine.models import AssistantCommand, CanvasAppItem, SmartAppDataCommand
 from .models.commands import CustomCommand
 
 
-def generate_item(smart_app_data: Union[AssistantCommand, Dict]) -> CanvasAppItem:
+def generate_item(smart_app_data: AssistantCommand | dict) -> CanvasAppItem:
     """
     ## Генерация item-команды для списка items в ответе.
 

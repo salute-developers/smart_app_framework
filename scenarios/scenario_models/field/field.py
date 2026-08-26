@@ -1,4 +1,3 @@
-# coding: utf-8
 from core.logging.logger_utils import log
 from core.model.registered import Registered
 from core.utils.masking_message import masking
@@ -91,7 +90,7 @@ class BasicField:
 class QuestionField(BasicField):
     def __init__(self, description, items, user, lifetime):
         items = items or {}
-        super(QuestionField, self).__init__(description, items, user, lifetime)
+        super().__init__(description, items, user, lifetime)
         self.ask_again_counter = items.get("ask_again_counter", 0)
 
     @property
@@ -128,7 +127,7 @@ class QuestionField(BasicField):
 class IntegrationField(BasicField):
     def __init__(self, description, items, user, lifetime):
         items = items or {}
-        super(IntegrationField, self).__init__(description, items, user, lifetime)
+        super().__init__(description, items, user, lifetime)
 
     # TODO сделать required requirement
     # def valid(self, text_preprocessing_result, user, params):

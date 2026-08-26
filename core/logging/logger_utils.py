@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import inspect
 import logging
 import re
 from unittest.mock import Mock
-from typing import Dict, List, Union, Optional
 
 import timeout_decorator
 
@@ -118,8 +119,8 @@ def log(message, user=None, params=None, level="INFO", exc_info=None, log_store_
                            params, exc_info=True, stack_info=True)
 
 
-def log_classifier_result(classification_res: List[Dict[str, Union[str, float, bool]]], user,
-                          classifier: Classifier, timer: Optional[StatsTimer] = None) -> None:
+def log_classifier_result(classification_res: list[dict[str, str | float | bool]], user,
+                          classifier: Classifier, timer: StatsTimer | None = None) -> None:
     classifier_name = classifier.settings.get("classifier", "intent_recognizer")
     score_key = cls_const.INTENT_RECOGNIZER_ANSWER_DISTANCE_KEY if classifier_name == "intent_recognizer" \
         else cls_const.SCORE_KEY

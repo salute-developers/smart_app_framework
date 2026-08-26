@@ -1,7 +1,7 @@
-from typing import Optional
+from __future__ import annotations
 
 
-def pan2service(pan: str) -> Optional[str]:
+def pan2service(pan: str) -> str | None:
     if len(pan) < 4:
         return None
 

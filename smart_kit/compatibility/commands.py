@@ -8,7 +8,7 @@ from scenarios.user.user_model import User
 from smart_kit.names.message_names import ANSWER_TO_USER
 
 
-def combine_answer_to_user(commands: typing.List[Command]) -> Command:
+def combine_answer_to_user(commands: list[Command]) -> Command:
     from smart_kit.configs import get_app_config
     _ = get_app_config()
 
@@ -44,7 +44,7 @@ def combine_answer_to_user(commands: typing.List[Command]) -> Command:
     return answer
 
 
-def combine_commands(commands: typing.List[Command], user: User, **kwargs) -> typing.List[Command]:
+def combine_commands(commands: list[Command], user: User, **kwargs) -> list[Command]:
     user_answers = []
 
     for command in commands:

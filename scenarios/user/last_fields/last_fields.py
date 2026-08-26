@@ -1,4 +1,3 @@
-# coding: utf-8
 import time
 
 from scenarios.user.last_fields.last_field import LastField

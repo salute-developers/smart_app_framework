@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 from io import StringIO
-from typing import Any, Union, List, Optional
+from typing import Any
 
 import yaml
 
@@ -18,7 +18,7 @@ from smart_kit.configs import get_app_config
 
 
 class Version:
-    def __init__(self, code_version: Optional[str], separate_static=False, static_version: Optional[str] = None):
+    def __init__(self, code_version: str | None, separate_static=False, static_version: str | None = None):
         self.code_version = code_version
         self.separate_static = separate_static
         self.static_version = static_version
@@ -29,7 +29,7 @@ class Version:
         return self.code_version or "UNKNOWN"
 
     @classmethod
-    def from_env_and_source(cls, source: DBAdapter) -> "Version":
+    def from_env_and_source(cls, source: DBAdapter) -> Version:
         code_version = os.getenv("VERSION", default=0)
         attrs = {"code_version": code_version}
         if isinstance(source, CephAdapter):
@@ -77,7 +77,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
                 if isinstance(repo, UpdatableFileRepository):
                     repo.update_cooldown = update_time
 
-    def override_repositories(self, repositories: List):
+    def override_repositories(self, repositories: list):
         """
         Метод предназначен для переопределения репозиториев в дочерних классах.
         :param repositories: Список репозиториев родителя
@@ -85,7 +85,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
         """
         return repositories
 
-    def _load_base_repositories(self) -> List[FileRepository]:
+    def _load_base_repositories(self) -> list[FileRepository]:
         """Load base repositories with service settings"""
         template_settings_repo = SecretUpdatableFileRepository(
             filename=self.subfolder_path("template_config.yml"),
@@ -112,7 +112,7 @@ class Settings(BaseConfig, metaclass=SingletonOneInstance):
         ]
 
     def _get_kafka_settings_filepath(
-            self, filename: Any, use_secrets_path: bool = True) -> Union[bytes, str]:
+            self, filename: Any, use_secrets_path: bool = True) -> bytes | str:
         """Возвращает путь к файлу с настройками кафки. По умолчанию возвращает путь к файлу в секретах."""
         if use_secrets_path:
             return self.subfolder_secret_path(filename)

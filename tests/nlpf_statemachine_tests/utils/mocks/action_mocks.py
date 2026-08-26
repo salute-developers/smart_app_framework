@@ -1,7 +1,9 @@
 """
 # Локальные утилиты для тестов.
 """
-from typing import Any, Optional, Union
+from __future__ import annotations
+
+from typing import Any
 from unittest.mock import MagicMock
 
 from pydantic import BaseModel
@@ -11,8 +13,8 @@ from tests.nlpf_statemachine_tests.utils import random_string
 
 
 def action_mock(
-        message_name: Optional[str] = None,
-        payload: Optional[dict or BaseModel] = None,
+        message_name: str | None = None,
+        payload: dict or BaseModel | None = None,
         side_effect: Any = None,
 ) -> MagicMock:
     """
@@ -41,7 +43,7 @@ def action_mock(
     return action
 
 
-def action_with_exception_mock(exception: Optional[Exception] = None) -> MagicMock:
+def action_with_exception_mock(exception: Exception | None = None) -> MagicMock:
     """
     ## Генерация экшена с ошибкой.
 
@@ -65,9 +67,9 @@ def action_with_exception_mock(exception: Optional[Exception] = None) -> MagicMo
 
 
 def action_integration_mock(
-        message_name: Optional[str] = None,
-        payload: Optional[Union[dict, BaseModel]] = None,
-        request_data: Optional[dict] = None,
+        message_name: str | None = None,
+        payload: dict | BaseModel | None = None,
+        request_data: dict | None = None,
         request_type: str = IntegrationRequestType.KAFKA,
 ) -> MagicMock:
     """

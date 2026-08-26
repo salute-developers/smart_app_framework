@@ -1,6 +1,3 @@
-# coding: utf-8
-
-
 class BaseKafkaConsumer:
     def subscribe(self, topics=None):
         raise NotImplementedError

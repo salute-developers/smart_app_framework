@@ -1,4 +1,3 @@
-from typing import Dict
 
 import nltk
 
@@ -24,12 +23,12 @@ class TextPreprocessingResult(BaseTextPreprocessingResult):
                  "model_ner", "dict_ner")
 
     @staticmethod
-    def from_payload(payload: Dict):
+    def from_payload(payload: dict):
         return TextPreprocessingResult(payload.get(MESSAGE, {}), payload.get(ANNOTATIONS, {}))
 
-    def __init__(self, *args: Dict):
+    def __init__(self, *args: dict):
         items = {k: v for arg in args for k, v in arg.items()}
-        super(TextPreprocessingResult, self).__init__(items)
+        super().__init__(items)
         self.original_text = items.get("original_text", "")
         self.normalized_text = items.get("normalized_text", "")
         self.original_message_name = items.get("original_message_name", "")

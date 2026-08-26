@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypeVar, Optional, Type
+from typing import TypeVar
 
 T = TypeVar("T")
 
@@ -9,10 +9,10 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
-    def get_instance(cls: Type[T]) -> Optional[T]:
+    def get_instance(cls: type[T]) -> T | None:
         return cls._instances.get(cls)
 
 
@@ -21,8 +21,8 @@ class SingletonOneInstance(type):
 
     def __call__(cls, *args, **kwargs):
         if SingletonOneInstance._instance is None:
-            SingletonOneInstance._instance = super(SingletonOneInstance, cls).__call__(*args, **kwargs)
+            SingletonOneInstance._instance = super().__call__(*args, **kwargs)
         return SingletonOneInstance._instance
 
-    def get_instance(cls: Type[T]) -> Optional[T]:
+    def get_instance(cls: type[T]) -> T | None:
         return SingletonOneInstance._instance

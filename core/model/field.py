@@ -1,6 +1,3 @@
-# coding: utf-8
-
-
 class Field:
     def __init__(self, name, model, description=None, *args):
         self.name = name

@@ -1,5 +1,4 @@
-# coding: utf-8
-from typing import Dict, Any, List
+from typing import Any
 
 from core.basic_models.actions.command import Command
 from scenarios.scenario_descriptions.form_filling_scenario import FormFillingScenario
@@ -15,7 +14,7 @@ MAIN_INNER_FORM_DELIMETER = "__"
 
 class TreeScenario(FormFillingScenario):
     def __init__(self, items, id):
-        super(TreeScenario, self).__init__(items, id)
+        super().__init__(items, id)
         self._start_node_key = items["start_node_key"]
         self._scenario_nodes = items["scenario_nodes"]
         self.scenario_nodes = self.build_scenario_nodes()
@@ -80,12 +79,12 @@ class TreeScenario(FormFillingScenario):
             if form:
                 main_inner_forms_key = "".join(
                     (self._clean_key(form_type), MAIN_INNER_FORM_DELIMETER, self._clean_key(inner_form_key)))
-                form_field_data = super(TreeScenario, self).get_fields_data(form, main_inner_forms_key)
+                form_field_data = super().get_fields_data(form, main_inner_forms_key)
                 all_forms_fields.update(form_field_data)
         return all_forms_fields
 
     @monitoring.got_histogram("scenario_time")
-    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+    async def run(self, text_preprocessing_result, user, params: dict[str, Any] = None) -> list[Command]:
         main_form = self._get_form(user)
         user.last_scenarios.add(self.id, text_preprocessing_result)
         user.preprocessing_messages_for_scenarios.add(text_preprocessing_result)

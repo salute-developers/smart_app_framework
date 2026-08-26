@@ -2,10 +2,12 @@
 # Общий подход для работы со статикой.
 """
 
+from __future__ import annotations
+
 import json
 from copy import deepcopy
 from random import choice
-from typing import Any, Dict, Optional
+from typing import Any
 
 import yaml
 
@@ -52,13 +54,13 @@ class StaticStorageManager:
             self.storage = StaticStorage()
 
     @staticmethod
-    def _load_yaml(filename: str) -> Dict[str, Any]:
-        with open(filename, "r") as file:
+    def _load_yaml(filename: str) -> dict[str, Any]:
+        with open(filename) as file:
             return yaml.safe_load(file)
 
     @staticmethod
-    def _load_json(filename: str) -> Dict[str, Any]:
-        with open(filename, "r") as file:
+    def _load_json(filename: str) -> dict[str, Any]:
+        with open(filename) as file:
             return json.load(file)
 
     @staticmethod
@@ -149,8 +151,8 @@ class StaticStorageManager:
             return self._merge_payloads(assistant_answer, answer)
         return AssistantResponsePayload(**assistant_answer.model_dump())
 
-    def _get_assistant_payload(self, data: StaticStorageItem, character_id: Optional[str]) -> \
-            Optional[AssistantResponsePayload]:
+    def _get_assistant_payload(self, data: StaticStorageItem, character_id: str | None) -> \
+            AssistantResponsePayload | None:
         if character_id:
             if character_id == AssistantId.joy and data.joy:
                 return self._merge_payloads(master=data, updater=self._get_answer(data.joy))
@@ -162,7 +164,7 @@ class StaticStorageManager:
             return self._merge_payloads(master=data, updater=self._get_answer(data.any))
         return AssistantResponsePayload(**data.model_dump())
 
-    def response(self, code: str, context: Context = None, activate_app_info: bool = True) -> Optional[Response]:
+    def response(self, code: str, context: Context = None, activate_app_info: bool = True) -> Response | None:
         """
         # Общий метод, формирующий ответ.
 
@@ -189,7 +191,7 @@ class StaticStorageManager:
         return response
 
     def answer_to_user(self, code: str, context: Context = None, activate_app_info: bool = True) -> \
-            Optional[AssistantResponse]:
+            AssistantResponse | None:
         """
         # Формирование сообщения ANSWER_TO_USER.
 

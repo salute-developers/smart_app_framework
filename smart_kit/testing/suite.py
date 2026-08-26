@@ -4,7 +4,8 @@ import json
 import os
 from csv import DictWriter, QUOTE_MINIMAL
 from functools import cached_property
-from typing import AnyStr, Optional, Tuple, Any, Dict, Callable, List
+from typing import AnyStr, Any
+from collections.abc import Callable
 
 from core.configs.global_constants import LINK_BEHAVIOR_FLAG
 from core.message.from_message import SmartAppFromMessage
@@ -28,15 +29,15 @@ def run_testfile(
         parametrizer_cls: type,
         from_msg_cls: type,
         test_case_cls: type[TestCase],
-        storaged_predefined_fields: Dict[str, Any],
-        csv_file_callback: Optional[Callable[[str], Callable[[Any], None]]] = None,
+        storaged_predefined_fields: dict[str, Any],
+        csv_file_callback: Callable[[str], Callable[[Any], None]] | None = None,
         interactive: bool = False,
-        test_suite: Optional["TestSuite"] = None,
-) -> Tuple[int, int]:
+        test_suite: TestSuite | None = None,
+) -> tuple[int, int]:
     test_file_path = os.path.join(path, file)
     if not os.path.isfile(test_file_path) or not test_file_path.endswith('.json'):
         raise FileNotFoundError
-    with open(test_file_path, "r") as test_file:
+    with open(test_file_path) as test_file:
         json_obj = json.load(test_file)
     success = 0
     for test_case in json_obj:
@@ -75,7 +76,7 @@ class TestSuite:
         if make_csv:
             field_names = ['file', 'test_case', 'success', 'diff']
             results_csv_writer = DictWriter(
-                open(os.path.join(path, 'tests_results.csv'), 'wt'),
+                open(os.path.join(path, 'tests_results.csv'), 'w'),
                 fieldnames=field_names,
                 quoting=QUOTE_MINIMAL
             )
@@ -92,7 +93,7 @@ class TestSuite:
                 return __csv_test_case_callback
             self.csv_callback = __csv_file_callback
 
-        with open(predefined_fields_storage, "r") as f:
+        with open(predefined_fields_storage) as f:
             self.storaged_predefined_fields = json.load(f)
 
     @cached_property
@@ -148,10 +149,10 @@ class TestSuite:
 
 class TestCase:
     def __init__(self, app_model: SmartAppModel, settings: Settings, user_cls: type[User], parametrizer_cls: type,
-                 from_msg_cls: type[SmartAppFromMessage], messages: dict, storaged_predefined_fields: Dict[str, Any],
-                 interactive: bool, csv_case_callback: Optional[Callable[[Any], None]] = None,
-                 test_suite: Optional[TestSuite] = None, user: Optional[dict] = None,
-                 override_configs: Optional[dict] = None):
+                 from_msg_cls: type[SmartAppFromMessage], messages: dict, storaged_predefined_fields: dict[str, Any],
+                 interactive: bool, csv_case_callback: Callable[[Any], None] | None = None,
+                 test_suite: TestSuite | None = None, user: dict | None = None,
+                 override_configs: dict | None = None):
         self.messages = messages
         self.user_state = json.dumps(user)
         self.interactive = interactive
@@ -170,7 +171,7 @@ class TestCase:
         self._saved_configs_states = {}
         self.apply_override_configs(override_configs or {})
 
-    def _compare_answers(self, answers: List[SmartAppToMessage], expected_response: dict) -> bool:
+    def _compare_answers(self, answers: list[SmartAppToMessage], expected_response: dict) -> bool:
         expected_answers = expected_response["messages"]
         success = True
 

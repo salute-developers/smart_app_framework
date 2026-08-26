@@ -1,4 +1,3 @@
-# coding: utf-8
 from __future__ import annotations
 
 import logging
@@ -17,11 +16,12 @@ from core.mq.kafka.base_kafka_publisher import BaseKafkaPublisher
 
 if TYPE_CHECKING:
     from asyncio import AbstractEventLoop
-    from typing import Optional, Tuple, Any, Dict, Sequence
+    from typing import Any
+    from collections.abc import Sequence
 
 
 class KafkaPublisher(BaseKafkaPublisher):
-    def __init__(self, config: Dict[str, Any], loop: AbstractEventLoop):
+    def __init__(self, config: dict[str, Any], loop: AbstractEventLoop):
         self._config = config["publisher"]
         conf = self._config["conf"]
         self._update_old_config(conf)
@@ -31,21 +31,21 @@ class KafkaPublisher(BaseKafkaPublisher):
             debug_logger = logging.getLogger("debug_publisher")  # TODO add debug logger to _publisher events
             timestamp = time.strftime("_%d%m%Y_")
             debug_logger.addHandler(logging.FileHandler(
-                "{}/kafka_publisher_debug{}{}.log".format(internal_log_path, timestamp, os.getpid())
+                f"{internal_log_path}/kafka_publisher_debug{timestamp}{os.getpid()}.log"
             ))
         self._producer = AIOKafkaProducer(**conf, loop=loop)
         loop.run_until_complete(self._producer.start())
 
-    async def send(self, value: bytes, key: Any = None, topic_key: Optional[str] = None,
-                   headers: Optional[Sequence[Tuple[str, bytes]]] = None) -> None:
+    async def send(self, value: bytes, key: Any = None, topic_key: str | None = None,
+                   headers: Sequence[tuple[str, bytes]] | None = None) -> None:
         topic = self._config["topic"]
         if topic_key is not None:
             topic = topic[topic_key]
         print("topic:", topic)
         await self._producer.send_and_wait(topic=topic, value=value, headers=headers or list(), key=key)
 
-    async def send_to_topic(self, value: bytes, key: Any = None, topic: Optional[str] = None,
-                            headers: Optional[Sequence[Tuple[str, bytes]]] = None) -> None:
+    async def send_to_topic(self, value: bytes, key: Any = None, topic: str | None = None,
+                            headers: Sequence[tuple[str, bytes]] | None = None) -> None:
         if topic is None:
             params = {
                 "message": str(value),
@@ -91,13 +91,13 @@ class KafkaPublisher(BaseKafkaPublisher):
     async def close(self) -> None:
         await self._producer.stop()
 
-    def _setup_ssl(self, conf: Dict[str, Any], ssl_config: Optional[Dict[str, Any]] = None) -> None:
+    def _setup_ssl(self, conf: dict[str, Any], ssl_config: dict[str, Any] | None = None) -> None:
         if ssl_config:
             context = create_ssl_context(**ssl_config)
             conf["security_protocol"] = "SSL"
             conf["ssl_context"] = context
 
-    def _update_old_config(self, conf: Dict[str, Any]) -> None:
+    def _update_old_config(self, conf: dict[str, Any]) -> None:
         if "ssl.ca.location" in conf:
             context = create_ssl_context(
                 cafile=conf["ssl.ca.location"],

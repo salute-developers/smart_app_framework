@@ -12,5 +12,4 @@ class LimitedQueuedHashableObjectsDescription:
 
 class LimitedQueuedHashableObjectsDescriptionsItems(DescriptionsItems):
     def __init__(self, items):
-        super(LimitedQueuedHashableObjectsDescriptionsItems, self).__init__(LimitedQueuedHashableObjectsDescription,
-                                                                            items)
+        super().__init__(LimitedQueuedHashableObjectsDescription, items)

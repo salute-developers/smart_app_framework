@@ -1,5 +1,5 @@
-# coding: utf-8
-from typing import Iterable, Dict, Any, Optional
+from typing import Any
+from collections.abc import Iterable
 
 from core.model.factory import build_factory
 from core.model.registered import Registered
@@ -10,7 +10,7 @@ comparator_factory = build_factory(comparators)
 
 
 class Comparator:
-    def __init__(self, items: Optional[Dict[str, Any]]) -> None:
+    def __init__(self, items: dict[str, Any] | None) -> None:
         pass
 
     def compare(self, left: Any, right: Any) -> bool:

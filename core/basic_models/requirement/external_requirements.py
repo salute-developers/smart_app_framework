@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.requirement.basic_requirements import Requirement, requirement_factory
 from core.model.base_user import BaseUser
@@ -16,11 +18,11 @@ class ExternalRequirements(SmartUpdatableDescriptionsItems):
 class ExternalRequirement(Requirement):
     requirement: str
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.requirement = items["requirement"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         requirement = user.descriptions["external_requirements"][self.requirement]
         return requirement.check(text_preprocessing_result, user, params)

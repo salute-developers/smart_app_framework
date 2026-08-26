@@ -1,7 +1,7 @@
 """
 # Pre и Post процессы.
 """
-from typing import Optional
+from __future__ import annotations
 
 from core.logging.logger_utils import behaviour_log
 from nlpf_statemachine.example.app.sc.commands import generate_item
@@ -14,7 +14,7 @@ from nlpf_statemachine.example.app.sc.models.pre_process_message import (
 from nlpf_statemachine.models import AnswerToUser, AssistantMessage, Response
 
 
-def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[AssistantMessage]:
+def pre_process(message: CustomMessageToSkill, state: CustomState) -> AssistantMessage | None:
     """
     ## Pre-процесс.
 
@@ -38,7 +38,7 @@ def pre_process(message: CustomMessageToSkill, state: CustomState) -> Optional[A
         )
 
 
-def post_process(message: AssistantMessage, response: AnswerToUser, context: ExampleContext) -> Optional[Response]:
+def post_process(message: AssistantMessage, response: AnswerToUser, context: ExampleContext) -> Response | None:
     """
     ## Post-процесс.
 

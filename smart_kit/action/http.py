@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import asyncio
-from typing import Optional, Dict, Union, List, Any
+from typing import Any
 
 import aiohttp
 import aiohttp.client_exceptions
@@ -38,7 +40,7 @@ class HTTPRequestAction(NodeAction):
     TIMEOUT = "TIMEOUT"
     CONNECTION = "CONNECTION"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.method_params = items["params"]
         self.method_params.setdefault("method", self.DEFAULT_METHOD)
@@ -58,7 +60,7 @@ class HTTPRequestAction(NodeAction):
         self.method_params["timeout"] = ClientTimeout(self.method_params["timeout"])
 
     @staticmethod
-    def _check_headers_validity(headers: Dict[str, Any], user) -> Dict[str, str]:
+    def _check_headers_validity(headers: dict[str, Any], user) -> dict[str, str]:
         for header_name, header_value in list(headers.items()):
             if not isinstance(header_value, (str, bytes)):
                 if isinstance(header_value, (int, float, bool)):
@@ -88,7 +90,7 @@ class HTTPRequestAction(NodeAction):
             self.error = self.CONNECTION
 
     def _get_request_params(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                            params: Optional[Dict[str, Union[str, float, int]]] = None):
+                            params: dict[str, str | float | int] | None = None):
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
         request_parameters = self._get_rendered_tree_recursive(self._get_template_tree(self.method_params),
@@ -133,7 +135,7 @@ class HTTPRequestAction(NodeAction):
             return await action.run(user, text_preprocessing_result, None)
 
     async def run(self, user: BaseUser, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command] | None:
         self.preprocess(user, text_preprocessing_result, params)
         params = params or {}
         request_parameters = self._get_request_params(user, text_preprocessing_result, params)

@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Any, Optional, Tuple
+from typing import Any
 
 
 class Variables:
@@ -7,16 +7,16 @@ class Variables:
 
     def __init__(self, items, user, savable: bool = True):
         self._savable = savable
-        self._storage: Dict[str, Tuple[Any, float]] = items or {}
+        self._storage: dict[str, tuple[Any, float]] = items or {}
 
     @property
-    def raw(self) -> Optional[Dict[str, Any]]:
+    def raw(self) -> dict[str, Any] | None:
         if self._savable:
             return self._storage
         return None
 
     @property
-    def values(self) -> Dict[str, Any]:
+    def values(self) -> dict[str, Any]:
         self.expire()
         return {key: value[0] for key, value in self._storage.items()}
 

@@ -1,10 +1,10 @@
-from typing import List, Tuple, Any
+from typing import Any
 
 from core.logging.logger_utils import log
 from smart_kit.utils.object_location import ObjectLocation
 
 
-def ssml_string_parser(obj: Any, location: ObjectLocation) -> List[Tuple[str, ObjectLocation]]:
+def ssml_string_parser(obj: Any, location: ObjectLocation) -> list[tuple[str, ObjectLocation]]:
     ssml_strings = []
     if isinstance(obj, dict):
         # For pattern (dict contain ["command": "ANSWER_TO_USER"; nodes.pronounceTextType = "application/ssml"])

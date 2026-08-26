@@ -1,4 +1,3 @@
-# coding: utf-8
 from functools import cached_property
 
 from core.basic_models.actions.basic_actions import Action
@@ -11,7 +10,7 @@ class QuestionFieldDescription(BasicFieldDescription):
     DEFAULT_AVAILABLE_VALUE = True
 
     def __init__(self, items, id):
-        super(QuestionFieldDescription, self).__init__(items, id)
+        super().__init__(items, id)
         self._requests = items.get("questions", [])
         self._on_filled_actions = items.get("on_filled_actions", [])
         self._ask_again_requests = items.get("ask_again_questions", [])

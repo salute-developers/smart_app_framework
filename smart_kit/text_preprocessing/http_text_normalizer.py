@@ -1,7 +1,7 @@
 import requests
 import os
 from tqdm import tqdm
-from typing import List, Sequence
+from collections.abc import Sequence
 
 from smart_kit.text_preprocessing.base_text_normalizer import BaseTextNormalizer
 from smart_kit.utils.cache import ItemExpired
@@ -73,7 +73,7 @@ class HttpTextNormalizer(BaseTextNormalizer):
         for index in self._tqdm_func(range(0, max_ndx, n)):
             yield sequence[index: min(index + n, max_ndx)]
 
-    def _normalize_batch(self, batch: Sequence) -> List:
+    def _normalize_batch(self, batch: Sequence) -> list:
         response = requests.post(self._url, json=[{HttpTextNormalizer.TEXT_PARAM_NAME: el} for el in batch],
                                  timeout=self._timeout)
         response.raise_for_status()
@@ -82,7 +82,7 @@ class HttpTextNormalizer(BaseTextNormalizer):
             self.cache[item["original_text"]] = item
         return result
 
-    def normalize_sequence(self, texts: Sequence, batch_size=None) -> List:
+    def normalize_sequence(self, texts: Sequence, batch_size=None) -> list:
         normalized_texts = []
         batch_generator = self._get_batch(texts, batch_size or self._batch_size)
         for batch in batch_generator:

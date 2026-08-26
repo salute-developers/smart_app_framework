@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from smart_kit.action.http import HTTPRequestAction
 from smart_kit.configs import settings
@@ -8,7 +10,7 @@ class SmartPayAction(HTTPRequestAction):
     url = None
     method = None
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         request_params = items.get("request_params")
         smartpay_params = items.get("smartpay_params")
 
@@ -144,7 +146,7 @@ class SmartPayCreateAction(SmartPayAction):
             }
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + "/invoices"
         self.method = self.POST
         self.store = items.get("store", "smartpay_create_answer")
@@ -184,7 +186,7 @@ class SmartPayPerformAction(SmartPayAction):
             }
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.POST
         self.store = items.get("store", "smartpay_perform_answer")
@@ -204,7 +206,7 @@ class SmartPayGetStatusAction(SmartPayAction):
             "wait": 50 // опциональный параметр
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         items["request_params"] = {}
         inv_status = items.get("inv_status")
         wait = items.get("wait")
@@ -250,7 +252,7 @@ class SmartPayConfirmAction(SmartPayAction):
             }
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.PUT
         self.store = items.get("store", "smartpay_confirm_answer")
@@ -268,7 +270,7 @@ class SmartPayDeleteAction(SmartPayAction):
             "invoice_id": "0" // обязательный параметр
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.DELETE
         self.store = items.get("store", "smartpay_delete_answer")
@@ -305,7 +307,7 @@ class SmartPayRefundAction(SmartPayAction):
             }
         }
     """
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.url = settings.Settings()["template_settings"]["smartpay_url"] + f"/invoices/{items['invoice_id']}"
         self.method = self.PATCH
         self.store = items.get("store", "smartpay_refund_answer")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from nltk import word_tokenize
 from core.text_preprocessing.grammem.grammem_constants import TOKEN_TYPE, TEXT
@@ -10,7 +12,7 @@ class NLTKWordTokenizer:
     URL = re.compile(
         "(?:(?:https?|ftp)://)?(?:www)?[a-zA-Zа-яА-Я0-9_-]+(?:\\.[a-zA-Zа-яА-Я0-9_-]+)?\\.(?:com|ru|рф|org|bz|ua|ge|by|mp|net|cn)(?:/[a-zA-Zа-яА-Я0-9_\\-\\#\\&\\=\\?\\(\\)]+)*(?:\\.html|\\.xml)?/?")  # noqa
     MAIL = re.compile(r"[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}")
-    SPACES = re.compile("^\s+$")
+    SPACES = re.compile(r"^\s+$")
     QUASIPUNCT = "=…№-——'"
     DATE_CHECKER = DateConverter()
 
@@ -131,7 +133,7 @@ class NLTKWordTokenizer:
                 final_tokens = self._quasipunct_removal(token, new_token, final_tokens)
             elif len(token) == 0:
                 continue
-            elif re.match("\s+", token):
+            elif re.match(r"\s+", token):
                 continue
             elif "/" in token or "\\" in token:
                 if token == "/":

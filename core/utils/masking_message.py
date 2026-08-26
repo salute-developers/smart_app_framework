@@ -1,4 +1,6 @@
-from typing import Optional, Union, Match, Dict, List
+from __future__ import annotations
+
+from re import Match
 import re
 
 MASK = "***"
@@ -16,7 +18,7 @@ CARD_MASKING_FIELDS = ["message", "debug_info", "normalizedMessage", "normalized
 card_regular = re.compile(r"(?:(\d{18})|(\d{16})|(?:\d{4} ){3}(\d{4})(\s?\d{2})?)")
 
 
-class Counter(object):
+class Counter:
     # Класс счетчик для маскировки структуры, items - кол-во простых элементов, collections - коллекций
     # max_depth - максимальная глубина
     def __init__(self):
@@ -45,9 +47,9 @@ def card_sub_func(x: Match[str]) -> str:
     return mask + digs + (last_char * is_last_not_digit)
 
 
-def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]] = None,
+def masking(data: dict | list, masking_fields: dict | list | None = None,
             depth_level: int = 2, mask_available_depth: int = -1,
-            white_list: Optional[List[str]] = None) -> Union[Dict, List]:
+            white_list: list[str] | None = None) -> dict | list:
     """
     :param data: коллекция для маскирования приватных данных
     :param masking_fields: поля для обязательной маскировки независимо от уровня
@@ -66,9 +68,9 @@ def masking(data: Union[Dict, List], masking_fields: Optional[Union[Dict, List]]
                     masking_on=False, card_masking_on=False, white_list=white_list)
 
 
-def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
+def _masking(data: dict | list, masking_fields: dict | list,
              depth_level: int = 2, mask_available_depth: int = -1, masking_on: bool = False,
-             card_masking_on: bool = False, white_list: Optional[List[str]] = None) -> Union[Dict, List]:
+             card_masking_on: bool = False, white_list: list[str] | None = None) -> dict | list:
 
     # тут в зависимости от листа или словаря создаем итератор
     if isinstance(data, dict):
@@ -125,8 +127,8 @@ def _masking(data: Union[Dict, List], masking_fields: Union[Dict, List],
     return masked_data
 
 
-def structure_mask(data: Union[Dict, List], depth: int, available_depth: int = -1,
-                   counter: Optional[Counter] = None):
+def structure_mask(data: dict | list, depth: int, available_depth: int = -1,
+                   counter: Counter | None = None):
     """
     Функция маскирования для сложной структуры
     :param data: структура маскируемая без сохранения структуры

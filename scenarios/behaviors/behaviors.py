@@ -1,9 +1,7 @@
-# coding: utf-8
 import math
 import socket
 from collections import namedtuple
 from time import time
-from typing import Dict, List
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
@@ -28,7 +26,7 @@ class Behaviors:
         self.descriptions = descriptions
         self._user = user
         self.Callback = Callback
-        self._callbacks: Dict[str, Callback] = {}
+        self._callbacks: dict[str, Callback] = {}
         self._behavior_timeouts = []
         self._returned_callbacks = []
 
@@ -104,7 +102,7 @@ class Behaviors:
         self._callbacks = {}
 
     def _log_callback(
-        self, callback_id: str, log_name: str, metric, behavior_result: str, callback_action_params: Dict
+        self, callback_id: str, log_name: str, metric, behavior_result: str, callback_action_params: dict
     ):
         callback = self._get_callback(callback_id)
         behavior = self.descriptions[callback.behavior_id] if callback else None
@@ -129,7 +127,7 @@ class Behaviors:
             params=log_params,
         )
 
-    async def success(self, callback_id: str) -> List[Command]:
+    async def success(self, callback_id: str) -> list[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -155,7 +153,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    async def fail(self, callback_id: str) -> List[Command]:
+    async def fail(self, callback_id: str) -> list[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -176,7 +174,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    async def timeout(self, callback_id: str) -> List[Command]:
+    async def timeout(self, callback_id: str) -> list[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:
@@ -197,7 +195,7 @@ class Behaviors:
         self._delete(callback_id)
         return result
 
-    async def misstate(self, callback_id: str) -> List[Command]:
+    async def misstate(self, callback_id: str) -> list[Command]:
         callback = self._get_callback(callback_id)
         result = []
         if callback:

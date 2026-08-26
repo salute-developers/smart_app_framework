@@ -1,5 +1,3 @@
-# coding: utf-8
-
 ADJ_FORM = "adj_form"
 ADJECTIVAL_NUMBER = "adjectival_number"
 AMBIGUOUS = "ambiguous"

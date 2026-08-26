@@ -1,6 +1,3 @@
-# coding: utf-8
-
-
 class PreprocessingMessagesDescription:
     def __init__(self, items):
         items = items or {}

@@ -1,7 +1,9 @@
 """
 # Описание модели Device.
 """
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +16,7 @@ class Device(BaseModel):
     # Описание модели Device.
     """
 
-    platformType: Optional[str] = Field(default=None)
+    platformType: str | None = Field(default=None)
     """
     Операционная система устройства.
 
@@ -23,9 +25,9 @@ class Device(BaseModel):
     * ANDROID;
     * IOS.
     """
-    platformVersion: Optional[str] = Field(default=None)
+    platformVersion: str | None = Field(default=None)
     """Версия операционной системы."""
-    surface: Optional[str] = Field(default=None)
+    surface: str | None = Field(default=None)
     """
     Устройство или мобильное приложение, от которого приходит вызов ассистента.
 
@@ -35,17 +37,17 @@ class Device(BaseModel):
     * COMPANION — запрос от приложения Салют;
     * STARGATE — запрос от устройства SberPortal.
     """
-    surfaceVersion: Optional[str] = Field(default=None)
+    surfaceVersion: str | None = Field(default=None)
     """Версия поверхности."""
-    deviceId: Optional[str] = Field(default=None)
+    deviceId: str | None = Field(default=None)
     """Идентификатор устройства."""
-    features: Optional[DeviceFeatures] = Field(default=None)
+    features: DeviceFeatures | None = Field(default=None)
     """Описание функциональности устройства."""
-    capabilities: Optional[DeviceCapabilities] = Field(default=None)
+    capabilities: DeviceCapabilities | None = Field(default=None)
     """Описание возможностей устройства пользователя."""
-    additionalInfo: Optional[Any] = Field(default=None)
+    additionalInfo: Any | None = Field(default=None)
     """Дополнительная информация об объекте или устройстве. В настоящий момент не используется."""
-    deviceManufacturer: Optional[str] = Field(default=None)
+    deviceManufacturer: str | None = Field(default=None)
     """Производитель устройства"""
-    deviceModel: Optional[str] = Field(default=None)
+    deviceModel: str | None = Field(default=None)
     """Модель устройства"""

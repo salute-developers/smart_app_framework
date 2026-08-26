@@ -187,7 +187,7 @@ class TokenizeHelper:
                         string_for_w2v = token_type
                     elif not token.get(IS_STOP_WORD):
                         lemma = TokenizeHelper.lemma_modification(token.get(LEMMA))
-                        lemma = '{}{}{}'.format(lemma, TokenizeHelper.get_tense(token), TokenizeHelper.get_mood(token))
+                        lemma = f'{lemma}{TokenizeHelper.get_tense(token)}{TokenizeHelper.get_mood(token)}'
                         string_for_w2v = lemma
             elif include_sentence_endpoint:
                 string_for_w2v = token[TEXT]

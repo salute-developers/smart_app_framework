@@ -260,8 +260,8 @@ class Num2Ordinal:
 
     def __init__(self, num2text=None):
         self.num2text = num2text or Num2Text()
-        self.re_any_ord = re.compile("[+-]?\d+")
-        self.re_explicit_ord = re.compile("(\d+)\-?((?:о?го)|(?:ы?й)|(?:и?й)|(?:ой)|(?:ая)|(?:ое))")
+        self.re_any_ord = re.compile(r"[+-]?\d+")
+        self.re_explicit_ord = re.compile(r"(\d+)\-?((?:о?го)|(?:ы?й)|(?:и?й)|(?:ой)|(?:ая)|(?:ое))")
 
     def _gen_sub1000(self, sub1000, data, sex, case):
         if sub1000 in data:
@@ -300,12 +300,12 @@ class Num2Ordinal:
 
     def replace_everything_in_text(self, text, sex='m', case='nomn', only_explicit=False):
         def repl(m):
-            return " {} ".format(self(int(m.groups()[0]), **self.end2form[m.groups()[1]]))
-        text = self.re_explicit_ord.sub(repl=repl, string=" {} ".format(text)).strip().replace("  ", " ").strip()
+            return f" {self(int(m.groups()[0]), **self.end2form[m.groups()[1]])} "
+        text = self.re_explicit_ord.sub(repl=repl, string=f" {text} ").strip().replace("  ", " ").strip()
         if not only_explicit:
             def repl(x):
-                return " {} ".format(self(int(x.group()), sex=sex, case=case))
-            text = self.re_any_ord.sub(repl=repl, string=" {} ".format(text)).strip().replace("  ", " ").strip()
+                return f" {self(int(x.group()), sex=sex, case=case)} "
+            text = self.re_any_ord.sub(repl=repl, string=f" {text} ").strip().replace("  ", " ").strip()
         return text
 
     def __call__(self, num: int, sex="m", case="nomn"):
@@ -344,7 +344,7 @@ class Num2Ordinal:
 if __name__ == "__main__":
     num2ord = Num2Ordinal()
     t = "На улице 2 день хорошая погода"
-    print("Проверим режим замены вхождений по всему тексту: \"{}\"".format(t))
+    print(f"Проверим режим замены вхождений по всему тексту: \"{t}\"")
     print(num2ord.replace_everything_in_text(t))
     print()
 

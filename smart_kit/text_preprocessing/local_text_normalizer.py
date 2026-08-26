@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import List, Sequence
+from collections.abc import Sequence
 
 import nltk
 from rusenttokenize import ru_sent_tokenize
@@ -129,7 +129,7 @@ class LocalTextNormalizer(BaseTextNormalizer, metaclass=Singleton):
     def with_cache(cls, app_config, **kwargs):
         return cls()
 
-    def normalize_sequence(self, texts: Sequence, batch_size=None) -> List:
+    def normalize_sequence(self, texts: Sequence, batch_size=None) -> list:
         normalized_texts = []
         for text in texts:
             normalized_texts.append(self(text))

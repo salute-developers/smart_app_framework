@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from core.model.base_user import BaseUser
 
@@ -13,13 +15,13 @@ class CounterValueRequirement(ComparisonRequirement):
     operator: Operator
     key: str
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.key = items["key"]
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         counter = user.counters[self.key]
         return self.operator.compare(counter)
 
@@ -28,13 +30,13 @@ class CounterUpdateTimeRequirement(ComparisonRequirement):
     operator: Operator
     key: str
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.key = items["key"]
         self.fallback_value = items.get("fallback_value") or False
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         _time = user.counters[self.key].update_time
         return self.operator.compare(time() - _time) if _time else self.fallback_value

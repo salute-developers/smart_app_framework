@@ -1,12 +1,10 @@
-# coding: utf-8
-
 from scenarios.scenario_models.forms.form import form_model_factory
 from core.model.lazy_items import LazyItems
 
 
 class Forms(LazyItems):
     def __init__(self, items, descriptions, user):
-        super(Forms, self).__init__(items, descriptions, user, form_model_factory)
+        super().__init__(items, descriptions, user, form_model_factory)
 
     def __getitem__(self, description):
         if hasattr(description, "id"):

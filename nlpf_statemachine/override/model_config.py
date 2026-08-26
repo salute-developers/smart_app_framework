@@ -1,7 +1,6 @@
 """
 # Переопределение NLPF SmartAppResources.
 """
-from typing import List
 
 from nlpf_statemachine.const import STATE_MACHINE_REPOSITORY_NAME
 from nlpf_statemachine.override.repository import SMRepository
@@ -15,16 +14,16 @@ class SMSmartAppResources(SmartAppResources):
 
     CONTEXT_MANAGER = None
 
-    def override_repositories(self, repositories: List) -> List:
+    def override_repositories(self, repositories: list) -> list:
         """
         # Переопределение репозиториев.
 
         В список репозиториев добавляется хранилище для машины состояний.
 
         Args:
-            repositories (List): список репозиториев;
+            repositories (list): список репозиториев;
 
         Returns:
-            List: обновлённый список.
+            list: обновлённый список.
         """
         return repositories + [SMRepository(key=STATE_MACHINE_REPOSITORY_NAME, context_manager=self.CONTEXT_MANAGER)]
