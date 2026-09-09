@@ -1,4 +1,6 @@
-from typing import Dict, Any, NamedTuple, Union, List, TYPE_CHECKING
+from __future__ import annotations
+
+from typing import Any, TYPE_CHECKING
 
 from core.model.factory import build_factory
 from core.model.registered import Registered
@@ -15,13 +17,13 @@ class EventFormatter:
     def __init__(self, *args, **kwargs):
         pass
 
-    def format(self, events: List['Event']) -> List[Union[NamedTuple, Dict[str, Any]]]:
+    def format(self, events: list[Event]) -> list[dict[str, Any]]:
         raise NotImplementedError
 
 
 class HistoryEventFormatter(EventFormatter):
 
-    def format(self, events: List['Event']) -> List[Dict[str, Any]]:
+    def format(self, events: list[Event]) -> list[dict[str, Any]]:
         result = []
         for no, event in enumerate(events):
             formatted_event = self._format_event(event)
@@ -29,7 +31,7 @@ class HistoryEventFormatter(EventFormatter):
             result.append(formatted_event)
         return result
 
-    def _format_event(self, event: 'Event') -> Dict[str, Any]:
+    def _format_event(self, event: Event) -> dict[str, Any]:
         return {
             "scenarioName": event.scenario,
             "scenarioVersion": event.scenario_version,

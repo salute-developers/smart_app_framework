@@ -1,4 +1,3 @@
-# coding: utf-8
 from collections import defaultdict
 
 from core.model.lazy_items import LazyItems
@@ -49,18 +48,18 @@ class BaseScenarioModel:
 
 class ScenarioModels(LazyItems):
     def __init__(self, items, descriptions, user):
-        super(ScenarioModels, self).__init__(items, descriptions, user, scenario_model_factory)
+        super().__init__(items, descriptions, user, scenario_model_factory)
 
 
 class MetaClassifierScenarioModel(BaseScenarioModel):
     def __init__(self, value, description, user):
-        super(MetaClassifierScenarioModel, self).__init__(value, description, user)
+        super().__init__(value, description, user)
         self.scenario_id = value
 
 
 class FormFillingScenarioModel(BaseScenarioModel):
     def __init__(self, value, description, user):
-        super(FormFillingScenarioModel, self).__init__(value, description, user)
+        super().__init__(value, description, user)
         self._break_scenario = False
         self._shared_data = {}
         self._postprocessing_data = list()
@@ -88,7 +87,7 @@ class TreeScenarioModel(FormFillingScenarioModel):
     DEFAULT_COUNT = 10
 
     def __init__(self, items, description, user):
-        super(TreeScenarioModel, self).__init__(items, description, user)
+        super().__init__(items, description, user)
         items = items or {}
         self.current_node = items.get("current_node")
         self.number_of_calls = defaultdict(int)

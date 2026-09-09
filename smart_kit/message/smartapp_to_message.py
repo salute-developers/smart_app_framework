@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Iterable, Optional, List
+from typing import TYPE_CHECKING
+from collections.abc import Iterable
 import json
 from copy import copy
 
@@ -21,7 +22,7 @@ class SmartAppToMessage:
 
     def __init__(self, command: Command, message, request: SmartKitKafkaRequest,
                  forward_fields=None, masking_fields=None, validators: Iterable[MessageValidator] = (),
-                 masking_white_list: Optional[List[str]] = None, **kwargs):
+                 masking_white_list: list[str] | None = None, **kwargs):
         root_nodes = command.payload.pop(self.ROOT_NODES_KEY, None)
         self.command = command
         self.root_nodes = root_nodes or {}

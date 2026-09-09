@@ -1,5 +1,4 @@
 from time import time
-from typing import Dict
 
 
 class Counter:
@@ -69,7 +68,7 @@ class Counter:
         return value
 
     @property
-    def raw(self) -> Dict[str, int]:
+    def raw(self) -> dict[str, int]:
         if self.value is not None:
             return {
                 "value": self.value,

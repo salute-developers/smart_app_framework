@@ -2,7 +2,6 @@
 # Общие характеристики сообщения пользователя.
 """
 
-from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -12,11 +11,11 @@ class AnnotationsDetails(BaseModel):
     # Описание модели AnnotationsDetails.
     """
 
-    classes: List[str] = Field(default_factory=list)
+    classes: list[str] = Field(default_factory=list)
     """
     Список вариаций аннотаций.
     """
-    probas: List[int] = Field(default_factory=list)
+    probas: list[int] = Field(default_factory=list)
     """
     Список вероятностей соответствующих аннотаций.
     """

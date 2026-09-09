@@ -1,7 +1,7 @@
 import json
 import unittest
 from logging import LogRecord
-from typing import Dict, Any
+from typing import Any
 from unittest.mock import Mock
 
 from smart_kit.utils.logger_writer.logger_formatter import SmartKitJsonFormatter
@@ -54,10 +54,10 @@ class SmartKitJsonFormatterTest(unittest.TestCase):
         self.formatter = SmartKitJsonFormatter(**self.items)
 
     @staticmethod
-    def mock_log_record(args: Dict[str, Any]):
+    def mock_log_record(args: dict[str, Any]):
         return LogRecord("name", 40, 'pathname', 145, 'msg', [args], None)
 
-    def format_and_loads(self, args: Dict[str, Any]):
+    def format_and_loads(self, args: dict[str, Any]):
         record = self.mock_log_record(args)
         return json.loads(self.formatter.format(record))
 

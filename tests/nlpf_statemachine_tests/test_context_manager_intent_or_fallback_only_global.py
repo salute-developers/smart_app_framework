@@ -29,7 +29,7 @@ class TestScenarioIntentOrFallbackOnlyGlobal(SMAsyncioTestCase):
         """
         ## Конфигурация базовых параметров перед запуском тестов.
         """
-        super(TestScenarioIntentOrFallbackOnlyGlobal, self).setUp()
+        super().setUp()
         self.intent = "HELLO"
         self.stub_event = "STUB"
         self.message = self.mocks.message_to_skill()

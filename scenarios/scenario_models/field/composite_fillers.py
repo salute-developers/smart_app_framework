@@ -1,4 +1,6 @@
-from typing import Optional, Union, List, Dict, Any
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.requirement.basic_requirements import Requirement
 from core.model.factory import factory, list_factory
@@ -14,7 +16,7 @@ class RequirementFiller(FieldFillerDescription):
 
     FIELD_KEY = "filler"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self._requirement: str = items["requirement"]
         # can be used not only with filters but with every entity which implements FieldFillerDescription interface
@@ -34,22 +36,22 @@ class RequirementFiller(FieldFillerDescription):
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+                user: User, params: dict[str, Any] = None) -> int | float | str | bool | list | dict | None:
         if self.requirement.check(text_preprocessing_result, user, params):
             return self.internal_item.run(user, text_preprocessing_result, params)
 
 
 class ChoiceFiller(FieldFillerDescription):
-    items: List[RequirementFiller]
-    else_item: Optional[FieldFillerDescription]
+    items: list[RequirementFiller]
+    else_item: FieldFillerDescription | None
 
     FIELD_REQUIREMENT_KEY = "requirement_fillers"
     FIELD_ELSE_KEY = "else_filler"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
-        self._requirement_items: List[str] = items[self.FIELD_REQUIREMENT_KEY]
-        self._else_item: Optional[str] = items.get(self.FIELD_ELSE_KEY)
+        self._requirement_items: list[str] = items[self.FIELD_REQUIREMENT_KEY]
+        self._else_item: str | None = items.get(self.FIELD_ELSE_KEY)
 
         self.items = self.build_items()
 
@@ -59,16 +61,16 @@ class ChoiceFiller(FieldFillerDescription):
             self.else_item = None
 
     @list_factory(RequirementFiller)
-    def build_items(self) -> List[str]:
+    def build_items(self) -> list[str]:
         return self._requirement_items
 
     @factory(FieldFillerDescription)
-    def build_else_item(self) -> Optional[str]:
+    def build_else_item(self) -> str | None:
         return self._else_item
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+                user: User, params: dict[str, Any] = None) -> int | float | str | bool | list | dict | None:
         for item in self.items:
             if item.requirement.check(text_preprocessing_result, user, params):
                 return item.internal_item.run(user, text_preprocessing_result, params)
@@ -79,16 +81,16 @@ class ChoiceFiller(FieldFillerDescription):
 class ElseFiller(FieldFillerDescription):
     requirement: Requirement
     item: RequirementFiller
-    else_item: Optional[FieldFillerDescription]
+    else_item: FieldFillerDescription | None
 
     FIELD_ITEM_KEY = "filler"
     FIELD_ELSE_KEY = "else_filler"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self._requirement: str = items["requirement"]
         self._item: str = items[self.FIELD_ITEM_KEY]
-        self._else_item: Optional[str] = items.get(self.FIELD_ELSE_KEY)
+        self._else_item: str | None = items.get(self.FIELD_ELSE_KEY)
 
         self.requirement = self.build_requirement()
         self.item = self.build_item()
@@ -106,12 +108,12 @@ class ElseFiller(FieldFillerDescription):
         return self._item
 
     @factory(FieldFillerDescription)
-    def build_else_item(self) -> Optional[str]:
+    def build_else_item(self) -> str | None:
         return self._else_item
 
     @exc_handler(on_error_obj_method_name="on_extract_error")
     def extract(self, text_preprocessing_result: BaseTextPreprocessingResult,
-                user: User, params: Dict[str, Any] = None) -> Optional[Union[int, float, str, bool, List, Dict]]:
+                user: User, params: dict[str, Any] = None) -> int | float | str | bool | list | dict | None:
         if self.requirement.check(text_preprocessing_result, user, params):
             return self.item.run(user, text_preprocessing_result, params)
         elif self._else_item:

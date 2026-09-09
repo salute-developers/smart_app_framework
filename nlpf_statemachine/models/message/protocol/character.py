@@ -2,7 +2,7 @@
 # Описание модели ассистента.
 """
 
-from typing import Optional
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -14,7 +14,7 @@ class Character(BaseModel):
     # Модель ассистента.
     """
 
-    id: Optional[AssistantId] = Field(default=None)
-    name: Optional[AssistantName] = Field(default=None)
-    gender: Optional[AssistantGender] = Field(default=None)
-    appeal: Optional[AssistantAppeal] = Field(default=None)
+    id: AssistantId | None = Field(default=None)
+    name: AssistantName | None = Field(default=None)
+    gender: AssistantGender | None = Field(default=None)
+    appeal: AssistantAppeal | None = Field(default=None)

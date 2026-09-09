@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 from core.logging.logger_utils import behaviour_log
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
@@ -59,7 +59,7 @@ class Form:
         self._field_fillers_legacy.update(form._field_fillers_legacy)
         self._field_fillers.update(form._field_fillers)
 
-    def add_field(self, name: str, filler: Union[Filler, FieldFillerDescription]) -> None:
+    def add_field(self, name: str, filler: Filler | FieldFillerDescription) -> None:
         """
         # Добавление слота на форму.
 
@@ -80,7 +80,7 @@ class Form:
             self._field_fillers[name] = filler
 
     def fill(self, message: MessageToSkill, context: Context,
-             text_preprocessing_result: TextPreprocessingResult, user: SMUser) -> Dict[str, Any]:
+             text_preprocessing_result: TextPreprocessingResult, user: SMUser) -> dict[str, Any]:
         """
         # Заполнение формы в runtime.
 
@@ -91,7 +91,7 @@ class Form:
             user (SMUser): NLPF User.
 
         Returns:
-            Dict[str, Any]
+            dict[str, Any]
         """
         fields = {}
         for name, filler in self._field_fillers_legacy.items():

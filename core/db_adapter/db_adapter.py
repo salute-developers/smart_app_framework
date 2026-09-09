@@ -1,6 +1,6 @@
-# coding: utf-8
+from __future__ import annotations
+
 import asyncio
-from typing import Optional
 
 import core.logging.logger_constants as log_const
 from core.logging.logger_utils import log
@@ -21,7 +21,7 @@ class DBAdapter(Rerunable):
     IS_ASYNC = False
 
     def __init__(self, config=None):
-        super(DBAdapter, self).__init__(config)
+        super().__init__(config)
         self._client = None
 
     def _on_prepare(self):
@@ -92,7 +92,7 @@ class DBAdapter(Rerunable):
 class AsyncDBAdapter(DBAdapter):
     IS_ASYNC = True
 
-    async def is_alive(self) -> Optional[bool]:
+    async def is_alive(self) -> bool | None:
         raise NotImplementedError
 
     async def _on_all_tries_fail(self):

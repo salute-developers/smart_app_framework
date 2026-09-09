@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from functools import singledispatchmethod
-from typing import Dict, Any, Tuple
+from typing import Any
 
 import tabulate
 
@@ -12,9 +12,9 @@ DoesNotExpected = object()
 
 class Diff:
     def __init__(self):
-        self.missed: Dict[str, Any] = {}  # key : expected
-        self.different: Dict[str, Tuple[Any, Any]] = {}  # key: expected,actual
-        self.does_not_expected: Dict[str, Any] = {}  # key: actual
+        self.missed: dict[str, Any] = {}  # key : expected
+        self.different: dict[str, tuple[Any, Any]] = {}  # key: expected,actual
+        self.does_not_expected: dict[str, Any] = {}  # key: actual
 
     @singledispatchmethod
     @classmethod

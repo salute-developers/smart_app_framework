@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional, List, Union
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.actions.basic_actions import Action
 from core.basic_models.actions.string_actions import StringAction
@@ -11,15 +13,15 @@ from smart_kit.names.message_names import NOTHING_FOUND
 
 
 class NothingFoundAction(Action):
-    version: Optional[int]
-    id: Optional[str]
+    version: int | None
+    id: str | None
 
-    def __init__(self, items: Dict[str, Any] = None, id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any] = None, id: str | None = None):
         super().__init__(items, id)
         self._action = StringAction({"command": NOTHING_FOUND})
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         commands = []
         commands.extend(await self._action.run(user, text_preprocessing_result, params=params) or [])
         return commands

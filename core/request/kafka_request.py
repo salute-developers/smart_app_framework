@@ -9,7 +9,8 @@ import core.logging.logger_constants as log_const
 if TYPE_CHECKING:
     from core.mq.kafka.kafka_publisher import KafkaPublisher
     from aiokafka import ConsumerRecord
-    from typing import Dict, Optional, Sequence, Tuple, Any
+    from typing import Any
+    from collections.abc import Sequence
 
 
 class KafkaRequest(BaseRequest):
@@ -17,7 +18,7 @@ class KafkaRequest(BaseRequest):
     KAFKA_KEY = "kafka_key"
     TOPIC = "topic"
 
-    def __init__(self, items: Dict[str, str], id=None):
+    def __init__(self, items: dict[str, str], id=None):
         super().__init__(items)
         items = items or {}
         self.topic_key = items.get(self.TOPIC_KEY)
@@ -25,16 +26,16 @@ class KafkaRequest(BaseRequest):
         # topic_key has priority over topic
         self.topic = items.get(self.TOPIC)
 
-    def update_empty_items(self, items: Dict[str, str]) -> None:
+    def update_empty_items(self, items: dict[str, str]) -> None:
         self.topic_key = self.topic_key or items.get(self.TOPIC_KEY)
         self.kafka_key = self.kafka_key or items.get(self.KAFKA_KEY)
         self.topic = self.topic or items.get(self.TOPIC)
 
     @property
-    def group_key(self) -> Optional[str]:
-        return "{}_{}".format(self.kafka_key, self.topic_key) if (self.topic_key and self.kafka_key) else None
+    def group_key(self) -> str | None:
+        return f"{self.kafka_key}_{self.topic_key}" if (self.topic_key and self.kafka_key) else None
 
-    def _get_new_headers(self, source_mq_message: ConsumerRecord) -> Sequence[Tuple[str, bytes]]:
+    def _get_new_headers(self, source_mq_message: ConsumerRecord) -> Sequence[tuple[str, bytes]]:
         headers = source_mq_message.headers or []
         return headers
 
@@ -51,7 +52,7 @@ class KafkaRequest(BaseRequest):
             }
             log("KafkaRequest: got no topic and no topic_key", params=log_params, level="ERROR")
 
-    async def run(self, data: bytes, params: Dict[str, Any]) -> None:
+    async def run(self, data: bytes, params: dict[str, Any]) -> None:
         publishers = params["publishers"]
         publisher = publishers[self.kafka_key]
         await self.send(data=data, publisher=publisher, source_mq_message=params["mq_message"])

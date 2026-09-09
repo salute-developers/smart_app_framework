@@ -1,4 +1,3 @@
-# coding: utf-8
 from collections import deque
 
 from core.model.lazy_items import LazyItems
@@ -31,4 +30,4 @@ class LimitedQueuedHashableObjects:
 
 class LimitedQueuedHashableObjectsItems(LazyItems):
     def __init__(self, items, descriptions, user):
-        super(LimitedQueuedHashableObjectsItems, self).__init__(items, descriptions, user, LimitedQueuedHashableObjects)
+        super().__init__(items, descriptions, user, LimitedQueuedHashableObjects)

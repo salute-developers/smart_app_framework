@@ -36,7 +36,7 @@ class TestScenarioIntegrationTimeout(SMTestCase):
         """
         ## Базовая конфигурация теста.
         """
-        super(TestScenarioIntegrationTimeout, self).setUp()
+        super().setUp()
         self.base_event = random_string()
         self.request_name = random_string()
         self.screen = Screen(id=random_string())

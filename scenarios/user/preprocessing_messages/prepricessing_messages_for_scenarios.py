@@ -1,4 +1,3 @@
-# coding: utf-8
 from scenarios.user.message_history.message_history import MessageHistory
 
 

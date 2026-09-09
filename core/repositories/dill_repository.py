@@ -1,4 +1,3 @@
-# coding: utf-8
 import sys
 from pathlib import Path
 
@@ -18,7 +17,7 @@ class DillRepository(BaseRepository):
         required: raise FileNotFoundError if file not found
     """
     def __init__(self, filename, source=None, required=True, *args, **kwargs):
-        super(DillRepository, self).__init__(source=source, *args, **kwargs)
+        super().__init__(source=source, *args, **kwargs)
         self.filename = Path(filename)
         self.required = required
 
@@ -41,4 +40,4 @@ class DillRepository(BaseRepository):
             log('DillRepository.load loading failed. Error %(error)s', params=params, level='WARNING')
             if self.required:
                 raise
-        super(DillRepository, self).load()
+        super().load()

@@ -17,7 +17,7 @@ class RestRequest(BaseRequest):
     GET = "get"
 
     def __init__(self, items, id=None):
-        super(RestRequest, self).__init__(items)
+        super().__init__(items)
         self.url = items.get(self.URL)
         self.method = items.get("method", self.POST)
         self.rest_args = items.get("rest_args") or dict()

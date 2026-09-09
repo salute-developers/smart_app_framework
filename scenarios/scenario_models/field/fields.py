@@ -1,11 +1,10 @@
-# coding: utf-8
 from core.model.lazy_items import LazyItems
 
 
 class Fields(LazyItems):
     def __init__(self, items, descriptions, user, factory, lifetime):
         self._lifetime = lifetime
-        super(Fields, self).__init__(items, descriptions, user, factory)
+        super().__init__(items, descriptions, user, factory)
 
     def _build_factory(self, description, raw_data):
         return self._factory(description, raw_data or {}, self._user, self._lifetime)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from unittest import TestCase
 
@@ -148,7 +150,7 @@ class TestJinjaTemplates(TestCase):
     def test_ics(self):
         date = datetime.datetime.now()
 
-        expected = "".join(map(str, [date.year, "{:02d}".format(date.month), "{:02d}".format(date.day)]))
+        expected = "".join(map(str, [date.year, f"{date.month:02d}", f"{date.day:02d}"]))
         got = core.unified_template.jinja_filters.generate_ics(date)
         timestring = got.split()[2]  # Third row contains date
         self.assertTrue(expected in timestring)

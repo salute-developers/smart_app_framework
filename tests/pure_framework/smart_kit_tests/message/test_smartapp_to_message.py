@@ -1,4 +1,3 @@
-# coding: utf-8
 import unittest
 
 from core.message.msg_validator import MessageValidator

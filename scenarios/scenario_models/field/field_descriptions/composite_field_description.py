@@ -8,7 +8,7 @@ from scenarios.scenario_models.field.field_descriptions.basic_field_description 
 class CompositeFieldDescription(BasicFieldDescription):
 
     def __init__(self, items, id):
-        super(CompositeFieldDescription, self).__init__(items, id)
+        super().__init__(items, id)
         self._fields = items["fields"]
 
     @cached_property

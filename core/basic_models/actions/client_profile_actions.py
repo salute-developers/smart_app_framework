@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional, Union, List
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
@@ -43,13 +45,13 @@ class GiveMeMemoryAction(StringAction):
     """
     DEFAULT_KAFKA_KEY = "main"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         config = settings.Settings()
         self.command = GIVE_ME_MEMORY
         self.request_type = KAFKA
-        self.kafka_key: Optional[str] = items.get("kafka_key")
-        self.behavior: Optional[str] = items.get("behavior")
+        self.kafka_key: str | None = items.get("kafka_key")
+        self.behavior: str | None = items.get("behavior")
         self._nodes.update({
             "root_nodes": {
                 "protocolVersion": items.get("protocolVersion", 1)
@@ -73,7 +75,7 @@ class GiveMeMemoryAction(StringAction):
             self.request_data[KAFKA_REPLY_TOPIC] = config["template_settings"]["consumer_topic"]
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command] | None:
         if self.behavior:
             callback_id = user.message.generate_new_callback_id()
             scenario_id = user.last_scenarios.last_scenario_name if hasattr(user, 'last_scenarios') else None
@@ -145,11 +147,11 @@ class RememberThisAction(StringAction):
     """
     DEFAULT_KAFKA_KEY = "main"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.command = REMEMBER_THIS
         self.request_type = KAFKA
-        self.kafka_key: Optional[str] = items.get("kafka_key")
+        self.kafka_key: str | None = items.get("kafka_key")
         self._nodes.update({
             "root_nodes": {
                 "protocolVersion": items.get("protocolVersion", 3)
@@ -157,7 +159,7 @@ class RememberThisAction(StringAction):
         })
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> Optional[List[Command]]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command] | None:
         self._nodes.update({
             "consumer": {
                 "projectId": user.settings["template_settings"]["project_id"]
@@ -168,7 +170,7 @@ class RememberThisAction(StringAction):
         if "topic_key" not in self.request_data:
             self.request_data["topic_key"] = "client_info_remember"
         if "kafka_key" not in self.request_data:
-            settings_kafka_key: Optional[str] = user.settings["template_settings"].get("client_profile_kafka_key")
+            settings_kafka_key: str | None = user.settings["template_settings"].get("client_profile_kafka_key")
             kafka_key: str = self.kafka_key or settings_kafka_key or self.DEFAULT_KAFKA_KEY
             self.request_data["kafka_key"] = kafka_key
         if REPLY_TOPIC_KEY not in self.request_data and KAFKA_REPLY_TOPIC not in self.request_data:

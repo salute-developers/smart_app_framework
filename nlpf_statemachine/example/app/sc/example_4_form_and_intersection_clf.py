@@ -20,7 +20,6 @@
 **Замечание:** Примеры сделаны максимально простыми.
 Исключительно с целью показать механизм работы с `IntersectionClassifier`, создания филлеров и формы.
 """
-from typing import Dict
 
 from nlpf_statemachine.example.app.sc.commands import generate_item
 from nlpf_statemachine.example.app.sc.fillers.approve_filler import CustomApproveFiller, no_words, yes_words
@@ -61,14 +60,14 @@ scenario.add_classifier(classifier=classifier)
 # 4. Определяем экшен, который будет обрабатывать значения в слотах.
 @scenario.on_event(event="APPROVE")
 @scenario.on_event(event="REJECT")
-def form_filling_approve_action(form: Dict) -> AnswerToUser:
+def form_filling_approve_action(form: dict) -> AnswerToUser:
     """
     # Пример работы с формой и IntersectionClassifier.
 
     **Событие:** `FORM_FILLING_EVENT`. (определяется классификатором на основе вхождения ключевых фраз)
 
     Args:
-        form (Dict): форма (словарь).
+        form (dict): форма (словарь).
 
     Returns:
         AnswerToUser: Ответ с командой FormCommand.

@@ -90,7 +90,7 @@ class GetBundleCommand:
                 if not os.path.exists(self.bundle_path):
                     os.makedirs(self.bundle_path)
                 if os.path.exists(self.file_path):
-                    with open(self.file_path, "r") as json_file:
+                    with open(self.file_path) as json_file:
                         file_data = json.load(json_file)
                         file_data.update(items_from_pps)
                 else:

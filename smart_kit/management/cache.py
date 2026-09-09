@@ -30,12 +30,10 @@ class CreateCacheCommand(AppCommand):
                 if key == self._normalize_key:
                     yield val
                 if isinstance(val, dict):
-                    for result in self._collect_items_for_normalized(val):
-                        yield result
+                    yield from self._collect_items_for_normalized(val)
                 elif isinstance(val, list):
                     for item in val:
-                        for result in self._collect_items_for_normalized(item):
-                            yield result
+                        yield from self._collect_items_for_normalized(item)
 
     @property
     def items_for_normalized(self):

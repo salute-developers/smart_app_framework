@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from time import time
-from typing import Dict, Any, Optional, NamedTuple, List, Union, TYPE_CHECKING
+from typing import Any, NamedTuple, TYPE_CHECKING
 
 from core.logging.logger_utils import log
 
@@ -9,24 +11,24 @@ if TYPE_CHECKING:
 
 
 class Event(NamedTuple):
-    type: Optional[str] = None
-    scenario: Optional[str] = None
-    scenario_version: Optional[str] = None
-    node: Optional[str] = None
-    result: Optional[str] = None
-    content: Optional[Dict[str, str]] = None
+    type: str | None = None
+    scenario: str | None = None
+    scenario_version: str | None = None
+    node: str | None = None
+    result: str | None = None
+    content: dict[str, str] | None = None
     created_time: float = time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self._asdict()
 
 
 class History:
 
-    _events: List[Event]
+    _events: list[Event]
     _description: 'HistoryDescription'
 
-    def __init__(self, items: Dict[str, Any], description: 'HistoryDescription', user: 'User'):
+    def __init__(self, items: dict[str, Any], description: 'HistoryDescription', user: 'User'):
         items = items or {}
         self._description = description
         self._events = [Event(**e) for e in items.get('events', [])]
@@ -34,7 +36,7 @@ class History:
             log("History: scenario history events logging disabled", level="WARNING")
 
     @property
-    def raw(self) -> Dict[str, Any]:
+    def raw(self) -> dict[str, Any]:
         return {
             "events": [e.to_dict() for e in self.get_raw_events()]
         }
@@ -43,10 +45,10 @@ class History:
     def enabled(self) -> bool:
         return self._description.enabled
 
-    def get_events(self) -> List[Union[NamedTuple, Dict[str, Any]]]:
+    def get_events(self) -> list[dict[str, Any]]:
         return self._description.formatter.format(self._events)
 
-    def get_raw_events(self) -> List[Event]:
+    def get_raw_events(self) -> list[Event]:
         return self._events
 
     def add_event(self, event: Event):

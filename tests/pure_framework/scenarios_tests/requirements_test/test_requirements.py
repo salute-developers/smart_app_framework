@@ -1,4 +1,5 @@
-# coding: utf-8
+from __future__ import annotations
+
 import unittest
 from unittest.mock import Mock
 
@@ -173,7 +174,7 @@ class RequirementTest(unittest.TestCase):
     def test_regexp_in_template_req_true(self):
         items = {
             "template": "{{ payload.message.strip() }}",
-            "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
+            "regexp": r"(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
         }
         requirement = RegexpInTemplateRequirement(items)
         params = {"payload": {
@@ -190,7 +191,7 @@ class RequirementTest(unittest.TestCase):
     def test_regexp_in_template_req_false(self):
         items = {
             "template": "{{ payload.message.strip() }}",
-            "regexp": "(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
+            "regexp": r"(^|\s)[Фф](\.|-)?1(\-)?(у|У)?($|\s)"
         }
         requirement = RegexpInTemplateRequirement(items)
         params = {"payload": {

@@ -1,4 +1,3 @@
-# coding: utf-8
 import unittest
 
 from smart_kit.testing.ssml_test.ssml_string_parser import ssml_string_parser

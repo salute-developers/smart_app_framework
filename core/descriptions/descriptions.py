@@ -1,5 +1,5 @@
-# coding: utf-8
-from typing import Dict, Callable, Any
+from typing import Any
+from collections.abc import Callable
 
 from core.descriptions.descriptions_items import DescriptionsItems
 from core.model.registered import Registered
@@ -13,8 +13,8 @@ def default_description_factory(x):
 
 
 class Descriptions:
-    def __init__(self, registered_repositories: Dict[str, BaseRepository]) -> None:
-        self.registered_repositories: Dict[str, BaseRepository] = registered_repositories
+    def __init__(self, registered_repositories: dict[str, BaseRepository]) -> None:
+        self.registered_repositories: dict[str, BaseRepository] = registered_repositories
         self._descriptions: dict = {}
 
     def __getitem__(self, key: str) -> Any:

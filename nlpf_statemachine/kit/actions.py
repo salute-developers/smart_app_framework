@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 # Экшен.
 
@@ -35,7 +34,10 @@
 
 """
 
-from typing import Any, Callable, Dict, List, Optional
+from __future__ import annotations
+
+from typing import Any
+from collections.abc import Callable
 
 from core.logging.logger_utils import behaviour_log
 from nlpf_statemachine.kit.errors import ActionDisabledError, ActionWithNoAnswerError, ActionWithNoValidAnswerError
@@ -52,12 +54,12 @@ class Requirement:
     Для создания своих условий рекомендовано наследоваться и определять метод run.
     """
 
-    def __init__(self, id: str, requirement: Optional[Callable] = None) -> None:
+    def __init__(self, id: str, requirement: Callable | None = None) -> None:
         self.id = id
         if requirement:
             self.run = requirement
 
-    def __call__(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def __call__(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Вызов requirement.
 
@@ -66,14 +68,14 @@ class Requirement:
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             bool
         """
         return self.run(message=message, context=context, form=form)
 
-    def run(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def run(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Основной метод для определения доступности экшена.
 
@@ -82,7 +84,7 @@ class Requirement:
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             bool
@@ -96,12 +98,12 @@ class Action:
     """
 
     ENABLED: bool = True
-    id: Optional[str]
+    id: str | None
 
     def __init__(self, id: str) -> None:
         self.id = id
 
-    async def __call__(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> Response:
+    async def __call__(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> Response:
         """
         ## Вызов экшена.
 
@@ -110,7 +112,7 @@ class Action:
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             Response
@@ -125,7 +127,7 @@ class Action:
             return response
         raise ActionDisabledError(action=self.id)
 
-    async def run(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> Response:
+    async def run(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> Response:
         """
         ## Основной метод для вызова экшена.
 
@@ -134,14 +136,14 @@ class Action:
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             Response
         """
         raise NotImplementedError
 
-    def check(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def check(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Проверка доступности экшена.
 
@@ -151,7 +153,7 @@ class Action:
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             bool
@@ -164,7 +166,7 @@ class RequirementAction(Action):
     # Экшен с условием на запуск.
     """
 
-    async def run(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> Response:
+    async def run(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> Response:
         """
         ## Основной метод для вызова экшена.
 
@@ -173,14 +175,14 @@ class RequirementAction(Action):
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             Response
         """
         raise NotImplementedError
 
-    def requirement(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def requirement(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Основной метод для определения доступности экшена.
 
@@ -189,14 +191,14 @@ class RequirementAction(Action):
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма.
+            form (dict[str, Any]): Форма.
 
         Returns:
             bool
         """
         raise NotImplementedError
 
-    def check(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def check(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Проверка доступности экшена.
 
@@ -206,7 +208,7 @@ class RequirementAction(Action):
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма.
+            form (dict[str, Any]): Форма.
 
         Returns:
             bool
@@ -219,15 +221,15 @@ class MultipleRequirementsAction(RequirementAction):
     # Экшен с множеством условий на запуск.
     """
 
-    id: Optional[str]
+    id: str | None
 
-    def __init__(self, id: str, requirements: Optional[List[Callable]] = None) -> None:
-        super(MultipleRequirementsAction, self).__init__(id=id)
+    def __init__(self, id: str, requirements: list[Callable] | None = None) -> None:
+        super().__init__(id=id)
         self._requirements = []
         if requirements:
             self.add_requirements(requirements)
 
-    async def run(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> Response:
+    async def run(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> Response:
         """
         ## Основной метод для вызова экшена.
 
@@ -236,14 +238,14 @@ class MultipleRequirementsAction(RequirementAction):
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             Response
         """
         raise NotImplementedError
 
-    def requirement(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> bool:
+    def requirement(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> bool:
         """
         ## Основной метод для определения доступности экшена.
 
@@ -252,7 +254,7 @@ class MultipleRequirementsAction(RequirementAction):
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма.
+            form (dict[str, Any]): Форма.
 
         Returns:
             bool
@@ -274,12 +276,12 @@ class MultipleRequirementsAction(RequirementAction):
         """
         self._requirements.append(requirement)
 
-    def add_requirements(self, requirements: List[Callable]) -> None:
+    def add_requirements(self, requirements: list[Callable]) -> None:
         """
         ## Добаление множества requirements.
 
         Args:
-            requirements (List[Callable]): Условия на доступность экшена.
+            requirements (list[Callable]): Условия на доступность экшена.
 
         Returns:
             None
@@ -293,18 +295,18 @@ class GeneratedAction(MultipleRequirementsAction):
     # Экшен, сгенерированный из декоратора.
     """
 
-    def __init__(self, id: str, action: Callable, requirements: Optional[List[Callable]] = None) -> None:
-        super(GeneratedAction, self).__init__(id=id, requirements=requirements)
+    def __init__(self, id: str, action: Callable, requirements: list[Callable] | None = None) -> None:
+        super().__init__(id=id, requirements=requirements)
         self._run = action
 
-    async def run(self, message: BaseMessage, context: Context, form: Dict[str, Any]) -> Response:
+    async def run(self, message: BaseMessage, context: Context, form: dict[str, Any]) -> Response:
         """
         ## Основной метод для вызова экшена.
 
         Args:
             message (nlpf_statemachine.models.message.protocol.assistant_message.BaseMessage): Тело запроса.
             context (nlpf_statemachine.models.context.Context): Контекст.
-            form (Dict[str, Any]): Форма
+            form (dict[str, Any]): Форма
 
         Returns:
             Response

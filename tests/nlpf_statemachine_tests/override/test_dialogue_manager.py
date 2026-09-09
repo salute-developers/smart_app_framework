@@ -1,7 +1,8 @@
 """
 # Тесты на nlpf_statemachine.override.dialog_manager.
 """
-from typing import List, Optional
+from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 from pydantic import BaseModel
@@ -19,17 +20,17 @@ class TestScenarioSimpleEvent(SMAsyncioTestCaseBase):
     SMART_KIT_APP_CONFIG = "nlpf_statemachine.example.app_config"
 
     @staticmethod
-    def _assert_one_command(response: List[Command]) -> None:
+    def _assert_one_command(response: list[Command]) -> None:
         assert isinstance(response, list)
         assert len(response) == 1
         assert isinstance(response[0], Command)
 
     async def _run_statemachine(
             self,
-            mock_response: Optional[Response],
+            mock_response: Response | None,
             context_manager_run: MagicMock,
             success_run: bool = True,
-    ) -> List[Command]:
+    ) -> list[Command]:
         event: str = random_guid()
         context_manager_run.return_value = mock_response
         user = self.mocks.user()

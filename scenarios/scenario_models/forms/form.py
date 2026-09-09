@@ -39,7 +39,7 @@ class BaseForm:
 
 class Form(BaseForm):
     def __init__(self, items, description, user):
-        super(Form, self).__init__(items, description, user)
+        super().__init__(items, description, user)
         items = items or {}
         self.fields = Fields(items.get("fields"), description.fields, user, field_model_factory, description.lifetime)
 

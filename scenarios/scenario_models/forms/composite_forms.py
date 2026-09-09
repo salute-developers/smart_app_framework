@@ -4,7 +4,7 @@ from scenarios.scenario_models.forms.forms import Forms
 
 class CompositeForm(BaseForm):
     def __init__(self, items, description, user):
-        super(CompositeForm, self).__init__(items, description, user)
+        super().__init__(items, description, user)
         items = items or {}
         self.forms = Forms(items.get("forms"), description.forms, user)
         self._valid = items.get("valid") or self.description.valid

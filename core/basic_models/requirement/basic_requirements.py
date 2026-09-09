@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import logging
 import hashlib
 from datetime import datetime, timezone
 from functools import cached_property
 from random import random
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from croniter import croniter
 
@@ -43,7 +45,7 @@ class Requirement:
     """
     cache_result = False
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         items = items or {}
         self._descr = items.get("_description")
         self.items = items
@@ -62,7 +64,7 @@ class Requirement:
         }
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return True
 
     def _on_check_error_result(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser) -> bool:
@@ -70,7 +72,7 @@ class Requirement:
         raise
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         if self.cache_result:
             cached_results = user.message_vars.get("cached_req_results")
             if not cached_results:
@@ -117,9 +119,9 @@ class Requirement:
 
 
 class CompositeRequirement(Requirement):
-    requirements: List[Requirement]
+    requirements: list[Requirement]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self._requirements = items["requirements"]
         self.requirements = self.build_requirements()
@@ -132,7 +134,7 @@ class CompositeRequirement(Requirement):
 class AndRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return all(
             requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
             for requirement in self.requirements
@@ -142,7 +144,7 @@ class AndRequirement(CompositeRequirement):
 class OrRequirement(CompositeRequirement):
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return any(
             requirement.check(text_preprocessing_result=text_preprocessing_result, user=user, params=params)
             for requirement in self.requirements
@@ -152,7 +154,7 @@ class OrRequirement(CompositeRequirement):
 class NotRequirement(Requirement):
     requirement: Requirement
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self._requirement = items["requirement"]
         self.requirement = self.build_requirement()
@@ -162,7 +164,7 @@ class NotRequirement(Requirement):
         return self._requirement
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return not self.requirement.check(text_preprocessing_result=text_preprocessing_result, user=user,
                                           params=params)
 
@@ -170,7 +172,7 @@ class NotRequirement(Requirement):
 class ComparisonRequirement(Requirement):
     operator: Operator
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self._operator = items["operator"]
         self.operator = self.build_operator()
@@ -183,35 +185,35 @@ class ComparisonRequirement(Requirement):
 class RandomRequirement(Requirement):
     percent: int
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         result = random() * 100
         return result < self.percent
 
 
 class TopicRequirement(Requirement):
-    topics: List[str]
+    topics: list[str]
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.topics = items["topics"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return user.message.topic_key in self.topics
 
 
 class TemplateRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self._template = UnifiedTemplateMultiLoader(items["template"])
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result)
         params.update(collected)
@@ -227,12 +229,12 @@ class TemplateRequirement(Requirement):
 class RollingRequirement(Requirement):
     percent: int
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.percent = items["percent"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         id = user.id
         s = id.encode('utf-8')
         hash = int(hashlib.sha256(s).hexdigest(), 16)
@@ -241,14 +243,14 @@ class RollingRequirement(Requirement):
 
 
 class TimeRequirement(ComparisonRequirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
 
     def _check(
             self,
             text_preprocessing_result: BaseTextPreprocessingResult,
             user: BaseUser,
-            params: Dict[str, Any] = None
+            params: dict[str, Any] = None
     ) -> bool:
         message_time_dict = user.message.payload['meta']['time']
         message_timestamp_sec = message_time_dict['timestamp'] // 1000
@@ -266,7 +268,7 @@ class TimeRequirement(ComparisonRequirement):
 class DateTimeRequirement(Requirement):
     match_cron: str
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.match_cron = items['match_cron']
 
@@ -274,7 +276,7 @@ class DateTimeRequirement(Requirement):
             self,
             text_preprocessing_result: BaseTextPreprocessingResult,
             user: BaseUser,
-            params: Dict[str, Any] = None
+            params: dict[str, Any] = None
     ) -> bool:
         message_time_dict = user.message.payload['meta']['time']
         message_timestamp_sec = message_time_dict['timestamp'] // 1000
@@ -283,9 +285,9 @@ class DateTimeRequirement(Requirement):
 
 
 class IntersectionRequirement(Requirement):
-    phrases: Optional[List]
+    phrases: list | None
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.filler = IntersectionFieldFiller(
             {
@@ -301,7 +303,7 @@ class IntersectionRequirement(Requirement):
             self,
             text_preprocessing_result: TextPreprocessingResult,
             user: User,
-            params: Dict[str, Any] = None
+            params: dict[str, Any] = None
     ) -> bool:
         result = bool(self.filler.extract(text_preprocessing_result, user, params))
         return result
@@ -313,7 +315,7 @@ class ClassifierRequirement(Requirement):
     но не равной классу other.
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items=items, id=id)
         self._classifier = items["classifier"]
 
@@ -322,7 +324,7 @@ class ClassifierRequirement(Requirement):
         return ExternalClassifier(self._classifier)
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         check_res = True
         classifier = self.classifier
         with StatsTimer() as timer:
@@ -342,14 +344,14 @@ class FormFieldValueRequirement(Requirement):
     иначе - False. Данное условие предназначено только для плоских форм.
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.form_name = items["form_name"]
         self.field_name = items["field_name"]
         self.value = items["value"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return user.forms[self.form_name].fields[self.field_name].value == self.value
 
 
@@ -359,7 +361,7 @@ class EnvironmentRequirement(Requirement):
     Возможные значения в values: ift, uat, pt, prod (это ИФТ, ПСИ, НТ, ПРОМ).
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.values = items.get("values", [])
         # Из конфига получаем среду исполнения
@@ -370,7 +372,7 @@ class EnvironmentRequirement(Requirement):
         self.check_result = self.environment in self.values if self.environment else False
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return self.check_result
 
 
@@ -379,12 +381,12 @@ class CharacterIdRequirement(Requirement):
     в список значений, иначе - False.
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items=items, id=id)
         self.values = items["values"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return user.message.payload["character"]["id"] in self.values
 
 
@@ -393,10 +395,10 @@ class FeatureToggleRequirement(Requirement):
     Тоглы задаются в template_config.yml, с помощью значений True и False их можно включить или выключить.
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items=items, id=id)
         self.toggle_name = items["toggle_name"]
 
     def _check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: User,
-               params: Dict[str, Any] = None) -> bool:
+               params: dict[str, Any] = None) -> bool:
         return user.settings["template_settings"].get(self.toggle_name, False)

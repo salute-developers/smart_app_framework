@@ -1,4 +1,3 @@
-# coding: utf-8
 import random
 import threading
 
@@ -22,7 +21,7 @@ class IgniteThreadAdapter(DBAdapter):
         self._cache_name = config["cache_name"]
         self._clients = {}
         self._caches = {}
-        super(IgniteThreadAdapter, self).__init__(config)
+        super().__init__(config)
 
     def _open(self, filename, *args, **kwargs):
         pass

@@ -1,7 +1,7 @@
 """
 # Описание моделей запросов.
 """
-from typing import Optional
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -20,10 +20,10 @@ class CustomState(BaseModel):
     # Описание стейта с фронта.
     """
 
-    replace_message: Optional[bool] = Field(default=None)
+    replace_message: bool | None = Field(default=None)
     """Флаг подмены сообщения для примера с pre_process."""
 
-    screen: Optional[str] = Field(default=None)
+    screen: str | None = Field(default=None)
     """Наименование текущего экрана."""
 
 
@@ -32,7 +32,7 @@ class CustomCurrentApp(CurrentApp):
     # Текущий current_app в запросе.
     """
 
-    state: Optional[CustomState] = Field(default=None)
+    state: CustomState | None = Field(default=None)
     """Описание стейта."""
 
 
@@ -41,7 +41,7 @@ class CustomMeta(AssistantMeta):
     # Модель meta в запросе.
     """
 
-    current_app: Optional[CustomCurrentApp] = Field(default=None)
+    current_app: CustomCurrentApp | None = Field(default=None)
     """Текущий current_app."""
 
 

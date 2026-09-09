@@ -40,7 +40,7 @@ class TestScenarioIntegration(SMAsyncioTestCase):
         """
         ## Базовая конфигурация теста.
         """
-        super(TestScenarioIntegration, self).setUp()
+        super().setUp()
         self.init()
         self.screen = Screen(id=random_string())
         self.core.context_manager.add_screen(screen=self.screen)

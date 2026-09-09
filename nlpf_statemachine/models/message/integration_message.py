@@ -2,7 +2,7 @@
 # Базовые модели для интеграций.
 """
 
-from typing import Optional, Dict
+from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -15,15 +15,15 @@ class IntegrationPayload(BaseModel):
     # Описание модели IntegrationPayload.
     """
 
-    status: Optional[str] = Field(default=None)
+    status: str | None = Field(default=None)
     """Статус интеграции."""
-    errorTitle: Optional[str] = Field(default=None)
+    errorTitle: str | None = Field(default=None)
     """Заголовок ошибки (если есть)."""
-    errorMessage: Optional[str] = Field(default=None)
+    errorMessage: str | None = Field(default=None)
     """Сообщение об ошибке (если есть)."""
-    error: Optional[str] = Field(default=None)
+    error: str | None = Field(default=None)
     """Информация об ошибке (если есть)."""
-    data: Optional[Dict] = Field(default=None)
+    data: dict | None = Field(default=None)
     """Данные, полученные в ответ от интеграции."""
 
 

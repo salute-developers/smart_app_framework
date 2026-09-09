@@ -1,18 +1,16 @@
-# coding=utf-8
+from __future__ import annotations
+
 import copy
 import datetime
 import gc
 import json
 import os
 import re
-import weakref
 
 from collections import OrderedDict
 from math import isnan, isinf
-from typing import Optional, Any, Dict
+from typing import Any
 from time import time
-
-from scenarios.user.user_model import User
 
 
 def convert_version_to_list_of_int(version):
@@ -53,7 +51,7 @@ def get_number(word):
     return number
 
 
-def convert_to_float(word: str) -> Optional[float]:
+def convert_to_float(word: str) -> float | None:
     try:
         num = float(word)
         if isnan(num) or isinf(num):
@@ -100,7 +98,7 @@ def merge_numbers(text):
     def remove_whitespace(number_match):
         return number_match.group().replace(" ", "")
 
-    regex = re.compile("\d+(\s\d+)+")
+    regex = re.compile(r"\d+(\s\d+)+")
     return regex.sub(remove_whitespace, text)
 
 
@@ -146,7 +144,7 @@ def deep_update_dict(original, update):
     return update
 
 
-def mask_numbers(message: Dict[str, Any]) -> Dict[str, Any]:
+def mask_numbers(message: dict[str, Any]) -> dict[str, Any]:
     masked_message = copy.deepcopy(message)
     items = masked_message.get("payload", {}).get("items", [])
     for item in items:

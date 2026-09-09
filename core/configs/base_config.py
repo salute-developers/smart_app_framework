@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from core.model.registered import Registered
 from core.repositories.base_repository import BaseRepository
@@ -36,8 +35,8 @@ class BaseConfig:
         items = self.registered_repositories
         return {key: items[key].data for key in items}
 
-    def _override_repositories(self, main_rep: List[BaseRepository],
-                               new_repo: List[BaseRepository]) -> List[BaseRepository]:
+    def _override_repositories(self, main_rep: list[BaseRepository],
+                               new_repo: list[BaseRepository]) -> list[BaseRepository]:
         """
         Метод предназначе для переопределения источников для чтения по умолчанию на
         пользовательские

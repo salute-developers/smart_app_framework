@@ -1,6 +1,8 @@
-# coding=utf-8
+from __future__ import annotations
+
 from functools import cached_property
-from typing import Iterable, Dict, Optional, Set, Any, List, Union, Tuple, Sequence
+from typing import Any, get_type_hints
+from collections.abc import Iterable, Sequence
 import json
 import uuid
 
@@ -58,10 +60,10 @@ class SmartAppFromMessage:
     payload: dict
     uuid: dict
 
-    def __init__(self, value: Dict[str, Any], topic_key: Optional[str] = None, creation_time: Optional[int] = None,
-                 kafka_key: Optional[str] = None, headers: Optional[Sequence[Tuple[str, bytes]]] = None,
-                 masking_fields: Optional[Union[Dict[str, int], List[str]]] = None, headers_required: bool = True,
-                 validators: Iterable[MessageValidator] = (), callback_id: Optional[str] = None):
+    def __init__(self, value: dict[str, Any], topic_key: str | None = None, creation_time: int | None = None,
+                 kafka_key: str | None = None, headers: Sequence[tuple[str, bytes]] | None = None,
+                 masking_fields: dict[str, int] | list[str] | None = None, headers_required: bool = True,
+                 validators: Iterable[MessageValidator] = (), callback_id: str | None = None):
         self.logging_uuid = str(uuid.uuid4())
         self._value = value
         self.topic_key = topic_key
@@ -86,6 +88,7 @@ class SmartAppFromMessage:
             return False
 
         try:
+            field_types = get_type_hints(self.__class__)
             message_name = self.as_dict.get(self.MESSAGE_NAME)
             required_fields = self._REQUIRED_FIELDS_MAP.get(message_name) or self._REQUIRED_FIELDS_MAP[None]
             for r_field in required_fields:
@@ -93,16 +96,16 @@ class SmartAppFromMessage:
                     self.print_validation_error(r_field)
                     return False
 
-                if r_field not in self.__annotations__:
+                if r_field not in field_types:
                     continue
 
                 if not isinstance(
                         self.as_dict[r_field],
-                        self.__annotations__[r_field],
+                        field_types[r_field],
                 ):
                     self.print_validation_error(
                         r_field,
-                        self.__annotations__[r_field],
+                        field_types[r_field],
                     )
                     return False
 
@@ -119,8 +122,8 @@ class SmartAppFromMessage:
 
     def print_validation_error(
             self,
-            required_field: Optional[str] = None,
-            required_field_type: Optional[str] = None,
+            required_field: str | None = None,
+            required_field_type: str | None = None,
     ) -> None:
         if self._value:
             params = {
@@ -157,18 +160,18 @@ class SmartAppFromMessage:
         return CALLBACK_ID_HEADER
 
     @property
-    def session_id(self) -> Optional[str]:
+    def session_id(self) -> str | None:
         return self.as_dict.get(self.SESSION_ID)
 
     # database user_id
     @property
-    def db_uid(self) -> Optional[str]:
+    def db_uid(self) -> str | None:
         if self.uid is None or self.channel is None:
             return None
-        return "{}_{}".format(self.uid, self.channel)
+        return f"{self.uid}_{self.channel}"
 
     @property
-    def channel(self) -> Optional[str]:
+    def channel(self) -> str | None:
         return self.uuid.get(field.USER_CHANNEL)
 
     @channel.setter
@@ -176,19 +179,19 @@ class SmartAppFromMessage:
         self.uuid[field.USER_CHANNEL] = value
 
     @property
-    def uid(self) -> Optional[str]:
+    def uid(self) -> str | None:
         return self.uuid.get(field.USER_ID)
 
     @property
-    def sub(self) -> Optional[str]:
+    def sub(self) -> str | None:
         return self.uuid.get(field.SUB)
 
     @property
-    def uuid(self) -> Dict[str, str]:
+    def uuid(self) -> dict[str, str]:
         return self.as_dict[self.UUID]
 
     @property
-    def payload(self) -> Dict[str, Any]:
+    def payload(self) -> dict[str, Any]:
         return self.as_dict[self.PAYLOAD]
 
     @payload.setter
@@ -199,11 +202,11 @@ class SmartAppFromMessage:
     def type(self) -> str:
         return self.as_dict[self.MESSAGE_NAME]
 
-    def project_name(self) -> Optional[str]:
+    def project_name(self) -> str | None:
         return self.payload.get(field.PROJECT_NAME)
 
     @property
-    def intent(self) -> Optional[str]:
+    def intent(self) -> str | None:
         return self.payload.get(field.INTENT)
 
     @property
@@ -215,11 +218,11 @@ class SmartAppFromMessage:
         return AppInfo(self.payload.get(field.APP_INFO) or {})
 
     @property
-    def smart_bio(self) -> Dict[str, Any]:
+    def smart_bio(self) -> dict[str, Any]:
         return self.payload.get(field.SMART_BIO) or {}
 
     @property
-    def annotations(self) -> Dict[str, Dict[str, float]]:
+    def annotations(self) -> dict[str, dict[str, float]]:
         annotations = self.payload.get(field.ANNOTATIONS) or {}
         for annotation in annotations:
             classes = annotations[annotation][field.CLASSES]
@@ -228,7 +231,7 @@ class SmartAppFromMessage:
         return annotations
 
     @cached_property
-    def callback_id(self) -> Optional[str]:
+    def callback_id(self) -> str | None:
         if self._callback_id is not None:
             return self._callback_id
 
@@ -273,7 +276,7 @@ class SmartAppFromMessage:
         return self.as_dict[self.MESSAGE_ID]
 
     @property
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return self._value
 
     @property

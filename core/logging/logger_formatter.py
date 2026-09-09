@@ -1,4 +1,3 @@
-# coding: utf-8
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
 from core.model.factory import build_factory
@@ -15,7 +14,7 @@ class BaseJsonFormatter(jsonlogger.JsonFormatter):
     APPLICATION_NAME = "NA"
 
     def add_fields(self, log_record, record, message_dict):
-        super(BaseJsonFormatter, self).add_fields(log_record, record, message_dict)
+        super().add_fields(log_record, record, message_dict)
         dt = datetime.fromtimestamp(record.created)
         st = dt.strftime("%Y-%m-%dT%H:%M:%S")
         log_record['timestamp'] = "%s.%06d" % (st, record.msecs * 1000)

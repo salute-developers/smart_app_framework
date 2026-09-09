@@ -149,7 +149,7 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
         with StatsTimer() as load_timer:
             user = await self.load_user(db_uid, message)
         monitoring.sampling_load_time(self.app_name, load_timer.secs)
-        stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+        stats += f"Loading time: {load_timer.msecs} msecs\n"
         with StatsTimer() as script_timer:
             commands = await self.model.answer(message, user)
             if commands:
@@ -157,11 +157,11 @@ class AIOHttpMainLoop(BaseHttpMainLoop):
             else:
                 answer = None
 
-        stats += "Script time: {} msecs\n".format(script_timer.msecs)
+        stats += f"Script time: {script_timer.msecs} msecs\n"
         with StatsTimer() as save_timer:
             await self.save_user(db_uid, user, message)
         monitoring.sampling_save_time(self.app_name, save_timer.secs)
-        stats += "Saving time: {} msecs\n".format(save_timer.msecs)
+        stats += f"Saving time: {save_timer.msecs} msecs\n"
         log(stats, params={log_const.KEY_NAME: "timings"})
         await self.postprocessor.postprocess(user, message)
         return answer, stats, user

@@ -106,14 +106,14 @@ class Monitoring:
 
     @silence_it
     def init_metrics(self, app_name):
-        self._get_or_create_counter(_filter_monitoring_msg("{}_load_error".format(app_name)), "Load user data error")
-        self._get_or_create_counter(_filter_monitoring_msg("{}_save_error".format(app_name)), "Save user data error")
-        self._get_or_create_counter(_filter_monitoring_msg("{}_save_collision".format(app_name)),
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_load_error"), "Load user data error")
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_save_error"), "Save user data error")
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_save_collision"),
                                     "Save user data collision")
-        self._get_or_create_counter(_filter_monitoring_msg("{}_save_collision_tries_left".format(app_name)),
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_save_collision_tries_left"),
                                     "Save user data collision all retries left.")
-        self._get_or_create_counter(_filter_monitoring_msg("{}_exception".format(app_name)), "Exception in run-time.")
-        self._get_or_create_counter(_filter_monitoring_msg("{}_invalid_message".format(app_name)),
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_exception"), "Exception in run-time.")
+        self._get_or_create_counter(_filter_monitoring_msg(f"{app_name}_invalid_message"),
                                     "Incoming message validation error.")
 
     def _get_or_create_counter(self, monitoring_msg, descr, labels=()):
@@ -124,7 +124,7 @@ class Monitoring:
 
     @silence_it
     def counter_incoming(self, app_name, message_name, handler, user, app_info=None):
-        monitoring_msg = _filter_monitoring_msg("{}_incoming".format(app_name))
+        monitoring_msg = _filter_monitoring_msg(f"{app_name}_incoming")
 
         c = self._get_or_create_counter(monitoring_msg, "Count of incoming messages",
                                         ['message_name', 'handler', 'project_id', 'system_name', 'application_id',
@@ -142,7 +142,7 @@ class Monitoring:
     @silence_it
     def counter_outgoing(self, app_name, message_name, outgoing_message, user):
 
-        monitoring_msg = _filter_monitoring_msg("{}_outgoing".format(app_name))
+        monitoring_msg = _filter_monitoring_msg(f"{app_name}_outgoing")
 
         c = self._get_or_create_counter(monitoring_msg, "Count of outgoing requests from application.",
                                         ['message_name', 'project_id', 'system_name', 'application_id',
@@ -154,7 +154,7 @@ class Monitoring:
 
     @silence_it
     def counter_scenario_change(self, app_name, scenario, user):
-        monitoring_msg = "{}_scenario_change".format(app_name)
+        monitoring_msg = f"{app_name}_scenario_change"
 
         c = self._get_or_create_counter(monitoring_msg, "Count of scenario change events",
                                         ['scenario', 'project_id', 'system_name', 'application_id',
@@ -166,7 +166,7 @@ class Monitoring:
 
     @silence_it
     def counter_nothing_found(self, app_name, scenario, user):
-        monitoring_msg = "{}_outgoing_nothing_found".format(app_name)
+        monitoring_msg = f"{app_name}_outgoing_nothing_found"
         c = self._get_or_create_counter(monitoring_msg, "Count of scenario nothing found events",
                                         ['scenario', 'project_id', 'system_name', 'application_id',
                                          'app_version_id', 'channel', 'surface'])
@@ -177,38 +177,38 @@ class Monitoring:
 
     @silence_it
     def counter_load_error(self, app_name):
-        monitoring_msg = "{}_load_error".format(app_name)
+        monitoring_msg = f"{app_name}_load_error"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg), "Load user data error")
         c.inc()
 
     @silence_it
     def counter_save_error(self, app_name):
-        monitoring_msg = "{}_save_error".format(app_name)
+        monitoring_msg = f"{app_name}_save_error"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg), "Save user data error")
         c.inc()
 
     @silence_it
     def counter_save_collision(self, app_name):
-        monitoring_msg = "{}_save_collision".format(app_name)
+        monitoring_msg = f"{app_name}_save_collision"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg), "Save user data collision")
         c.inc()
 
     @silence_it
     def counter_save_collision_tries_left(self, app_name):
-        monitoring_msg = "{}_save_collision_tries_left".format(app_name)
+        monitoring_msg = f"{app_name}_save_collision_tries_left"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg),
                                         "Save user data collision all retries left.")
         c.inc()
 
     @silence_it
     def counter_exception(self, app_name):
-        monitoring_msg = "{}_exception".format(app_name)
+        monitoring_msg = f"{app_name}_exception"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg), "Exception in run-time.")
         c.inc()
 
     @silence_it
     def counter_invalid_message(self, app_name):
-        monitoring_msg = "{}_invalid_message".format(app_name)
+        monitoring_msg = f"{app_name}_invalid_message"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg), "Incoming message validation error.")
         c.inc()
 
@@ -238,7 +238,7 @@ class Monitoring:
         self._behavior_monitoing_by_status(app_name, "expire", request_message_name)
 
     def _behavior_monitoing_by_status(self, app_name, status, request_message_name):
-        monitoring_msg = '{}_callback'.format(app_name)
+        monitoring_msg = f'{app_name}_callback'
         c = self._get_or_create_counter(monitoring_msg,
                                         "Count of incoming callback events with request_message_name",
                                         ['request_message_name', 'status'])
@@ -247,47 +247,47 @@ class Monitoring:
 
     @silence_it
     def counter_host_has_changed(self, app_name):
-        monitoring_msg = '{}_host_has_changed'.format(app_name)
+        monitoring_msg = f'{app_name}_host_has_changed'
         c = self._get_or_create_counter(monitoring_msg,
                                         "Count of host has changed events within one message_id")
         c.inc()
 
     @silence_it
     def counter_mq_long_waiting(self, app_name):
-        monitoring_msg = "{}_mq_long_waiting".format(app_name)
+        monitoring_msg = f"{app_name}_mq_long_waiting"
         c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg),
                                         "(Now - creation_time) is greater than threshold")
         c.inc()
 
     @silence_it
     def sampling_load_time(self, app_name, value):
-        monitoring_msg = "{}_load_time".format(app_name)
+        monitoring_msg = f"{app_name}_load_time"
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
     @silence_it
     def sampling_script_time(self, app_name, value):
-        monitoring_msg = "{}_script_time".format(app_name)
+        monitoring_msg = f"{app_name}_script_time"
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
     @silence_it
     def sampling_save_time(self, app_name, value):
-        monitoring_msg = "{}_save_time".format(app_name)
+        monitoring_msg = f"{app_name}_save_time"
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
     @silence_it
     def sampling_mq_waiting_time(self, app_name, value):
-        monitoring_msg = "{}_mq_waiting_time".format(app_name)
+        monitoring_msg = f"{app_name}_mq_waiting_time"
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
     @silence_it
     def counter_mq_skip_waiting(self, app_name):
-        monitoring_msg = "{}_mq_skip_waiting".format(app_name)
+        monitoring_msg = f"{app_name}_mq_skip_waiting"
         c = self._get_or_create_counter(monitoring_msg, "(Now - creation_time) is greater than error threshold")
         c.inc()
 
     @silence_it
     def pod_event(self, app_name, event_type):
-        monitoring_msg = "{}_pod_event".format(app_name)
+        monitoring_msg = f"{app_name}_pod_event"
         c = self._get_or_create_counter(monitoring_msg, "Count of pod events by type", ['event_type'])
         c.labels(event_type).inc()
 

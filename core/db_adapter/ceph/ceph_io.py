@@ -6,7 +6,7 @@ from core.utils.rerunable import Rerunable
 
 class CephIO(Rerunable):
     def __init__(self, config):
-        super(CephIO, self).__init__(config)
+        super().__init__(config)
         self.bucket = config["bucket"]
         self.filename = config["filename"]
         self.mode = config["mode"]

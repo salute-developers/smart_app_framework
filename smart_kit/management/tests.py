@@ -107,7 +107,7 @@ class TestsCommand(AppCommand):
                 raise
             print(f"[+] Update tests folder at: {folder_path}")
 
-        with open(self.get_test_template_path(), "r") as template_file:
+        with open(self.get_test_template_path()) as template_file:
             for scen_name in scenario_names:
                 template_file.seek(0)
                 new_file_path = os.path.join(folder_path, scen_name + self.TEST_EXTENSION)

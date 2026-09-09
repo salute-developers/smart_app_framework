@@ -84,9 +84,9 @@ class Num2Text:
 
     def replace_everything_in_text(self, text, sex='m'):
         return re.sub(
-            pattern="[+-]?\d+(?:\.\d+)?",
-            repl=lambda x: " {} ".format(self(float(x.group()), sex=sex)),
-            string=" {} ".format(text)
+            pattern=r"[+-]?\d+(?:\.\d+)?",
+            repl=lambda x: f" {self(float(x.group()), sex=sex)} ",
+            string=f" {text} "
         ).strip().replace("  ", " ")
 
     def __call__(self, num, sex='m'):
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     num2text = Num2Text()
     # demo
     t = "На улице -2 градуса. Битрикс24. Круассанам 7дней"
-    print("Проверим режим замены вхождений по всему тексту: \"{}\"".format(t))
+    print(f"Проверим режим замены вхождений по всему тексту: \"{t}\"")
     print(num2text.replace_everything_in_text(t))
     print()
 

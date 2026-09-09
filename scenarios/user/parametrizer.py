@@ -4,7 +4,7 @@ from core.basic_models.parametrizers.parametrizer import BasicParametrizer
 class Parametrizer(BasicParametrizer):
 
     def __init__(self, user, items):
-        super(Parametrizer, self).__init__(user, items)
+        super().__init__(user, items)
 
     def _get_scenario(self):
         scenario_id = self._user.last_scenarios.last_scenario_name

@@ -1,6 +1,3 @@
-# coding: utf-8
-
-
 class LastScenarios:
     def __init__(self, items, description, user):
         self.scenarios_names = items or []

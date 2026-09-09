@@ -27,7 +27,7 @@ class TestContextManagerExceptions(SMAsyncioTestCase):
         """
         ## Конфигурация базовых параметров перед запуском тестов.
         """
-        super(TestContextManagerExceptions, self).setUp()
+        super().setUp()
         self.context_manager = ContextManager()
         self.action = action_with_exception_mock()
         self.event = random_string()

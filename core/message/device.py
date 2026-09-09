@@ -1,5 +1,4 @@
 from functools import cached_property
-from typing import Dict
 
 
 class Device:
@@ -31,15 +30,15 @@ class Device:
         return self._value.get("surfaceVersion") or ""
 
     @cached_property
-    def features(self) -> Dict:
+    def features(self) -> dict:
         return self._value.get("features") or {}
 
     @cached_property
-    def capabilities(self) -> Dict:
+    def capabilities(self) -> dict:
         return self._value.get("capabilities") or {}
 
     @cached_property
-    def additional_info(self) -> Dict:
+    def additional_info(self) -> dict:
         return self._value.get("additionalInfo") or {}
 
     @cached_property

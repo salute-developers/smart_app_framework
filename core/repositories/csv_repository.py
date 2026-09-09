@@ -4,7 +4,7 @@ from core.repositories.base_repository import BaseRepository
 
 class CSVRepository(BaseRepository):
     def __init__(self, filename, source=None, *args, **kwargs):
-        super(CSVRepository, self).__init__(source=source, *args, **kwargs)
+        super().__init__(source=source, *args, **kwargs)
         self.filename = filename
 
     def load(self):
@@ -12,4 +12,4 @@ class CSVRepository(BaseRepository):
             reader = csv.DictReader(stream)
             data = list(reader)
             self.fill(data)
-        super(CSVRepository, self).load()
+        super().load()

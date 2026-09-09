@@ -1,5 +1,4 @@
-# coding: utf-8
-from typing import Dict, Any, List
+from typing import Any
 
 import core.logging.logger_constants as log_const
 import scenarios.logging.logger_constants as scenarios_log_const
@@ -25,7 +24,7 @@ class BaseScenario:
     switched_off: bool
     version: int
     empty_answer: Action
-    actions: List[Action]
+    actions: list[Action]
     available_requirement: Requirement
 
     def __init__(self, items, id):
@@ -60,14 +59,14 @@ class BaseScenario:
             return self.available_requirement.check(text_preprocessing_result, user)
         return False
 
-    def _log_params(self) -> Dict[str, str]:
+    def _log_params(self) -> dict[str, str]:
         return {log_const.KEY_NAME: log_const.SCENARIO_VALUE}
 
     def text_fits(self, text_preprocessing_result, user):
         return False
 
     async def get_no_commands_action(self, user, text_preprocessing_result,
-                                     params: Dict[str, Any] = None) -> List[Command]:
+                                     params: dict[str, Any] = None) -> list[Command]:
         log_params = {log_const.KEY_NAME: scenarios_log_const.CHOSEN_ACTION_VALUE,
                       scenarios_log_const.CHOSEN_ACTION_VALUE: self._empty_answer}
         log(scenarios_log_const.CHOSEN_ACTION_MESSAGE, user, log_params)
@@ -81,7 +80,7 @@ class BaseScenario:
         return empty_answer
 
     async def get_action_results(self, user, text_preprocessing_result,
-                                 actions: List[Action], params: Dict[str, Any] = None) -> List[Command]:
+                                 actions: list[Action], params: dict[str, Any] = None) -> list[Command]:
         results = []
         for action in actions:
             result = await action.run(user, text_preprocessing_result, params) or []
@@ -106,5 +105,5 @@ class BaseScenario:
     def history(self):
         return {"scenario_path": [{"scenario": self.id, "node": None}]}
 
-    async def run(self, text_preprocessing_result, user, params: Dict[str, Any] = None) -> List[Command]:
+    async def run(self, text_preprocessing_result, user, params: dict[str, Any] = None) -> list[Command]:
         return await self.get_action_results(user, text_preprocessing_result, self.actions, params)

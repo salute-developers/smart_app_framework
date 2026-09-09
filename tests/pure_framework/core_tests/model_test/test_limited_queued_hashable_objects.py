@@ -1,4 +1,3 @@
-# coding: utf-8
 import unittest
 
 from core.model.queued_objects.limited_queued_hashable_objects import LimitedQueuedHashableObjects

@@ -373,7 +373,7 @@ class Money2Text:
     def for_special_cases(self, whole, frac, whole_name, frac_name):
         right_whole_name = self.right_text_spelling_with_number(whole, whole_name)
         right_frac_name = self.right_text_spelling_with_number(frac, frac_name)
-        return "{:.0f} {} {:.0f} {}".format(whole, right_whole_name, frac, right_frac_name)
+        return f"{whole:.0f} {right_whole_name} {frac:.0f} {right_frac_name}"
 
     def right_text_spelling_with_number(self, number, text):
         agreed = []
@@ -399,7 +399,7 @@ class Money2Text:
         currency = currency.upper()
         amount = round(amount, precision)
         if currency not in CURRENCY_CODE_2_NAME_MAP:
-            return '{} {}'.format(round(amount, 2), currency)
+            return f'{round(amount, 2)} {currency}'
 
         name = CURRENCY_CODE_2_NAME_MAP[currency]
 
@@ -410,9 +410,9 @@ class Money2Text:
                 frac_name = CURRENCY_CODE_2_DEMUNITIVE_NAME_MAP[currency]
                 return self.for_special_cases(whole=whole, whole_name=name, frac=frac, frac_name=frac_name)
             else:
-                return '{0:.0f}'.format(amount) + " " + self.right_text_spelling_with_number(amount, name)
+                return f'{amount:.0f}' + " " + self.right_text_spelling_with_number(amount, name)
         else:
             if frac == 0:
-                return '{0:.0f}'.format(amount) + " " + self.right_text_spelling_with_number(amount, name)
+                return f'{amount:.0f}' + " " + self.right_text_spelling_with_number(amount, name)
             else:
-                return '{}'.format(round(amount, 2)) + " " + self.right_text_spelling_with_number(amount, name)
+                return f'{round(amount, 2)}' + " " + self.right_text_spelling_with_number(amount, name)

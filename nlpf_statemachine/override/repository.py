@@ -31,7 +31,7 @@ class SMRepository(BaseRepository):
 
     def __init__(self, *args, **kwargs) -> None:
         context_manager = kwargs.pop("context_manager", None)
-        super(SMRepository, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._data = {}
         self._context_manager = context_manager
 

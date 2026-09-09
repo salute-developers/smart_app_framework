@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import copy
 import importlib
-from typing import Optional
 
 from core.db_adapter import error
 from core.db_adapter.db_adapter import AsyncDBAdapter
@@ -13,7 +14,7 @@ class AIORedisAdapter(AsyncDBAdapter):
         super().__init__(config)
         self.aioredis = importlib.import_module("redis.asyncio")
         redis_type = self.aioredis.Redis
-        self._redis: Optional[redis_type] = None
+        self._redis: redis_type | None = None
 
         try:
             del self.config["type"]
@@ -71,7 +72,7 @@ class AIORedisAdapter(AsyncDBAdapter):
     async def _on_prepare(self):
         pass
 
-    async def is_alive(self) -> Optional[bool]:
+    async def is_alive(self) -> bool | None:
         try:
             return self._redis.ping()
         except Exception:

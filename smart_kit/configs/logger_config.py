@@ -1,4 +1,3 @@
-# coding: utf-8
 import os
 
 import yaml
@@ -23,7 +22,7 @@ LOGGING_CONFIG = "logging_config"
 class LoggerConfig(BaseConfig):
     def __init__(self, config_path):
         self.config_path = config_path
-        super(LoggerConfig, self).__init__()
+        super().__init__()
         self.repositories = [
             FileRepository(self.subfolder_path("logging_config.yml"),
                            loader=yaml.safe_load, key=LOGGING_CONFIG)

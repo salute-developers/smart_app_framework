@@ -1,4 +1,6 @@
-from typing import Dict, Any, Optional, Union
+from __future__ import annotations
+
+from typing import Any
 
 from core.basic_models.requirement.basic_requirements import Requirement
 from core.model.factory import build_factory, factory
@@ -12,17 +14,17 @@ ANSWER_TO_USER = "ANSWER_TO_USER"
 
 class SdkAnswerItem:
     version: int
-    id: Optional[str]
+    id: str | None
     requirement: Requirement
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         items = items or {}
         self.id = id
         self.version = items.get("version", -1)
         self._requirement = items.get("requirement", None)
         self.requirement = self.build_requirement()
 
-    def render(self, nodes: Dict[str, Any]):
+    def render(self, nodes: dict[str, Any]):
         return {}
 
     @factory(Requirement)
@@ -31,17 +33,17 @@ class SdkAnswerItem:
 
 
 class TextSdkItem(SdkAnswerItem):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(TextSdkItem, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.text = items["text"]
 
 
 class BubbleText(TextSdkItem):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(BubbleText, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.markdown = items.get("markdown", True)
 
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, dict[str, str]]:
         return {
             "bubble": {
                 "text": nodes.get(self.text, self.text),
@@ -51,21 +53,21 @@ class BubbleText(TextSdkItem):
 
 
 class ItemCard(TextSdkItem):
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, str]:
         return {"card": nodes.get(self.text, self.text)}
 
 
 class PronounceText(TextSdkItem):
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, str]:
         return {"pronounceText": nodes.get(self.text, self.text)}
 
 
 class SuggestText(TextSdkItem):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SuggestText, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.title = items["title"]
 
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, Union[str, Dict[str, str]]]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, str | dict[str, str]]:
         return {
             "title": nodes.get(self.title, self.title),
             "action": {
@@ -76,12 +78,12 @@ class SuggestText(TextSdkItem):
 
 
 class SuggestDeepLink(SdkAnswerItem):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(SuggestDeepLink, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.title = items["title"]
         self.deep_link = items["deep_link"]
 
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, Union[str, Dict[str, str]]]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, str | dict[str, str]]:
         return {
             "title": nodes.get(self.title, self.title),
             "action": {
@@ -92,10 +94,10 @@ class SuggestDeepLink(SdkAnswerItem):
 
 
 class RawItem(SdkAnswerItem):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
-        super(RawItem, self).__init__(items, id)
+    def __init__(self, items: dict[str, Any], id: str | None = None):
+        super().__init__(items, id)
         self.key = items["key"]
         self.value = items["value"]
 
-    def render(self, nodes: Dict[str, Any]) -> Dict[str, str]:
+    def render(self, nodes: dict[str, Any]) -> dict[str, str]:
         return {self.key: nodes.get(self.value, self.value)}

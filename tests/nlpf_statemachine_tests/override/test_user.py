@@ -1,9 +1,10 @@
 """
 # Тесты на nlpf_statemachine.override.user.
 """
+from __future__ import annotations
+
 import json
 from random import randint
-from typing import Type, Optional
 
 from pydantic import BaseModel, Field
 
@@ -105,7 +106,7 @@ class TestUser(SMAsyncioTestCaseBase):
             # Пример переопределение Context с обязательным вложенным полем.
             """
 
-            field: Optional[SomeField] = Field(default=None)
+            field: SomeField | None = Field(default=None)
 
         class CustomUser(SMUser):
             """
@@ -113,12 +114,9 @@ class TestUser(SMAsyncioTestCaseBase):
             """
 
             @property
-            def context_model(self) -> Type[Context]:
+            def context_model(self) -> type[Context]:
                 """
                 ## Определение модели для контекста.
-
-                Returns:
-                    Type[Context]
                 """
                 return CustomContext
 

@@ -33,7 +33,7 @@ class OSAdapter(DBAdapter):
         return result
 
     def _open(self, filename, *args, **kwargs):
-        return io.open(filename, *args, **kwargs)
+        return open(filename, *args, **kwargs)
 
     def _get_counter_name(self):
         return "os_adapter"

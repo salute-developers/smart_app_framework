@@ -1,4 +1,6 @@
-from typing import List, Dict, Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 import scenarios.logging.logger_constants as log_const
 from core.basic_models.actions.command import Command
@@ -15,17 +17,17 @@ from smart_kit.handlers.handler_base import HandlerBase
 class HandlerServerAction(HandlerBase):
     handler_name = "HandlerServerAction"
 
-    def __init__(self, app_name: str, action_name: Optional[str] = None):
+    def __init__(self, app_name: str, action_name: str | None = None):
         super().__init__(app_name)
         self._action_name = action_name
 
-    def get_action_name(self, payload: Dict[str, Any], user: User):
+    def get_action_name(self, payload: dict[str, Any], user: User):
         return payload[SERVER_ACTION]["action_id"]
 
-    def get_action_params(self, payload: Dict[str, Any]):
+    def get_action_params(self, payload: dict[str, Any]):
         return payload[SERVER_ACTION].get("parameters", {})
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: dict[str, Any], user: User) -> list[Command]:
         commands = await super().run(payload, user)
         action_params = pickle_deepcopy(self.get_action_params(payload))
         params = {log_const.KEY_NAME: "handling_server_action",

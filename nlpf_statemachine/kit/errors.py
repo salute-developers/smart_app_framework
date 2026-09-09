@@ -25,7 +25,7 @@ class ActionWithNoValidAnswerError(BaseActionError):
     """
 
     def __init__(self, action: str, response: Any) -> None:
-        super(ActionWithNoValidAnswerError, self).__init__(action=action)
+        super().__init__(action=action)
         self.response = response
 
 

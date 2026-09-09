@@ -15,7 +15,7 @@ def add_headers(request, response_text):
 class RootResource(Resource):
 
     def __init__(self, debug=False):
-        super(RootResource, self).__init__()
+        super().__init__()
         self.putChild(b'health', HealthcheckResource())
         self.putChild(b'metrics', MetricsResource())
 

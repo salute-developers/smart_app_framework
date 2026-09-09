@@ -19,7 +19,7 @@ class MockDescription2(MockDescription1):
 
 class MockRepository(BaseRepository):
     def __init__(self, data, key):
-        super(MockRepository, self).__init__(key=key)
+        super().__init__(key=key)
         self.data = data
 
 

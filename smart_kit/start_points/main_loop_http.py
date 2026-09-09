@@ -29,7 +29,7 @@ class BaseHttpMainLoop(BaseMainLoop):
     def stop(self, signum, frame):
         raise NotImplementedError
 
-    def handle_message(self, message: SmartAppFromMessage) -> typing.Tuple[int, str, SmartAppToMessage]:
+    def handle_message(self, message: SmartAppFromMessage) -> tuple[int, str, SmartAppToMessage]:
         if not message.validate():
             result = 400, "BAD REQUEST", SmartAppToMessage(
                 self.BAD_REQUEST_COMMAND,
@@ -72,7 +72,7 @@ class BaseHttpMainLoop(BaseMainLoop):
         with StatsTimer() as load_timer:
             user = self.loop.run_until_complete(self.load_user(db_uid, message))
         monitoring.sampling_load_time(self.app_name, load_timer.secs)
-        stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+        stats += f"Loading time: {load_timer.msecs} msecs\n"
         with StatsTimer() as script_timer:
             commands = asyncio.get_event_loop().run_until_complete(self.model.answer(message, user))
             if commands:
@@ -80,11 +80,11 @@ class BaseHttpMainLoop(BaseMainLoop):
             else:
                 answer = None
 
-        stats += "Script time: {} msecs\n".format(script_timer.msecs)
+        stats += f"Script time: {script_timer.msecs} msecs\n"
         with StatsTimer() as save_timer:
             self.loop.run_until_complete(self.save_user(db_uid, user, message))
         monitoring.sampling_save_time(self.app_name, save_timer.secs)
-        stats += "Saving time: {} msecs\n".format(save_timer.msecs)
+        stats += f"Saving time: {save_timer.msecs} msecs\n"
         log(stats, user=user, params={log_const.KEY_NAME: "timings"})
         self.loop.run_until_complete(self.postprocessor.postprocess(user, message))
         return answer, stats

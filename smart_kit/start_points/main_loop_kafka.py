@@ -12,7 +12,7 @@ import time
 import tracemalloc
 from collections import namedtuple
 from functools import lru_cache, cached_property
-from typing import Union, Dict, TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 from kafka.errors import KafkaError
 
 import scenarios.logging.logger_constants as log_const
@@ -375,7 +375,7 @@ class MainLoop(BaseMainLoop):
 
         return answers
 
-    def _get_timeout_from_message(self, orig_message_raw: Dict, callback_id, headers):
+    def _get_timeout_from_message(self, orig_message_raw: dict, callback_id, headers):
         timeout_from_message = SmartAppFromMessage(orig_message_raw, headers=headers,
                                                    masking_fields=self.masking_fields,
                                                    validators=self.from_msg_validators,
@@ -438,9 +438,9 @@ class MainLoop(BaseMainLoop):
                 waiting_message_time = 0
                 if message.creation_time:
                     waiting_message_time = time.time() * 1000 - message.creation_time
-                    stats += "Waiting message: {} msecs\n".format(waiting_message_time)
+                    stats += f"Waiting message: {waiting_message_time} msecs\n"
 
-                stats += "Mid: {}\n".format(message.incremental_id)
+                stats += f"Mid: {message.incremental_id}\n"
                 monitoring.sampling_mq_waiting_time(self.app_name, waiting_message_time / 1000)
 
                 if self._is_message_timeout_to_skip(message, waiting_message_time):
@@ -451,7 +451,7 @@ class MainLoop(BaseMainLoop):
                 with StatsTimer() as load_timer:
                     user = await self.load_user(db_uid, message)
                 monitoring.sampling_load_time(self.app_name, load_timer.secs)
-                stats += "Loading time: {} msecs\n".format(load_timer.msecs)
+                stats += f"Loading time: {load_timer.msecs} msecs\n"
                 self._stats_for_incoming(user)
 
                 # check_message_key
@@ -526,14 +526,14 @@ class MainLoop(BaseMainLoop):
                                                      topic_key=topic_key,
                                                      kafka_key=kafka_key)
                     monitoring.sampling_script_time(self.app_name, script_timer.secs)
-                    stats += "Script time: {} msecs\n".format(script_timer.msecs)
+                    stats += f"Script time: {script_timer.msecs} msecs\n"
 
                     self._stats_for_outgoing(user)
                     with StatsTimer() as save_timer:
                         user_save_no_collisions = await self.save_user(db_uid, user, message)
 
                     monitoring.sampling_save_time(self.app_name, save_timer.secs)
-                    stats += "Saving time: {} msecs\n".format(save_timer.msecs)
+                    stats += f"Saving time: {save_timer.msecs} msecs\n"
                     if not user_save_no_collisions:
                         log("MainLoop.iterate: save user got collision on uid %(uid)s db_version %(db_version)s.",
                             user=user,
@@ -552,7 +552,7 @@ class MainLoop(BaseMainLoop):
                         for answer in answers:
                             with StatsTimer() as publish_timer:
                                 await self._send_request(user, answer, mq_message)
-                            stats += "Publishing time: {} msecs\n".format(publish_timer.msecs)
+                            stats += f"Publishing time: {publish_timer.msecs} msecs\n"
                             log(stats, user=user)
             else:
                 try:
@@ -587,7 +587,7 @@ class MainLoop(BaseMainLoop):
     def _get_valid_message_key(self, from_message: SmartAppFromMessage):
         return "_".join([i for i in [from_message.channel, from_message.sub, from_message.uid] if i])
 
-    def _get_str_message_key(self, message_key: Union[str, bytes], incremental_id: int, uid: str, user: BaseUser):
+    def _get_str_message_key(self, message_key: str | bytes, incremental_id: int, uid: str, user: BaseUser):
         message_key = message_key or b""
         try:
             if isinstance(message_key, bytes):
@@ -634,7 +634,7 @@ class MainLoop(BaseMainLoop):
                     "message_key": (original_mq_message.key or b"").decode('utf-8', 'backslashreplace')},
             user=user)
 
-    @lru_cache()
+    @lru_cache
     def _topic_names_2_key(self, kafka_key):
         topics = self.settings["kafka"]["template-engine"][kafka_key]["consumer"]["topics"]
         return {name: key for key, name in topics.items()}

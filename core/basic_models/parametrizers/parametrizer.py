@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import TypeVar, Dict, Any
+from typing import TypeVar, Any
 
 from core.basic_models.parametrizers.filter import Filter
 
@@ -18,9 +18,9 @@ class BasicParametrizer:
     def filter_out(self, data: T, filter_params=None) -> T:
         return self.filter.filter_out(data, self._user, filter_params)
 
-    def _get_user_data(self, text_preprocessing_result=None) -> Dict[str, Any]:
+    def _get_user_data(self, text_preprocessing_result=None) -> dict[str, Any]:
         return {"message": self._user.message}
 
-    def collect(self, text_preprocessing_result=None, filter_params=None) -> Dict[str, Any]:
+    def collect(self, text_preprocessing_result=None, filter_params=None) -> dict[str, Any]:
         data = self._get_user_data(text_preprocessing_result)
         return self.filter_out(data, filter_params)

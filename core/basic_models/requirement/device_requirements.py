@@ -1,8 +1,9 @@
-# coding: utf-8
+from __future__ import annotations
+
 from core.model.base_user import BaseUser
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
 from core.utils.utils import convert_version_to_list_of_int
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from core.model.factory import factory
 
@@ -12,7 +13,7 @@ from core.text_preprocessing.base import BaseTextPreprocessingResult
 
 
 class BaseContainsRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items)
 
     @property
@@ -23,15 +24,15 @@ class BaseContainsRequirement(Requirement):
         return NotImplementedError
 
     def check(self, text_preprocessing_result: BaseTextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         return self.get_field(text_preprocessing_result, user) in self.descr_to_check_in
 
 
 class ChannelRequirement(BaseContainsRequirement):
-    channels = List[str]
+    channels = list[str]
 
     # should_process_message compatible
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         self.channels = items["channels"]
 
@@ -44,13 +45,13 @@ class ChannelRequirement(BaseContainsRequirement):
 
 
 class PlatformTypeRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.platfrom_type = items["platfrom_type"]
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         return user.message.device.platform_type == self.platfrom_type
 
 
@@ -66,46 +67,46 @@ class BasicVersionRequirement(ComparisonRequirement):
 class PlatformVersionRequirement(BasicVersionRequirement):
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         platform_version = convert_version_to_list_of_int(user.message.device.platform_version)
         return self.operator.compare(platform_version) if platform_version is not None else False
 
 
 class SurfaceRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.surface = items["surface"]
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         return user.message.device.surface == self.surface
 
 
 class SurfaceVersionRequirement(BasicVersionRequirement):
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         surface_version = convert_version_to_list_of_int(user.message.device.surface_version)
         return self.operator.compare(surface_version) if surface_version is not None else False
 
 
 class AppTypeRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.app_type = items["app_type"]
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         return self.app_type in user.message.device.features.get("appTypes", [])
 
 
 class CapabilitiesPropertyAvailableRequirement(Requirement):
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None) -> None:
+    def __init__(self, items: dict[str, Any], id: str | None = None) -> None:
         super().__init__(items, id)
         items = items or {}
         self.property_type = items["property_type"]
 
     def check(self, text_preprocessing_result: TextPreprocessingResult, user: BaseUser,
-              params: Dict[str, Any] = None) -> bool:
+              params: dict[str, Any] = None) -> bool:
         return user.message.device.capabilities.get(self.property_type, {}).get("available", False)

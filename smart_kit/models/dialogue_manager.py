@@ -1,4 +1,3 @@
-# coding: utf-8
 from functools import cached_property
 
 from core.logging.logger_utils import log

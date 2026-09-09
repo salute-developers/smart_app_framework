@@ -1,4 +1,3 @@
-# coding: utf-8
 import logging
 
 from core.logging.logger_utils import log

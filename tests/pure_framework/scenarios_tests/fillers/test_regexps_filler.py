@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 
 from scenarios.scenario_models.field.field_filler_description import AllRegexpsFieldFiller
@@ -6,12 +8,15 @@ from smart_kit.utils.picklable_mock import PicklableMock
 
 class Test_regexps_filler(unittest.TestCase):
     def setUp(self):
-        self.items = {}
-        self.items["exps"] = ["номер[а-я]*\.?\s?(\d+)", "n\.?\s?(\d+)", "nn\.?\s?(\d+)", "#\.?\s?(\d+)",
-                              "##\.?\s?(\d+)",
-                              "№\.?\s?(\d+)", "№№\.?\s?(\d+)", "платеж[а-я]+\.?\s?(\d+)", "поручен[а-я]+\.?\s?(\d+)",
-                              "п\\s?,\\s?п\.?\s?(\d+)", "п\\s?\\/\\s?п\.?\s?(\d+)"]
-        self.items["delimiter"] = "|"
+        self.items = {
+            "exps": [
+                r"номер[а-я]*\.?\s?(\d+)", r"n\.?\s?(\d+)", r"nn\.?\s?(\d+)", r"#\.?\s?(\d+)",
+                r"##\.?\s?(\d+)",
+                r"№\.?\s?(\d+)", r"№№\.?\s?(\d+)", r"платеж[а-я]+\.?\s?(\d+)", r"поручен[а-я]+\.?\s?(\d+)",
+                "п\\s?,\\s?п\\.?\\s?(\\d+)", "п\\s?\\/\\s?п\\.?\\s?(\\d+)",
+            ],
+            "delimiter": "|",
+        }
 
         self.filler = AllRegexpsFieldFiller(self.items)
 

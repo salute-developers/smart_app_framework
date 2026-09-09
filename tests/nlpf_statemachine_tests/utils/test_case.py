@@ -1,9 +1,10 @@
 """
 # Тест-кейс для NLPF StateMachine.
 """
+from __future__ import annotations
+
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Union
 from unittest import TestCase, IsolatedAsyncioTestCase
 
 from pydantic import BaseModel
@@ -90,14 +91,14 @@ class SMTestCase(SMTestCaseBase):
 
     def init(
             self,
-            context: Optional[Union[Dict, Context]] = None,
+            context: dict | Context | None = None,
             transaction_started: bool = False,
-            base_event: Optional[str] = None,
+            base_event: str | None = None,
             transaction_duration: float = 2,
-            last_event: Optional[str] = None,
-            last_intent: Optional[str] = None,
-            last_screen: Optional[str] = None,
-            last_response_message_name: Optional[str] = None,
+            last_event: str | None = None,
+            last_intent: str | None = None,
+            last_screen: str | None = None,
+            last_response_message_name: str | None = None,
     ) -> None:
         """
         ## Инициализация всех системных объектов для запуска ContextManager.
@@ -140,7 +141,7 @@ class SMTestCase(SMTestCaseBase):
         if not self.context.last_response_message_name:
             self.context.last_response_message_name = last_response_message_name
 
-    def _set_request_data_to_message_headers(self, request_data: Dict) -> None:
+    def _set_request_data_to_message_headers(self, request_data: dict) -> None:
         if not request_data:
             return
         if isinstance(request_data, BaseModel):
@@ -151,9 +152,9 @@ class SMTestCase(SMTestCaseBase):
 
     async def run_context_manager(
             self,
-            message: Union[Dict, BaseModel],
-            event: Optional[str] = None,
-            text_preprocessing_result: Optional[List] = None,
+            message: dict | BaseModel,
+            event: str | None = None,
+            text_preprocessing_result: list | None = None,
     ) -> None:
         """
         ## Запуск ContextManager.
@@ -205,17 +206,17 @@ class SMTestCase(SMTestCaseBase):
 
     async def run_context_manager_init(
             self,
-            message: Union[Dict, BaseModel],
-            event: Optional[str] = None,
-            text_preprocessing_result: Optional[List] = None,
-            context: Optional[Union[Dict, Context]] = None,
+            message: dict | BaseModel,
+            event: str | None = None,
+            text_preprocessing_result: list | None = None,
+            context: dict | Context | None = None,
             transaction_started: bool = False,
-            base_event: Optional[str] = None,
+            base_event: str | None = None,
             transaction_duration: float = 2,
-            last_event: Optional[str] = None,
-            last_intent: Optional[str] = None,
-            last_screen: Optional[str] = None,
-            last_response_message_name: Optional[str] = None,
+            last_event: str | None = None,
+            last_intent: str | None = None,
+            last_screen: str | None = None,
+            last_response_message_name: str | None = None,
     ) -> None:
         """
         ## Инициализация и запуск ContextManager.
@@ -305,11 +306,11 @@ class SMTestCase(SMTestCaseBase):
             self,
             called_event: str,
             called_action: str,
-            called_scenario: Optional[str] = GLOBAL_NODE_NAME,
+            called_scenario: str | None = GLOBAL_NODE_NAME,
             call_history_size: int = 1,
             finished_transaction: bool = True,
-            base_event: Optional[str] = None,
-            static_code: Optional[str] = None,
+            base_event: str | None = None,
+            static_code: str | None = None,
     ) -> None:
         """
         ## Проверка параметров debug_info.
@@ -335,7 +336,7 @@ class SMTestCase(SMTestCaseBase):
         if static_code:
             assert self.response.debug_info.static_code == static_code
 
-    def assert_error(self, message_name: Optional[str] = None) -> None:
+    def assert_error(self, message_name: str | None = None) -> None:
         """
         ## Проверка на ошибку в ответ.
 
@@ -385,14 +386,14 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
 
     def init(
             self,
-            context: Optional[Union[Dict, Context]] = None,
+            context: dict | Context | None = None,
             transaction_started: bool = False,
-            base_event: Optional[str] = None,
+            base_event: str | None = None,
             transaction_duration: float = 2,
-            last_event: Optional[str] = None,
-            last_intent: Optional[str] = None,
-            last_screen: Optional[str] = None,
-            last_response_message_name: Optional[str] = None,
+            last_event: str | None = None,
+            last_intent: str | None = None,
+            last_screen: str | None = None,
+            last_response_message_name: str | None = None,
     ) -> None:
         """
         ## Инициализация всех системных объектов для запуска ContextManager.
@@ -435,7 +436,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         if not self.context.last_response_message_name:
             self.context.last_response_message_name = last_response_message_name
 
-    def _set_request_data_to_message_headers(self, request_data: Dict) -> None:
+    def _set_request_data_to_message_headers(self, request_data: dict) -> None:
         if not request_data:
             return
         if isinstance(request_data, BaseModel):
@@ -446,9 +447,9 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
 
     async def run_context_manager(
             self,
-            message: Union[Dict, BaseModel],
-            event: Optional[str] = None,
-            text_preprocessing_result: Optional[List] = None,
+            message: dict | BaseModel,
+            event: str | None = None,
+            text_preprocessing_result: list | None = None,
     ) -> None:
         """
         ## Запуск ContextManager.
@@ -500,17 +501,17 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
 
     async def run_context_manager_init(
             self,
-            message: Union[Dict, BaseModel],
-            event: Optional[str] = None,
-            text_preprocessing_result: Optional[List] = None,
-            context: Optional[Union[Dict, Context]] = None,
+            message: dict | BaseModel,
+            event: str | None = None,
+            text_preprocessing_result: list | None = None,
+            context: dict | Context | None = None,
             transaction_started: bool = False,
-            base_event: Optional[str] = None,
+            base_event: str | None = None,
             transaction_duration: float = 2,
-            last_event: Optional[str] = None,
-            last_intent: Optional[str] = None,
-            last_screen: Optional[str] = None,
-            last_response_message_name: Optional[str] = None,
+            last_event: str | None = None,
+            last_intent: str | None = None,
+            last_screen: str | None = None,
+            last_response_message_name: str | None = None,
     ) -> None:
         """
         ## Инициализация и запуск ContextManager.
@@ -600,11 +601,11 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
             self,
             called_event: str,
             called_action: str,
-            called_scenario: Optional[str] = GLOBAL_NODE_NAME,
+            called_scenario: str | None = GLOBAL_NODE_NAME,
             call_history_size: int = 1,
             finished_transaction: bool = True,
-            base_event: Optional[str] = None,
-            static_code: Optional[str] = None,
+            base_event: str | None = None,
+            static_code: str | None = None,
     ) -> None:
         """
         ## Проверка параметров debug_info.
@@ -630,7 +631,7 @@ class SMAsyncioTestCase(SMAsyncioTestCaseBase):
         if static_code:
             assert self.response.debug_info.static_code == static_code
 
-    def assert_error(self, message_name: Optional[str] = None) -> None:
+    def assert_error(self, message_name: str | None = None) -> None:
         """
         ## Проверка на ошибку в ответ.
 

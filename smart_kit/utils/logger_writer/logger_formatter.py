@@ -1,7 +1,6 @@
-# coding: utf-8
 from datetime import datetime
 from numbers import Number
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pythonjsonlogger import jsonlogger
 import logging
@@ -19,14 +18,14 @@ def to_num(s):
 
 TYPES = {
     "str": str,
-    "dict": Dict,
+    "dict": dict,
     "int": Number,
     "bool": bool,
 }
 
 TYPE_CASTS = {
     "str": str,
-    "dict": Dict,
+    "dict": dict,
     "int": to_num,
     "bool": bool,
 }
@@ -43,11 +42,11 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
     APPLICATION_NAME = "NA"
 
     def __init__(self, *args, **kwargs):
-        self.fields_type: Dict = kwargs.pop("fields_type", None)
+        self.fields_type: dict = kwargs.pop("fields_type", None)
         super().__init__(*args, **kwargs)
 
     def add_fields(self, log_record, record, message_dict):
-        super(SmartKitJsonFormatter, self).add_fields(log_record, record, message_dict)
+        super().add_fields(log_record, record, message_dict)
         dt = datetime.fromtimestamp(record.created)
         st = dt.strftime("%Y-%m-%dT%H:%M:%S")
         log_record["timestamp"] = "%s.%06d" % (st, (record.created - int(record.created)) * 1e6)
@@ -61,7 +60,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
         if isinstance(record.args, dict):
             log_record["args"] = self._check_fields(record.args)
 
-    def _check_fields(self, record_args: Dict[str, Any], types: Optional[Dict[str, Dict]] = None):
+    def _check_fields(self, record_args: dict[str, Any], types: dict[str, dict] | None = None):
         if types is None:
             types = self.fields_type
         if types is None:
@@ -92,7 +91,7 @@ class SmartKitJsonFormatter(jsonlogger.JsonFormatter):
 
     def format(self, record: logging.LogRecord) -> str:
         # В готовый json логов добавляем поле с размером json-а.
-        result = super(SmartKitJsonFormatter, self).format(record)
+        result = super().format(record)
         log_size = len(result)
         # Убираем последнюю закрывающую скобку и добавляем поле log_size и закрываем скобки
         return f'{result[:-1]},"log_size":{log_size}}}'

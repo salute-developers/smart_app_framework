@@ -1,4 +1,3 @@
-# coding: utf-8
 import time
 import unittest
 from unittest.mock import Mock

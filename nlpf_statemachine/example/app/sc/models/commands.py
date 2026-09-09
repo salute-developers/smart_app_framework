@@ -1,7 +1,7 @@
 """
 # Описание моделей для CanvasApp.
 """
-from typing import Optional
+from __future__ import annotations
 
 from nlpf_statemachine.models import AssistantCommand
 
@@ -41,7 +41,7 @@ class FormCommand(AssistantCommand):
 
     command: str = "COMMAND"
     """Наименование команды."""
-    custom_approve: Optional[str] = None
+    custom_approve: str | None = None
     """Параметр custom_approve."""
-    nlpf_approve: Optional[bool] = None
+    nlpf_approve: bool | None = None
     """Параметр nlpf_approve."""

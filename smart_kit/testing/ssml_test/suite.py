@@ -1,7 +1,6 @@
 import re
 import requests
 from lxml import etree
-from typing import Tuple, Dict, Callable, Any, List, Optional
 
 
 from core.logging.logger_utils import log
@@ -21,7 +20,7 @@ class SsmlTestSuite:
     def test_statics(
             self,
             resources: SmartAppResources,
-            ssml_resources: List[str]
+            ssml_resources: list[str]
     ) -> bool:
         ssml_strings = self.collect_ssml_strings(resources, ssml_resources)
         success_num = 0
@@ -34,8 +33,8 @@ class SsmlTestSuite:
     def collect_ssml_strings(
             self,
             resources: SmartAppResources,
-            ssml_resources: List[str]
-    ) -> List[Tuple[str, ObjectLocation]]:
+            ssml_resources: list[str]
+    ) -> list[tuple[str, ObjectLocation]]:
         """Returns list of tuples of parsed ssml-string and their locations"""
         ssml_strings = []
         for resource_name in ssml_resources:
@@ -59,7 +58,7 @@ class SsmlTestSuite:
             print(f"[!] SSML markup of the string is invalid. Message: \"{message}\"")
         return is_valid
 
-    def _get_template_span(self, string) -> Optional[Tuple[int, int]]:
+    def _get_template_span(self, string) -> tuple[int, int] | None:
         match = re.search("{{.*}}", string)
         if match:
             return match.span()
@@ -74,7 +73,7 @@ class SsmlChecker:
     def __init__(self, ssml_checker_url: str):
         self.ssml_checker_url = ssml_checker_url
 
-    def __call__(self, string_to_test: str) -> Tuple[bool, str]:
+    def __call__(self, string_to_test: str) -> tuple[bool, str]:
         """Returns whether ssml_string is valid and message describing invalidity"""
         for checker in (self._check_format, self._check_with_api):
             is_valid, err_msg = checker(string_to_test)
@@ -82,14 +81,14 @@ class SsmlChecker:
                 return is_valid, err_msg
         return True, ""
 
-    def _check_format(self, string_to_test: str) -> Tuple[bool, str]:
+    def _check_format(self, string_to_test: str) -> tuple[bool, str]:
         try:
             etree.fromstring(string_to_test, self.parser)
             return True, ""
         except etree.XMLSyntaxError as e:
             return False, str(e)
 
-    def _check_with_api(self, string_to_test: str) -> Tuple[bool, str]:
+    def _check_with_api(self, string_to_test: str) -> tuple[bool, str]:
         try:
             response_json = requests.post(self.ssml_checker_url,
                                           data=string_to_test.encode("utf-8"),

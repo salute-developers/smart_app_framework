@@ -1,7 +1,7 @@
-# coding: utf-8
 import functools
 from collections import OrderedDict
-from typing import TypeVar, Type, List, Callable, Any, Dict
+from typing import TypeVar, Any
+from collections.abc import Callable
 
 from core.model.registered import registered_factories, Registered
 
@@ -20,13 +20,13 @@ def build_factory(registry_models: Registered) -> Callable:
     return _inner
 
 
-def factory(type: Type[T], **params) -> Callable[[Type[T]], Callable]:
+def factory(type: type[T], **params) -> Callable[[type[T]], Callable]:
     def _inner(func: Callable) -> Callable:
         @functools.wraps(func)
         def _wrap(self, *args: Any, **kwargs: Any) -> T:
             result = func(self, *args, **kwargs)
             result = result or {}
-            cls: Type[T] = registered_factories[type]
+            cls: type[T] = registered_factories[type]
             if not isinstance(result, dict):
                 result = cls(result)
             else:
@@ -38,12 +38,12 @@ def factory(type: Type[T], **params) -> Callable[[Type[T]], Callable]:
     return _inner
 
 
-def list_factory(type: Type[T], **params) -> Callable[[Type[T]], Callable]:
+def list_factory(type: type[T], **params) -> Callable[[type[T]], Callable]:
     def _inner(func: Callable) -> Callable:
         @functools.wraps(func)
-        def _wrap(*args: Any, **kwargs: Any) -> List[T]:
-            cls: Type[T] = registered_factories[type]
-            res: List[T] = []
+        def _wrap(*args: Any, **kwargs: Any) -> list[T]:
+            cls: type[T] = registered_factories[type]
+            res: list[T] = []
             for items in func(*args, **kwargs) or []:
                 if not isinstance(items, dict):
                     res.append(cls(items))
@@ -56,11 +56,11 @@ def list_factory(type: Type[T], **params) -> Callable[[Type[T]], Callable]:
     return _inner
 
 
-def dict_factory(type: Type[T], has_id=True) -> Callable[[Type[T]], Callable]:
+def dict_factory(type: type[T], has_id=True) -> Callable[[type[T]], Callable]:
     def _inner(func: Callable) -> Callable:
         @functools.wraps(func)
-        def _wrap(*args: Any, **kwargs: Any) -> Dict[str, T]:
-            cls: Type[T] = registered_factories[type]
+        def _wrap(*args: Any, **kwargs: Any) -> dict[str, T]:
+            cls: type[T] = registered_factories[type]
             items_iterator = func(*args, **kwargs).items()
             if has_id:
                 return {id: cls(id=id, items=items) for id, items in items_iterator or {}}
@@ -72,11 +72,11 @@ def dict_factory(type: Type[T], has_id=True) -> Callable[[Type[T]], Callable]:
     return _inner
 
 
-def ordered_dict_factory(type: Type[T], has_id=True) -> Callable[[Type[T]], Callable]:
+def ordered_dict_factory(type: type[T], has_id=True) -> Callable[[type[T]], Callable]:
     def _inner(func: Callable) -> Callable:
         @functools.wraps(func)
         def _wrap(*args: Any, **kwargs: Any) -> 'OrderedDict[str, T]':
-            cls: Type[T] = registered_factories[type]
+            cls: type[T] = registered_factories[type]
             items_iterator = func(*args, **kwargs).items()
             result = OrderedDict({})
             for id, items in items_iterator:

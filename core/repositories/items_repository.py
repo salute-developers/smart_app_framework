@@ -1,11 +1,9 @@
-# coding: utf-8
-
 from core.repositories.base_repository import BaseRepository
 
 
 class ItemsRepository(BaseRepository):
     def __init__(self, *args, **kwargs):
-        super(ItemsRepository, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.data = dict()
 
     @BaseRepository.data.setter
@@ -16,7 +14,7 @@ class ItemsRepository(BaseRepository):
             self._data = value
 
     def load(self):
-        super(ItemsRepository, self).load()
+        super().load()
 
     def __iter__(self):
         return iter(self.data)

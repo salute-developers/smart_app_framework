@@ -1,5 +1,4 @@
-# coding: utf-8
-from typing import Dict, Any
+from typing import Any
 
 
 class Command:
@@ -17,17 +16,17 @@ class Command:
         """
 
         self.name: str = name
-        self.payload: Dict[str, Any] = params or {}
+        self.payload: dict[str, Any] = params or {}
         self.action_id: str = action_id
         self.request_type: str = request_type
-        self.request_data: Dict[str, Any] = request_data or {}
+        self.request_data: dict[str, Any] = request_data or {}
         self.loader: str = loader or "json.dumps"
         self.need_payload_wrap: bool = need_payload_wrap
         self.need_message_name: bool = need_message_name
 
     @property
     def raw(self):
-        message: Dict[str, Any] = {"payload": self.payload} if self.need_payload_wrap else self.payload
+        message: dict[str, Any] = {"payload": self.payload} if self.need_payload_wrap else self.payload
         if self.need_message_name:
             message["messageName"] = self.name
         return message

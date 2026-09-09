@@ -1,14 +1,12 @@
-# coding: utf-8
-from typing import Dict
 
 from core.basic_models.counter.counter import Counter
 
 
 class Counters:
 
-    def __init__(self, items: Dict[str, Dict], user):
+    def __init__(self, items: dict[str, dict], user):
         self._raw_items = items or {}
-        self._items: Dict[str, Counter] = {}
+        self._items: dict[str, Counter] = {}
         self._item_type = Counter
 
     def __getitem__(self, key):

@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 # Мозг приложения.
 
@@ -6,8 +5,11 @@
 и управляет обработкой запроса в runtime. По сути является "мозгом" всего приложения.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any
+from collections.abc import Callable
 
 from core.logging.logger_utils import behaviour_log
 from core.text_preprocessing.preprocessing_result import TextPreprocessingResult
@@ -41,13 +43,13 @@ class ScenarioContainer:
     # Контейнер всех сценариев приложения (глобальный и экраны).
     """
 
-    screens: Dict[str, Screen]
+    screens: dict[str, Screen]
     """Множество экранов."""
 
     global_scenario: Scenario
     """Глобальный сценарий."""
 
-    isolated_scenarios: Dict[str, Tuple[Callable, Scenario]]
+    isolated_scenarios: dict[str, tuple[Callable, Scenario]]
     """Независимые условные сценарии для запросов с особым flow обработки."""
 
     def __init__(self) -> None:
@@ -100,7 +102,7 @@ class ScenarioContainer:
         """
         self.isolated_scenarios[scenario.id] = (condition, scenario)
 
-    def add_error_action(self, action: Callable, enabled: Optional[bool] = True) -> None:
+    def add_error_action(self, action: Callable, enabled: bool | None = True) -> None:
         """
         ## Добавление глобального обработчика ошибок.
 
@@ -115,7 +117,7 @@ class ScenarioContainer:
         """
         self.global_scenario.add_error_action(action=action, enabled=enabled)
 
-    def add_fallback_action(self, action: Callable, enabled: Optional[bool] = True) -> None:
+    def add_fallback_action(self, action: Callable, enabled: bool | None = True) -> None:
         """
         ## Добавление экшена на обработку глобального фоллбека.
 
@@ -159,7 +161,7 @@ class ScenarioContainer:
         self.global_scenario.add_classifier(classifier=classifier)
 
     def add_action(
-            self, event: str, action: Callable, base_event: Optional[str] = None, enabled: Optional[bool] = None,
+            self, event: str, action: Callable, base_event: str | None = None, enabled: bool | None = None,
     ) -> None:
         """
         ## Добавление глобального экшена к событию.
@@ -180,8 +182,8 @@ class ScenarioContainer:
         self.global_scenario.add_action(event=event, base_event=base_event, action=action, enabled=enabled)
 
     def add_timeout_action(
-            self, action: Callable, request_name: Optional[str] = None, base_event: Optional[str] = None,
-            enabled: Optional[bool] = None,
+            self, action: Callable, request_name: str | None = None, base_event: str | None = None,
+            enabled: bool | None = None,
     ) -> None:
         """
         ## Добавление экшена к таймауту на запрос.
@@ -220,7 +222,7 @@ class ContextManager(ScenarioContainer):
             run_smart_app_framework_base_kit (bool, optional): Флаг включения стандартного SmartApp Framework Kit
                                                                default: False
         """
-        super(ContextManager, self).__init__()
+        super().__init__()
         self.run_smart_app_framework_base_kit = run_smart_app_framework_base_kit
         self._pre_process = None
         self._post_process = None
@@ -254,7 +256,7 @@ class ContextManager(ScenarioContainer):
         self._post_process = process
 
     @staticmethod
-    def get_screen(message: AssistantMessage) -> Optional[str]:
+    def get_screen(message: AssistantMessage) -> str | None:
         """
         ## Определение screen из AssistantMessage.
 
@@ -268,7 +270,7 @@ class ContextManager(ScenarioContainer):
         """
         return message.payload.meta.current_app.state.screen
 
-    def _get_screen_id(self, message: BaseMessage) -> Optional[str]:
+    def _get_screen_id(self, message: BaseMessage) -> str | None:
         """
         ## Получить информацию о текущем screen name.
 
@@ -284,7 +286,7 @@ class ContextManager(ScenarioContainer):
             except AttributeError:
                 behaviour_log("Screen not defined", level="DEBUG", params={"message_id": message.messageId})
 
-    def _get_screen(self, message: BaseMessage, context: Context) -> Optional[Screen]:
+    def _get_screen(self, message: BaseMessage, context: Context) -> Screen | None:
         """
         ## Получить информацию о текущей странице и передача информации в контекст.
 
@@ -314,9 +316,9 @@ class ContextManager(ScenarioContainer):
         return scenario
 
     def _classify_intent(
-            self, screen: Screen, message: MessageToSkill, context: Context, form: Dict,
+            self, screen: Screen, message: MessageToSkill, context: Context, form: dict,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         ## Определение интента.
 
@@ -324,7 +326,7 @@ class ContextManager(ScenarioContainer):
             screen (Screen): Экран
             message (MessageToSkill): Тело запроса
             context (Context): Контекст
-            form (Dict): Форма
+            form (dict): Форма
             text_preprocessing_result (TextPreprocessingResult): Предобработанные данные голосового запроса
             user (SMUser): Пользователь
 
@@ -383,7 +385,7 @@ class ContextManager(ScenarioContainer):
     def _fill_form(
             self, screen: Screen, message: MessageToSkill, context: Context,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         ## Заполнение формы.
 
@@ -395,7 +397,7 @@ class ContextManager(ScenarioContainer):
             user (SMUser): Пользователь
 
         Returns:
-            Dict: Форма
+            dict: Форма
         """
         form = self.global_scenario.fill_form(
             message=message, context=context, text_preprocessing_result=text_preprocessing_result, user=user,
@@ -409,9 +411,9 @@ class ContextManager(ScenarioContainer):
         return form
 
     def _define_event(
-            self, event: Optional[str], screen: Screen, message: BaseMessage, context: Context, form: Dict,
+            self, event: str | None, screen: Screen, message: BaseMessage, context: Context, form: dict,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         ## Определение события.
 
@@ -419,7 +421,7 @@ class ContextManager(ScenarioContainer):
             screen (Screen): Экран
             message (MessageToSkill): Тело запроса
             context (Context): Контекст
-            form (Dict): Форма
+            form (dict): Форма
             text_preprocessing_result (TextPreprocessingResult): Предобработанные данные голосового запроса
             user (SMUser): Пользователь
 
@@ -561,8 +563,8 @@ class ContextManager(ScenarioContainer):
 
     # ==== RUN action ====
     async def _run_event(
-            self, event: str, screen: Screen, message: BaseMessage, context: Context, form: Dict,
-    ) -> Optional[Response]:
+            self, event: str, screen: Screen, message: BaseMessage, context: Context, form: dict,
+    ) -> Response | None:
         """
         ## Запуск обработчика любого события.
 
@@ -578,7 +580,7 @@ class ContextManager(ScenarioContainer):
             screen (Screen): Экран
             message (BaseMessage): Сообщение
             context (Context): Контекст
-            form (Dict): Форма
+            form (dict): Форма
 
         Returns:
             Response
@@ -596,7 +598,7 @@ class ContextManager(ScenarioContainer):
                 )
         return response
 
-    async def _run_timeout(self, screen: Screen, message: BaseMessage, context: Context) -> Optional[Response]:
+    async def _run_timeout(self, screen: Screen, message: BaseMessage, context: Context) -> Response | None:
         """
         ## Запуск обработчика на таймаут ответа от интеграций в рамках транзакций.
 
@@ -638,8 +640,8 @@ class ContextManager(ScenarioContainer):
         return response
 
     async def _run_fallback(
-            self, screen: Screen, message: MessageToSkill, context: Context, form: Dict,
-    ) -> Optional[Response]:
+            self, screen: Screen, message: MessageToSkill, context: Context, form: dict,
+    ) -> Response | None:
         """
         ## Запуск обработчика fallback. Значит, не смогли найти подходящего обработчика на голосовой запрос.
 
@@ -647,7 +649,7 @@ class ContextManager(ScenarioContainer):
             screen (Screen): Экран
             message (MessageToSkill): Сообщение
             context (Context): Контекст
-            form (Dict): Форма
+            form (dict): Форма
 
         Returns:
             Response
@@ -664,7 +666,7 @@ class ContextManager(ScenarioContainer):
             response = await self.global_scenario.run_fallback(message=message, context=context, form=form)
         return response
 
-    async def _run_error_action(self, screen: Screen, message: BaseMessage, context: Context) -> Optional[Response]:
+    async def _run_error_action(self, screen: Screen, message: BaseMessage, context: Context) -> Response | None:
         """
         ## Запуск обработчика ошибки. Запускается, если ломается обработчик на текущее событие.
 
@@ -729,7 +731,7 @@ class ContextManager(ScenarioContainer):
         return response
 
     # ==== Run StateMachine ====
-    def _run_pre_process(self, event: Optional[str], message: BaseMessage, context: Context) -> BaseMessage:
+    def _run_pre_process(self, event: str | None, message: BaseMessage, context: Context) -> BaseMessage:
         """
         ## Запуск дополнительноых действий перед исполнения основной логики обработки запроса.
 
@@ -763,7 +765,7 @@ class ContextManager(ScenarioContainer):
                 context.local.run_isolated_scenario = True
         return message
 
-    def _run_post_process(self, response: Response, message: BaseMessage, context: Context) -> Optional[Response]:
+    def _run_post_process(self, response: Response, message: BaseMessage, context: Context) -> Response | None:
         """
         ## Запуск дополнительноых действий после исполнения основной логики обработки запроса.
 
@@ -786,7 +788,7 @@ class ContextManager(ScenarioContainer):
             return self._post_process(**kwargs)
 
     @staticmethod
-    def _default_response(event: Optional[str] = None) -> Optional[Response]:
+    def _default_response(event: str | None = None) -> Response | None:
         """
         ## Генерация дефолтного ответа от ContextManager.
 
@@ -812,9 +814,9 @@ class ContextManager(ScenarioContainer):
         return ErrorResponse()
 
     async def _run_process(
-            self, event: Optional[str], screen: Optional[Screen], message: BaseMessage, context: Context,
+            self, event: str | None, screen: Screen | None, message: BaseMessage, context: Context,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> Tuple[str, Optional[Response]]:
+    ) -> tuple[str, Response | None]:
         """
         ## Определение и запуск пользовательского обработчика.
 
@@ -860,7 +862,7 @@ class ContextManager(ScenarioContainer):
         return event, response
 
     async def _run(
-            self, event: Optional[str], message: BaseMessage, context: Context,
+            self, event: str | None, message: BaseMessage, context: Context,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
     ) -> Response:
         """
@@ -952,9 +954,9 @@ class ContextManager(ScenarioContainer):
         return response
 
     async def run(
-            self, event: Optional[str], message: BaseMessage, context: Context,
+            self, event: str | None, message: BaseMessage, context: Context,
             text_preprocessing_result: TextPreprocessingResult, user: SMUser,
-    ) -> Optional[Response]:
+    ) -> Response | None:
         """
         ## Основной метод запуска обработки запроса.
 

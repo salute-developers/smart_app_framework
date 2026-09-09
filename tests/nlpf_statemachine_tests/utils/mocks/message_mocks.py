@@ -1,8 +1,9 @@
 """
 # Моки различных типов сообщений в апп.
 """
+from __future__ import annotations
+
 from random import choice, randint
-from typing import Dict, List, Optional, Type, Union
 
 from core.logging.logger_utils import behaviour_log
 from nlpf_statemachine.const import AssistantAthena, AssistantJoy, AssistantSber
@@ -50,9 +51,9 @@ class MessageMocks:
         )
 
     @staticmethod
-    def character(character_id: Optional[AssistantId] = AssistantId.athena) -> Character:
+    def character(character_id: AssistantId | None = AssistantId.athena) -> Character:
         """## Мок объекта Character."""
-        characters: Dict[AssistantId, Character] = {
+        characters: dict[AssistantId, Character] = {
             AssistantId.joy: AssistantJoy,
             AssistantId.athena: AssistantAthena,
             AssistantId.sber: AssistantSber,
@@ -63,8 +64,8 @@ class MessageMocks:
 
     @staticmethod
     def meta(
-            cls: Type[AssistantMeta] = AssistantMeta,
-            state: Optional[Union[Dict, AssistantState]] = None,
+            cls: type[AssistantMeta] = AssistantMeta,
+            state: dict | AssistantState | None = None,
     ) -> AssistantMeta:
         """## Мок объекта AssistantMeta."""
         current_app_cls = CustomCurrentApp if cls.__name__ == 'CustomMeta' else CurrentApp
@@ -77,7 +78,7 @@ class MessageMocks:
         return meta
 
     @staticmethod
-    def uuid(sub: Optional[str] = None, user_id: Optional[str] = None, user_channel: Optional[str] = None) -> UUID:
+    def uuid(sub: str | None = None, user_id: str | None = None, user_channel: str | None = None) -> UUID:
         """## Мок объекта UUID."""
         return UUID(
             sub=sub if sub else random_string(length=100),
@@ -87,11 +88,11 @@ class MessageMocks:
 
     @staticmethod
     def message(
-            original_text: Optional[str] = None,
-            normalized_text: Optional[str] = None,
-            asr_normalized_message: Optional[str] = None,
-            entities: Optional[Dict] = None,
-            tokenized_elements_list: Optional[List[str]] = None,
+            original_text: str | None = None,
+            normalized_text: str | None = None,
+            asr_normalized_message: str | None = None,
+            entities: dict | None = None,
+            tokenized_elements_list: list[str] | None = None,
     ) -> Message:
         """## Мок объекта Message."""
         return Message(
@@ -126,8 +127,8 @@ class MessageMocks:
 
     @staticmethod
     def server_action(
-            action_id: Optional[str] = None,
-            parameters: Optional[Dict] = None,
+            action_id: str | None = None,
+            parameters: dict | None = None,
     ) -> ServerAction:
         """## Мок объекта ServerAction."""
         return ServerAction(
@@ -138,30 +139,30 @@ class MessageMocks:
     # ==== Message Mocks ====
     def message_to_skill(
             self,
-            cls: Type[MessageToSkill] = MessageToSkill,
-            original_text: Optional[str] = None,
-            normalized_text: Optional[str] = None,
-            asr_normalized_message: Optional[str] = None,
-            entities: Optional[Dict] = None,
-            tokenized_elements_list: Optional[List] = None,
-            intent: Optional[str] = None,
-            original_intent: Optional[str] = None,
-            selected_item: Optional[Union[Dict, SelectedItem]] = None,
-            project_name: Optional[str] = None,
-            uuid: Optional[Union[Dict, UUID]] = None,
-            character_id: Optional[Union[str, AssistantId]] = AssistantId.athena,
-            state: Optional[Union[Dict, AssistantState]] = None,
-            annotations: Optional[Union[Dict, Annotations]] = None,
-            app_info: Optional[Union[Dict, AppInfo]] = None,
-            device: Optional[Union[Dict, Device]] = None,
+            cls: type[MessageToSkill] = MessageToSkill,
+            original_text: str | None = None,
+            normalized_text: str | None = None,
+            asr_normalized_message: str | None = None,
+            entities: dict | None = None,
+            tokenized_elements_list: list | None = None,
+            intent: str | None = None,
+            original_intent: str | None = None,
+            selected_item: dict | SelectedItem | None = None,
+            project_name: str | None = None,
+            uuid: dict | UUID | None = None,
+            character_id: str | AssistantId | None = AssistantId.athena,
+            state: dict | AssistantState | None = None,
+            annotations: dict | Annotations | None = None,
+            app_info: dict | AppInfo | None = None,
+            device: dict | Device | None = None,
             new_session: bool = False,
-            strategies: Optional[Union[Dict, Strategies]] = None,
+            strategies: dict | Strategies | None = None,
     ) -> MessageToSkill:
         """
         ## Мок объекта MessageToSkill.
         """
-        payload_cls: Type[MessageToSkillPayload] = get_field_class(base_obj=cls, field="payload")
-        meta_cls: Type[AssistantMeta] = get_field_class(base_obj=payload_cls, field="meta")
+        payload_cls: type[MessageToSkillPayload] = get_field_class(base_obj=cls, field="payload")
+        meta_cls: type[AssistantMeta] = get_field_class(base_obj=payload_cls, field="meta")
 
         return cls(
             messageId=randint(0, 100000000),
@@ -192,19 +193,19 @@ class MessageMocks:
 
     def server_action_message(
             self,
-            cls: Type[ServerActionMessage] = ServerActionMessage,
-            action_id: Optional[str] = None,
-            parameters: Optional[Dict] = None,
-            intent: Optional[str] = None,
-            original_intent: Optional[str] = None,
-            project_name: Optional[str] = None,
-            uuid: Optional[Union[Dict, UUID]] = None,
-            character_id: Optional[Union[str, AssistantId]] = AssistantId.athena,
-            state: Optional[Union[Dict, AssistantState]] = None,
-            app_info: Optional[Union[Dict, AppInfo]] = None,
-            device: Optional[Union[Dict, Device]] = None,
+            cls: type[ServerActionMessage] = ServerActionMessage,
+            action_id: str | None = None,
+            parameters: dict | None = None,
+            intent: str | None = None,
+            original_intent: str | None = None,
+            project_name: str | None = None,
+            uuid: dict | UUID | None = None,
+            character_id: str | AssistantId | None = AssistantId.athena,
+            state: dict | AssistantState | None = None,
+            app_info: dict | AppInfo | None = None,
+            device: dict | Device | None = None,
             new_session: bool = False,
-            strategies: Optional[Union[Dict, Strategies]] = None,
+            strategies: dict | Strategies | None = None,
     ) -> ServerActionMessage:
         """## Мок объекта ServerActionMessage."""
         return cls(
@@ -228,8 +229,8 @@ class MessageMocks:
 
     def local_timeout(
             self,
-            cls: Type[LocalTimeout] = LocalTimeout,
-            message: Optional[BaseMessage] = None,
+            cls: type[LocalTimeout] = LocalTimeout,
+            message: BaseMessage | None = None,
     ) -> LocalTimeout:
         """## Мок объекта LocalTimeout."""
         if not message:
@@ -243,8 +244,8 @@ class MessageMocks:
 
     def run_app(
             self,
-            cls: Type[RunApp] = RunApp,
-            message: Optional[BaseMessage] = None,
+            cls: type[RunApp] = RunApp,
+            message: BaseMessage | None = None,
     ) -> RunApp:
         """## Мок объекта RunApp."""
         if not message:
@@ -258,8 +259,8 @@ class MessageMocks:
 
     def close_app(
             self,
-            cls: Type[CloseApp] = CloseApp,
-            message: Optional[AssistantMessage] = None,
+            cls: type[CloseApp] = CloseApp,
+            message: AssistantMessage | None = None,
     ) -> CloseApp:
         """## Мок объекта CloseApp."""
         if not message:

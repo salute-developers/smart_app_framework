@@ -1,4 +1,4 @@
-from typing import List, Any, Dict
+from typing import Any
 
 from core.basic_models.actions.command import Command
 from core.logging.logger_utils import log
@@ -11,7 +11,7 @@ from smart_kit.names.field import PROFILE_DATA, STATUS_CODE, CODE, GEO
 class HandlerTakeProfileData(HandlerBase):
     SUCCESS_CODE = 1
 
-    async def run(self, payload: Dict[str, Any], user: User) -> List[Command]:
+    async def run(self, payload: dict[str, Any], user: User) -> list[Command]:
         commands = await super().run(payload, user)
         log(f"{self.__class__.__name__} started", user)
 

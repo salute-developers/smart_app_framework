@@ -1,7 +1,8 @@
-# coding: utf-8
+from __future__ import annotations
+
 import base64
 import uuid
-from typing import Union, Dict, List, Any, Optional
+from typing import Any
 
 from core.basic_models.actions.command import Command
 from core.basic_models.actions.string_actions import StringAction
@@ -53,7 +54,7 @@ class PushAction(StringAction):
     COMPANION = "COMPANION"
     EX_HEADERS_NAME = SmartKitKafkaRequest.KAFKA_EXTRA_HEADERS
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         self.surface = items.get("surface", self.COMPANION)
         items["nodes"] = items.get("content") or {}
         items["command"] = PUSH_NOTIFY
@@ -69,7 +70,7 @@ class PushAction(StringAction):
         return request_data
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         params = params or {}
         command_params = {
             "projectId": user.settings["template_settings"]["project_id"],
@@ -110,11 +111,11 @@ class PushAuthenticationActionHttp(PushAction):
     BASIC_METHOD_AUTH = "Basic "
     URL_OAUTH = "https://salute.online.sberbank.ru:9443/api/v2/oauth"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         items["store"] = "push_authentification_response"
         items["behavior"] = items.get("behavior") or COMMON_BEHAVIOR
-        items["params"] = {"url": items.get("url") or self.URL_OAUTH, "data": "scope=SMART_PUSH".encode()}
+        items["params"] = {"url": items.get("url") or self.URL_OAUTH, "data": b"scope=SMART_PUSH"}
         items["params"]["headers"] = {}
         self.headers = items["params"]["headers"]
         self.headers["RqUID"] = str(uuid.uuid4())
@@ -122,10 +123,10 @@ class PushAuthenticationActionHttp(PushAction):
         self.headers["Content-Type"] = "application/x-www-form-urlencoded"
         self._create_instance_of_http_request_action(items, id)
 
-    def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
+    def _create_instance_of_http_request_action(self, items: dict[str, Any], id: str | None = None):
         self.http_request_action = HTTPRequestAction(items, id)
 
-    def _create_authorization_token(self, items: Dict[str, Any]) -> str:
+    def _create_authorization_token(self, items: dict[str, Any]) -> str:
         client_id = items["client_id"]
         client_secret = items["client_secret"]
         auth_string = base64.b64encode((client_id + ":" + client_secret).encode("ascii"))
@@ -133,7 +134,7 @@ class PushAuthenticationActionHttp(PushAction):
         return authorization_token
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)
@@ -161,13 +162,13 @@ class GetRuntimePermissionsAction(PushAction):
         }
     """
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.behavior = items.get("behavior") or COMMON_BEHAVIOR
         self.command = GET_RUNTIME_PERMISSIONS
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         params = params or {}
         scenario_id = user.last_scenarios.last_scenario_name
         user.behaviors.add(user.message.generate_new_callback_id(), self.behavior, scenario_id,
@@ -277,7 +278,7 @@ class PushActionHttp(PushAction):
     URL_OAUTH_APPREQUEST_LITE = "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest-lite"
     URL_OAUTH_APPREQUEST = "https://salute.online.sberbank.ru:9443/api/v2/smartpush/apprequest"
 
-    def __init__(self, items: Dict[str, Any], id: Optional[str] = None):
+    def __init__(self, items: dict[str, Any], id: str | None = None):
         super().__init__(items, id)
         self.type_request = items["type_request"]
 
@@ -306,11 +307,11 @@ class PushActionHttp(PushAction):
         self.headers["callbackUrl"] = items.get("callbackUrl")
         self._create_instance_of_http_request_action(items, id)
 
-    def _create_instance_of_http_request_action(self, items: Dict[str, Any], id: Optional[str] = None):
+    def _create_instance_of_http_request_action(self, items: dict[str, Any], id: str | None = None):
         self.http_request_action = HTTPRequestAction(items, id)
 
     async def run(self, user: User, text_preprocessing_result: BaseTextPreprocessingResult,
-                  params: Optional[Dict[str, Union[str, float, int]]] = None) -> List[Command]:
+                  params: dict[str, str | float | int] | None = None) -> list[Command]:
         params = params or {}
         collected = user.parametrizer.collect(text_preprocessing_result, filter_params={"command": self.command})
         params.update(collected)

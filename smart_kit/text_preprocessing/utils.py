@@ -2,7 +2,6 @@ import re
 import json
 import time
 import string
-from typing import Dict
 
 from core.text_preprocessing.constants import ANIMACY_TOKEN
 from core.text_preprocessing.grammem.grammem_constants import TEXT, LEMMA, TOKEN_TYPE, LIST_OF_TOKEN_TYPES_DATA, \
@@ -31,7 +30,7 @@ def reverse_json_dict(data):
     return result
 
 
-def replace_by_dict(text: str, replace_rules: Dict[str, str]) -> str:
+def replace_by_dict(text: str, replace_rules: dict[str, str]) -> str:
     for value, replacement in replace_rules.items():
         text = text.replace(value, replacement)
     return text
@@ -68,7 +67,7 @@ def merge_numbers(text: str) -> str:
         if tokens[i].isdigit() and tokens[i - 1].isdigit():
             result += tokens[i]
         else:
-            result = "{} {}".format(result, tokens[i])
+            result = f"{result} {tokens[i]}"
     return result
 
 
@@ -83,7 +82,7 @@ def unmerge_numbers_and_letters(text: str) -> str:
     prev_letter = ''
     for letter in text:
         if (prev_letter.isalpha() and letter.isdigit()) or (prev_letter.isdigit() and letter.isalpha()):
-            result = "{} {}".format(result, letter)
+            result = f"{result} {letter}"
         else:
             result += letter
         prev_letter = letter
@@ -134,10 +133,10 @@ def return_lemmas_only(token_desc_list: list, include_sentence_endpoint: bool = 
     return " ".join(final_line)
 
 
-class BaseNormalizePhoneNumbers(object):
+class BaseNormalizePhoneNumbers:
     def __init__(self):
-        self.boundary_start = "(?:[^\d\+]|^)"
-        self.boundary_end = "(?:[^\d\-\:]|$)"
+        self.boundary_start = r"(?:[^\d\+]|^)"
+        self.boundary_end = r"(?:[^\d\-\:]|$)"
         self.plus_regex = re.compile(r"(\+ *)(\+7\d{10})")
 
     def remove_additional_phone_pluses(self, text: str) -> str:
@@ -176,22 +175,22 @@ class BaseNormalizePhoneNumbers(object):
 
 class NormalizePhoneNumbers(BaseNormalizePhoneNumbers):
     def __init__(self):
-        super(NormalizePhoneNumbers, self).__init__()
-        self.phone_start = '(\+?[78]?'
-        self.phone_delim = '[\s\-\(\)]?'
-        self.phone_delim_with_dash = '[\) ][\- ]'
-        self.phone_delim_dash_twice = '[\s\-\(\)]{,2}'
+        super().__init__()
+        self.phone_start = r'(\+?[78]?'
+        self.phone_delim = r'[\s\-\(\)]?'
+        self.phone_delim_with_dash = r'[\) ][\- ]'
+        self.phone_delim_dash_twice = r'[\s\-\(\)]{,2}'
 
-        t1 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, '\d{3}',
-                                         self.phone_delim, '\d{3}', self.phone_delim, '\d{2}', self.phone_delim,
-                                         '\d{2})')
-        t2 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, '\d{4}',
-                                         self.phone_delim, '\d{2}', self.phone_delim, '\d{2}', self.phone_delim,
-                                         '\d{2})')
-        t3 = "{}{}{}{}".format(self.phone_start, '\d{10}', self.phone_delim, ')')
-        t4 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim_dash_twice, '\d{3}',
-                                         self.phone_delim_with_dash, '\d{3}', self.phone_delim, '\d{2}',
-                                         self.phone_delim, '\d{2})')
+        t1 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, r'\d{3}',
+                                         self.phone_delim, r'\d{3}', self.phone_delim, r'\d{2}', self.phone_delim,
+                                         r'\d{2})')
+        t2 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim, r'\d{4}',
+                                         self.phone_delim, r'\d{2}', self.phone_delim, r'\d{2}', self.phone_delim,
+                                         r'\d{2})')
+        t3 = "{}{}{}{}".format(self.phone_start, r'\d{10}', self.phone_delim, ')')
+        t4 = "{}{}{}{}{}{}{}{}{}".format(self.phone_start, self.phone_delim_dash_twice, r'\d{3}',
+                                         self.phone_delim_with_dash, r'\d{3}', self.phone_delim, r'\d{2}',
+                                         self.phone_delim, r'\d{2})')
         regex_phone_number_template = '|'.join([t1, t2, t3, t4])
         regex_phone_number_template = '{}(?:{}){}'.format(self.boundary_start, regex_phone_number_template,
                                                           self.boundary_end)
@@ -204,15 +203,15 @@ class NormalizePhoneNumbers(BaseNormalizePhoneNumbers):
 
 class NormalizePhoneNumbersVoice(BaseNormalizePhoneNumbers):
     def __init__(self):
-        super(NormalizePhoneNumbersVoice, self).__init__()
-        phone_start_1 = '\+?[78]'
+        super().__init__()
+        phone_start_1 = r'\+?[78]'
         phone_start_2 = '9'
-        phone_1 = '(([ \-]*\d){10})'
-        phone_2 = '(([ \-]*\d){9})'
+        phone_1 = r'(([ \-]*\d){10})'
+        phone_2 = r'(([ \-]*\d){9})'
 
-        t1 = "{}{}".format(phone_start_1, phone_1)
+        t1 = f"{phone_start_1}{phone_1}"
 
-        t2 = "{}{}".format(phone_start_2, phone_2)
+        t2 = f"{phone_start_2}{phone_2}"
 
         regex_phone_number_template = '|'.join([t1, t2])
 
@@ -228,13 +227,13 @@ class NormalizePhoneNumbersVoice(BaseNormalizePhoneNumbers):
         return phone_numbers
 
 
-class MergeCardNumbers(object):
+class MergeCardNumbers:
     def __init__(self):
         self._card_words = ["карта", "карты", "карте", "карту", "картой", "карт", "картах", "картам", "картами",
                             "виза", "visa", "мастеркард", "кард", "mastercard", "card", "maestro", "маэстро",
                             "мир"]
         self.words = "({}) ".format("|".join(self._card_words))
-        self.card_regex = "((\d{4} \d{4} \d{4} \d{4})|(\d{4} \d{4} \d{10}))(?:(?!\d)|$)"
+        self.card_regex = r"((\d{4} \d{4} \d{4} \d{4})|(\d{4} \d{4} \d{10}))(?:(?!\d)|$)"
         self.regex_str = self.words + self.card_regex
         self._regex_card_number = re.compile(self.regex_str, re.IGNORECASE)
 
@@ -249,27 +248,27 @@ class MergeCardNumbers(object):
         for matched_tuple in self._regex_card_number.findall(text):
             card_word = matched_tuple[0]
             card_number = matched_tuple[1]
-            text = text.replace("{} {}".format(card_word, card_number),
+            text = text.replace(f"{card_word} {card_number}",
                                 "{} {}".format(card_word, card_number.replace(' ', '')))
         return text
 
 
 class MergeCardNumbersVoice(MergeCardNumbers):
     def __init__(self):
-        super(MergeCardNumbersVoice, self).__init__()
-        self.card_regex = '(([ ]*\d){16}(?:(?!\d)|$))'
+        super().__init__()
+        self.card_regex = r'(([ ]*\d){16}(?:(?!\d)|$))'
         self.regex_str = self.words + self.card_regex
         self._regex_card_number = re.compile(self.regex_str, re.IGNORECASE)
 
 
-class AdditionalMathSplitter(object):
+class AdditionalMathSplitter:
     """
     Класс предназначен для дополнительного расспличивания по токенам для математического выражения.
     Деление уже ушло на этапе токенизации
     """
 
     def __init__(self):
-        self.regexp = re.compile('(^|\s)(\d+([.,]\d+)?)(([*+\-^])(\d+([.,]\d+)?))+')
+        self.regexp = re.compile(r'(^|\s)(\d+([.,]\d+)?)(([*+\-^])(\d+([.,]\d+)?))+')
         self.str_of_delimiters = '*-^+'
 
     def __call__(self, text: str) -> str:
@@ -280,7 +279,7 @@ class AdditionalMathSplitter(object):
             end_index = searchen.end()
             for i, char in enumerate(text):
                 if start_index <= i <= end_index and char in self.str_of_delimiters:
-                    new_text += " {} ".format(char)
+                    new_text += f" {char} "
                 else:
                     new_text += char
         else:
@@ -306,7 +305,7 @@ class UnicodeSymbolsConverter:
         return text
 
 
-class ReplaceSynonyms(object):
+class ReplaceSynonyms:
     """
     class to replace whole words in text avoiding replacements inside words
     based on regular expressions and synonyms dictionary from __init__
@@ -334,8 +333,8 @@ class ReplaceSynonyms(object):
                 skip = False
             else:
                 if len(token_desc_list) > i + 1 and \
-                        "{} {}".format(token[TEXT].lower(), token_desc_list[i + 1][TEXT].lower()) in self.synonyms:
-                    new_token = self.synonyms["{} {}".format(token[TEXT].lower(), token_desc_list[i + 1][TEXT].lower())]
+                        f"{token[TEXT].lower()} {token_desc_list[i + 1][TEXT].lower()}" in self.synonyms:
+                    new_token = self.synonyms[f"{token[TEXT].lower()} {token_desc_list[i + 1][TEXT].lower()}"]
                     if len(new_token.split(" ")) > 1:
                         to_extend = [{TEXT: token} for token in new_token.split(" ")]
                         final_list_of_tokens.extend(to_extend)
@@ -354,7 +353,7 @@ class ReplaceSynonyms(object):
         return final_list_of_tokens
 
 
-class CurrencyTokensOneIterationMerger(object):
+class CurrencyTokensOneIterationMerger:
     def __init__(self):
         self.currencies_list = ["rur", "коп", "копеек", "копейки", "копейка", "копейку", "копейками", "копейкой",
                                 "копейкам",
@@ -471,8 +470,8 @@ class DateConverter:
     CENTURY = 100
 
     def __init__(self):
-        self.regex = re.compile('(\d{1,2})[,\./\\\-](\d{1,2})[,\./\\\-](\d{4}|\d{2})')
-        self.safe_regex_for_month_and_year = re.compile('(\d{1,2})[\\\/](\d{4}|\d{2})')
+        self.regex = re.compile('(\\d{1,2})[,\\./\\\\-](\\d{1,2})[,\\./\\\\-](\\d{4}|\\d{2})')
+        self.safe_regex_for_month_and_year = re.compile('(\\d{1,2})[\\\\/](\\d{4}|\\d{2})')
 
     def _year_preprocessing(self, year):
         tm_year_now = time.localtime().tm_year
@@ -509,5 +508,5 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]

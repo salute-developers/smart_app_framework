@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Optional
 from unittest import TestCase
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -173,7 +174,7 @@ class TestUtils(TestCase):
     def message_to_skill_mock(text: str = "Привет",
                               intent: str = "HELLO",
                               screen: str = None,
-                              tokenized_elements_list: Optional[List] = None,
+                              tokenized_elements_list: list | None = None,
                               character=None):
         return MessageToSkill(
             payload=MessageToSkillPayload(
@@ -194,7 +195,7 @@ class TestUtils(TestCase):
         )
 
     def server_action_mock(self, action_id: str = "ACTION_ID", intent: str = "HELLO",
-                           screen: Optional[str] = None, parameters: Optional[dict] = None):
+                           screen: str | None = None, parameters: dict | None = None):
         return ServerActionMessage(
             uuid=UUID(
                 sub=self.random_string(),

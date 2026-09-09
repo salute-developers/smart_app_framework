@@ -9,7 +9,7 @@
 1. Пример простой интеграции.
 2. Пример run_app, где так же используется интеграция.
 """
-from typing import Optional
+from __future__ import annotations
 
 from nlpf_statemachine.example.app.sc.enums.integration_message_names import IntegrationResponseMessageName
 from nlpf_statemachine.example.app.scenario_utils import get_integration_data
@@ -72,7 +72,7 @@ def run_app(message: AssistantMessage, context: ExampleContext) -> Response:
 
 
 @scenario.on_event(event=IntegrationResponseMessageName.GENERATE_DATA, base_event=RUN_APP)
-def get_data_success_action(message: GetDataResponse, context: ExampleContext) -> Optional[Response]:
+def get_data_success_action(message: GetDataResponse, context: ExampleContext) -> Response | None:
     """
     # Успешный ответа от интеграции в случае RUN_APP.
 
