@@ -275,6 +275,11 @@ class Monitoring:
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
 
     @silence_it
+    def sampling_total_time(self, app_name, value):
+        monitoring_msg = f"{app_name}_total_time"
+        monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
+
+    @silence_it
     def sampling_mq_waiting_time(self, app_name, value):
         monitoring_msg = f"{app_name}_mq_waiting_time"
         monitoring.got_histogram_observe(_filter_monitoring_msg(monitoring_msg), value)
