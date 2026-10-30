@@ -32,7 +32,9 @@ from smart_kit.compatibility.commands import combine_commands
 from smart_kit.message.get_to_message import get_to_message
 from smart_kit.message.smartapp_to_message import SmartAppToMessage
 from smart_kit.names import message_names
-from smart_kit.names.message_names import ANSWER_TO_USER, RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION, CLOSE_APP
+from smart_kit.names.message_names import (ANSWER_TO_USER, ERROR, RUN_APP, MESSAGE_TO_SKILL, SERVER_ACTION,
+                                           CLOSE_APP, NOTHING_FOUND, INTENT_RUN_APP, POLICY_RUN_APP,
+                                           DATA_FOR_GIGACHAT, LOCAL_TIMEOUT)
 from smart_kit.request.kafka_request import SmartKitKafkaRequest
 from smart_kit.start_points.base_main_loop import BaseMainLoop
 from smart_kit.start_points.constants import WORKER_EXCEPTION, POD_UP
@@ -340,10 +342,19 @@ class MainLoop(BaseMainLoop):
         commands = commands or []
 
         commands = combine_commands(commands, user)
-
+        app_answers = {
+            ANSWER_TO_USER,
+            ERROR,
+            NOTHING_FOUND,
+            LOCAL_TIMEOUT,
+            CLOSE_APP,
+            INTENT_RUN_APP,
+            POLICY_RUN_APP,
+            DATA_FOR_GIGACHAT
+        }
         for command in commands:
-            if (command.name in ["ANSWER_TO_USER", "ERROR", "NOTHING_FOUND"] or
-                    (command.name == "DATA_FOR_GIGACHAT" and command.payload.get("function_result"))):
+            if (command.name in [ANSWER_TO_USER, ERROR, NOTHING_FOUND] or
+                    (command.name == DATA_FOR_GIGACHAT and command.payload.get("function_result"))):
                 if not user.settings["template_settings"].get("stats_off"):
                     finish_ts = time.time()
                     command.payload["stats"] = Stats(
@@ -361,7 +372,7 @@ class MainLoop(BaseMainLoop):
             request.update_empty_items({
                 "kafka_key": kafka_key,
                 "topic_key": topic_key,
-                "topic": user.local_vars.get(KAFKA_REPLY_TOPIC) if command.name == ANSWER_TO_USER else None
+                "topic": user.local_vars.get(KAFKA_REPLY_TOPIC) if command.name in app_answers else None
             })
 
             to_message = get_to_message(command.name)
