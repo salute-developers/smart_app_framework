@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 
 from prometheus_client import Counter, Histogram
@@ -107,3 +108,101 @@ class MonitoringTest(unittest.TestCase):
         self.assertEqual(obj.some_method(), "test")
 
         self.assertIn('test_histogram', monitoring._monitoring_items[Monitoring.HISTOGRAM].keys())
+
+    def test_req_out_counters(self):
+        from core.monitoring.monitoring import monitoring
+
+        monitoring.set_instance(Monitoring)
+        instance = monitoring.instance
+        instance._enabled = True
+        instance.disabled_metrics = []
+        instance._monitoring_items = {instance.COUNTER: {}, instance.HISTOGRAM: {}}
+        Monitoring._clean_registry()
+
+        instance.counter_req_out_success("test_app", "isearch")
+        instance.counter_req_out_error("test_app", "isearch")
+        counter_item = instance._monitoring_items[instance.COUNTER]
+        self.assertIn("test_app_req_out_success", counter_item)
+        self.assertIn("test_app_req_out_error", counter_item)
+        self.assertEqual(counter_item["test_app_req_out_success"]._labelnames, ("integration_name",))
+        self.assertEqual(
+            counter_item["test_app_req_out_success"]._metrics[("isearch",)]._value.get(), 1.0)
+        self.assertEqual(
+            counter_item["test_app_req_out_error"]._metrics[("isearch",)]._value.get(), 1.0)
+
+    def test_req_out_decorator_sync(self):
+        from core.monitoring.monitoring import monitoring
+
+        monitoring.set_instance(Monitoring)
+        instance = monitoring.instance
+        instance._enabled = True
+        instance.disabled_metrics = []
+        instance._monitoring_items = {instance.COUNTER: {}, instance.HISTOGRAM: {}}
+        Monitoring._clean_registry()
+
+        @instance.req_out(integration_name="isearch", app_name="test_app")
+        def ok_func():
+            return "ok"
+
+        @instance.req_out(integration_name="isearch", app_name="test_app")
+        def fail_func():
+            raise ValueError("fail")
+
+        self.assertEqual(ok_func(), "ok")
+        with self.assertRaises(ValueError):
+            fail_func()
+        counter_item = instance._monitoring_items[instance.COUNTER]
+        self.assertEqual(
+            counter_item["test_app_req_out_success"]._metrics[("isearch",)]._value.get(), 1.0)
+        self.assertEqual(
+            counter_item["test_app_req_out_error"]._metrics[("isearch",)]._value.get(), 1.0)
+
+    def test_req_out_decorator_async(self):
+        from core.monitoring.monitoring import monitoring
+
+        monitoring.set_instance(Monitoring)
+        instance = monitoring.instance
+        instance._enabled = True
+        instance.disabled_metrics = []
+        instance._monitoring_items = {instance.COUNTER: {}, instance.HISTOGRAM: {}}
+        Monitoring._clean_registry()
+
+        @instance.req_out(integration_name="ihapi", app_name="test_app")
+        async def ok_func():
+            return "ok"
+
+        @instance.req_out(integration_name="ihapi", app_name="test_app")
+        async def fail_func():
+            raise ValueError("fail")
+
+        async def run():
+            self.assertEqual(await ok_func(), "ok")
+            with self.assertRaises(ValueError):
+                await fail_func()
+
+        asyncio.run(run())
+        counter_item = instance._monitoring_items[instance.COUNTER]
+        self.assertEqual(
+            counter_item["test_app_req_out_success"]._metrics[("ihapi",)]._value.get(), 1.0)
+        self.assertEqual(
+            counter_item["test_app_req_out_error"]._metrics[("ihapi",)]._value.get(), 1.0)
+
+    def test_req_out_decorator_emit_failure_does_not_break_call(self):
+        """Сбой отправки метрик (например, get_app_config бросил исключение) не должен уронить бизнес-вызов."""
+        from unittest.mock import patch
+
+        from core.monitoring.monitoring import monitoring
+
+        monitoring.set_instance(Monitoring)
+        instance = monitoring.instance
+        instance._enabled = True
+        instance.disabled_metrics = []
+        instance._monitoring_items = {instance.COUNTER: {}, instance.HISTOGRAM: {}}
+        Monitoring._clean_registry()
+
+        @instance.req_out(integration_name="isearch")
+        def ok_func():
+            return "ok"
+
+        with patch("smart_kit.configs.get_app_config", side_effect=AttributeError("not configured")):
+            self.assertEqual(ok_func(), "ok")

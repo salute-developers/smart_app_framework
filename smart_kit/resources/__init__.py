@@ -92,6 +92,7 @@ from scenarios.user.last_scenarios.last_scenarios_descriptions import LastScenar
 from scenarios.user.preprocessing_messages.preprocessing_messages_description import \
     PreprocessingMessagesDescription
 from smart_kit.action.http import HTTPRequestAction
+from smart_kit.action.http_with_retries import HTTPRequestActionWithRetries
 from smart_kit.action.smart_geo_action import SmartGeoAction
 from smart_kit.message.get_to_message import to_messages
 from smart_kit.message.as_is_to_message import AsIsToMessage
@@ -294,6 +295,7 @@ class SmartAppResources(BaseConfig):
         actions["external"] = ExternalAction
         actions["fill_field"] = FillFieldAction
         actions["http_request"] = HTTPRequestAction
+        actions["http_request_with_retries"] = HTTPRequestActionWithRetries
         actions["process_behavior"] = ProcessBehaviorAction
         actions["random_field_answer"] = AfinaAnswerAction
         actions["remove_composite_form_field"] = RemoveCompositeFormFieldAction

@@ -1,4 +1,6 @@
+import inspect
 import re
+from functools import wraps
 
 from core.logging.logger_constants import KEY_NAME
 from core.logging.logger_utils import log
@@ -124,6 +126,8 @@ class Monitoring:
 
     @silence_it
     def counter_incoming(self, app_name, message_name, handler, user, app_info=None):
+        # REQ_IN_SUCCESS/REQ_IN_ERROR (пункты 3, 5 реестра метрик) покрыты существующими счётчиками:
+        # incoming / invalid_message / exception / behavior_* — отдельных req_in-метрик не требуется.
         monitoring_msg = _filter_monitoring_msg(f"{app_name}_incoming")
 
         c = self._get_or_create_counter(monitoring_msg, "Count of incoming messages",
@@ -295,6 +299,79 @@ class Monitoring:
         monitoring_msg = f"{app_name}_pod_event"
         c = self._get_or_create_counter(monitoring_msg, "Count of pod events by type", ['event_type'])
         c.labels(event_type).inc()
+
+    @silence_it
+    def counter_req_out_success(self, app_name, integration_name):
+        """integration_name должен быть статичным идентификатором интеграции из конфигурации сценария."""
+        monitoring_msg = f"{app_name}_req_out_success"
+        c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg),
+                                        "Count of successful outgoing requests to external services.",
+                                        ['integration_name'])
+        c.labels(str(integration_name)).inc()
+
+    @silence_it
+    def counter_req_out_error(self, app_name, integration_name):
+        monitoring_msg = f"{app_name}_req_out_error"
+        c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg),
+                                        "Count of failed outgoing requests to external services.",
+                                        ['integration_name'])
+        c.labels(str(integration_name)).inc()
+
+    @silence_it
+    def counter_req_out_retry(self, app_name, integration_name, reason):
+        monitoring_msg = f"{app_name}_req_out_retry"
+        c = self._get_or_create_counter(_filter_monitoring_msg(monitoring_msg),
+                                        "Count of retried outgoing requests to external services.",
+                                        ['integration_name', 'reason'])
+        c.labels(str(integration_name), str(reason)).inc()
+
+    def req_out(self, integration_name, app_name=None):
+        """Декоратор метрик req_out_success / req_out_error (4, 6 из реестра).
+
+        Можно использовать отдельно от http-вызовов. Поддерживает обычные и async-функции.
+        Сбой отправки метрик не влияет на оборачиваемый вызов.
+
+        :param integration_name: статичный идентификатор интеграции (лейбл integration_name).
+        :param app_name: имя приложения; по умолчанию APP_NAME из app_config, затем "unknown".
+        """
+
+        def emit(success):
+            try:
+                from smart_kit.configs import get_app_config
+                app = app_name or getattr(get_app_config(), "APP_NAME", None) or "unknown"
+                # через прокси monitoring: резолвим текущий инстанс на каждый вызов,
+                # декоратор не должен биндить инстанс на момент декорирования
+                if success:
+                    monitoring.counter_req_out_success(app, integration_name)
+                else:
+                    monitoring.counter_req_out_error(app, integration_name)
+            except Exception:
+                log("Metrics: Failed send. Exception occurred.",
+                    params={KEY_NAME: "metrics_fail"}, level="ERROR", exc_info=True)
+
+        def decor(func):
+            if inspect.iscoroutinefunction(func):
+                @wraps(func)
+                async def wrap(*args, **kwargs):
+                    try:
+                        result = await func(*args, **kwargs)
+                    except Exception:
+                        emit(False)
+                        raise
+                    emit(True)
+                    return result
+            else:
+                @wraps(func)
+                def wrap(*args, **kwargs):
+                    try:
+                        result = func(*args, **kwargs)
+                    except Exception:
+                        emit(False)
+                        raise
+                    emit(True)
+                    return result
+            return wrap
+        return decor
 
 
 class MonitoringProxy:

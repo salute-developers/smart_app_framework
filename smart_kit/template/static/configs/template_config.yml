@@ -17,6 +17,13 @@ masking_fields:
   - epkId
   - profileId
 user_save_collisions_tries: 2
+# число попыток запроса
+http_request_max_attempts: 3
+# HTTP-статусы, при которых делается перезапрос
+http_request_retry_statuses:
+  - 429
+# пауза в секундах перед повторной попыткой
+http_request_retry_delay: 0
 self_service_with_state_save_messages: true
 project_id: template-app-id
 consumer_topic: "app"
